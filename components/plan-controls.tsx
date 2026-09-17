@@ -1,0 +1,4 @@
+"use client";
+import {Select,SelectTrigger,SelectValue,SelectContent,SelectItem} from '@/components/ui/select';
+export function Choice({label,value,onChange,items}:{label:string;value:string;onChange:(v:string)=>void;items:[string,string][]}){return <label className="field"><span>{label}</span><Select value={value||'none'} onValueChange={v=>onChange(v==='none'?'':v)}><SelectTrigger aria-label={label}><SelectValue/></SelectTrigger><SelectContent>{items.map(([v,n])=><SelectItem value={v||'none'} key={v}>{n}</SelectItem>)}</SelectContent></Select></label>}
+export function Field({label,value,onChange,type='text',min,max,step}:{label:string;value:string|number;onChange:(v:string)=>void;type?:string;min?:number;max?:number;step?:number}){return <label className="field"><span>{label}</span><input aria-label={label} type={type} value={value} min={min} max={max} step={step} onChange={e=>onChange(e.target.value)}/></label>}

@@ -1,0 +1,20 @@
+import type {Plan,Floor,Point} from './plan';
+export type FloorRoute=Floor['routes'][number];
+export type SiteNode=Plan['plot']['nodes'][number];
+export type SiteRoute=Plan['plot']['routes'][number];
+export function polylineLength(points:Point[],units=1){return points.slice(1).reduce((sum,p,i)=>sum+Math.hypot(p.x-points[i].x,p.y-points[i].y)/units,0)}
+export function floorPoints(r:FloorRoute,f:Floor){const pts=r.points.map(p=>({...p}));const start=f.devices.find(d=>d.id===r.startId),end=f.devices.find(d=>d.id===r.endId);if(start)pts[0]={x:start.x,y:start.y};if(end)pts[pts.length-1]={x:end.x,y:end.y};return pts}
+export function floorLength(r:FloorRoute,f:Floor){const plane=(r.planeHeight??260)/100;const a=f.devices.find(d=>d.id===r.startId),b=f.devices.find(d=>d.id===r.endId);const start=(a?.height??r.startHeight??r.planeHeight??260)/100,end=(b?.height??r.endHeight??r.planeHeight??260)/100;const horizontal=polylineLength(floorPoints(r,f),40),vertical=Math.abs(start-plane)+Math.abs(end-plane);return {horizontal,vertical,total:horizontal+vertical,start,end,plane}}
+export function nodeHeight(n:SiteNode,p:Plan){for(const b of p.buildings)for(const f of b.floors){const d=f.devices.find(d=>d.id===n.deviceId);if(d)return f.elevation+d.height/100}return n.height}
+export function sitePoints(r:SiteRoute,p:Plan){const a=p.plot.nodes.find(n=>n.id===r.from),b=p.plot.nodes.find(n=>n.id===r.to);return a&&b?[{x:a.x,y:a.y},...r.via,{x:b.x,y:b.y}]:[]}
+export function siteLength(r:SiteRoute,p:Plan){const a=p.plot.nodes.find(n=>n.id===r.from),b=p.plot.nodes.find(n=>n.id===r.to);const horizontal=polylineLength(sitePoints(r,p));const start=a?nodeHeight(a,p):r.level,end=b?nodeHeight(b,p):r.level;const vertical=Math.abs(start-r.level)+Math.abs(end-r.level);return {horizontal,vertical,total:horizontal+vertical,start,end,plane:r.level}}
+export function detachDevice(f:Floor,id:string){const d=f.devices.find(d=>d.id===id);if(!d)return;for(const r of f.routes){const pts=floorPoints(r,f);if(r.startId===id){r.points=pts;r.startHeight=d.height;r.startId=''}if(r.endId===id){r.points=pts;r.endHeight=d.height;r.endId=''}}}
+export type FloorDrag={type:'rooms'|'walls'|'devices'|'routes';id:string;dx:number;dy:number;handle?:number};
+export function translateFloor(f:Floor,drag:FloorDrag){const out=structuredClone(f),{type,id,dx,dy,handle}=drag;
+ const shift=(p:Point)=>({x:Math.max(0,Math.min(2000,p.x+dx)),y:Math.max(0,Math.min(2000,p.y+dy))});
+ if(type==='devices'){const d=out.devices.find(d=>d.id===id);if(d)Object.assign(d,shift(d))}
+ if(type==='rooms'){const r=out.rooms.find(r=>r.id===id);if(r)Object.assign(r,shift(r))}
+ if(type==='walls'){const w=out.walls.find(w=>w.id===id);if(w){w.a=shift(w.a);w.b=shift(w.b)}}
+ if(type==='routes'){const r=out.routes.find(r=>r.id===id);if(r)r.points=r.points.map((p,i)=>((handle===undefined||handle===i)&&!(i===0&&r.startId)&&!(i===r.points.length-1&&r.endId))?shift(p):p)}
+ return out;
+}
