@@ -21,17 +21,18 @@ Magyar nyelvű villamos alaprajz- és lakáselosztó-tervező webalkalmazás.
 - Az alaprajzi nyomvonal két végpontja szerelvényhez kapcsolható. A rajzolás a közeli szerelvényeket automatikusan hozzákapcsolja, a tulajdonságpanelen ez módosítható. A vezetési sík és a szabad végpontok magassága centiméterben adható meg. A kapcsolt végpont helye és magassága követi a szerelvényt.
 - Hossz = vízszintes töréspontos hossz + |kezdőpont magassága − vezetési magasság| + |végpont magassága − vezetési magasság|. Az érték geometriai hossz, ráhagyás nélkül; a szakaszokon belüli további magasságváltásokat külön nyomvonalakkal kell megadni. A régi tervek pontosan szerelvényre eső végpontjai automatikusan kapcsolódnak; alapértelmezett vezetési magasságuk 260 cm, szerkeszthető.
 - Kijelölés módban a szobák, falak, szerelvények, nyomvonalak és telki elemek húzás közben követik a mutatót. Egy húzás egy visszavonható művelet.
+- A szobanevek és területek a rajz legfelső rétegén jelennek meg, a szerelvények és nyomvonalak felett; az SVG- és PDF-exportban is.
 - A fejléc nap/hold gombja sötét és világos mód között vált. A választás az adott böngészőben megmarad. A PDF mindig fehér hátterű.
 
 ## Fiók és adatbázis
 
-A fejléc Belépés/Fiókom gombja a Sites beépített ChatGPT-bejelentkezését és kijelentkezését használja. Vendégként a mintaterv szerkeszthető és exportálható; adatbázisba mentéshez bejelentkezés szükséges. Az azonosítást a platform végzi, az alkalmazás nem tárol jelszavakat.
+A fejléc Belépés/Fiókom gombja a ShockCraft saját e-mailes regisztrációját, bejelentkezését és kijelentkezését nyitja meg. ChatGPT-fiók nem szükséges. Vendégként a mintaterv szerkeszthető és exportálható; adatbázisba mentéshez bejelentkezés szükséges. A szerver bcrypt jelszólenyomatot és lejáró, visszavonható munkameneteket tárol; a jelszó nem kerül a böngésző tárhelyére.
 
-A meglévő Cloudflare D1 `plans` táblában minden felhasználó külön `user:<hitelesített azonosító>` kulcson tartja a saját tervét. A GET és PUT végpont is ellenőrzi a szerveroldali azonosságot. A kliens nem választhat másik tulajdonost. A verzióellenőrzés megakadályozza az elavult ablakból történő felülírást, a fiókváltás ellenőrzése pedig a másik fiókba történő véletlen mentést. Az API-válaszok nem gyorsítótárazhatók.
+A `plans` táblában minden felhasználó külön `account:<users.id>` kulcson tartja a saját tervét. A GET és PUT végpont is ellenőrzi a szerveroldali munkamenetet. A kliens nem választhat másik tulajdonost. A verzióellenőrzés megakadályozza az elavult ablakból történő felülírást, a fiókváltás ellenőrzése pedig a másik fiókba történő véletlen mentést. Az API-válaszok nem gyorsítótárazhatók.
 
 A régi, korábban közösen elérhető `main` terv megmarad, csak olvasható. Saját mentett terv hiányában a **Korábbi terv megnyitása** gombbal másolat vehető át, majd a saját fiókba menthető. Személyes tervekhez ez nem ad hozzáférést. Belépés előtt a folyamatban lévő szerkesztés ideiglenesen, az adott böngészőfülön megőrződik. A tartós adatforrás a D1 adatbázis.
 
-Helyi fejlesztésben a starter kizárólag loopback kéréseken szimulálja a bejelentkezést; éles buildben a Sites szolgáltatja a hitelesített fejléceket. Új adatbázis-migráció nem szükséges ehhez a változáshoz: a meglévő táblaséma támogatja a felhasználói kulcsokat.
+MySQL-szerver hiányában a meglévő D1 adatbázis működik tovább. A MySQL-adapter, táblaséma és telepítő elő van készítve; `MYSQL_URL` szerveroldali titokkal választható ki. A részletes beállítást és adatátvitelt a [MySQL útmutató](docs/mysql.md) írja le. A korábbi ChatGPT-fiókok `user:` terveit a frissítés nem törli, de az új regisztrációhoz nem rendeli automatikusan. A megnyitott terv JSON-exporttal/importtal vihető át.
 
 ## Fejlesztés
 
@@ -40,8 +41,11 @@ Node.js 22.13 vagy újabb. npm run install:ci, npm run dev, npm run build. Az el
 Az adatbázissémát a db/schema.ts, a migrációkat a drizzle könyvtár tartalmazza. Helyi migrációhoz build után:
 
     node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_perfect_absorbing_man.sql
+    node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0001_omniscient_iceman.sql
 
 A migrációt helyi adatbázison egyszer kell alkalmazni. Éles telepítésnél a Sites végzi el. A .openai/hosting.json a meglévő Sites-alkalmazást azonosítja.
+
+A saját hitelesítés integrációs ellenőrzése a helyi Worker és migrációk elindítása után: `node tests/auth-flow.mjs` (alapértelmezett cím: `http://127.0.0.1:5180`). Tesztfelhasználókat hoz létre kizárólag a helyi adatbázisban. MySQL-beállításellenőrzés: `node --experimental-strip-types tests/mysql-config.mjs`. Tényleges MySQL-kapcsolatot szerver hiányában még nem ellenőriztünk.
 
 ## Ellenőrzés és jelenlegi határok
 

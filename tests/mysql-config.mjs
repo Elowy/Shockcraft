@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {mysqlOptions} from '../db/mysql-config.ts';
+const remote=mysqlOptions('mysql://user:p%40ss@db.example.test:3307/shockcraft');
+assert.equal(remote.password,'p@ss');
+assert.equal(remote.port,3307);
+assert.deepEqual(remote.ssl,{rejectUnauthorized:true});
+assert.equal(remote.multipleStatements,false);
+assert.equal(remote.disableEval,true);
+assert.equal(mysqlOptions('mysql://user:pass@127.0.0.1/shockcraft').ssl,undefined);
+assert.deepEqual(mysqlOptions('mysql://user:pass@localhost/shockcraft','certificate').ssl,{rejectUnauthorized:true,ca:'certificate'});
+assert.throws(()=>mysqlOptions('https://user:pass@db.example.test/shockcraft'));
+assert.throws(()=>mysqlOptions('mysql://db.example.test/shockcraft'));
+assert.throws(()=>mysqlOptions('mysql://user:pass@db.example.test/'));
+assert.throws(()=>mysqlOptions('mysql://user:pass@db.example.test/shockcraft?ssl=false'));
+console.log('PASS: MySQL URL validation, decoded credentials, TLS enforcement and safe driver options. No live database connection tested.');
