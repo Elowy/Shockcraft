@@ -34,7 +34,13 @@ A régi, korábban közösen elérhető `main` terv megmarad, csak olvasható. S
 
 MySQL-szerver hiányában a meglévő D1 adatbázis működik tovább. A MySQL-adapter, táblaséma és telepítő elő van készítve; `MYSQL_URL` szerveroldali titokkal választható ki. A részletes beállítást és adatátvitelt a [MySQL útmutató](docs/mysql.md) írja le. A korábbi ChatGPT-fiókok `user:` terveit a frissítés nem törli, de az új regisztrációhoz nem rendeli automatikusan. A megnyitott terv JSON-exporttal/importtal vihető át.
 
-## Fejlesztés
+## Saját Node.js-tárhely és VPS
+
+A [telepítési útmutató](docs/telepites.md) és a [letölthető PDF](public/docs/ShockCraft-telepitesi-utmutato.pdf) végigvezet a MySQL, környezeti változók, HTTPS, Nginx, systemd, frissítés és mentés beállításán. A `deploy/` könyvtár konfigurációmintákat tartalmaz. Node.js-es fordítás: `npm run build:node`; indítás `.env.production` mellett: `npm run start:node`. A Node-változat MySQL-t igényel. Az alapértelmezett `build` továbbra is a Sites kiadást készíti. A két célt külön kiadási könyvtárban fordítsd, mert mindkettő a `dist/` könyvtárat használja.
+
+Az **Eszközök → Tervsegéd** anyagkimutatást ad épületenként vagy teljes projektre, állítható 0–50% kábelráhagyással és magyar Excel-kompatibilis CSV-exporttal. A méteradatok tartalmazzák a függőleges szakaszokat; egy rajzolt nyomvonal egy kábelt jelent. A kapcsolt telki elosztójelölést nem számolja kétszer. A kereső ékezet nélkül is keres szobák, szerelvények, nyomvonalak és elosztókészülékek között; a találat a megfelelő szintet és elemet nyitja meg.
+
+## Helyi fejlesztés
 
 Node.js 22.13 vagy újabb. npm run install:ci, npm run dev, npm run build. Az előnézeti szerver alapértelmezett címe http://localhost:5173.
 

@@ -1,4 +1,5 @@
 import {headers} from 'next/headers';
+import {env} from 'cloudflare:workers';
 import {compare,hash} from 'bcryptjs';
 import {withDatabase,type Database} from '@/db/database';
 
@@ -23,7 +24,7 @@ export async function makeSession(db:Database,userId:string,h:Headers){
   await db.run('DELETE FROM sessions WHERE expires_at <= ?',[Date.now()]);
   return sessionCookie(h.get('host')||'',token);
 }
-export function sameOrigin(req:Request){return req.headers.get('origin')===new URL(req.url).origin&&req.headers.get('sec-fetch-site')!=='cross-site'}
+export function sameOrigin(req:Request){const configured=(env as unknown as Record<string,string>).APP_ORIGIN;return req.headers.get('origin')===(configured?new URL(configured).origin:new URL(req.url).origin)&&req.headers.get('sec-fetch-site')!=='cross-site'}
 export function passwordValid(password:string){return password.length>=12&&new TextEncoder().encode(password).length<=72&&!password.includes('\0')}
 export const hashPassword=(password:string)=>hash(password,12);
 // Dummy hash keeps unknown-account and wrong-password verification on the same path.
@@ -32,7 +33,8 @@ export const verifyPassword=(password:string,encoded?:string)=>compare(password,
 export async function allowAttempt(db:Database,req:Request,email:string){
   const now=Date.now(),windowMs=15*60*1000,bucket=Math.floor(now/windowMs),expires=(bucket+1)*windowMs;
   const identifiers:[string,number][]=[['email:'+email,12]];
-  const ip=req.headers.get('cf-connecting-ip');if(ip)identifiers.push(['ip:'+ip,40]);
+  const node=(env as unknown as Record<string,string>).SHOCKCRAFT_NODE_RUNTIME==='1';
+  const ip=req.headers.get(node?'x-real-ip':'cf-connecting-ip');if(ip)identifiers.push(['ip:'+ip,40]);
   for(const [identity,limit] of identifiers){const key=await digest(identity+':'+bucket);
     const sql=db.kind==='mysql'?'INSERT INTO auth_limits (`key`,attempts,expires_at) VALUES (?,1,?) ON DUPLICATE KEY UPDATE attempts=attempts+1':'INSERT INTO auth_limits (`key`,attempts,expires_at) VALUES (?,1,?) ON CONFLICT(`key`) DO UPDATE SET attempts=attempts+1';
     await db.run(sql,[key,expires]);const row=await db.first<{attempts:number}>('SELECT attempts FROM auth_limits WHERE `key` = ?',[key]);if(!row||row.attempts>limit)return false;
