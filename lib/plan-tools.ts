@@ -35,6 +35,6 @@ export function searchPlan(plan:Plan,query:string):SearchResult[]{
   for(const r of f.rooms)add({id:r.id,type:'rooms',buildingId:b.id,floorId:f.id,title:r.name,subtitle:location+' · Szoba',x:r.x+r.w/2,y:r.y+r.h/2});
   for(const d of f.devices)add({id:d.id,type:'devices',buildingId:b.id,floorId:f.id,title:d.name,subtitle:location+' · '+labels[d.kind]+' · '+d.height+' cm · '+(plan.circuits.find(c=>c.id===d.circuit)?.name||'Nincs áramkör'),x:d.x,y:d.y});
   for(const r of f.routes){const pts=floorPoints(r,f);add({id:r.id,type:'routes',buildingId:b.id,floorId:f.id,title:r.name,subtitle:location+' · Nyomvonal · '+r.cable+' · '+(plan.circuits.find(c=>c.id===r.circuit)?.name||''),x:pts.reduce((s,p)=>s+p.x,0)/pts.length,y:pts.reduce((s,p)=>s+p.y,0)/pts.length})}
- }for(const m of plan.modules.filter(m=>m.building===b.id))add({id:m.id,type:'modules',buildingId:b.id,floorId:b.floors[0].id,title:m.name,subtitle:b.name+' · Elosztó · '+m.type+' · '+(m.row+1)+'. sor · '+(plan.circuits.find(c=>c.id===m.circuit)?.name||''),x:0,y:0})}
+ }for(const m of plan.modules.filter(m=>m.building===b.id))add({id:m.id,type:'modules',buildingId:b.id,floorId:b.floors[0]?.id||'',title:m.name,subtitle:b.name+' · Elosztó · '+m.type+' · '+(m.row+1)+'. sor · '+(plan.circuits.find(c=>c.id===m.circuit)?.name||''),x:0,y:0})}
  return found;
 }

@@ -10,8 +10,10 @@ Magyar nyelvű villamos alaprajz- és lakáselosztó-tervező webalkalmazás.
 - A Szerelvény eszköz kapcsolókat, dugaljakat, RJ45- és telefonaljzatokat, lámpakiállásokat, kötődobozokat és elosztójelölést helyez el. Fal közelében automatikusan illeszt.
 - A Nyomvonal eszköz töréspontokat vesz fel. Enter vagy Befejezés lezárja; Esc megszakítja. A belső és külső vezetés eltérő jelölést kap.
 - A lakáselosztó épületenként 4 × 18 modult tartalmaz. A készülékek mérete, sora, pozíciója és áramköre szerkeszthető. Az átfedő modulhelyet elutasítja.
-- Mentés: szerveroldali Cloudflare D1. Az egyszerre megnyitott ablakok felülírását verzióellenőrzés védi.
+- **Projektek:** új üres terv, jelenlegi terv másolata és mentett projektek megnyitása. A **Mentés** vagy Ctrl+S az aktuális projektet menti, a fejlécben a neve is átírható. Projektváltáskor a mentetlen módosításokról külön párbeszédablak kérdez. Vendégként a böngészőbe, bejelentkezve a saját fiók adatbázisába ment. Az egyszerre megnyitott ablakok felülírását verzióellenőrzés védi.
 - JSON export/import teljes tervhez; SVG export az aktuális alaprajzhoz. Ctrl+Z visszavon, Ctrl+Shift+Z újraalkalmaz, Ctrl+S ment.
+
+A bal oldali struktúrában a szobák, szintek és épületek/lakrészek mellett törlésgomb található. A szoba törlése csak a körvonalat és nevet távolítja el; a szint törlése annak teljes rajzát, az épület törlése annak szintjeit és villamos elosztását is eltávolítja. A telki hálózat önálló jelölései megmaradnak. Minden ilyen törlés egy lépésben visszavonható; az utolsó szint vagy épület is törölhető.
 
 ## Nyomtatás, hálózat és magasságok
 
@@ -28,9 +30,9 @@ Magyar nyelvű villamos alaprajz- és lakáselosztó-tervező webalkalmazás.
 
 ## Fiók és adatbázis
 
-A fejléc Belépés/Fiókom gombja a ShockCraft saját e-mailes regisztrációját, bejelentkezését és kijelentkezését nyitja meg. ChatGPT-fiók nem szükséges. Vendégként a mintaterv szerkeszthető és exportálható; adatbázisba mentéshez bejelentkezés szükséges. A szerver bcrypt jelszólenyomatot és lejáró, visszavonható munkameneteket tárol; a jelszó nem kerül a böngésző tárhelyére.
+A fejléc Belépés/Fiókom gombja a ShockCraft saját e-mailes regisztrációját, bejelentkezését és kijelentkezését nyitja meg. ChatGPT-fiók nem szükséges. Vendégként a tervek a böngészőben is menthetők; másik eszközön történő megnyitáshoz fiókba mentés vagy JSON-export/import szükséges. A szerver bcrypt jelszólenyomatot és lejáró, visszavonható munkameneteket tárol; a jelszó nem kerül a böngésző tárhelyére.
 
-A `plans` táblában minden felhasználó külön `account:<users.id>` kulcson tartja a saját tervét. A GET és PUT végpont is ellenőrzi a szerveroldali munkamenetet. A kliens nem választhat másik tulajdonost. A verzióellenőrzés megakadályozza az elavult ablakból történő felülírást, a fiókváltás ellenőrzése pedig a másik fiókba történő véletlen mentést. Az API-válaszok nem gyorsítótárazhatók.
+A `plans` táblában a korábbi mentés `account:<users.id>`, az új projektek `account:<users.id>:project:<UUID>` kulcsot használnak. Az összes projekt tulajdonosa a szerveroldali munkamenetből származik; a korábbi mentés változatlanul megmarad a projektlistában. A GET és PUT végpont is ellenőrzi a szerveroldali munkamenetet. A kliens nem választhat másik tulajdonost. A verzióellenőrzés megakadályozza az elavult ablakból történő felülírást, a fiókváltás ellenőrzése pedig a másik fiókba történő véletlen mentést. Az API-válaszok nem gyorsítótárazhatók.
 
 A régi, korábban közösen elérhető `main` terv megmarad, csak olvasható. Saját mentett terv hiányában a **Korábbi terv megnyitása** gombbal másolat vehető át, majd a saját fiókba menthető. Személyes tervekhez ez nem ad hozzáférést. Belépés előtt a folyamatban lévő szerkesztés ideiglenesen, az adott böngészőfülön megőrződik. A tartós adatforrás a D1 adatbázis.
 
@@ -61,5 +63,5 @@ Az új változat ellenőrzése: magasságot figyelembe vevő geometria, kapcsolt
 
 TypeScript-ellenőrzés és gyártási build sikeres. Böngészőben ellenőrizve: szobarajzolás, falra illesztett dugalj, töréspontos nyomvonal, elosztómodul hozzáadás, visszavonás, mentés, mobilmenü. Célzottan ellenőrizve: geometria, modulátfedés, tartós visszaolvasás, elavult és hibás mentési kérések elutasítása. A read_electrical_plan WebMCP eszköz érvényes és hibás bemenettel ellenőrizve.
 
-Első tervezőszerkesztő-változat: téglalap alakú szobák, külön rajzolható falszakaszok, felhasználónként egy mentett projekt, épületenként egy 72 modulos elosztó. Az SVG jelölések alkalmazássaját jelölések. Nincs automatikus villamos méretezés, szelektivitás-, feszültségesés- vagy szabványmegfelelőség-vizsgálat; a mintaterv értékei szerkeszthető példaadatok.
+Első tervezőszerkesztő-változat: téglalap alakú szobák, külön rajzolható falszakaszok, felhasználónként több mentett projekt, épületenként egy 72 modulos elosztó. Az SVG jelölések alkalmazássaját jelölések. Nincs automatikus villamos méretezés, szelektivitás-, feszültségesés- vagy szabványmegfelelőség-vizsgálat; a mintaterv értékei szerkeszthető példaadatok.
 

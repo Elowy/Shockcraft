@@ -1,0 +1,12 @@
+"use client";
+import {useState} from 'react';
+import {FolderOpen,Plus,Copy} from 'lucide-react';
+import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from './ui/dialog';
+import {Field} from './plan-controls';
+import type {ProjectSummary} from '@/lib/projects';
+export function ProjectManager({currentId,busy,account,list,onOpen,onNew}:{currentId:string;busy:boolean;account:boolean;list:()=>Promise<ProjectSummary[]>;onOpen:(id:string)=>void;onNew:(name:string,copy:boolean)=>void}){
+ const [open,setOpen]=useState(false),[rows,setRows]=useState<ProjectSummary[]>([]),[loading,setLoading]=useState(false),[error,setError]=useState(''),[name,setName]=useState('Új projekt');
+ async function refresh(){setLoading(true);setError('');try{setRows(await list())}catch(e){setError(e instanceof Error?e.message:'A projektek nem tölthetők be.')}finally{setLoading(false)}}
+ function create(copy:boolean){if(!name.trim()||name.trim().length>120){setError('Adj meg 1–120 karakteres projektnevet.');return}setOpen(false);onNew(name.trim(),copy)}
+ return <><button className="projects-button" aria-label="Projektek" disabled={busy} onClick={()=>{setOpen(true);void refresh()}}><FolderOpen/><span>Projektek</span></button><Dialog open={open} onOpenChange={setOpen}><DialogContent className="projects-dialog"><DialogHeader><DialogTitle>Projektek</DialogTitle><DialogDescription>{account?'A saját fiókodba mentett terveid.':'A böngészőben mentett terveid. Másik eszközre JSON-exporttal vagy bejelentkezés után viheted át őket.'}</DialogDescription></DialogHeader><form onSubmit={e=>{e.preventDefault();create(false)}}><Field label="Új projekt neve" value={name} onChange={setName}/><div className="project-actions"><button type="submit" className="primary" disabled={busy}><Plus/> Üres projekt</button><button type="button" disabled={busy} onClick={()=>create(true)}><Copy/> Jelenlegi terv másolata</button></div></form><h3>Mentett projektek</h3>{error&&<div role="alert"><p className="auth-error">{error}</p><button onClick={()=>void refresh()}>Újrapróbálás</button></div>}{loading?<p role="status">Projektek betöltése…</p>:!rows.length&&!error?<p>Még nincs mentett projekt. Hozz létre egyet, majd kattints a Mentés gombra.</p>:<div className="project-list">{rows.map(r=><button key={r.id} disabled={busy} onClick={()=>{setOpen(false);onOpen(r.id)}}><span><strong>{r.name}</strong><small>{new Date(r.updatedAt).toLocaleString('hu-HU')}{r.id===currentId?' · Jelenlegi projekt':''}</small></span><FolderOpen/></button>)}</div>}</DialogContent></Dialog></>;
+}

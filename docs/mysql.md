@@ -27,7 +27,7 @@ MySQL-kiszolgáló hiányában a meglévő Cloudflare D1 tárolja ugyanazokat az
 
 ## Adatok átállítása
 
-A beállítás másik adatbázist választ, önmagában nem másolja át a meglévő rekordokat. Éles váltás előtt készíts mentést és állítsd le a módosításokat, majd másold át a `users`, `plans` és szükség esetén `sessions` táblákat az azonosítók megtartásával. A session tábla elhagyható, ekkor mindenki újra belép. A D1 és MySQL sémák mezőnevei azonosak. A `plans.id` az új fiókoknál `account:<users.id>` formájú; ezeket az azonosítókat változatlanul kell átvinni. Alternatíva: tervenként JSON-export/import és új regisztráció.
+A beállítás másik adatbázist választ, önmagában nem másolja át a meglévő rekordokat. Éles váltás előtt készíts mentést és állítsd le a módosításokat, majd másold át a `users`, `plans` és szükség esetén `sessions` táblákat az azonosítók megtartásával. A session tábla elhagyható, ekkor mindenki újra belép. A D1 és MySQL sémák mezőnevei azonosak. A `plans.id` az új fiókoknál `account:<users.id>` (korábbi terv), illetve `account:<users.id>:project:<UUID>` (új projekt) formájú; ezeket az azonosítókat változatlanul kell átvinni. Alternatíva: tervenként JSON-export/import és új regisztráció.
 
 A korábbi ChatGPT-belépéshez tartozó `user:` kulcsú rekordokat a frissítés nem törli és nem kapcsolja automatikusan egy azonos e-mail-címmel létrehozott fiókhoz. A már megnyitott régi terv JSON-exporttal átvihető az új fiókba; szerveroldali átvételhez az eredeti tulajdonosi kapcsolatot külön ellenőrizni kell. A korábban nyilvános, közös `main` mintaterv továbbra is csak olvasható másolatként vehető át.
 

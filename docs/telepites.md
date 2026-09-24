@@ -138,7 +138,7 @@ Ellenőrizve: Node.js-es fordítás és önálló szerverindítás, a felület �
 
 Mivel még nincs MySQL-szervered, a valódi MySQL-kapcsolatot, a cél tárhelyet, az Nginxet és a systemd szolgáltatást az első telepítéskor kell ellenőrizni. A mintafájlok nem telepítenek semmit automatikusan a gépeden.
 
-Jelenleg nincs e-mailes címellenőrzés vagy elfelejtettjelszó-levélküldés. Felhasználónként egy mentett projekt van. A kimutatás a rajzolt geometria alapján számol; nem végez villamos méretezést.
+Jelenleg nincs e-mailes címellenőrzés vagy elfelejtettjelszó-levélküldés. Felhasználónként több külön projekt menthető és nyitható meg. A kimutatás a rajzolt geometria alapján számol; nem végez villamos méretezést.
 
 Hivatalos műszaki háttér: a Node.js env-file beállítása, a vinext standalone kimenete és az Nginx proxy-beállításai. Az útmutatóban szereplő alkalmazásparancsok a ShockCraft csomag saját parancsai.
 

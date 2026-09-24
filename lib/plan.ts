@@ -9,14 +9,14 @@ const wall=z.object({id,a:point,b:point});
 const device=z.object({id,name,kind:z.enum(kinds),x:n,y:n,angle:z.number().finite(),height:z.number().min(0).max(1000),circuit:z.string().max(80)});
 const route=z.object({id,name,points:z.array(point).min(2).max(300),mode:z.enum(["inside","outside"]),circuit:z.string().max(80),cable:z.string().max(60),startId:z.string().max(80).optional(),endId:z.string().max(80).optional(),planeHeight:z.number().finite().min(0).max(1000).optional(),startHeight:z.number().finite().min(0).max(1000).optional(),endHeight:z.number().finite().min(0).max(1000).optional()});
 const floor=z.object({id,name,elevation:z.number().min(-30).max(100),rooms:z.array(room).max(200),walls:z.array(wall).max(1000),devices:z.array(device).max(2000),routes:z.array(route).max(2000)});
-const building=z.object({id,name,x:n,y:n,w:z.number().min(1).max(100),h:z.number().min(1).max(100),floors:z.array(floor).min(1).max(30)});
+const building=z.object({id,name,x:n,y:n,w:z.number().min(1).max(100),h:z.number().min(1).max(100),floors:z.array(floor).max(30)});
 const circuit=z.object({id,name,building:id,phase:z.enum(["L1","L2","L3","3P"]),rating:z.number().int().min(1).max(125),curve:z.enum(["B","C","D"]),cable:z.string().max(60),rcd:z.string().max(80)});
 const moduleSchema=z.object({id,name,building:id,type:z.enum(["MCB","RCD","RCBO","SPD","MAIN"]),width:z.number().int().min(1).max(8),row:z.number().int().min(0).max(3),slot:z.number().int().min(0).max(17),circuit:z.string().max(80)});
 export const siteKinds=["supply","meter","main","panel","sub"] as const;
 export const siteLabels={supply:"Bekötési pont",meter:"Villanyóra",main:"Főelosztószekrény",panel:"Lakáselosztó",sub:"Alelosztó"};
 const siteNode=z.object({id,name,kind:z.enum(siteKinds),x:n,y:n,height:z.number().finite().min(-30).max(110),deviceId:z.string().max(80).optional()});
 const siteRoute=z.object({id,name,from:id,to:id,via:z.array(point).max(300),level:z.number().finite().min(-30).max(100),mode:z.enum(["underground","surface","overhead"]),cable:z.string().max(80)});
-export const planSchema=z.object({version:z.literal(1),name,plot:z.object({name,w:z.number().min(5).max(100),h:z.number().min(5).max(100),nodes:z.array(siteNode).max(300).default([]),routes:z.array(siteRoute).max(1000).default([])}),buildings:z.array(building).min(1).max(30),circuits:z.array(circuit).max(300),modules:z.array(moduleSchema).max(300)});
+export const planSchema=z.object({version:z.literal(1),name,plot:z.object({name,w:z.number().min(5).max(100),h:z.number().min(5).max(100),nodes:z.array(siteNode).max(300).default([]),routes:z.array(siteRoute).max(1000).default([])}),buildings:z.array(building).max(30),circuits:z.array(circuit).max(300),modules:z.array(moduleSchema).max(300)});
 export type Plan=z.infer<typeof planSchema>;export type Floor=Plan["buildings"][number]["floors"][number];export type Point=z.infer<typeof point>;export type Device=z.infer<typeof device>;
 export const uid=()=>crypto.randomUUID();
 export function newFloor(name:string,elevation:number):Floor{return {id:uid(),name,elevation,rooms:[],walls:[],devices:[],routes:[]}}

@@ -42,7 +42,8 @@ export function createPlanPdf(plan:Plan,options:PdfOptions,font:string){
  table('Elosztó - készülékjegyzék',b.name,['Jel','Megnevezés','Típus','Sor / hely','Szélesség','Áramkör'],[12,65,22,28,25,55],plan.modules.filter(m=>m.building===b.id).map((m,i)=>['K'+(i+1),m.name,m.type,(m.row+1)+' / '+(m.slot+1),m.width+' modul',plan.circuits.find(c=>c.id===m.circuit)?.name||'-']));
  table('Elosztó - áramkörjegyzék',b.name,['Áramkör','Fázis','Védelem','Kábel','ÁVK-csoport','Szerelvény'],[60,18,25,50,35,25],plan.circuits.filter(c=>c.building===b.id).map(c=>[c.name,c.phase,c.curve+c.rating+' A',c.cable,c.rcd||'-',String(b.floors.flatMap(f=>f.devices).filter(d=>d.circuit===c.id).length)]));
  }
- const building=plan.buildings.find(b=>b.id===options.buildingId)||plan.buildings[0],floor=building.floors.find(f=>f.id===options.floorId)||building.floors[0];
+ const building=plan.buildings.find(b=>b.id===options.buildingId)||plan.buildings[0],floor=building?.floors.find(f=>f.id===options.floorId)||building?.floors[0];
+ if(options.scope==='floor'&&(!building||!floor))throw Error('Nincs exportálható szint. Hozz létre egy szintet, vagy válaszd a telek PDF-et.');if(options.scope==='board'&&!building)throw Error('Nincs exportálható épület.');
  if(options.scope==='plot'||options.scope==='all')plotPage();if(options.scope==='floor')floorPage(building,floor);if(options.scope==='board')boardPage(building);if(options.scope==='all')for(const b of plan.buildings){for(const f of [...b.floors].sort((a,b)=>a.elevation-b.elevation))floorPage(b,f);boardPage(b)}
  for(let i=1;i<=doc.getNumberOfPages();i++){doc.setPage(i);text(i+' / '+doc.getNumberOfPages(),W/2,H-7,8,'center')}
  return doc;
