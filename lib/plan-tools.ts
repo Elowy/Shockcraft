@@ -1,3 +1,4 @@
+import {moduleLabels} from "./board";
 import {labels,siteLabels,type Plan} from './plan';
 import {floorLength,siteLength,floorPoints} from './geometry';
 export type MaterialRow={category:string;location:string;item:string;detail:string;unit:'db'|'m';quantity:number};
@@ -9,7 +10,7 @@ export function materialList(plan:Plan,buildingId='all'):MaterialRow[]{
    for(const d of f.devices)add({category:'Szerelvény',location,item:labels[d.kind],detail:d.height+' cm',unit:'db',quantity:1});
    for(const r of f.routes)add({category:'Kábel',location,item:r.cable.trim()||'Nincs kábeltípus',detail:r.mode==='inside'?'Falon belül':'Falon kívül',unit:'m',quantity:floorLength(r,f).total});
   }
-  for(const m of plan.modules.filter(m=>m.building===b.id)){const c=plan.circuits.find(c=>c.id===m.circuit);add({category:'Elosztókészülék',location:b.name,item:m.type,detail:m.width+' modul'+(c?' · '+c.curve+c.rating+' A':m.type==='RCD'||m.type==='SPD'?' · '+m.name:''),unit:'db',quantity:1})}
+  for(const m of plan.modules.filter(m=>m.building===b.id)){const c=plan.circuits.find(c=>c.id===m.circuit);add({category:'Elosztókészülék',location:b.name,item:moduleLabels[m.type],detail:m.width+' modul'+(c?' · '+c.curve+c.rating+' A':m.type==='RCD'||m.type==='SPD'?' · '+m.name:''),unit:'db',quantity:1})}
  }
  if(buildingId==='all'){
   // A linked panel already appears in the floor device count.
@@ -35,6 +36,6 @@ export function searchPlan(plan:Plan,query:string):SearchResult[]{
   for(const r of f.rooms)add({id:r.id,type:'rooms',buildingId:b.id,floorId:f.id,title:r.name,subtitle:location+' · Szoba',x:r.x+r.w/2,y:r.y+r.h/2});
   for(const d of f.devices)add({id:d.id,type:'devices',buildingId:b.id,floorId:f.id,title:d.name,subtitle:location+' · '+labels[d.kind]+' · '+d.height+' cm · '+(plan.circuits.find(c=>c.id===d.circuit)?.name||'Nincs áramkör'),x:d.x,y:d.y});
   for(const r of f.routes){const pts=floorPoints(r,f);add({id:r.id,type:'routes',buildingId:b.id,floorId:f.id,title:r.name,subtitle:location+' · Nyomvonal · '+r.cable+' · '+(plan.circuits.find(c=>c.id===r.circuit)?.name||''),x:pts.reduce((s,p)=>s+p.x,0)/pts.length,y:pts.reduce((s,p)=>s+p.y,0)/pts.length})}
- }for(const m of plan.modules.filter(m=>m.building===b.id))add({id:m.id,type:'modules',buildingId:b.id,floorId:b.floors[0]?.id||'',title:m.name,subtitle:b.name+' · Elosztó · '+m.type+' · '+(m.row+1)+'. sor · '+(plan.circuits.find(c=>c.id===m.circuit)?.name||''),x:0,y:0})}
+ }for(const m of plan.modules.filter(m=>m.building===b.id))add({id:m.id,type:'modules',buildingId:b.id,floorId:b.floors[0]?.id||'',title:m.name,subtitle:b.name+' · Elosztó · '+moduleLabels[m.type]+' · '+(m.row+1)+'. sor · '+(plan.circuits.find(c=>c.id===m.circuit)?.name||''),x:0,y:0})}
  return found;
 }

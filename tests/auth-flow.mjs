@@ -1,5 +1,6 @@
 // Run only against a local ShockCraft preview with the D1 migrations applied.
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 const base=process.env.TEST_BASE_URL||'http://127.0.0.1:5180';
 if(!['127.0.0.1','localhost'].includes(new URL(base).hostname))throw Error('Use a loopback test server.');
 const id=Date.now()+'-'+Math.random().toString(36).slice(2),password='Test passphrase '+id;
@@ -14,6 +15,15 @@ const a=await call('/api/auth/register','POST',{name:"Teszt O'Name",email:'A-'+i
 assert.equal((await call('/api/auth/register','POST',{name:'Duplicate',email:'a-'+id+'@example.test',password})).status,409);
 const b=await call('/api/auth/register','POST',{name:'Másik felhasználó',email:'b-'+id+'@example.test',password});assert.equal(b.status,200);
 const body={plan,revision:0,userId:a.data.account.userId};assert.equal((await call('/api/plan','PUT',body,a.cookie)).status,200);assert.equal((await call('/api/plan','GET',undefined,a.cookie)).data.plan.name,plan.name);
+if(process.env.TEST_BOARD_FIXTURE){
+ const board=JSON.parse(readFileSync(process.env.TEST_BOARD_FIXTURE,'utf8'));
+ const boardId=crypto.randomUUID();
+ assert.equal((await call('/api/plan','PUT',{...body,projectId:boardId,plan:board},a.cookie)).status,200);
+ assert.deepEqual((await call('/api/plan?projectId='+boardId,'GET',undefined,a.cookie)).data.plan,board);
+ const broken=structuredClone(board);broken.boardWires[0].to.id='missing-device';
+ assert.equal((await call('/api/plan','PUT',{...body,projectId:boardId,revision:1,plan:broken},a.cookie)).status,400);
+ console.log('PASS: board connections and conductor names persisted in D1; invalid endpoints rejected.');
+}
 assert.equal((await call('/api/plan','GET',undefined,b.cookie)).data.plan,null);assert.equal((await call('/api/plan','PUT',body,b.cookie)).status,409);
 assert.equal((await call('/api/plan','PUT',body,a.cookie)).status,409);
 const projectId=crypto.randomUUID(),secondId=crypto.randomUUID();
@@ -21,7 +31,7 @@ assert.equal((await call('/api/plan?list=1')).status,401);
 assert.equal((await call('/api/plan','PUT',{...body,projectId,plan:{...plan,name:'Első külön projekt'}},a.cookie)).status,200);
 assert.equal((await call('/api/plan','PUT',{...body,projectId:secondId,plan:{...plan,name:'Második külön projekt',buildings:[]}},a.cookie)).status,200);
 const list=(await call('/api/plan?list=1','GET',undefined,a.cookie)).data.projects;
-assert.equal(list.length,3);assert.ok(list.some(p=>p.id==='default'));assert.ok(list.some(p=>p.id===projectId&&p.name==='Első külön projekt'));
+assert.equal(list.length,process.env.TEST_BOARD_FIXTURE?4:3);assert.ok(list.some(p=>p.id==='default'));assert.ok(list.some(p=>p.id===projectId&&p.name==='Első külön projekt'));
 assert.equal((await call('/api/plan?list=1','GET',undefined,b.cookie)).data.projects.length,0);
 assert.equal((await call('/api/plan?projectId='+projectId,'GET',undefined,b.cookie)).status,404);
 assert.equal((await call('/api/plan?projectId='+projectId,'GET',undefined,a.cookie)).data.plan.name,'Első külön projekt');
