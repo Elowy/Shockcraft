@@ -69,3 +69,7 @@ Első tervezőszerkesztő-változat: téglalap alakú szobák, külön rajzolhat
 ## Projektdíjak és Stripe
 
 Az első projekt fiókonként ingyenes, minden további projekt egyszeri díja **3 490 Ft**. Az adminpanelen külön teszt- és éles Stripe-kulcsok állíthatók be. A telepítés, a webhook és az adminjog részletei: [Stripe beállítási útmutató](docs/stripe.md).
+
+## Fióklevelek
+
+A belépőablakban elérhető az elfelejtett jelszó visszaállítása, a Fiókom ablakban pedig az e-mail-cím megerősítése. A Resend az adminpanelen állítható be. Részletek: [Fióklevelek beállítása](docs/email.md).

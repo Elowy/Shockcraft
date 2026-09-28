@@ -1,0 +1,9 @@
+"use client";
+import {useEffect,useState} from 'react';
+export function EmailVerification({initialVerified}:{initialVerified:boolean}){
+ const [verified,setVerified]=useState(initialVerified),[busy,setBusy]=useState(false),[message,setMessage]=useState(''),[error,setError]=useState(''),[ready,setReady]=useState<boolean|null>(null);
+ async function refresh(){const r=await fetch('/api/account-email/status',{cache:'no-store'});const d=await r.json() as {verified:boolean;ready:boolean;error?:string};if(!r.ok)throw Error(d.error);setVerified(d.verified);setReady(d.ready)}
+ useEffect(()=>{void refresh().catch(()=>setError('Az e-mail állapota nem tölthető be.'))},[]);
+ async function resend(){setBusy(true);setError('');setMessage('');try{const r=await fetch('/api/account-email/resend',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});const d=await r.json() as {error?:string;message:string;verified?:boolean};if(!r.ok)throw Error(d.error);setMessage(d.message);if(d.verified)setVerified(true)}catch(e){setError(e instanceof Error?e.message:'A levélküldés sikertelen.')}finally{setBusy(false)}}
+ return <section className="email-verification"><strong>{verified?'E-mail-cím megerősítve':'Az e-mail-címed még nincs megerősítve'}</strong>{!verified&&<><p>{ready===false?'A levélküldés még nincs bekapcsolva. A meglévő fiókod és terveid használhatók.':'A kapott levél hivatkozásával igazolhatod az e-mail-címedet.'}</p><div className="project-actions"><button disabled={busy||!ready} onClick={()=>void resend()}>{busy?'Küldés…':'Megerősítő levél küldése'}</button><button disabled={busy} onClick={()=>void refresh().catch(()=>setError('Az állapot nem tölthető be.'))}>Állapot frissítése</button></div></>}{message&&<p role="status">{message}</p>}{error&&<p className="auth-error" role="alert">{error}</p>}</section>
+}

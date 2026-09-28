@@ -149,3 +149,7 @@ Hivatalos műszaki háttér: a Node.js env-file beállítása, a vinext standalo
 ## Projektdíjak és Stripe
 
 Az első projekt ingyenes, további projektenként egyszeri 3 490 Ft fizetendő. Az adminfiók, a titkosítókulcs, a Stripe-kulcsok és a webhook beállítását a [Stripe telepítési útmutató](stripe.md) tartalmazza.
+
+## Jelszó-visszaállítás és e-mail-megerősítés
+
+A Resend, a feladói domain és az adminpanel beállítását az [E-mail beállítási útmutató](email.md) írja le. Frissítéskor MySQL-en futtasd újra az adatbázis-előkészítő lépést az új fiókmezők hozzáadásához.

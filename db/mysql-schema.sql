@@ -4,12 +4,15 @@ CREATE TABLE IF NOT EXISTS users (
  email varchar(254) NOT NULL,
  name varchar(100) NOT NULL,
  password_hash varchar(100) CHARACTER SET ascii NOT NULL,
+ email_verified_at bigint NULL,
+ auth_version int NOT NULL DEFAULT 0,
  created_at bigint NOT NULL,
  UNIQUE KEY users_email_unique (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE IF NOT EXISTS sessions (
  token_hash char(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+ auth_version int NOT NULL DEFAULT 0,
  user_id varchar(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
  expires_at bigint NOT NULL,
  created_at bigint NOT NULL,
@@ -59,4 +62,23 @@ CREATE TABLE IF NOT EXISTS billing_orders (
  updated_at bigint NOT NULL,
  UNIQUE KEY billing_orders_session_unique (session_id),
  KEY billing_orders_user_idx (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+CREATE TABLE IF NOT EXISTS mail_settings (
+ id varchar(40) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+ data longtext NOT NULL,
+ revision int NOT NULL,
+ updated_at varchar(30) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+CREATE TABLE IF NOT EXISTS account_tokens (
+ token_hash char(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+ user_id varchar(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+ email varchar(254) NOT NULL,
+ purpose varchar(10) NOT NULL,
+ auth_version int NOT NULL,
+ expires_at bigint NOT NULL,
+ created_at bigint NOT NULL,
+ KEY account_tokens_user_idx (user_id),
+ KEY account_tokens_expiry_idx (expires_at),
+ CONSTRAINT account_tokens_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
