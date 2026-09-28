@@ -73,3 +73,5 @@ Az első projekt fiókonként ingyenes, minden további projekt egyszeri díja *
 ## Fióklevelek
 
 A belépőablakban elérhető az elfelejtett jelszó visszaállítása, a Fiókom ablakban pedig az e-mail-cím megerősítése. A Resend az adminpanelen állítható be. Részletek: [Fióklevelek beállítása](docs/email.md).
+
+A **2 490 Ft/hó előfizetés** korlátlan projektet ad. Lejáratkor az első és az egyszeri díjjal megvásárolt projektek maradnak elérhetők; a többi terv megőrződik és zárolódik. Részletek és a kötelező webhook-események: [Stripe útmutató](docs/stripe.md).

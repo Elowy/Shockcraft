@@ -7,7 +7,7 @@ try{
   const source=await fs.readFile(new URL('../db/mysql-schema.sql',import.meta.url),'utf8');
   for(const statement of source.replace(/^--.*$/gm,'').split(';').map(v=>v.trim()).filter(Boolean))await db.execute(statement);
   // Upgrade existing installations as well as creating fresh databases.
-  for(const [table,column,definition] of [['users','email_verified_at','bigint NULL'],['users','auth_version','int NOT NULL DEFAULT 0'],['sessions','auth_version','int NOT NULL DEFAULT 0']]){
+  for(const [table,column,definition] of [['billing_orders','kind',"varchar(20) NOT NULL DEFAULT 'project'"],['users','email_verified_at','bigint NULL'],['users','auth_version','int NOT NULL DEFAULT 0'],['sessions','auth_version','int NOT NULL DEFAULT 0']]){
     const [columns]=await db.execute('SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?',[table,column]);
     if(!columns.length)await db.execute('ALTER TABLE '+table+' ADD COLUMN '+column+' '+definition);
   }

@@ -7,6 +7,7 @@ import {checkout,fulfillCheckout,stripeClient} from '../lib/stripe-payments';
 import Stripe from 'stripe';
 const sql=new DatabaseSync(':memory:');sql.exec('CREATE TABLE plans(id TEXT PRIMARY KEY,data TEXT,revision INTEGER,updated_at TEXT)');
 sql.exec(readFileSync('drizzle/0002_aspiring_husk.sql','utf8').replaceAll('--> statement-breakpoint',''));
+sql.exec(readFileSync('drizzle/0004_lovely_young_avengers.sql','utf8').replaceAll('--> statement-breakpoint',''));
 const db:Database={kind:'d1',async first<T>(s:string,p:(string|number|null)[]=[]){return (sql.prepare(s).get(...p)||null) as T|null},async all<T>(s:string,p:(string|number|null)[]=[]){return sql.prepare(s).all(...p) as T[]},async run(s,p=[]){return Number(sql.prepare(s).run(...p).changes)}};
 const user={userId:'user-a',email:'a@example.test',displayName:'A'},other={...user,userId:'user-b'},admin={...user,userId:'test-admin'};
 assert.equal(isAdmin(user),false);assert.equal(isAdmin(admin),true);
@@ -28,6 +29,6 @@ const payload=JSON.stringify({id:'evt_test',type:'checkout.session.completed',li
 // A test credit cannot unlock an ordinary user's live project.
 await db.run('INSERT INTO billing_grants VALUES (?,?,?,?,?)',['test-only',user.userId,null,'test',Date.now()]);assert.equal(await claimProject(db,user,'four'),false);
 await db.run('INSERT INTO billing_grants VALUES (?,?,?,?,?)',['live-paid',user.userId,null,'live',Date.now()]);assert.equal(await claimProject(db,user,'four'),true);assert.equal(await claimProject(db,user,'five'),false);
-for(let i=0;i<9;i++)await db.run('INSERT INTO billing_orders VALUES (?,?,?,?,?,?,?,?,?)',[crypto.randomUUID(),admin.userId,349000,'huf','test','pending',null,Date.now(),Date.now()]);
+for(let i=0;i<9;i++)await db.run('INSERT INTO billing_orders (id,user_id,amount,currency,mode,status,session_id,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?)',[crypto.randomUUID(),admin.userId,349000,'huf','test','pending',null,Date.now(),Date.now()]);
 await assert.rejects(()=>checkout(db,admin,crypto.randomUUID()),/15 perc/);
 console.log('PASS: atomic free/paid entitlements, legacy projects, encrypted keys, admin-only test mode, Stripe amount/metadata, duplicate fulfillment, amount/owner/mode checks and signed raw webhook validation.');

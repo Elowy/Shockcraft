@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS billing_grants (
  KEY billing_grants_user_idx (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 CREATE TABLE IF NOT EXISTS billing_orders (
+ kind varchar(20) NOT NULL DEFAULT 'project',
  id varchar(36) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
  user_id varchar(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
  amount int NOT NULL,
@@ -81,4 +82,24 @@ CREATE TABLE IF NOT EXISTS account_tokens (
  KEY account_tokens_user_idx (user_id),
  KEY account_tokens_expiry_idx (expires_at),
  CONSTRAINT account_tokens_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+CREATE TABLE IF NOT EXISTS billing_subscriptions (
+ id varchar(255) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+ user_id varchar(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+ mode varchar(10) NOT NULL,
+ order_id varchar(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+ customer_id varchar(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+ status varchar(40) NOT NULL,
+ paid_until bigint NOT NULL DEFAULT 0,
+ cancel_at_period_end int NOT NULL DEFAULT 0,
+ revision int NOT NULL DEFAULT 0,
+ updated_at bigint NOT NULL,
+ UNIQUE KEY billing_subscriptions_order_id_unique (order_id),
+ KEY billing_subscriptions_user_mode_idx (user_id,mode)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+CREATE TABLE IF NOT EXISTS subscription_checkouts (
+ id varchar(50) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+ order_id varchar(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+ expires_at bigint NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;

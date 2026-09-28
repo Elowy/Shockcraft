@@ -1,0 +1,5 @@
+import type {Database} from '@/db/database';
+export const MONTHLY_PRICE=2490,MONTHLY_AMOUNT=249000;
+export type SubscriptionRow={id:string;user_id:string;mode:'test'|'live';order_id:string;customer_id:string;status:string;paid_until:number;cancel_at_period_end:number;revision:number;updated_at:number};
+export const subscriptionActive=(s:Pick<SubscriptionRow,'status'|'paid_until'>,now=Date.now())=>['active','past_due'].includes(s.status)&&s.paid_until>now;
+export async function subscriptionStatus(db:Database,userId:string,mode:string){const rows=await db.all<SubscriptionRow>('SELECT * FROM billing_subscriptions WHERE user_id = ? AND mode = ? ORDER BY paid_until DESC, updated_at DESC',[userId,mode]);const selected=rows.find(s=>subscriptionActive(s))||rows.find(s=>!['canceled','incomplete_expired'].includes(s.status))||rows[0];return {active:!!selected&&subscriptionActive(selected),paidUntil:selected?.paid_until||0,cancelAtPeriodEnd:!!selected?.cancel_at_period_end,status:selected?.status||'none',manageable:!!selected?.customer_id,ongoing:rows.some(s=>!['canceled','incomplete_expired'].includes(s.status))}}

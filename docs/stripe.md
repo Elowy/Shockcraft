@@ -1,6 +1,6 @@
 # Projektdíjak és Stripe
 
-Az első elmentett projekt fiókonként ingyenes. Minden további projekthely egyszeri, összesen **3 490 Ft**. Nincs előfizetés. A vásárolt hely a következő új projekt, másolat vagy importált projekt mentésekor foglalódik le. Ugyanazon projekt későbbi mentése ingyenes. A korábban létrehozott projektek megnyitása és szerkesztése megmarad.
+Az első elmentett projekt fiókonként ingyenes. Minden további projekthely egyszeri, összesen **3 490 Ft**. Alternatívaként havi **2 490 Ft-os**, automatikusan megújuló előfizetés választható korlátlan projekthez. A vásárolt hely a következő új projekt, másolat vagy importált projekt mentésekor foglalódik le. Ugyanazon projekt későbbi mentése ingyenes. Az első és az egyszeri díjjal megvásárolt projektek előfizetés nélkül is elérhetők. Az előfizetés lejártakor a többi projekt megnyitása és mentése zárolódik, de az adataik megmaradnak.
 
 Vendégként egy helyi projekt menthető; további projektekhez saját fiók és projekthely szükséges. A pénzügyi jogosultságokat a szerver ellenőrzi. Az adminpanel nem a böngészőben tárolt adatok alapján ad hozzáférést.
 
@@ -35,6 +35,45 @@ A díj a szerveren rögzített: 3 490 Ft, a Stripe számára 349000 HUF kisegys�
 - A vásárlások kikapcsolása nem tiltja a meglévő projektek szerkesztését és nem állítja le a korábbi fizetések webhook-feldolgozását.
 - Az adminpanel az utolsó 50 fizetési kísérletet mutatja. A megszakított vagy lejárt kísérlet jóváírás nélkül függőben maradhat a jegyzékben.
 - Visszatérítést és vitatott fizetést a Stripe Dashboardban kezelj. Ez a változat nem törli automatikusan a tervet és nem vonja vissza a projekthelyet visszatérítéskor; ez külön üzemeltetői egyeztetést igényel.
-- Adatbázis-költöztetéskor a három billing táblát, a `users` és `plans` táblákat, valamint a titkosítókulcsot együtt őrizd meg.
+- Adatbázis-költöztetéskor az összes billing táblát és a `subscription_checkouts` táblát, a `users` és `plans` táblákat, valamint a titkosítókulcsot együtt őrizd meg.
 
 A fizetésfeldolgozás a [Stripe Checkout jóváírási útmutatóját](https://docs.stripe.com/checkout/fulfillment) és a [webhook-aláírás ellenőrzését](https://docs.stripe.com/webhooks/signature) követi.
+
+## Havi előfizetés – 2 490 Ft
+
+A csomag egy hónapra szól, automatikusan megújul; a Stripe Checkout ismétlődő HUF-terhelése 249000 kisegység. Nem kell kézzel Stripe Price-azonosítót megadni: a szerver készíti elő a havi árat. Az egyszeri projektdíj továbbra is 3 490 Ft. A Stripe-kulcsok és a vásárlások engedélyezése mindkét csomagra vonatkoznak.
+
+### Kötelező webhook-bővítés
+
+A meglévő végponton az egyszeri fizetés eseményei mellé kapcsold be:
+
+- `invoice.paid`
+- `invoice.payment_failed`
+- `invoice.payment_action_required`
+- `customer.subscription.created`
+- `customer.subscription.updated`
+- `customer.subscription.deleted`
+- `customer.subscription.paused`
+- `customer.subscription.resumed`
+
+A beállítás az adminpanelen is olvasható. A program az esemény aláírását ellenőrzi, majd a Stripe aktuális előfizetését kéri le; egy régi esemény nem írhatja vissza a saját elavult állapotát. Jogosultság csak a megfelelő, kifizetett havi számla időszakára jár. A puszta aktív státusz vagy visszatérési URL nem elegendő. A kifizetett határidő leteltét minden szerveroldali megnyitás és mentés ellenőrzi, ezért elmulasztott webhook mellett sem marad korlátlan hozzáférés. A megújulás késedelmes webhookja esetén az Állapot frissítése gomb újraszinkronizál.
+
+### Hozzáférés és lemondás
+
+- Az első elmentett projekt ingyenes helyet kap, aktív előfizetés esetén is.
+- Az egyszeri díjas projektek tartósan hozzáférhetők. Aktív előfizetés alatt az új projektek nem fogyasztják el a még felhasználható egyszeri fizetett helyeket.
+- Lejárat után a zárolt projektek neve látszik, tartalmukat a szerver nem küldi vissza, és menteni sem lehet őket. Új, rendezett előfizetéssel újra hozzáférhetők.
+- Az előfizetés előtti, régi rendszerből származó tervek megmaradnak; ha a fiók előfizetésre vált, majd az lejár, az első és a bizonyíthatóan egyszeri díjjal vásárolt projekten kívüli tervek szintén zárolódnak.
+- Az Előfizetés kezelése / lemondás gomb a Stripe ügyfélportálját nyitja meg. Az alkalmazás létrehozza a hozzá tartozó portálbeállítást: fizetési mód frissítése, számlák megtekintése és időszak végi lemondás. Csomagváltás nincs engedélyezve. Korlátozott API-kulcsnál ehhez Customer Portal konfiguráció- és munkamenet-jogosultság is szükséges.
+- Lemondáskor a már kifizetett időszak végéig megmarad a hozzáférés. Sikertelen megújulás nem hosszabbítja meg az időszakot.
+- Tesztelőfizetés csak az admin tesztkörnyezetében ad jogosultságot, éles hozzáférést nem biztosít.
+- Párhuzamos előfizetésindítások közös függő Checkoutot használnak. Már futó vagy rendezésre váró előfizetés mellett új helyett a portált kell használni.
+- A böngészőbe korábban betöltött vagy exportált adatokat egy előfizetés lejárta nem tudja visszavonni. A korlátozás az új szerveroldali megnyitásokra és mentésekre vonatkozik.
+
+### Frissítés és próba
+
+Sites a `0004_lovely_young_avengers.sql` migrációt közzétételkor alkalmazza. Node.js / MySQL telepítésnél futtasd újra a `scripts/mysql-setup.mjs` programot: az új táblák mellett a meglévő `billing_orders` táblához hozzáadja a csomagtípust. Készíts adatbázismentést frissítés előtt.
+
+Tesztüzemben ellenőrizd az első fizetést, a megújulást, a fizetési hibát, az időszak végi lemondást, a projektek zárolását és az újbóli hozzáférést. A helyi automatizált tesztek szimulált Stripe-válaszokat használnak; valódi Stripe-előfizetéssel végzett próba még szükséges a saját kulcsokkal. A fizetési kísérletek listája az előfizetés indítását mutatja; minden havi számla a Stripe portálon és Dashboardon érhető el.
+
+Hivatalos referencia: [Stripe előfizetési események](https://docs.stripe.com/billing/subscriptions/webhooks).
