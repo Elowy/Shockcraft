@@ -1,12 +1,14 @@
 "use client";
 import {EmailVerification} from './email-verification';
-import {useState} from 'react';
+import {useEffect,useState} from 'react';
+import {CookieSettingsButton} from './cookie-notice';
 import {UserRound,LogIn,LogOut,Database,Eye,EyeOff} from 'lucide-react';
 import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from '@/components/ui/dialog';
 export type Account={userId:string;displayName:string;email:string;emailVerified?:boolean}|null;
 export function AccountMenu({account,onAuthenticated,dirty,save,storeDraft,dbState}:{account:Account;onAuthenticated:()=>void;dirty:boolean;save:()=>Promise<boolean>;storeDraft:()=>boolean;dbState:string}){
  const[open,setOpen]=useState(false),[busy,setBusy]=useState(false),[mode,setMode]=useState<'login'|'register'>('login');
  const[name,setName]=useState(''),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[repeat,setRepeat]=useState(''),[visible,setVisible]=useState(false),[error,setError]=useState('');
+ useEffect(()=>{const params=new URLSearchParams(location.search);const auth=params.get('auth');if(auth==='login'||auth==='register'){setMode(auth);setOpen(true);params.delete('auth');history.replaceState(null,'',location.pathname+(params.size?'?'+params:'')+location.hash)}},[]);
  function switchMode(next:'login'|'register'){setMode(next);setError('');setPassword('');setRepeat('')}
  async function submit(e:React.FormEvent){
   e.preventDefault();if(busy)return;setError('');
@@ -26,5 +28,5 @@ export function AccountMenu({account,onAuthenticated,dirty,save,storeDraft,dbSta
  <label className="field"><span>Jelszó</span><div className="password-field"><input aria-label="Jelszó" type={visible?'text':'password'} autoComplete={mode==='register'?'new-password':'current-password'} required minLength={mode==='register'?12:undefined} value={password} disabled={busy} onChange={e=>setPassword(e.target.value)}/><button type="button" aria-label={visible?'Jelszó elrejtése':'Jelszó megjelenítése'} onClick={()=>setVisible(!visible)}>{visible?<EyeOff/>:<Eye/>}</button></div></label>
  {mode==='register'&&<><p className="password-hint">Legalább 12 karakter. Használhatsz hosszú jelmondatot is; a felső határ 72 bájt.</p><label className="field"><span>Jelszó ismét</span><input aria-label="Jelszó ismét" type={visible?'text':'password'} autoComplete="new-password" required value={repeat} disabled={busy} onChange={e=>setRepeat(e.target.value)}/></label></>}
  {error&&<p className="auth-error" role="alert">{error}</p>}<button className="primary" type="submit" disabled={busy}><LogIn/>{busy?'Folyamatban…':mode==='register'?'Fiók létrehozása':'Belépés'}</button></form>{mode==='login'&&<a className="account-help-link" href="/fiok/jelszo" target="_blank" rel="noopener noreferrer">Elfelejtetted a jelszavad?</a>}<p className="auth-note">A nyitott szerkesztés belépéskor megmarad. Vendégként PDF-et és tervfájlt is exportálhatsz.</p></>}
- </DialogContent></Dialog></>
+ <nav className="account-legal" aria-label="Jogi tájékoztatók"><a href="/aszf" target="_blank" rel="noopener noreferrer">ÁSZF</a><a href="/adatvedelem" target="_blank" rel="noopener noreferrer">Adatvédelem</a><a href="/sutik" target="_blank" rel="noopener noreferrer">Sütik</a><CookieSettingsButton/></nav></DialogContent></Dialog></>
 }

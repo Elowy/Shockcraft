@@ -1,0 +1,13 @@
+'use client';
+import {useEffect,useState} from 'react';
+import {ShieldCheck} from 'lucide-react';
+import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from './ui/dialog';
+const key='shockcraft-cookie-notice-v1';
+const maxAge=180*24*60*60*1000;
+export function CookieSettingsButton(){return <button className="cookie-settings-link" onClick={()=>window.dispatchEvent(new Event('shockcraft-cookie-settings'))}>Sütibeállítások</button>}
+export function CookieNotice(){
+ const[visible,setVisible]=useState(false),[details,setDetails]=useState(false);
+ useEffect(()=>{try{const acknowledged=Number(localStorage.getItem(key));setVisible(!acknowledged||Date.now()-acknowledged>maxAge||acknowledged>Date.now())}catch{setVisible(true)}const show=()=>setDetails(true);window.addEventListener('shockcraft-cookie-settings',show);return()=>window.removeEventListener('shockcraft-cookie-settings',show)},[]);
+ function acknowledge(){try{localStorage.setItem(key,String(Date.now()))}catch{}setVisible(false);setDetails(false)}
+ return <>{visible&&<aside className="cookie-notice" aria-label="Süti-tájékoztatás"><ShieldCheck size={24}/><div><strong>A terveidhez szükséges tárolás</strong><p>A ShockCraft a belépéshez, a mentéshez és a kért beállítások megőrzéséhez használ sütiket és böngészőtárhelyet. Nem építettünk be hirdetési vagy látogatottságmérő követést.</p><div className="cookie-actions"><button className="primary" onClick={acknowledge}>Rendben</button><button onClick={()=>setDetails(true)}>Részletek és beállítások</button></div></div></aside>}<Dialog open={details} onOpenChange={setDetails}><DialogContent className="cookie-dialog"><DialogHeader><DialogTitle>Sütik és böngészőtárhely</DialogTitle><DialogDescription>A jelenlegi ShockCraft alkalmazás tárolási beállításai.</DialogDescription></DialogHeader><div className="cookie-category"><strong>Működéshez szükséges</strong><span>Mindig aktív</span></div><p>Bejelentkezés, kérésedre mentett helyi tervek, megszakított szerkesztés visszaállítása és a kiválasztott felületi beállítások. Ezek letiltását a böngésződben kezelheted; a belépés és a helyi mentés ilyenkor nem feltétlenül működik.</p><div className="cookie-category"><strong>Statisztika és marketing</strong><span>Nincs használatban</span></div><p>Nincs bekapcsolható elemzési vagy hirdetési kategória. A „Rendben” a tájékoztató tudomásulvétele, nem marketing-hozzájárulás. A Stripe saját fizetési oldalára lépve az ottani tájékoztató érvényes.</p><a href="/sutik" target="_blank" rel="noopener noreferrer">Részletes cookie-tájékoztató ↗</a><button className="primary" onClick={acknowledge}>Rendben, bezárom</button></DialogContent></Dialog></>;
+}

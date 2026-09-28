@@ -68,6 +68,6 @@ export async function subscriptionPortal(db:Database,user:Account,mode:'test'|'l
  const row=await db.first<SubscriptionRow>('SELECT * FROM billing_subscriptions WHERE user_id = ? AND mode = ? ORDER BY updated_at DESC LIMIT 1',[user.userId,mode]);if(!row)throw Error('Még nincs kezelhető előfizetés.');
  const {config}=await getBillingConfig(db),stripe=stripeClient(config[mode].secretKey);
  const portalConfig=await stripe.billingPortal.configurations.create({business_profile:{headline:'ShockCraft – előfizetés kezelése'},features:{customer_update:{enabled:false},invoice_history:{enabled:true},payment_method_update:{enabled:true},subscription_cancel:{enabled:true,mode:'at_period_end'},subscription_update:{enabled:false}}},{idempotencyKey:'shockcraft-monthly-portal-v1'});
- const portal=await stripe.billingPortal.sessions.create({customer:row.customer_id,configuration:portalConfig.id,return_url:publicOrigin()+'/?payment=manage'});
+ const portal=await stripe.billingPortal.sessions.create({customer:row.customer_id,configuration:portalConfig.id,return_url:publicOrigin()+'/tervezo?payment=manage'});
  if(new URL(portal.url).hostname!=='billing.stripe.com')throw Error('A kezelőfelület nem érhető el.');return portal.url;
 }
