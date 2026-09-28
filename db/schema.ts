@@ -1,6 +1,9 @@
-import {sqliteTable,text,integer,index} from "drizzle-orm/sqlite-core";
+import {sqliteTable,text,integer,index,uniqueIndex} from "drizzle-orm/sqlite-core";
 export const plans=sqliteTable("plans",{id:text("id").primaryKey(),data:text("data").notNull(),revision:integer("revision").notNull(),updatedAt:text("updated_at").notNull()});
 export const users=sqliteTable('users',{id:text('id').primaryKey(),email:text('email').notNull().unique(),name:text('name').notNull(),passwordHash:text('password_hash').notNull(),createdAt:integer('created_at').notNull()});
 export const sessions=sqliteTable('sessions',{tokenHash:text('token_hash').primaryKey(),userId:text('user_id').notNull().references(()=>users.id,{onDelete:'cascade'}),expiresAt:integer('expires_at').notNull(),createdAt:integer('created_at').notNull()},t=>[index('sessions_user_idx').on(t.userId),index('sessions_expiry_idx').on(t.expiresAt)]);
 export const authLimits=sqliteTable('auth_limits',{key:text('key').primaryKey(),attempts:integer('attempts').notNull(),expiresAt:integer('expires_at').notNull()},t=>[index('auth_limits_expiry_idx').on(t.expiresAt)]);
+export const billingSettings=sqliteTable('billing_settings',{id:text('id').primaryKey(),data:text('data').notNull(),revision:integer('revision').notNull(),updatedAt:text('updated_at').notNull()});
+export const billingGrants=sqliteTable('billing_grants',{id:text('id').primaryKey(),userId:text('user_id').notNull(),projectId:text('project_id'),mode:text('mode').notNull(),createdAt:integer('created_at').notNull()},t=>[uniqueIndex('billing_grants_project_unique').on(t.userId,t.projectId),index('billing_grants_user_idx').on(t.userId)]);
+export const billingOrders=sqliteTable('billing_orders',{id:text('id').primaryKey(),userId:text('user_id').notNull(),amount:integer('amount').notNull(),currency:text('currency').notNull(),mode:text('mode').notNull(),status:text('status').notNull(),sessionId:text('session_id'),createdAt:integer('created_at').notNull(),updatedAt:integer('updated_at').notNull()},t=>[uniqueIndex('billing_orders_session_unique').on(t.sessionId),index('billing_orders_user_idx').on(t.userId)]);
 

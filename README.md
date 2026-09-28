@@ -65,3 +65,7 @@ TypeScript-ellenőrzés és gyártási build sikeres. Böngészőben ellenőrizv
 
 Első tervezőszerkesztő-változat: téglalap alakú szobák, külön rajzolható falszakaszok, felhasználónként több mentett projekt, épületenként egy 72 modulos elosztó. Az SVG jelölések alkalmazássaját jelölések. Nincs automatikus villamos méretezés, szelektivitás-, feszültségesés- vagy szabványmegfelelőség-vizsgálat; a mintaterv értékei szerkeszthető példaadatok.
 
+
+## Projektdíjak és Stripe
+
+Az első projekt fiókonként ingyenes, minden további projekt egyszeri díja **3 490 Ft**. Az adminpanelen külön teszt- és éles Stripe-kulcsok állíthatók be. A telepítés, a webhook és az adminjog részletei: [Stripe beállítási útmutató](docs/stripe.md).

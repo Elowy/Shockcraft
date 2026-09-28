@@ -15,6 +15,13 @@
       "when": 1789711521292,
       "tag": "0001_omniscient_iceman",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1790527726558,
+      "tag": "0002_aspiring_husk",
+      "breakpoints": true
     }
   ]
 }

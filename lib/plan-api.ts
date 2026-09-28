@@ -1,3 +1,4 @@
+import {claimProject} from '@/lib/billing';
 import {withDatabase,insertPlanSql} from '@/db/database';
 import {validProjectId,projectKey} from '@/lib/projects';
 import {validatePlan} from '@/lib/plan';
@@ -33,6 +34,7 @@ export async function PUT(req:Request){
   let data;try{data=JSON.parse(text);data.plan=validatePlan(data.plan);data.projectId??='default';if(!validProjectId(data.projectId))throw Error();if(!Number.isInteger(data.revision)||data.revision<0)throw Error()}catch{return Response.json({error:'A terv adatai érvénytelenek.'},{status:400,headers})}
   if(data.userId!==user.userId)return Response.json({error:'A bejelentkezett fiók megváltozott. Exportáld a nyitott tervet, majd jelentkezz be újra.'},{status:409,headers});
   const rev=data.revision,now=new Date().toISOString(),key=projectKey(user.userId,data.projectId);
+  if(rev===0&&!await db.first('SELECT id FROM plans WHERE id = ?',[key])&&!await claimProject(db,user,data.projectId))return Response.json({error:'Az első projekt ingyenes. Egy további projekthely egyszeri díja 3 490 Ft.',code:'PAYMENT_REQUIRED'},{status:402,headers});
   const result=rev===0?await db.run(insertPlanSql(db),[key,JSON.stringify(data.plan),now]):await db.run('UPDATE plans SET data = ?, revision = revision + 1, updated_at = ? WHERE id = ? AND revision = ?',[JSON.stringify(data.plan),now,key,rev]);
   if(result===0)return Response.json({error:'A terv egy másik ablakban módosult. Exportáld a munkádat, majd töltsd újra az oldalt.'},{status:409,headers});
   return Response.json({revision:rev+1,projectId:data.projectId,userId:user.userId},{headers});

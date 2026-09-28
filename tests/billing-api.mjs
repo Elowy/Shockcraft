@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import Stripe from 'stripe';
+import {DatabaseSync} from 'node:sqlite';
+const base=process.env.TEST_BASE_URL||'http://127.0.0.1:5180';
+if(!['127.0.0.1','localhost'].includes(new URL(base).hostname))throw Error('Loopback only.');
+async function call(path,method='GET',body,cookie='',extra={}){const r=await fetch(base+path,{method,headers:{Connection:'close',Origin:base,'Content-Type':'application/json',...(cookie?{Cookie:cookie}:{}),...extra},body:body===undefined?undefined:JSON.stringify(body)});const text=await r.text();let data;try{data=JSON.parse(text)}catch{throw Error(method+' '+path+' returned '+r.status+': '+text.slice(0,100))}return{status:r.status,data,cookie:r.headers.get('set-cookie')?.split(';')[0]}}
+const login=await call('/api/auth/login','POST',{email:'billing-admin@example.test',password:'Local billing test 2026!'});assert.equal(login.status,200);const admin=login.cookie;
+assert.equal((await call('/api/admin/billing')).status,403);
+const s=await call('/api/admin/billing','GET',undefined,admin);assert.equal(s.status,200);
+const webhookSecret='whsec_localfixture';
+assert.equal((await call('/api/admin/billing','POST',{action:'save',revision:s.data.revision,enabled:true,mode:'test',test:{secretKey:'sk_test_localfixture',webhookSecret}},admin,{Origin:'https://attacker.invalid'})).status,403);
+assert.equal((await call('/api/admin/billing','POST',{action:'save',revision:s.data.revision,enabled:true,mode:'test',test:{secretKey:'sk_test_localfixture',webhookSecret}},admin)).status,200);
+const config=await call('/api/admin/billing','GET',undefined,admin);assert.equal(config.data.test.secretKey,true);assert.ok(!JSON.stringify(config.data).includes('sk_test_localfixture'));assert.ok(!JSON.stringify(config.data).includes(webhookSecret));
+const newUser=await call('/api/auth/register','POST',{name:'Billing test',email:`billing-${Date.now()}@example.test`,password:'Local billing test 2026!'});assert.equal(newUser.status,200);const cookie=newUser.cookie,userId=newUser.data.account.userId;
+assert.equal((await call('/api/admin/billing','GET',undefined,cookie)).status,403);
+assert.equal((await call('/api/billing','GET',undefined,cookie)).data.ready,false);
+const plan={version:1,name:'Free project',plot:{name:'Telek',w:40,h:30},buildings:[],circuits:[],modules:[]};
+const ids=[crypto.randomUUID(),crypto.randomUUID()];const saves=await Promise.all(ids.map(projectId=>call('/api/plan','PUT',{plan,projectId,userId,revision:0},cookie)));assert.deepEqual(saves.map(s=>s.status).sort(),[200,402]);
+// Local fixture insertion supplies orders only; all payment signatures and grants run through HTTP.
+if(!process.env.TEST_D1_PATH)throw Error('TEST_D1_PATH must point at the disposable local D1 database.');
+const db=new DatabaseSync(process.env.TEST_D1_PATH);const orderId=crypto.randomUUID(),sessionId='cs_live_local'+Date.now();db.prepare('INSERT INTO billing_orders VALUES (?,?,?,?,?,?,?,?,?)').run(orderId,userId,349000,'huf','live','pending',sessionId,Date.now(),Date.now());
+const cfg=await call('/api/admin/billing','GET',undefined,admin);assert.equal((await call('/api/admin/billing','POST',{action:'save',revision:cfg.data.revision,enabled:false,mode:'test',live:{secretKey:'sk_live_localfixture',webhookSecret:'whsec_livefixture'}},admin)).status,200);
+const session={id:sessionId,object:'checkout.session',mode:'payment',payment_status:'paid',client_reference_id:userId,metadata:{order_id:orderId,user_id:userId},amount_total:349000,currency:'huf',livemode:true};
+const payload=JSON.stringify({id:'evt_live_fixture',object:'event',type:'checkout.session.completed',livemode:true,data:{object:session}});const stripe=new Stripe('sk_test_fixture'),signature=stripe.webhooks.generateTestHeaderString({payload,secret:'whsec_livefixture'});
+const send=(raw=payload,sig=signature)=>fetch(base+'/api/stripe/webhook',{method:'POST',headers:{'Stripe-Signature':sig},body:raw});
+assert.equal((await send(payload+' ')).status,400);assert.equal((await send(payload,'t=1,v1=wrong')).status,400);
+assert.deepEqual((await Promise.all([send(),send()])).map(r=>r.status),[200,200]);
+assert.equal((await call('/api/billing','GET',undefined,cookie)).data.paid,1);
+const next=crypto.randomUUID();assert.equal((await call('/api/plan','PUT',{plan,projectId:next,userId,revision:0},cookie)).status,200);assert.equal((await call('/api/plan','PUT',{plan,projectId:crypto.randomUUID(),userId,revision:0},cookie)).status,402);
+assert.equal((await call('/api/plan','PUT',{plan,projectId:next,userId,revision:1},cookie)).status,200);
+assert.equal((await call('/api/billing','POST',{action:'confirm',sessionId},admin)).status,400,'other account cannot confirm a checkout');
+db.close();console.log('PASS: HTTP admin authorization/CSRF/secret masking, concurrent free saves, signed and duplicate webhook fulfillment, payment requirement, paid project and free re-save. No external Stripe requests.');

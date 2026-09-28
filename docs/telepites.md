@@ -145,3 +145,7 @@ Hivatalos műszaki háttér: a Node.js env-file beállítása, a vinext standalo
 - Node.js: https://nodejs.org/api/cli.html#--env-filefile
 - vinext: https://github.com/cloudflare/vinext
 - Nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html
+
+## Projektdíjak és Stripe
+
+Az első projekt ingyenes, további projektenként egyszeri 3 490 Ft fizetendő. Az adminfiók, a titkosítókulcs, a Stripe-kulcsok és a webhook beállítását a [Stripe telepítési útmutató](stripe.md) tartalmazza.
