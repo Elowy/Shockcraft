@@ -1,9 +1,10 @@
+import {buildSchematic,schematicTitle,type SchematicMode} from './schematic';
 import {moduleLabels,moduleShort,endpointInfo,circuitPorts,endpointKey} from "./board";
 import {jsPDF} from 'jspdf';
 import {labels,siteLabels} from './plan';
 import type {Plan,Floor,Point,Kind} from './plan';
 import {floorPoints,floorLength,sitePoints,siteLength,nodeHeight} from './geometry';
-export type PdfOptions={scope:'floor'|'plot'|'board'|'all';paper:'a4'|'a3';buildingId:string;floorId:string};
+export type PdfOptions={scope:'floor'|'plot'|'board'|'all'|'single'|'multi';paper:'a4'|'a3';buildingId:string;floorId:string};
 const number=(v:number)=>v.toLocaleString('hu-HU',{maximumFractionDigits:2});
 const clean=(s:string)=>s.replace(/[\u0000-\u001f]/g,' ').replace(/[\u2010-\u2015]/g,'-').replace(/→/g,' > ');
 export function createPlanPdf(plan:Plan,options:PdfOptions,font:string){
@@ -13,7 +14,7 @@ export function createPlanPdf(plan:Plan,options:PdfOptions,font:string){
  const text=(s:string,x:number,y:number,size=10,align:'left'|'center'|'right'='left')=>{doc.setFontSize(size);doc.setTextColor('#263b49');doc.text(clean(s),x,y,{align})};
 
  const label=(s:string,x:number,y:number,size=8)=>{doc.setFontSize(size);doc.setFillColor('#ffffff');doc.rect(x-.5,y-2.6,doc.getTextWidth(s)+1,3.6,'F');text(s,x,y,size)};
- function page(title:string,subtitle:string){if(pages++)doc.addPage(options.paper,'landscape');doc.setDrawColor('#d6e0e5');doc.setLineWidth(.25);doc.line(margin,33,W-margin,33);text('ShockCraft',margin,13,15);doc.setFontSize(10);const project=doc.splitTextToSize(clean(plan.name),W-80) as string[];text(project[0]+(project.length>1?'…':''),W-margin,13,10,'right');text(title,margin,23,15);text(subtitle,margin,29,9);doc.line(margin,H-19,W-margin,H-19);text('Geometriai terv. Ráhagyás és villamos méretezés nélkül.',margin,H-12,8);text(new Date().toLocaleDateString('hu-HU'),W-margin,H-12,8,'right')}
+ function page(title:string,subtitle:string){if(pages++)doc.addPage(options.paper,'landscape');doc.setDrawColor('#d6e0e5');doc.setLineWidth(.25);doc.line(margin,33,W-margin,33);text('ShockCraft',margin,13,15);doc.setFontSize(10);const project=doc.splitTextToSize(clean(plan.name),W-80) as string[];text(project[0]+(project.length>1?'…':''),W-margin,13,10,'right');text(title,margin,23,15);text(subtitle,margin,29,9);doc.line(margin,H-19,W-margin,H-19);text('Tervdokumentáció. Ráhagyás és villamos méretezés nélkül.',margin,H-12,8);text(new Date().toLocaleDateString('hu-HU'),W-margin,H-12,8,'right')}
  function table(title:string,subtitle:string,headers:string[],widths:number[],rows:string[][]){if(!rows.length)return;page(title,subtitle);const total=widths.reduce((a,b)=>a+b,0),ww=widths.map(v=>v/total*(W-2*margin));let y=39;
  const head=()=>{doc.setFillColor('#eaf1ef');doc.rect(margin,y,W-2*margin,9,'F');let x=margin;headers.forEach((s,i)=>{text(s,x+2,y+6,9);x+=ww[i]});y+=9};head();
  rows.forEach((row,index)=>{doc.setFontSize(9);const cells=row.map((s,i)=>doc.splitTextToSize(clean(s),ww[i]-4) as string[]);const h=Math.max(9,...cells.map(v=>v.length*4+4));if(y+h>H-25){page(title+' - folytatás',subtitle);y=39;head()}if(index%2===0){doc.setFillColor('#f6f8fa');doc.rect(margin,y,W-2*margin,h,'F')}let x=margin;cells.forEach((lines,i)=>{doc.setFontSize(9);doc.setTextColor('#263b49');doc.text(lines,x+2,y+5);x+=ww[i]});y+=h;doc.setDrawColor('#dde5ea');doc.line(margin,y,W-margin,y)})}
@@ -46,9 +47,31 @@ export function createPlanPdf(plan:Plan,options:PdfOptions,font:string){
  const unconnected=plan.circuits.filter(c=>c.building===b.id).flatMap(c=>circuitPorts(c).filter(port=>!plan.boardWires.some(w=>[w.from,w.to].some(e=>endpointKey(e)===endpointKey({kind:'circuit',id:c.id,port:port.id})))).map(port=>[c.name,port.signal,port.label,'Nincs bekötve']));
  table('Elosztó - be nem kötött szálak',b.name,['Áramkör','Jel','Szál neve','Állapot'],[55,20,85,40],unconnected);
  }
+ function schematicPage(b:Plan['buildings'][number],mode:SchematicMode){
+  const diagram=buildSchematic(plan,b.id,mode),scale=(W-2*margin)/diagram.width,top=43,usable=H-top-31,tile=usable/scale;
+  const cuts=[0];while(cuts.at(-1)!<diagram.height){const start=cuts.at(-1)!,limit=start+tile;const end=diagram.height<=limit?diagram.height:diagram.breaks.filter(y=>y>start&&y<=limit).at(-1)||limit;cuts.push(end)}
+  const total=cuts.length-1;
+  for(let section=0;section<total;section++){
+   page(schematicTitle(mode),b.name+' | '+(section+1)+' / '+total+' rajzlap | '+diagram.missing.length+' be nem kötött áramköri szál');
+   text('Nem méretarányos. Keresztezés nem jelent kötést. Több lap esetén függőlegesen folytatódik.',margin,39,8);
+   const offset=cuts[section],end=cuts[section+1],xx=(x:number)=>margin+x*scale,yy=(y:number)=>top+(y-offset)*scale;
+   doc.saveGraphicsState();doc.rect(margin,top,W-2*margin,(end-offset)*scale,null);doc.clip();doc.discardPath();
+   for(const p of diagram.drawing){
+    doc.setDrawColor(p.color);doc.setLineWidth(.3);doc.setLineDashPattern([],0);
+    if(p.type==='text'){doc.setFontSize(p.size*scale*72/25.4);doc.setTextColor(p.color);doc.text(clean(p.text),xx(p.x),yy(p.y))}
+    else if(p.type==='rect'){doc.setFillColor(p.fill);doc.rect(xx(p.x),yy(p.y),p.w*scale,p.h*scale,'FD')}
+    else if(p.type==='circle'){doc.setFillColor(p.fill);doc.circle(xx(p.x),yy(p.y),p.r*scale,'FD')}
+    else{doc.setLineWidth((p.width||2)*scale);doc.setLineDashPattern(p.dash?[1.4,1.2]:[],0);p.points.slice(1).forEach((b,i)=>{const a=p.points[i];doc.line(xx(a.x),yy(a.y),xx(b.x),yy(b.y))})}
+   }
+   doc.restoreGraphicsState();doc.setLineDashPattern([],0);
+   text('Rajzi tartomány: '+Math.round(offset)+'–'+Math.round(end)+' | Kapocsjelek: üres = nincs bekötve; kitöltött = megadott kapcsolat.',margin,H-24,8);
+  }
+  table('Kapcsolási rajz - bekötési jegyzék',b.name,['Kapcsolat','Megadott végpontok'],[55,160],diagram.edges.map(e=>[e.name,e.detail]));
+  table('Kapcsolási rajz - hiányzó bekötések',b.name,['Áramkör','Jel','Szál neve'],[70,20,120],diagram.missing.map(m=>[m.circuit,m.signal,m.name]));
+ }
  const building=plan.buildings.find(b=>b.id===options.buildingId)||plan.buildings[0],floor=building?.floors.find(f=>f.id===options.floorId)||building?.floors[0];
- if(options.scope==='floor'&&(!building||!floor))throw Error('Nincs exportálható szint. Hozz létre egy szintet, vagy válaszd a telek PDF-et.');if(options.scope==='board'&&!building)throw Error('Nincs exportálható épület.');
- if(options.scope==='plot'||options.scope==='all')plotPage();if(options.scope==='floor')floorPage(building,floor);if(options.scope==='board')boardPage(building);if(options.scope==='all')for(const b of plan.buildings){for(const f of [...b.floors].sort((a,b)=>a.elevation-b.elevation))floorPage(b,f);boardPage(b)}
+ if(options.scope==='floor'&&(!building||!floor))throw Error('Nincs exportálható szint. Hozz létre egy szintet, vagy válaszd a telek PDF-et.');if(['board','single','multi'].includes(options.scope)&&!building)throw Error('Nincs exportálható épület.');
+ if(options.scope==='plot'||options.scope==='all')plotPage();if(options.scope==='floor')floorPage(building,floor);if(options.scope==='board')boardPage(building);if(options.scope==='single'||options.scope==='multi')schematicPage(building,options.scope);if(options.scope==='all')for(const b of plan.buildings){for(const f of [...b.floors].sort((a,b)=>a.elevation-b.elevation))floorPage(b,f);boardPage(b);schematicPage(b,'single');schematicPage(b,'multi')}
  for(let i=1;i<=doc.getNumberOfPages();i++){doc.setPage(i);text(i+' / '+doc.getNumberOfPages(),W/2,H-7,8,'center')}
  return doc;
 }
