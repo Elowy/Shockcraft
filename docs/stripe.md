@@ -77,3 +77,7 @@ Sites a `0004_lovely_young_avengers.sql` migrációt közzétételkor alkalmazza
 Tesztüzemben ellenőrizd az első fizetést, a megújulást, a fizetési hibát, az időszak végi lemondást, a projektek zárolását és az újbóli hozzáférést. A helyi automatizált tesztek szimulált Stripe-válaszokat használnak; valódi Stripe-előfizetéssel végzett próba még szükséges a saját kulcsokkal. A fizetési kísérletek listája az előfizetés indítását mutatja; minden havi számla a Stripe portálon és Dashboardon érhető el.
 
 Hivatalos referencia: [Stripe előfizetési események](https://docs.stripe.com/billing/subscriptions/webhooks).
+
+## Importálás és exportálás
+
+A tervimport és a JSON-, SVG-, CSV-, PDF-export / nyomtatható tervdokumentáció kizárólag aktív havi előfizetéshez tartozik. Az ingyenes és egyszeri díjas projekt mentése és szerkesztése megmarad, import/export jogosultságot ezek nem adnak. Lemondás után a kifizetett időszak végéig használhatók az exportok, lejárat után minden új művelet tiltott. A műveletek friss szerveroldali előfizetés-ellenőrzést kérnek, hálózati hiba esetén nem indulnak el. Az admin tesztüzeme csak érvényes tesztelőfizetéssel engedi a tesztelést. A jogi tájékoztatók és telepítési útmutatók nyomtatása továbbra is nyilvános.
