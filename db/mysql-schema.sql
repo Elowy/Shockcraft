@@ -103,3 +103,8 @@ CREATE TABLE IF NOT EXISTS subscription_checkouts (
  order_id varchar(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
  expires_at bigint NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+CREATE TABLE IF NOT EXISTS invoice_settings (id varchar(32) PRIMARY KEY,data longtext NOT NULL,revision int NOT NULL,updated_at varchar(40) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+CREATE TABLE IF NOT EXISTS billing_profiles (user_id varchar(36) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,data longtext NOT NULL,updated_at bigint NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+CREATE TABLE IF NOT EXISTS order_billing (order_id varchar(36) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,data longtext NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+CREATE TABLE IF NOT EXISTS invoice_jobs (id varchar(180) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,user_id varchar(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,mode varchar(10) NOT NULL,payload longtext NOT NULL,status varchar(20) NOT NULL,number varchar(100) NULL,error varchar(250) NULL,attempts int NOT NULL DEFAULT 0,lock_until bigint NOT NULL DEFAULT 0,created_at bigint NOT NULL,updated_at bigint NOT NULL,KEY invoice_jobs_user_idx(user_id),KEY invoice_jobs_status_idx(status)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;

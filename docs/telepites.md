@@ -153,3 +153,7 @@ Az első projekt ingyenes, további projektenként egyszeri 3 490 Ft fizetendő.
 ## Jelszó-visszaállítás és e-mail-megerősítés
 
 A Resend, a feladói domain és az adminpanel beállítását az [E-mail beállítási útmutató](email.md) írja le. Frissítéskor MySQL-en futtasd újra az adatbázis-előkészítő lépést az új fiókmezők hozzáadásához.
+
+## Automatikus AAM számlázás
+
+A Számlázz.hu Számla Agent beállítását, a teszt- és éles kulcsok kezelését, az új adatbázistáblákat és a hibás számlázás rendezését a [számlázási útmutató](szamlazz-hu.md) írja le. Új fizetéshez mentett számlázási profil és bekapcsolt számlázás szükséges.

@@ -24,7 +24,7 @@ Sites-hostolásnál a három változót a szerveroldali környezeti beállítás
 6. Az adminfiókban, a **Projektek → Projekthelyek és fizetés** ablakban indíts tesztvásárlást. Használd a [Stripe hivatalos tesztadatait](https://docs.stripe.com/testing). Ellenőrizd a jóváírást, a fizetési jegyzéket, az új projekt létrehozását, valamint a megszakított fizetést. Tesztüzemben csak az admin indíthat fizetést; a normál felhasználók meglévő tervei elérhetők maradnak.
 7. Az éles működéshez az éles API-kulcsot (`sk_live_…`) és az éles webhook-végpont külön aláírókulcsát is add meg. Válts **Éles fizetés** módra, és ments. A két környezet kulcsait ne keverd össze.
 
-A díj a szerveren rögzített: 3 490 Ft, a Stripe számára 349000 HUF kisegység. A böngésző nem adhat meg árat. A HUF terhelési egységéről a [Stripe pénznemdokumentációja](https://docs.stripe.com/currencies#special-cases) ír. A vásárló a Stripe oldalán adja meg a kártyaadatokat; azok nem kerülnek a ShockCraft adatbázisába. A fizetés indítása nem állít be automatikus adó- vagy számlázási integrációt.
+A díj a szerveren rögzített: 3 490 Ft, a Stripe számára 349000 HUF kisegység. A böngésző nem adhat meg árat. A HUF terhelési egységéről a [Stripe pénznemdokumentációja](https://docs.stripe.com/currencies#special-cases) ír. A vásárló a Stripe oldalán adja meg a kártyaadatokat; azok nem kerülnek a ShockCraft adatbázisába. Az AAM számlák automatikus kiállításához kötelező a [Számlázz.hu beállítása](szamlazz-hu.md) és a vásárló számlázási adatainak mentése. A Stripe saját bizonylata nem helyettesíti a Számlázz.hu-számlát.
 
 ## Jóváírás és üzemeltetés
 
