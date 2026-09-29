@@ -6,12 +6,15 @@ if(!['127.0.0.1','localhost'].includes(new URL(base).hostname))throw Error('Use 
 const id=Date.now()+'-'+Math.random().toString(36).slice(2),password='Test passphrase '+id;
 const plan={version:1,name:'Auth isolation test',plot:{name:'Telek',w:40,h:30,nodes:[],routes:[]},buildings:[{id:'house',name:'Ház',x:2,y:2,w:10,h:10,floors:[{id:'floor',name:'Földszint',elevation:0,rooms:[],walls:[],devices:[],routes:[]}]}],circuits:[],modules:[]};
 async function call(path,method='GET',body,cookie='',extra={}){const r=await fetch(base+path,{method,headers:{Origin:base,'Content-Type':'application/json',...(cookie?{Cookie:cookie}:{}),...extra},body:body?JSON.stringify(body):undefined,signal:AbortSignal.timeout(20000)});return{status:r.status,data:await r.json(),cookie:r.headers.get('set-cookie')?.split(';')[0],headers:r.headers}}
+async function plannerAccess(cookie,allowed){const r=await fetch(base+'/tervezo?payment=plans',{headers:cookie?{Cookie:cookie}:{},signal:AbortSignal.timeout(20000)}),html=await r.text();assert.equal(r.status,200);assert.equal(html.includes('id="plan-svg"'),allowed,'only an authenticated session receives the editor');assert.equal(html.includes('A tervezéshez jelentkezz be'),!allowed,'guest receives the sign-in page');}
+await plannerAccess('',false);await plannerAccess('shockcraft_session='+'0'.repeat(64),false);
 assert.equal((await call('/api/plan')).status,401);
 assert.equal((await call('/api/plan','GET',undefined,'',{'oai-authenticated-user-id':'forged','oai-authenticated-user-email':'forged@example.test'})).status,401);
 assert.equal((await call('/api/auth/register','POST',{name:'Test',email:'weak-'+id+'@example.test',password:'short'})).status,400);
 assert.equal((await call('/api/auth/register','POST',{name:'Test',email:'long-'+id+'@example.test',password:'á'.repeat(40)})).status,400);
 assert.equal((await call('/api/auth/login','POST',{email:'unknown-'+id+'@example.test',password})).status,401);
 const a=await call('/api/auth/register','POST',{name:"Teszt O'Name",email:'A-'+id+'@example.test',password});assert.equal(a.status,200);assert.ok(a.cookie);assert.match(a.headers.get('set-cookie'),/HttpOnly/);assert.match(a.headers.get('set-cookie'),/SameSite=Lax/);assert.equal(a.data.account.email,'a-'+id+'@example.test');assert.ok(!JSON.stringify(a.data).includes('password'));
+await plannerAccess(a.cookie,true);
 assert.equal((await call('/api/auth/register','POST',{name:'Duplicate',email:'a-'+id+'@example.test',password})).status,409);
 const b=await call('/api/auth/register','POST',{name:'Másik felhasználó',email:'b-'+id+'@example.test',password});assert.equal(b.status,200);
 const body={plan,revision:0,userId:a.data.account.userId};assert.equal((await call('/api/plan','PUT',body,a.cookie)).status,200);assert.equal((await call('/api/plan','GET',undefined,a.cookie)).data.plan.name,plan.name);
@@ -30,8 +33,10 @@ assert.equal((await call('/api/admin/billing','GET',undefined,a.cookie)).status,
 assert.equal((await call('/api/plan','PUT',{...body,revision:1},a.cookie,{Origin:'https://elsewhere.test'})).status,403);
 assert.equal((await call('/api/auth/logout','POST',undefined,a.cookie,{Origin:'https://elsewhere.test'})).status,403);
 assert.equal((await call('/api/auth/logout','POST',undefined,a.cookie)).status,200);assert.equal((await call('/api/plan','GET',undefined,a.cookie)).status,401);
+await plannerAccess(a.cookie,false);
 assert.equal((await call('/api/auth/login','POST',{email:a.data.account.email,password:'wrong password 123'})).status,401);
 const signed=await call('/api/auth/login','POST',{email:a.data.account.email,password});assert.equal(signed.status,200);assert.notEqual(signed.cookie,a.cookie);assert.equal((await call('/api/plan','GET',undefined,signed.cookie)).data.plan.name,plan.name);
+await plannerAccess(signed.cookie,true);
 const rotated=await call('/api/auth/login','POST',{email:a.data.account.email,password},signed.cookie);assert.equal(rotated.status,200);assert.equal((await call('/api/plan','GET',undefined,signed.cookie)).status,401);
 for(let i=0;i<12;i++)assert.equal((await call('/api/auth/login','POST',{email:'limited-'+id+'@example.test',password:'too-short'})).status,400);
 assert.equal((await call('/api/auth/login','POST',{email:'limited-'+id+'@example.test',password:'too-short'})).status,429);
