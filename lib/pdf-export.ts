@@ -1,3 +1,4 @@
+import {boardSize} from './board-size';
 import {buildSchematic,schematicTitle,type SchematicMode} from './schematic';
 import {moduleLabels,moduleShort,endpointInfo,circuitPorts,endpointKey} from "./board";
 import {jsPDF} from 'jspdf';
@@ -40,7 +41,21 @@ export function createPlanPdf(plan:Plan,options:PdfOptions,font:string){
  table('Telki pontjegyzék',plan.plot.name+' | Magasságok a közös telek-0 szinthez képest.',['Jel','Megnevezés','Típus','X / Y','Magasság'],[14,65,55,40,30],plan.plot.nodes.map((n,i)=>['P'+(i+1),n.name,siteLabels[n.kind],number(n.x)+' / '+number(n.y)+' m',number(nodeHeight(n,plan))+' m']));
  table('Telki nyomvonaljegyzék',plan.plot.name+' | Vízszintes nyomvonal + kezdő- és végpont fel/leállása.',['Jel / megnevezés','Honnan → hová','Vezetés / szint / kábel','Vízszintes','Függőleges','Összesen'],[45,55,60,25,25,25],plan.plot.routes.map((r,i)=>{const l=siteLength(r,plan);return ['T'+(i+1)+' - '+r.name,(plan.plot.nodes.find(n=>n.id===r.from)?.name||'')+' → '+(plan.plot.nodes.find(n=>n.id===r.to)?.name||''),({underground:'Föld alatt',surface:'Felszínen',overhead:'Magasban'})[r.mode]+' / '+number(r.level)+' m / '+r.cable,number(l.horizontal)+' m',number(l.vertical)+' m',number(l.total)+' m']}));
  }
- function boardPage(b:Plan['buildings'][number]){page('Lakáselosztó - készülékelrendezés',b.name+' | E-01 | 4 × 18 modul');const x=margin+10,y=43,unit=(W-2*margin-20)/18,rowH=(H-43-35)/4;for(let row=0;row<4;row++){const yy=y+row*rowH;doc.setFillColor('#f4f7f8');doc.setDrawColor('#cad6dc');doc.rect(x,yy,unit*18,rowH-5,'FD');text((row+1)+'.',margin,yy+10,9);for(let slot=0;slot<18;slot++){doc.setLineWidth(.15);doc.rect(x+slot*unit,yy,unit,rowH-5);text(String(slot+1),x+(slot+.5)*unit,yy+4,7,'center')}for(const m of plan.modules.filter(m=>m.building===b.id&&m.row===row)){const xx=x+m.slot*unit,ww=m.width*unit;doc.setDrawColor('#6d828e');doc.setFillColor('#fff');doc.setLineWidth(.4);doc.rect(xx+.6,yy+6,ww-1.2,rowH-12,'FD');const c=plan.circuits.find(c=>c.id===m.circuit);text(moduleShort[m.type],xx+ww/2,yy+11,8,'center');text(c?c.curve+c.rating+' A':m.type==='RCD'?'ÁVK':m.type==='MAIN'?'Főkapcs.':moduleShort[m.type],xx+ww/2,yy+17,8,'center');const index=plan.modules.filter(m=>m.building===b.id).findIndex(v=>v.id===m.id)+1;text('K'+index,xx+ww/2,yy+23,8,'center')}}
+ function boardPage(b:Plan['buildings'][number]){
+ const size=boardSize(b),x=margin+10,y=43,unit=(W-2*margin-20)/size.modulesPerRow;
+ for(let start=0;start<size.rows;start+=4){
+  const count=Math.min(4,size.rows-start),rowH=(H-43-35)/Math.max(3,count);
+  page('Lakáselosztó - készülékelrendezés',b.name+' | E-01 | '+size.rows+' × '+size.modulesPerRow+' modul | '+(start+1)+'–'+(start+count)+'. sor');
+  for(let row=start;row<start+count;row++){
+   const yy=y+(row-start)*rowH;doc.setFillColor('#f4f7f8');doc.setDrawColor('#cad6dc');doc.rect(x,yy,unit*size.modulesPerRow,rowH-5,'FD');text((row+1)+'.',margin,yy+10,9);
+   for(let slot=0;slot<size.modulesPerRow;slot++){doc.setLineWidth(.15);doc.rect(x+slot*unit,yy,unit,rowH-5);text(String(slot+1),x+(slot+.5)*unit,yy+4,7,'center')}
+   for(const m of plan.modules.filter(m=>m.building===b.id&&m.row===row)){
+    const xx=x+m.slot*unit,ww=m.width*unit;doc.setDrawColor('#6d828e');doc.setFillColor('#fff');doc.setLineWidth(.4);doc.rect(xx+.6,yy+6,ww-1.2,rowH-12,'FD');const c=plan.circuits.find(c=>c.id===m.circuit),fontSize=Math.min(8,(ww-1.5)*1.1);
+    text(moduleShort[m.type],xx+ww/2,yy+11,fontSize,'center');text(c?c.curve+c.rating+' A':moduleShort[m.type],xx+ww/2,yy+17,fontSize,'center');
+    const index=plan.modules.filter(m=>m.building===b.id).findIndex(v=>v.id===m.id)+1;text('K'+index,xx+ww/2,yy+23,fontSize,'center');
+   }
+  }
+ }
  table('Elosztó - készülékjegyzék',b.name,['Jel','Megnevezés','Típus','Sor / hely','Szélesség','Áramkör'],[12,65,22,28,25,55],plan.modules.filter(m=>m.building===b.id).map((m,i)=>['K'+(i+1),m.name,moduleLabels[m.type],(m.row+1)+' / '+(m.slot+1),m.width+' modul',plan.circuits.find(c=>c.id===m.circuit)?.name||'-']));
  table('Elosztó - áramkörjegyzék',b.name,['Áramkör','Fázis','Védelem','Kábel','ÁVK-csoport','Szerelvény'],[60,18,25,50,35,25],plan.circuits.filter(c=>c.building===b.id).map(c=>[c.name,c.phase,c.curve+c.rating+' A',c.cable,c.rcd||'-',String(b.floors.flatMap(f=>f.devices).filter(d=>d.circuit===c.id).length)]));
  table('Elosztó - bekötési jegyzék',b.name,['Vezeték neve','Honnan / kapocs','Hová / kapocs'],[55,75,75],plan.boardWires.filter(w=>w.building===b.id).map(w=>[w.name,endpointInfo(plan,w.from)?.text||'-',endpointInfo(plan,w.to)?.text||'-']));

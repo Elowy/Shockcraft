@@ -1,4 +1,5 @@
 import type {Plan,Point} from './plan';
+import {boardSize} from './board-size';
 import {modulePorts,circuitPorts,endpointInfo,endpointKey,compatible,connectBoard,type Endpoint,type Port} from './board';
 
 // Preview an unassigned protection device with the poles of the selected circuit.
@@ -30,10 +31,10 @@ export function connectTerminals(plan:Plan,from:Endpoint,to:Endpoint,id:string){
 }
 export type CabinetPin=Point&{end:Endpoint;port:Port;side:'top'|'bottom';escapeY:number};
 export function cabinetLayout(plan:Plan,buildingId:string){
- const unit=80,left=72,width=1584,modules=plan.modules.filter(m=>m.building===buildingId),circuits=plan.circuits.filter(c=>c.building===buildingId);
+ const size=boardSize(plan.buildings.find(b=>b.id===buildingId)),unit=80,left=72,width=Math.max(624,size.modulesPerRow*unit+144),modules=plan.modules.filter(m=>m.building===buildingId),circuits=plan.circuits.filter(c=>c.building===buildingId);
  const pins:CabinetPin[]=[],devices:{module:Plan['modules'][number];x:number;y:number;w:number;h:number}[]=[],rows:{y:number;bodyY:number;h:number}[]=[];
  let y=18;
- for(let row=0;row<4;row++){
+ for(let row=0;row<size.rows;row++){
   const items=modules.filter(m=>m.row===row).map(m=>{const ports=modulePorts(m,plan),columns=Math.max(1,Math.floor((m.width*unit-12)/30));
    const directional=ports.some(p=>p.id.endsWith('-in'));
    const split=directional?0:ports.length>columns?Math.ceil(ports.length/2):ports.length;
@@ -53,11 +54,12 @@ export function cabinetLayout(plan:Plan,buildingId:string){
   }
   y+=h+14;
  }
- const circuitTop=y+40,cards=circuits.map((c,i)=>{const x=left+(i%3)*480,cy=circuitTop+Math.floor(i/3)*172,w=448;
+ const cardColumns=Math.max(1,Math.floor((width-144)/480)),cardWidth=(width-144)/cardColumns-32;
+ const circuitTop=y+40,cards=circuits.map((c,i)=>{const x=left+(i%cardColumns)*(cardWidth+32),cy=circuitTop+Math.floor(i/cardColumns)*172,w=cardWidth;
   circuitPorts(c).forEach((port,j,ports)=>pins.push({x:x+w*(j+.5)/ports.length,y:cy+90,end:{kind:'circuit',id:c.id,port:port.id},port,side:'bottom',escapeY:cy+136}));
   return {circuit:c,x,y:cy,w,h:112};
  });
- return {width,height:circuitTop+Math.ceil(circuits.length/3)*172+24,rows,devices,cards,pins,circuitTop};
+ return {size,railWidth:size.modulesPerRow*unit,width,height:circuitTop+Math.ceil(circuits.length/cardColumns)*172+24,rows,devices,cards,pins,circuitTop};
 }
 export function cabinetWirePoints(a:CabinetPin,b:CabinetPin,index:number):Point[]{
  const shift=(index%5)*4,ay=a.escapeY+(a.side==='top'?-shift:shift),by=b.escapeY+(b.side==='top'?-shift:shift);

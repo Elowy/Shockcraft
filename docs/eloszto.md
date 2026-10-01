@@ -2,6 +2,20 @@
 
 Az **Elosztó** nézet az éppen kiválasztott épülethez tartozik.
 
+## Szekrényméret
+
+Az **Elosztó mérete** beállításban 1–12 sor és soronként 1–36 modulhely adható meg. A régi tervek továbbra is 4 × 18-as elosztóval nyílnak meg. Az értékek épületenként külön mentődnek, és az új készülékek elhelyezése, a sor-/helymezők és a PDF is ezeket használja. Négy sornál nagyobb elosztó PDF-je több rajzlapra oszlik.
+
+A **Méret alkalmazása** megőrzi a készülékek helyét és bekötéseit. Ha egy készülék kilógna, a módosítás nem hajtódik végre: a hibaüzenet megnevezi az érintett készülékeket. Előbb helyezd át őket a tulajdonságaiknál. A sikeres méretmódosítás visszavonható, és a projekt Mentés gombja rögzíti.
+
+## Szerelvények hozzárendelése áramkörhöz
+
+Az **Áramkörök** fülön válaszd ki az áramkör kártyáját, majd kattints a szerelvényre az alaprajzon vagy a szint szerelvénylistájában. A zöld keret a kiválasztott áramkörhöz tartozó elemeket jelöli. Egy már hozzárendelt elem újabb kattintással leválasztható; más áramkör eleme a kiválasztott áramkörbe helyeződik át. Minden kattintás külön visszavonható.
+
+A szintválasztóval az épület más szintjein is dolgozhatsz. Az **Összes**, **Kiválasztott áramkör**, illetve **Nincs hozzárendelve** szűrés segít az áttekintésben. A kártyák szerelvényszáma az egész épületre vonatkozik; a hozzárendeletlen darabszám az aktuális szintre. Az áramkör neve és műszaki adatai az **Elosztó és áramkörbeállítások** gombbal érhetők el.
+
+A hozzárendelés nem hoz létre új nyomvonalat, és nem változtatja meg az elosztó bekötéseit. Ezeket továbbra is a megfelelő szerkesztőben kell megadni. A szintváltás, szűrés és áramkörválasztás nem módosítja a terv adatait.
+
 ## Gyors bekötés a szekrényen
 
 A készülékek feletti és alatti körök kattintható kapcsok. Felül a bemenetek, alul a kimenetek találhatók; a sínek számozott pontokkal jelennek meg. Kattints egy kiinduló kapocsra, majd egy kiemelt célkapocsra. Az új kapcsolat azonnal bekerül a bekötési jegyzékbe és a kapcsolási rajzokba. A készülék közepére kattintva továbbra is a tulajdonságai szerkeszthetők.
