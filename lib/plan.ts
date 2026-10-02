@@ -1,4 +1,5 @@
 import {z} from "zod";
+import {backgroundSchema} from './background';
 import {boardSize} from "./board-size";
 import {moduleTypes,validateBoard} from "./board";
 const id=z.string().min(1).max(80),name=z.string().trim().min(1).max(120),n=z.number().finite().min(0).max(2000);
@@ -10,7 +11,7 @@ const room=z.object({id,name,x:n,y:n,w:z.number().min(8).max(1800),h:z.number().
 const wall=z.object({id,a:point,b:point});
 const device=z.object({id,name,kind:z.enum(kinds),x:n,y:n,angle:z.number().finite(),height:z.number().min(0).max(1000),circuit:z.string().max(80)});
 const route=z.object({id,name,points:z.array(point).min(2).max(300),mode:z.enum(["inside","outside"]),circuit:z.string().max(80),cable:z.string().max(60),startId:z.string().max(80).optional(),endId:z.string().max(80).optional(),planeHeight:z.number().finite().min(0).max(1000).optional(),startHeight:z.number().finite().min(0).max(1000).optional(),endHeight:z.number().finite().min(0).max(1000).optional()});
-const floor=z.object({id,name,elevation:z.number().min(-30).max(100),rooms:z.array(room).max(200),walls:z.array(wall).max(1000),devices:z.array(device).max(2000),routes:z.array(route).max(2000)});
+const floor=z.object({id,name,elevation:z.number().min(-30).max(100),rooms:z.array(room).max(200),walls:z.array(wall).max(1000),devices:z.array(device).max(2000),routes:z.array(route).max(2000),background:backgroundSchema.optional()});
 const building=z.object({id,name,x:n,y:n,w:z.number().min(1).max(100),h:z.number().min(1).max(100),floors:z.array(floor).max(30),board:z.object({rows:z.number().int().min(1).max(12),modulesPerRow:z.number().int().min(1).max(36)}).optional()});
 const circuit=z.object({id,name,building:id,phase:z.enum(["L1","L2","L3","3P"]),rating:z.number().int().min(1).max(125),curve:z.enum(["B","C","D"]),cable:z.string().max(60),rcd:z.string().max(80),conductorNames:z.object({L:name.optional(),L1:name.optional(),L2:name.optional(),L3:name.optional(),N:name.optional(),PE:name.optional()}).optional()});
 const moduleSchema=z.object({id,name,building:id,type:z.enum(moduleTypes),width:z.number().int().min(1).max(8),row:z.number().int().min(0).max(11),slot:z.number().int().min(0).max(35),circuit:z.string().max(80)});

@@ -8,7 +8,7 @@ import {floorPoints,floorLength,sitePoints,siteLength,nodeHeight} from './geomet
 export type PdfOptions={scope:'floor'|'plot'|'board'|'all'|'single'|'multi';paper:'a4'|'a3';buildingId:string;floorId:string};
 const number=(v:number)=>v.toLocaleString('hu-HU',{maximumFractionDigits:2});
 const clean=(s:string)=>s.replace(/[\u0000-\u001f]/g,' ').replace(/[\u2010-\u2015]/g,'-').replace(/→/g,' > ');
-export function createPlanPdf(plan:Plan,options:PdfOptions,font:string){
+export function createPlanPdf(plan:Plan,options:PdfOptions,font:string,backgrounds:Record<string,string>={}){
  const doc=new jsPDF({orientation:'landscape',unit:'mm',format:options.paper,compress:true,putOnlyUsedFonts:true});
  doc.addFileToVFS('NotoSans.ttf',font);doc.addFont('NotoSans.ttf','NotoSans','normal');doc.setFont('NotoSans');doc.setProperties({title:clean(plan.name),subject:'Villamos terv - alaprajz, telek, elosztó',creator:'ShockCraft'});doc.viewerPreferences({PrintScaling:'None'});
  const W=doc.internal.pageSize.getWidth(),H=doc.internal.pageSize.getHeight(),margin=12;let pages=0;
@@ -26,7 +26,7 @@ export function createPlanPdf(plan:Plan,options:PdfOptions,font:string){
  if(kind==='panel'||kind==='box'){doc.rect(p.x-2,p.y-2.5,4,5,'FD');if(kind==='panel')for(let i=-1;i<=1;i++)line(-1,i,1,i);else doc.circle(p.x,p.y,.35,'F')}
  else if(kind==='rj45'||kind==='phone'){doc.rect(p.x-2.5,p.y-2,5,4,'FD');text(kind==='rj45'?'RJ':'T',p.x,p.y+.8,6,'center')}
  else{doc.circle(p.x,p.y,2,'FD');if(kind==='light'){line(-1.4,-1.4,1.4,1.4);line(-1.4,1.4,1.4,-1.4)}else if(kind.startsWith('switch')){line(1,-1.5,2.5,-4);if(kind!=='switch1')line(-1,-1.5,-2.5,-4)}else{line(-.7,-.8,-.7,.8);line(.7,-.8,.7,.8);if(kind==='double')doc.circle(p.x+3,p.y,1.5)}}}
- function floorPage(building:Plan['buildings'][number],f:Floor){const sub=building.name+' / '+f.name+' | Szint: '+number(f.elevation)+' m';page('Villamos alaprajz',sub);const bounds=[...f.rooms.flatMap(r=>[{x:r.x,y:r.y},{x:r.x+r.w,y:r.y+r.h}]),...f.walls.flatMap(w=>[w.a,w.b]),...f.devices,...f.routes.flatMap(r=>floorPoints(r,f))];const tr=frame(bounds,40);doc.setDrawColor('#405563');doc.setFillColor('#ffffff');doc.setLineWidth(1);
+ function floorPage(building:Plan['buildings'][number],f:Floor){const sub=building.name+' / '+f.name+' | Szint: '+number(f.elevation)+' m';page('Villamos alaprajz',sub);const bounds=[...f.rooms.flatMap(r=>[{x:r.x,y:r.y},{x:r.x+r.w,y:r.y+r.h}]),...f.walls.flatMap(w=>[w.a,w.b]),...f.devices,...f.routes.flatMap(r=>floorPoints(r,f)),...(f.background?.visible?[{x:f.background.x,y:f.background.y},{x:f.background.x+f.background.w,y:f.background.y+f.background.h}]:[])];const tr=frame(bounds,40);if(f.background?.visible){const b=f.background,data=backgrounds[b.assetId];if(!data)throw Error('A PDF-ből hiányozna egy háttérkép. Töltsd be újra a hátteret.');const p=tr.xy(b);doc.saveGraphicsState();doc.setGState(doc.GState({opacity:b.opacity}));doc.addImage(data,'JPEG',p.x,p.y,b.w/40*tr.s,b.h/40*tr.s);doc.restoreGraphicsState();}doc.setDrawColor('#405563');doc.setFillColor('#ffffff');doc.setLineWidth(1);
  f.rooms.forEach(r=>{const p=tr.xy(r);doc.setDrawColor('#405563');doc.setLineWidth(1);doc.rect(p.x,p.y,r.w/40*tr.s,r.h/40*tr.s);});
  f.walls.forEach(w=>poly([w.a,w.b],tr.xy,'#405563'));
  f.routes.forEach((r,i)=>{const pts=floorPoints(r,f);poly(pts,tr.xy,r.mode==='inside'?'#b16d33':'#40769d',r.mode==='inside');if(pts.length>1){const a=tr.xy(pts[0]),b=tr.xy(pts[1]);label('N'+(i+1),(a.x+b.x)/2+2,(a.y+b.y)/2-2,8)}});

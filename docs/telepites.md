@@ -1,6 +1,14 @@
 # ShockCraft – telepítési útmutató
 
-Node.js-t támogató tárhelyhez és Linux VPS-hez. Kiadás: 2026. szeptember 18.
+Node.js-t támogató tárhelyhez és Linux VPS-hez. Frissítve: 2026. október 2.
+
+## Háttéralaprajzok fájltárolása
+
+A képek a MySQL-adatbázison kívül tárolódnak; az adatbázis a hivatkozásokat és a méretezést őrzi. Node.js-tárhelyen állítsd be a `SHOCKCRAFT_UPLOAD_DIR` változót egy állandó, privát, a szerver által írható könyvtár abszolút útvonalára, például `/var/lib/shockcraft/uploads`. Ne legyen a webkiszolgáló nyilvános könyvtárában. Ha nincs megadva, a munkakönyvtár `.shockcraft/uploads` mappája használatos.
+
+A könyvtárat a MySQL-adatbázissal együtt mentsd, és új kiadás telepítésekor is ugyanazt a helyet használd. Konténerben tartós kötet szükséges. Az adatbázismentés önmagában nem tartalmazza a háttérképeket. A webszerver/proxy kérésméret-korlátja engedjen legalább 2 MB-os feltöltést. Sites-tárhelyen a képek a privát `BACKGROUNDS` objektumtárba kerülnek, külön kézi beállítás nélkül.
+
+Használat: [Háttéralaprajz és méretarány](hatteralaprajz.md).
 
 ## 1. Mire lesz szükség?
 

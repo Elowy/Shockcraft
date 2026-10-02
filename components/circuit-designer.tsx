@@ -6,13 +6,14 @@ import {type Plan,type Device,labels} from '@/lib/plan';
 import {circuitPorts} from '@/lib/board';
 import {floorPoints} from '@/lib/geometry';
 import {toggleDeviceCircuit} from '@/lib/circuit-assignment';
+import {BackgroundImage} from './background-image';
 import {ElectricalSymbol} from './electrical-symbol';
 export function CircuitDesigner({plan,buildingId,floorId,onFloor,change,onCreate,onBoard,undo,redo,canUndo,canRedo}:{plan:Plan;buildingId:string;floorId:string;onFloor:(id:string)=>void;change:(fn:(p:Plan)=>void)=>void;onCreate:()=>void;onBoard:()=>void;undo:()=>void;redo:()=>void;canUndo:boolean;canRedo:boolean}){
  const circuits=plan.circuits.filter(c=>c.building===buildingId),building=plan.buildings.find(b=>b.id===buildingId)!;
  const [chosen,setChosen]=useState(''),[filter,setFilter]=useState('all'),[notice,setNotice]=useState('');
  const circuit=circuits.find(c=>c.id===chosen)||circuits[0],floor=building.floors.find(f=>f.id===floorId)||building.floors[0];
  const allDevices=building.floors.flatMap(f=>f.devices),visible=(d:Device)=>filter==='all'||(filter==='free'?!d.circuit:d.circuit===circuit?.id);
- const points=floor?[...floor.rooms.flatMap(r=>[{x:r.x,y:r.y},{x:r.x+r.w,y:r.y+r.h}]),...floor.walls.flatMap(w=>[w.a,w.b]),...floor.devices]:[];
+ const points=floor?[...floor.rooms.flatMap(r=>[{x:r.x,y:r.y},{x:r.x+r.w,y:r.y+r.h}]),...floor.walls.flatMap(w=>[w.a,w.b]),...floor.devices,...(floor.background?.visible?[{x:floor.background.x,y:floor.background.y},{x:floor.background.x+floor.background.w,y:floor.background.y+floor.background.h}]:[])]:[];
  const minX=Math.min(0,...points.map(p=>p.x))-40,minY=Math.min(0,...points.map(p=>p.y))-40,maxX=Math.max(800,...points.map(p=>p.x))+80,maxY=Math.max(560,...points.map(p=>p.y))+60;
  function assign(d:Device){if(!circuit||!floor)return;const previous=d.circuit,oldName=circuits.find(c=>c.id===previous)?.name;try{change(p=>{toggleDeviceCircuit(p,buildingId,floor.id,d.id,circuit.id)});setNotice(previous===circuit.id?`${d.name}: hozzárendelés megszüntetve.`:`${d.name} → ${circuit.name}${oldName?' (korábban: '+oldName+')':''}.`)}catch(e){toast.error(e instanceof Error?e.message:'A hozzárendelés nem módosítható.')}}
  const action=(d:Device)=>d.circuit===circuit?.id?'Hozzárendelés megszüntetése':`Hozzárendelés: ${circuit?.name||'válassz áramkört'}`;
@@ -24,7 +25,7 @@ export function CircuitDesigner({plan,buildingId,floorId,onFloor,change,onCreate
   <p role="status" className="circuit-assignment-status">{notice||(circuit?`Kiválasztva: ${circuit.name}. A zöld keret az ehhez tartozó szerelvényeket jelöli.`:'Hozz létre és válassz ki egy áramkört.')}</p>
   {floor?<><div className="circuit-floor-scroll"><svg role="group" aria-label={'Áramköri alaprajz: '+floor.name} viewBox={`${minX} ${minY} ${maxX-minX} ${maxY-minY}`}>
    <rect x={minX} y={minY} width={maxX-minX} height={maxY-minY} fill="var(--plan-bg)"/>
-   {floor.rooms.map(r=><rect key={r.id} x={r.x} y={r.y} width={r.w} height={r.h} fill="var(--plan-room)" stroke="var(--muted-foreground)" strokeWidth="4"/>)}
+   <BackgroundImage key={floor.background?.assetId} background={floor.background}/>{floor.rooms.map(r=><rect key={r.id} x={r.x} y={r.y} width={r.w} height={r.h} fill={floor.background?.visible?"transparent":"var(--plan-room)"} stroke="var(--muted-foreground)" strokeWidth="4"/>)}
    {floor.walls.map(w=><line key={w.id} x1={w.a.x} y1={w.a.y} x2={w.b.x} y2={w.b.y} stroke="var(--muted-foreground)" strokeWidth="4"/>)}
    {floor.routes.filter(r=>r.circuit===circuit?.id).map(r=><polyline key={r.id} points={floorPoints(r,floor).map(p=>`${p.x},${p.y}`).join(' ')} fill="none" stroke="#258574" strokeWidth="2" strokeDasharray="6 5" opacity=".45"/>)}
    {floor.devices.filter(visible).map(d=>{const selected=!!circuit&&d.circuit===circuit.id;return <g key={d.id} transform={`translate(${d.x} ${d.y})`} role="button" tabIndex={0} aria-disabled={!circuit} aria-pressed={selected} aria-label={`${d.name} · ${labels[d.kind]} · ${action(d)}`} onClick={()=>assign(d)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();assign(d)}}} className={'circuit-map-device'+(selected?' assigned':'')}><title>{d.name+' · '+(circuits.find(c=>c.id===d.circuit)?.name||'Nincs hozzárendelve')}</title><circle className="assignment-ring" r="20" fill="var(--plan-room)" stroke={selected?'#258574':!d.circuit?'#bb772b':'var(--border)'} strokeWidth={selected?3:1.5} strokeDasharray={!d.circuit?'4 3':undefined}/><g transform={`rotate(${d.angle})`}><ElectricalSymbol kind={d.kind}/></g><text x="25" y="5" fontSize="13" fill="var(--foreground)" paintOrder="stroke" stroke="var(--plan-room)" strokeWidth="4">{d.name}</text></g>})}
