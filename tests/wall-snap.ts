@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import {wallSnap,devicePlacement} from '../lib/wall-snap';
+import {newFloor} from '../lib/plan';
+import {translateFloor,floorPoints} from '../lib/geometry';
+const f=newFloor('Test',0);f.walls=[{id:'h',a:{x:0,y:100},b:{x:200,y:100}},{id:'v',a:{x:300,y:0},b:{x:300,y:200}}];
+assert.deepEqual(wallSnap({x:80,y:115},f)?.point,{x:80,y:100});
+assert.equal(wallSnap({x:80,y:120},f)?.angle,0);assert.equal(wallSnap({x:80,y:121},f),null);
+assert.equal(wallSnap({x:285,y:80},f)?.angle,90);
+assert.deepEqual(wallSnap({x:210,y:100},f)?.point,{x:200,y:100});
+f.walls=[{id:'d',a:{x:100,y:100},b:{x:200,y:200}}];
+const d=wallSnap({x:145,y:155},f)!;assert.deepEqual(d.point,{x:150,y:150});assert.equal(d.angle,45);
+f.walls[0]={id:'d',a:{x:200,y:200},b:{x:100,y:100}};assert.equal(wallSnap({x:145,y:155},f)?.angle,45);
+f.walls=[{id:'zero',a:{x:10,y:10},b:{x:10,y:10}}];assert.equal(wallSnap({x:10,y:10},f),null);
+f.walls=[];f.rooms=[{id:'r',name:'Room',x:100,y:100,w:200,h:200}];
+assert.equal(wallSnap({x:95,y:150},f)?.angle,90);assert.equal(wallSnap({x:100,y:100},f,90)?.angle,90);assert.equal(wallSnap({x:100,y:100},f,0)?.angle,0);
+assert.equal(devicePlacement({x:95,y:150},f,'socket',30,true,false).angle,30);
+assert.equal(devicePlacement({x:95,y:150},f,'socket',30,true,true).angle,90);
+for(const params of [['light',true,false],['socket',false,false],['socket',true,true]] as const){const r=devicePlacement({x:95,y:150},f,params[0],30,params[1],true,params[2]);assert.equal(r.snap,null);assert.equal(r.x,95);assert.equal(r.angle,30)}
+f.devices=[{id:'dev',name:'D',kind:'socket',x:150,y:100,angle:0,height:30,circuit:''}];f.routes=[{id:'route',name:'R',points:[{x:150,y:100},{x:400,y:100}],startId:'dev',mode:'inside',circuit:'',cable:'3x2.5'}];
+const moved=translateFloor(f,{type:'devices',id:'dev',dx:-50,dy:50,angle:90});assert.equal(moved.devices[0].angle,90);assert.equal(f.devices[0].angle,0);assert.deepEqual(floorPoints(moved.routes[0],moved)[0],{x:100,y:150});assert.equal(moved.devices[0].height,30);
+console.log('PASS: straight/diagonal/room walls, radius/endpoints/corners, reversed/zero walls, rotation/bypass/light rules and connected route movement.');
