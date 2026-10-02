@@ -87,6 +87,8 @@ body{background:var(--background)}button,.leftwrap,.toolbar,.right,.field input,
 @media(max-width:640px){.background-preview svg{height:230px}.background-dialog{padding:18px!important}.background-settings{gap:10px}}
 .snap-options{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:8px 16px;background:var(--background);border-bottom:1px solid var(--border);font-size:12px}
 .snap-options label{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.device-copy-button{width:100%;margin:0 0 18px;color:var(--primary);border-color:var(--primary);justify-content:flex-start}
+.device-copy-button kbd{margin-left:auto;font-size:11px;font-family:inherit;white-space:nowrap;color:var(--muted-foreground)}
 .snap-options>span{color:var(--muted-foreground);margin-left:auto}
 .snap-options [role=switch]{width:34px;height:20px;min-height:0;padding:2px;border:0;border-radius:20px;justify-content:flex-start;background:var(--input)}
 .snap-options [role=switch][data-state=checked]{background:var(--primary)}
