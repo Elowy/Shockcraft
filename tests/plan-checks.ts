@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import {checkPlan} from '../lib/plan-checks';
+import {blankProject} from '../lib/projects';
+import {newFloor,validatePlan,type Device} from '../lib/plan';
+const plan=blankProject('Tervellenőrzés'),b=plan.buildings[0],f=b.floors[0];
+assert.deepEqual(checkPlan(plan),[]);
+const device=(id:string,kind:Device['kind'],name=id):Device=>({id,name,kind,x:40,y:40,angle:0,height:30,circuit:''});
+f.devices=[device('socket','socket'),device('light','light'),device('rj','rj45'),device('phone','phone'),device('box','box'),device('panel','panel')];
+let issues=checkPlan(plan);assert.equal(issues.length,4);assert.deepEqual(issues.filter(i=>i.level==='missing').map(i=>i.target.id).sort(),['light','socket']);
+assert.ok(issues.every(i=>i.target.buildingId===b.id&&i.target.floorId===f.id));
+plan.circuits=[{id:'c',name:'Áramkör',building:b.id,phase:'L1',rating:16,curve:'B',cable:'3x2.5',rcd:''}];
+f.devices[0].circuit='c';
+f.routes=[{id:'r',name:'Vezeték',points:[{x:40,y:40},{x:200,y:40}],mode:'inside',circuit:'c',cable:'  ',startId:'socket',endId:''}];
+issues=checkPlan(plan);assert.ok(!issues.some(i=>i.code==='device-route'&&i.target.id==='socket'));assert.ok(!issues.some(i=>i.code==='device-circuit'&&i.target.id==='socket'));
+assert.equal(issues.filter(i=>i.code==='route-endpoint').length,1);assert.ok(issues.find(i=>i.code==='route-endpoint')!.detail.startsWith('A végpont'));assert.equal(issues.filter(i=>i.code==='route-cable').length,1);
+f.devices[0].x=80;assert.equal(checkPlan(plan).find(i=>i.target.id==='r')!.target.x,140);
+f.routes[0].startId='';assert.ok(checkPlan(plan).find(i=>i.code==='route-endpoint')!.detail.startsWith('Mindkét végpont'));
+// Coincident geometry does not invent a reference.
+assert.ok(checkPlan(plan).some(i=>i.code==='device-route'&&i.target.id==='socket'));
+f.routes[0].startId='socket';f.routes[0].endId='light';f.routes[0].cable='3x2.5';f.devices[1].circuit='c';assert.deepEqual(checkPlan(plan),[]);
+f.devices[0].name='Azonos';f.devices[1].name=' AZONOS ';assert.equal(checkPlan(plan).filter(i=>i.code==='device-name').length,2);
+const upper=newFloor('Emelet',3);upper.devices=[{...device('up','switch1','Azonos'),circuit:'c'}];b.floors.push(upper);assert.equal(checkPlan(plan).filter(i=>i.code==='device-name').length,2);assert.equal(checkPlan(plan).find(i=>i.target.id==='up')!.target.floorId,upper.id);
+plan.modules=[{id:'m',name:'Tartalék',building:b.id,type:'MCB',width:1,row:0,slot:0,circuit:''},{id:'main',name:'Főkapcsoló',building:b.id,type:'MAIN',width:4,row:0,slot:1,circuit:''}];
+const moduleIssue=checkPlan(plan).find(i=>i.code==='module-circuit')!;assert.equal(moduleIssue.target.id,'m');assert.equal(moduleIssue.level,'review');assert.equal(moduleIssue.target.type,'modules');
+const snapshot=JSON.stringify(plan);const a=checkPlan(plan),next=checkPlan(plan);assert.deepEqual(a,next);assert.equal(new Set(a.map(i=>i.id)).size,a.length);assert.equal(JSON.stringify(plan),snapshot);assert.doesNotThrow(()=>validatePlan(plan));
+plan.modules[0].type='RCBO';assert.equal(checkPlan(plan).filter(i=>i.code==='module-circuit').length,1);plan.modules[0].circuit='c';assert.equal(checkPlan(plan).filter(i=>i.code==='module-circuit').length,0);
+console.log('PASS: missing data, low-voltage exceptions, explicit vs geometric links, free endpoint variants, duplicate names scoped per floor, module types, target locations, live recalculation, stable IDs/order and immutable plan.');
