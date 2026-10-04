@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import {seed,validatePlan} from '../lib/plan';
+import {routeRegister,filterRouteRegister,type RouteFilters} from '../lib/route-register';
+const p=validatePlan(structuredClone(seed)),f=p.buildings[0].floors[0];
+const filters:RouteFilters={building:'all',circuit:'all',mode:'all',query:'',freeOnly:false,sort:'name'};
+const snapshot=JSON.stringify(p),rows=routeRegister(p);
+assert.equal(rows.length,2);assert.equal(rows.find(r=>r.target.id==='r1')!.total,23.4);assert.ok(Math.abs(rows.find(r=>r.target.id==='r1')!.vertical-3.4)<1e-10);
+assert.equal(rows.find(r=>r.target.id==='r1')!.start,'E-01');assert.equal(rows.find(r=>r.target.id==='r1')!.end,'D-01');assert.equal(rows[0].freeEnds,0);
+assert.equal(filterRouteRegister(rows,{...filters,query:'vilagitas'}).length,1);
+assert.equal(filterRouteRegister(rows,{...filters,query:'nappali 2,5'}).length,1);
+assert.equal(filterRouteRegister(rows,{...filters,query:'E-01'}).length,1);
+assert.equal(filterRouteRegister(rows,{...filters,mode:'outside'})[0].target.id,'r2');
+assert.equal(filterRouteRegister(rows,{...filters,building:'garage'}).length,0);
+assert.equal(filterRouteRegister(rows,{...filters,circuit:'c1'})[0].target.id,'r1');
+assert.equal(filterRouteRegister(rows,{...filters,freeOnly:true}).length,0);
+assert.deepEqual(filterRouteRegister(rows,{...filters,sort:'longest'}).map(r=>r.target.id),['r1','r2']);
+assert.deepEqual(filterRouteRegister(rows,{...filters,sort:'shortest'}).map(r=>r.target.id),['r2','r1']);
+assert.equal(JSON.stringify(p),snapshot);
+f.routes[0].startId='';f.routes[0].circuit='';f.routes[0].cable='   ';
+let changed=routeRegister(p);const free=filterRouteRegister(changed,{...filters,circuit:'unassigned',freeOnly:true});assert.equal(free.length,1);assert.equal(free[0].freeEnds,1);assert.equal(free[0].cable,'Nincs kábeljelölés');
+// Linked device coordinates and heights, rather than stale route endpoints, are used.
+f.devices.find(d=>d.id==='d1')!.x=220;f.devices.find(d=>d.id==='d1')!.height=80;
+changed=routeRegister(p);assert.equal(changed[0].target.x,350);assert.ok(Math.abs(changed[0].vertical-1.8)<1e-10);
+p.buildings[0].floors[1].routes.push({...f.routes[0],id:'up-route',startId:'',endId:'',name:'Emeleti tartalék'});assert.equal(routeRegister(p).find(r=>r.target.id==='up-route')!.target.floorId,'upper');
+p.plot.nodes=[{id:'a',kind:'supply',name:'a',x:1,y:1,height:0},{id:'b',kind:'meter',name:'b',x:5,y:1,height:1}];p.plot.routes=[{id:'site',name:'Telki kábel',from:'a',to:'b',via:[],level:-.7,mode:'underground',cable:'5x10'}];assert.equal(routeRegister(p).length,3);
+assert.deepEqual(routeRegister({...p,buildings:[]}),[]);
+console.log('PASS: floor/building/circuit filters, accent-insensitive multi-term search, sorting, free endpoints, live length/target data, all floors, plot exclusion and immutability.');
