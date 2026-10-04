@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import {seed,validatePlan} from '../lib/plan';
+import {circuitReport} from '../lib/circuit-report';
+const p=validatePlan(structuredClone(seed));
+assert.equal(circuitReport(p,'missing'),null);
+const f=p.buildings[0].floors[0];
+f.routes=[{id:'test-route',name:'Mért szakasz',circuit:'c1',cable:'3x2.5',mode:'inside',points:[{x:0,y:0},{x:200,y:100}],startId:'d1',endId:'',planeHeight:260,endHeight:110}];
+f.devices[0].x=40;f.devices[0].y=100;f.devices[0].height=30;
+p.buildings[0].floors[1].devices.push({...f.devices[0],id:'upper-device'});
+const before=JSON.stringify(p),r=circuitReport(p,'c1')!;
+assert.equal(r.devices.length,4);assert.equal(r.devices.find(d=>d.id==='upper-device')!.floorId,'upper');
+assert.equal(r.routes[0].x,120);assert.equal(r.routes[0].y,100);
+assert.equal(r.length.horizontal,4);assert.ok(Math.abs(r.length.vertical-3.8)<1e-10);assert.ok(Math.abs(r.length.total-7.8)<1e-10);
+assert.equal(r.modules.length,1);assert.equal(r.modules[0].id,'m2');assert.equal(r.ports.filter(x=>x.target).length,0);
+assert.equal(JSON.stringify(p),before);
+// Assignment alone is not a connection; reversed endpoints are equivalent.
+p.boardWires.push({id:'w',name:'Fázisvezető',building:'house',from:{kind:'module',id:'m2',port:'L-out'},to:{kind:'circuit',id:'c1',port:'L'}});
+let result=circuitReport(p,'c1')!;
+assert.equal(result.ports[0].target?.id,'m2');assert.equal(result.ports[0].connection,'Q1 / L · ki');assert.equal(result.ports[0].wireName,'Fázisvezető');
+const wire=p.boardWires[0];[wire.from,wire.to]=[wire.to,wire.from];assert.deepEqual(circuitReport(p,'c1'),result);
+p.circuits[0].conductorNames={L:'Betáp nappali'};assert.equal(circuitReport(p,'c1')!.ports[0].label,'Betáp nappali');
+assert.equal(circuitReport(p,'c2')!.routes.length,0);
+p.circuits[0].phase='3P';p.boardWires=[];result=circuitReport(p,'c1')!;assert.deepEqual(result.ports.map(p=>p.id),['L1','L2','L3','N','PE']);
+p.circuits.push({...p.circuits[0],id:'garage-circuit',building:'garage'});const empty=circuitReport(p,'garage-circuit')!;
+assert.equal(empty.devices.length,0);assert.equal(empty.modules.length,0);assert.equal(empty.length.total,0);
+assert.doesNotThrow(()=>validatePlan(p));
+console.log('PASS: circuit isolation, all-floor targets, height-aware lengths, real terminal links in both directions, custom conductor names, three-phase and empty circuits, no mutations.');

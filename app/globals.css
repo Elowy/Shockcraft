@@ -100,3 +100,17 @@ body{background:var(--background)}button,.leftwrap,.toolbar,.right,.field input,
 .snap-options [role=switch][data-state=checked]{background:var(--primary)}
 .snap-options [data-slot=switch-thumb]{width:16px;height:16px;flex-shrink:0;background:white}
 @media(max-width:640px){.snap-options{gap:8px 14px;padding:8px 12px}.snap-options>span{margin-left:0;width:100%}}
+
+/* Circuit report shares the planner's compact, theme-aware report controls. */
+.circuit-report .report-controls{flex-wrap:wrap}.circuit-report .report-controls>.field{flex:1 1 220px;min-width:0}
+.circuit-report-rating{display:flex;flex-wrap:wrap;gap:6px 16px;margin:12px 0}.circuit-report-rating span{color:var(--muted-foreground)}
+.circuit-report-sections{max-height:42dvh;overflow:auto;border-top:1px solid var(--border)}
+.circuit-report-sections details{padding:12px 0;border-bottom:1px solid var(--border)}
+.circuit-report-sections summary{font-weight:600;font-size:14px;cursor:pointer;padding:4px 0}
+.circuit-report-item{display:flex;width:100%;justify-content:space-between;align-items:center;gap:12px;text-align:left;padding:12px;margin-top:6px;border:1px solid var(--border);border-radius:8px;background:var(--background)}
+.circuit-report-item>span{min-width:0}.circuit-report-item small,.circuit-report-port small{display:block;color:var(--muted-foreground);font-size:13px;margin-top:3px;overflow-wrap:anywhere}
+.circuit-report-item b{font-size:14px;overflow-wrap:anywhere}.circuit-report-item svg{width:16px;height:16px;flex-shrink:0}
+.circuit-report-port{display:grid;grid-template-columns:36px minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:center;padding:10px 0;font-size:14px;border-top:1px solid var(--border);overflow-wrap:anywhere}
+.circuit-report-port button{text-align:left;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--background)}
+.circuit-report-port em{font-style:normal;color:var(--muted-foreground)}
+@media(max-width:560px){.circuit-report-port{grid-template-columns:36px minmax(0,1fr)}.circuit-report-port>button,.circuit-report-port>em{grid-column:2}}
