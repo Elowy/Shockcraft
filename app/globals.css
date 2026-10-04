@@ -114,3 +114,12 @@ body{background:var(--background)}button,.leftwrap,.toolbar,.right,.field input,
 .circuit-report-port button{text-align:left;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--background)}
 .circuit-report-port em{font-style:normal;color:var(--muted-foreground)}
 @media(max-width:560px){.circuit-report-port{grid-template-columns:36px minmax(0,1fr)}.circuit-report-port>button,.circuit-report-port>em{grid-column:2}}
+
+.route-point-trigger{width:100%;justify-content:center;margin:12px 0;padding:10px;border:1px solid var(--border);border-radius:7px;gap:8px;font-size:14px}.route-point-trigger svg{width:18px}
+.route-point-dialog[data-slot=dialog-content]{width:min(720px,calc(100% - 24px));max-width:720px;max-height:90dvh;overflow-y:auto}
+.route-point-summary{display:flex;flex-wrap:wrap;gap:8px 20px;padding:12px;background:var(--accent);border-radius:8px;font-size:14px}.route-point-summary span{color:var(--muted-foreground)}
+.route-point-list{max-height:45dvh;overflow:auto}.route-point-entry{padding:12px 0;border-bottom:1px solid var(--border)}
+.route-point-row{display:grid;grid-template-columns:minmax(100px,1.5fr) minmax(0,1fr) minmax(0,1fr) 36px;align-items:center;gap:12px;font-size:14px}
+.route-point-label small{display:block;color:var(--muted-foreground);font-size:13px;overflow-wrap:anywhere}.route-point-row label span{display:block;margin-bottom:4px}.route-point-row input{width:100%;min-width:0;padding:9px;border:1px solid var(--border);border-radius:6px;background:var(--background);color:var(--foreground)}.route-point-row input:disabled{opacity:.65}
+.route-point-insert{display:flex;align-items:center;gap:6px;font-size:14px;padding:8px;margin-top:8px;color:var(--primary)}.route-point-insert svg{width:16px}.route-point-actions{display:flex;justify-content:flex-end;gap:10px}.route-point-actions button{padding:10px 16px;border:1px solid var(--border);border-radius:7px}.route-point-error{color:var(--destructive);font-size:14px}
+@media(max-width:520px){.route-point-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 36px;gap:8px}.route-point-label{grid-column:1/-1}.route-point-dialog[data-slot=dialog-content]{padding:18px}}
