@@ -1,7 +1,10 @@
 import {type Plan,newFloor,uid} from './plan';
 import {nodeHeight} from './geometry';
 
-export type ProjectSummary={id:string;name:string;revision:number;updatedAt:string;locked?:boolean};
+export type ProjectState='active'|'archived'|'trash';
+export const projectStateLabels:Record<ProjectState,string>={active:'Aktív',archived:'Archivált',trash:'Lomtár'};
+export const validProjectState=(state:unknown):state is ProjectState=>state==='active'||state==='archived'||state==='trash';
+export type ProjectSummary={id:string;name:string;revision:number;updatedAt:string;locked?:boolean;state?:ProjectState;stateChangedAt?:string|null};
 export const validProjectId=(id:unknown):id is string=>typeof id==='string'&&(id==='default'||/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id));
 export function projectKey(userId:string,id:string){return 'account:'+userId+(id==='default'?'':':project:'+id)}
 export function blankProject(name:string):Plan{return {version:1,name,plot:{name:'Saját telek',w:40,h:30,nodes:[],routes:[]},buildings:[{id:uid(),name:'Új épület',x:2,y:2,w:10,h:8,floors:[newFloor('Földszint',0)]}],circuits:[],modules:[],boardWires:[]}}

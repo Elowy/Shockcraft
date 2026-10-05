@@ -32,7 +32,9 @@ CREATE TABLE IF NOT EXISTS plans (
  id varchar(191) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
  data longtext NOT NULL,
  revision int NOT NULL,
- updated_at varchar(30) NOT NULL
+ updated_at varchar(30) NOT NULL,
+ state varchar(10) NOT NULL DEFAULT 'active',
+ state_changed_at varchar(30) NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE IF NOT EXISTS billing_settings (
