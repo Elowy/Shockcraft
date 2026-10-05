@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import {seed,validatePlan} from '../lib/plan';
+import {backupKey,listBackups,writeBackup,clearSavedBackups,discardBackup,recoveryDestination,type DraftBackup,type BackupStore} from '../lib/draft-backup';
+class Memory implements BackupStore{rows=new Map<string,string>();get length(){return this.rows.size}key(i:number){return [...this.rows.keys()][i]??null}getItem(k:string){return this.rows.get(k)??null}setItem(k:string,v:string){this.rows.set(k,v)}removeItem(k:string){this.rows.delete(k)}}
+const store=new Memory(),plan=validatePlan(structuredClone(seed));
+const make=(owner:string,writer:string):DraftBackup=>({version:1,owner,writer,projectId:'default',revision:3,updatedAt:'2026-10-04T10:00:00.000Z',plan});
+const a=make('alice','tab-a'),b=make('alice','tab-b'),other=make('bob','tab-a');
+writeBackup(store,a);writeBackup(store,b);writeBackup(store,other);
+assert.equal(listBackups(store,'alice').length,2);assert.equal(listBackups(store,'bob').length,1);assert.equal(listBackups(store,'unknown').length,0);
+const changed={...b,plan:{...plan,name:'Másik ablak munkája'}};writeBackup(store,changed);
+clearSavedBackups(store,'alice','default',JSON.stringify(plan));assert.equal(listBackups(store,'alice').length,1);assert.equal(listBackups(store,'alice')[0].plan.name,changed.plan.name);assert.equal(listBackups(store,'bob').length,1);
+store.setItem(backupKey('alice','default','broken'),'{broken');assert.equal(listBackups(store,'alice').length,1);
+store.setItem(backupKey('alice','default','forged'),JSON.stringify(other));assert.equal(listBackups(store,'alice').length,1);
+assert.equal(recoveryDestination(a,3),'original');assert.equal(recoveryDestination(a,4),'copy');assert.equal(recoveryDestination(a,null),'copy');assert.equal(recoveryDestination({...a,revision:0},null),'original');assert.equal(recoveryDestination({...a,revision:0},1),'copy');
+writeBackup(store,{...changed,updatedAt:'2026-10-04T10:01:00.000Z'});assert.throws(()=>discardBackup(store,changed));assert.equal(listBackups(store,'alice').length,1);
+discardBackup(store,listBackups(store,'alice')[0]);assert.equal(listBackups(store,'alice').length,0);
+assert.throws(()=>writeBackup(store,{...a,projectId:'../bad'}));assert.throws(()=>writeBackup(store,{...a,revision:-1}));
+const full=new Memory();full.setItem=()=>{throw Error('Quota exceeded')};assert.throws(()=>writeBackup(full,a));
+assert.equal(JSON.stringify(a.plan),JSON.stringify(plan));
+console.log('PASS: owner/project/tab isolation, safe saved-snapshot cleanup, corrupt/forged entries, quota failures, stale revision recovery as copy, guarded discard and immutable plans.');
