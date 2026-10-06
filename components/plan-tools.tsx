@@ -2,13 +2,14 @@
 import {useMemo,useState} from 'react';
 import {Route,CircuitBoard,ClipboardCheck,ClipboardList,Download,Search,ArrowUpRight,BookOpen} from 'lucide-react';
 import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from '@/components/ui/dialog';
+import type {RouteTarget} from '@/lib/route-register';
 import {RouteRegister} from '@/components/route-register';
 import {CircuitReport} from '@/components/circuit-report';
 import {PlanChecks} from '@/components/plan-checks';
 import type {Plan} from '@/lib/plan';
 import {materialList,materialsCsv,searchPlan,withAllowance,type SearchResult} from '@/lib/plan-tools';
 const fmt=(n:number)=>n.toLocaleString('hu-HU',{maximumFractionDigits:2});
-export function PlanTools({plan,onLocate,requireAccess}:{requireAccess:()=>Promise<boolean>;plan:Plan;onLocate:(result:SearchResult)=>void}){
+export function PlanTools({plan,onLocate,requireAccess}:{requireAccess:()=>Promise<boolean>;plan:Plan;onLocate:(result:RouteTarget)=>void}){
  const[open,setOpen]=useState(false),[tab,setTab]=useState<'materials'|'search'|'checks'|'circuits'|'routes'>('materials'),[scope,setScope]=useState('all'),[allowance,setAllowance]=useState(10),[query,setQuery]=useState('');
  const rows=useMemo(()=>materialList(plan,scope),[plan,scope]),results=useMemo(()=>searchPlan(plan,query),[plan,query]);
  const meters=rows.filter(r=>r.unit==='m').reduce((s,r)=>s+r.quantity,0);
