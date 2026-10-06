@@ -1,0 +1,46 @@
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {createHash,randomBytes,randomUUID} from 'node:crypto';
+import path from 'node:path';
+const base=process.env.TEST_BASE_URL||'http://127.0.0.1:5180';
+if(!['127.0.0.1','localhost'].includes(new URL(base).hostname))throw Error('Loopback only.');
+const dbPath=path.resolve(process.env.TEST_D1_PATH||'');
+if(!dbPath.startsWith(path.resolve('.wrangler/state')+path.sep)||!dbPath.endsWith('.sqlite'))throw Error('Use the local preview database under .wrangler/state.');
+const db=new DatabaseSync(dbPath);db.exec('PRAGMA busy_timeout=5000');
+function fixture(){const id=randomUUID(),token=randomBytes(32).toString('hex'),now=Date.now();db.prepare('INSERT INTO users (id,email,name,password_hash,created_at) VALUES (?,?,?,?,?)').run(id,id+'@example.test','History test','unusable-test-hash',now);db.prepare('INSERT INTO sessions (token_hash,user_id,expires_at,created_at) VALUES (?,?,?,?)').run(createHash('sha256').update(token).digest('hex'),id,now+3600000,now);return{id,cookie:'shockcraft_session='+token}}
+const user=fixture(),other=fixture();
+async function call(route,method='GET',body,cookie=user.cookie,origin=base){const r=await fetch(base+route,{method,headers:{Connection:'close',Origin:origin,'Content-Type':'application/json',Cookie:cookie},body:body===undefined?undefined:JSON.stringify(body)});const text=await r.text();let data;try{data=JSON.parse(text)}catch{throw Error(method+' '+route+' returned '+r.status+': '+text.slice(0,150))}return{status:r.status,data}}
+const projectId=randomUUID(),key='account:'+user.id+':project:'+projectId;
+const plan={version:1,name:'Első változat',plot:{name:'Telek',w:40,h:30},buildings:[],circuits:[],modules:[]};
+const save=(revision,name)=>call('/api/plan','PUT',{plan:{...plan,name},revision,projectId,userId:user.id});
+const list=(cookie=user.cookie)=>call('/api/plan-history?projectId='+projectId,'GET',undefined,cookie);
+const restore=(revision,version,cookie=user.cookie,uid=user.id,origin=base)=>call('/api/plan-history','POST',{projectId,userId:uid,revision,version},cookie,origin);
+assert.equal((await save(0,plan.name)).status,200);
+assert.equal((await list()).data.versions.length,0);
+assert.equal((await save(1,'Második változat')).status,200);
+assert.equal((await save(2,'Harmadik változat')).status,200);
+let h=(await list()).data;assert.equal(h.current.revision,3);assert.deepEqual(h.versions.map(v=>v.revision),[2,1]);assert.equal(h.versions[1].name,plan.name);
+assert.equal((await list('')).status,401);assert.equal((await list(other.cookie)).status,404);
+assert.equal((await restore(3,1,'')).status,401);
+assert.equal((await restore(3,1,user.cookie,user.id,'https://attacker.invalid')).status,403);
+assert.equal((await restore(3,1,other.cookie,other.id)).status,404);
+assert.equal((await restore(3,1,user.cookie,other.id)).status,409);
+assert.equal((await restore(2,1)).status,409);
+assert.equal((await restore(3,999)).status,404);
+assert.equal((await restore(3,-1)).status,400);
+let result=await restore(3,1);assert.equal(result.status,200);assert.equal(result.data.revision,4);assert.equal(result.data.plan.name,plan.name);
+h=(await list()).data;assert.deepEqual(h.versions.map(v=>v.revision),[3,2,1]);assert.equal(h.versions[0].name,'Harmadik változat');
+assert.equal((await restore(4,3)).data.plan.name,'Harmadik változat','restoration itself is reversible');
+assert.deepEqual((await Promise.all([restore(5,1),save(5,'Párhuzamos mentés')])).map(v=>v.status).sort(),[200,409]);
+assert.equal((await list()).data.current.revision,6);
+const archive=await call('/api/plan','PATCH',{projectId,userId:user.id,revision:6,state:'archived'});assert.equal(archive.status,200);
+assert.equal((await list()).status,409);assert.equal((await restore(7,1)).status,409);
+assert.equal((await call('/api/plan','PATCH',{projectId,userId:user.id,revision:7,state:'active'})).status,200);
+for(let rev=8;rev<40;rev++)assert.equal((await save(rev,'Mentés '+rev)).status,200);
+h=(await list()).data;assert.equal(h.limit,30);assert.equal(h.versions.length,30);assert.equal(h.versions[0].revision,39);assert.equal(h.versions.at(-1).revision,10);assert.equal((await restore(40,1)).status,404);
+assert.equal(db.prepare('SELECT COUNT(*) AS n FROM billing_grants WHERE user_id=?').get(user.id).n,1,'history never claims new grants');
+// Mark only this synthetic fixture as subscription-bound; no subscription is active.
+db.prepare("UPDATE billing_grants SET mode='sub_live' WHERE user_id=? AND project_id=?").run(user.id,key);
+assert.equal((await list()).status,402);assert.equal((await restore(40,39)).status,402);
+assert.equal(db.prepare('SELECT revision FROM plans WHERE id=?').get(key).revision,40);
+db.close();console.log('PASS: HTTP history capture/restore/re-restore, ownership, CSRF, concurrent saves, stale revisions, archive restriction, 30-version retention, unchanged project entitlement, expired subscription lock.');

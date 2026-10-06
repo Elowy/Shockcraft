@@ -2,6 +2,7 @@ import {claimProject,projectAccess,projectAccessChecker} from '@/lib/billing';
 import {withDatabase,insertPlanSql} from '@/db/database';
 import {validProjectId,projectKey,validProjectState,type ProjectState} from '@/lib/projects';
 import {validatePlan} from '@/lib/plan';
+import {saveWithHistory} from '@/lib/plan-versions';
 import {accountFromHeaders,sameOrigin} from '@/lib/auth';
 const headers={'Cache-Control':'private, no-store','Vary':'Cookie'};
 export async function GET(req:Request){
@@ -40,7 +41,7 @@ export async function PUT(req:Request){
   if(existing&&existing.state!=='active')return Response.json({error:'A projekt archivált vagy a lomtárban van. Állítsd vissza a Projektek menüben.',code:'PROJECT_INACTIVE'},{status:409,headers});
   if(existing&&!await projectAccess(db,user,key))return Response.json({error:'Az előfizetés lejárt. A projekt mentéséhez újítsd meg az előfizetést.',code:'SUBSCRIPTION_REQUIRED'},{status:402,headers});
   if(rev===0&&!await db.first('SELECT id FROM plans WHERE id = ?',[key])&&!await claimProject(db,user,data.projectId))return Response.json({error:'Az első projekt ingyenes. További projekthely: egyszeri 3 490 Ft, vagy korlátlan projekt havi 2 490 Ft-ért.',code:'PAYMENT_REQUIRED'},{status:402,headers});
-  const result=rev===0?await db.run(insertPlanSql(db),[key,JSON.stringify(data.plan),now]):await db.run("UPDATE plans SET data = ?, revision = revision + 1, updated_at = ? WHERE id = ? AND revision = ? AND state = 'active'",[JSON.stringify(data.plan),now,key,rev]);
+  const result=rev===0?await db.run(insertPlanSql(db),[key,JSON.stringify(data.plan),now]):await saveWithHistory(db,key,JSON.stringify(data.plan),rev,now);
   if(result===0)return Response.json({error:'A terv egy másik ablakban módosult. Exportáld a munkádat, majd töltsd újra az oldalt.'},{status:409,headers});
   return Response.json({revision:rev+1,projectId:data.projectId,userId:user.userId},{headers});
  })}catch(e){console.error('Save plan failed',e instanceof Error?e.name:'Error');return Response.json({error:'Nem sikerült menteni. A módosítások a nyitott oldalon megmaradtak.'},{status:503,headers})}

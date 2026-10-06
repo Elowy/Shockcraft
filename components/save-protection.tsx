@@ -1,5 +1,5 @@
 'use client';
-import {useEffect,useRef,useState} from 'react';
+import {useEffect,useRef,useState,type ReactNode} from 'react';
 import {History} from 'lucide-react';
 import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from './ui/dialog';
 import {backupKey,listBackups,writeBackup,clearSavedBackups,discardBackup,type DraftBackup} from '@/lib/draft-backup';
@@ -22,11 +22,11 @@ export function useDraftBackup({plan,owner,projectId,revision,saved,ready}:{plan
  return {message,available,flush,refresh};
 }
 
-export function SaveProtection({owner,enabled,onEnabled,saving,status,backupMessage,available,busy,onRestore,onOpenChange}:{owner:string;enabled:boolean;onEnabled:(v:boolean)=>void;saving:boolean;status:string;backupMessage:string;available:number;busy:boolean;onRestore:(b:DraftBackup)=>Promise<boolean>;onOpenChange:(open:boolean)=>void}){
+export function SaveProtection({historyAction,owner,enabled,onEnabled,saving,status,backupMessage,available,busy,onRestore,onOpenChange}:{historyAction?:ReactNode;owner:string;enabled:boolean;onEnabled:(v:boolean)=>void;saving:boolean;status:string;backupMessage:string;available:number;busy:boolean;onRestore:(b:DraftBackup)=>Promise<boolean>;onOpenChange:(open:boolean)=>void}){
  const [open,setOpen]=useState(false),[rows,setRows]=useState<DraftBackup[]>([]),[error,setError]=useState(''),[restoring,setRestoring]=useState(false),[discard,setDiscard]=useState<DraftBackup|null>(null);
  function toggle(value:boolean){if(restoring)return;setOpen(value);onOpenChange(value);if(value){setDiscard(null);setError('');try{setRows(listBackups(localStorage,owner))}catch{setError('A helyreállítási másolatok nem olvashatók.')}}}
  async function restore(row:DraftBackup){setRestoring(true);try{if(await onRestore(row)){setOpen(false);onOpenChange(false)}}catch(e){setError(e instanceof Error?e.message:'Nem sikerült helyreállítani.')}finally{setRestoring(false)}}
- return <><div className="save-protection"><label><input type="checkbox" checked={enabled} onChange={e=>onEnabled(e.target.checked)}/> Automatikus mentés</label><span role="status">{saving?'Automatikus mentés folyamatban…':status}</span><button disabled={busy} onClick={()=>toggle(true)}><History/> Helyreállítás{available>0?` (${available})`:''}</button>{backupMessage&&<small>{backupMessage}</small>}</div>
+ return <><div className="save-protection"><label><input type="checkbox" checked={enabled} onChange={e=>onEnabled(e.target.checked)}/> Automatikus mentés</label><span role="status">{saving?'Automatikus mentés folyamatban…':status}</span>{historyAction}<button disabled={busy} onClick={()=>toggle(true)}><History/> Helyreállítás{available>0?` (${available})`:''}</button>{backupMessage&&<small>{backupMessage}</small>}</div>
  <Dialog open={open} onOpenChange={toggle}><DialogContent className="recovery-dialog"><DialogHeader><DialogTitle>Munka helyreállítása</DialogTitle><DialogDescription>Ezen a böngészőn megőrzött tervmásolatok, a saját fiókodhoz. Ha közben újabb szervermentés készült, külön új projektként állítjuk vissza a másolatot. Annak első mentésére a szokásos projekthely-szabályok vonatkoznak.</DialogDescription></DialogHeader>
  <p className="report-note">A helyreállítás lecseréli a nyitott tervet. Annak mentetlen változata előtte helyi másolatként megmarad. Az elérhetőséget helyreállítás előtt ellenőrizzük; zárolt projektet itt sem lehet megnyitni.</p>
  {error&&<p className="auth-error" role="alert">{error}</p>}

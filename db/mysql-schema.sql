@@ -1,4 +1,11 @@
 -- MySQL 8.0+. Run once against an empty ShockCraft database before setting MYSQL_URL.
+CREATE TABLE IF NOT EXISTS plan_versions (
+ project_id varchar(191) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+ revision int NOT NULL,
+ data longtext NOT NULL,
+ saved_at varchar(30) NOT NULL,
+ PRIMARY KEY (project_id,revision)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 CREATE TABLE IF NOT EXISTS users (
  id varchar(36) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
  email varchar(254) NOT NULL,
