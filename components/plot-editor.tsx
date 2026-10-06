@@ -1,3 +1,5 @@
+'use client';
+import {boardName} from '@/lib/board-size';
 "use client";
 import {useRef,useState} from 'react';
 import {MousePointer2,Plus,Cable,Check,X,Trash2,Undo2,Redo2,Settings2} from 'lucide-react';
@@ -28,7 +30,7 @@ export function PlotEditor({plan,change,buildingId,floorId,onPanel,onBuilding,un
  function showPanel(){if(!selectedNode)return;const next=structuredClone(plan);try{const linked=placePanel(next,selectedNode.id,targetFloor);if(!selectedNode.deviceId)change(p=>Object.assign(p,next));onPanel({type:'devices',id:linked.device.id,buildingId:linked.building.id,floorId:linked.floor.id,title:linked.device.name,subtitle:'',x:linked.device.x,y:linked.device.y})}catch(e){toast.error(e instanceof Error?e.message:'Az elosztó nem helyezhető el.')}}
  function routePatch(key:string,value:unknown){change(p=>Object.assign(p.plot.routes.find(r=>r.id===selectedRoute!.id)!,{[key]:value}))}
  const options=plan.plot.nodes.map(n=>[n.id,n.name] as [string,string]);
- const deviceOptions:[string,string][]=[['','Önálló telki pont'],...plan.buildings.flatMap(b=>b.floors.flatMap(f=>f.devices.filter(d=>d.kind==='panel').map(d=>[d.id,b.name+' / '+f.name+' / '+d.name] as [string,string])))];
+ const deviceOptions:[string,string][]=[['','Önálló telki pont'],...plan.buildings.flatMap(b=>b.floors.flatMap(f=>f.devices.filter(d=>d.kind==='panel').map(d=>[d.id,b.name+' / '+f.name+' / '+d.name+' · '+boardName(b,d.board)] as [string,string])))];
  const draft:SiteRoute={id:'draft',name:'',from:a,to:b,via:[...via,...(cursor?[cursor]:[])],level:-.7,mode:'underground',cable:''};
  return <div className="plot-editor"><div className="toolbar"><button className={tool==='select'?'active':''} onClick={()=>{setTool('select');setVia([])}} title="Kijelölés és mozgatás"><MousePointer2/> Kijelölés</button><button className={tool==='point'?'active':''} onClick={()=>setTool('point')}><Plus/> Pont elhelyezése</button><button className={tool==='connections'||tool==='draw'?'active':''} onClick={()=>setTool('connections')}><Cable/> Összekötés</button><div className="toolbar-spacer"/><button aria-label="Telki visszavonás" disabled={!canUndo} onClick={undo}><Undo2/></button><button aria-label="Telki újra" disabled={!canRedo} onClick={redo}><Redo2/></button><button className="plot-properties-toggle" aria-label="Telki tulajdonságok" onClick={()=>setPanel(!panel)}><Settings2/></button></div>
  {tool==='point'&&<div className="contextbar"><Choice label="Pont típusa" value={kind} onChange={v=>setKind(v as SiteNode['kind'])} items={siteKinds.map(k=>[k,siteLabels[k]])}/>{['main','panel','sub'].includes(kind)&&<Choice label="Alaprajzi szint" value={targetFloor} onChange={setPanelFloor} items={floorOptions}/>}<p>{['main','panel','sub'].includes(kind)?'A kiválasztott szint alaprajzán is megjelenik, 150 cm magasságban.':'Kattints a telken a kívánt helyre.'}</p></div>}

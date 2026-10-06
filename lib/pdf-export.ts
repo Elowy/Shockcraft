@@ -1,12 +1,12 @@
 import {dimensionGeometry} from './dimensions';
-import {boardSize} from './board-size';
+import {boardSize,boards,boardName,inBoard} from './board-size';
 import {buildSchematic,schematicTitle,type SchematicMode} from './schematic';
 import {moduleLabels,moduleShort,endpointInfo,circuitPorts,endpointKey} from "./board";
 import {jsPDF} from 'jspdf';
 import {labels,siteLabels} from './plan';
 import type {Plan,Floor,Point,Kind} from './plan';
 import {floorPoints,floorLength,sitePoints,siteLength,nodeHeight} from './geometry';
-export type PdfOptions={scope:'floor'|'plot'|'board'|'all'|'single'|'multi';paper:'a4'|'a3';buildingId:string;floorId:string};
+export type PdfOptions={scope:'floor'|'plot'|'board'|'all'|'single'|'multi';paper:'a4'|'a3';buildingId:string;floorId:string;boardId?:string};
 const number=(v:number)=>v.toLocaleString('hu-HU',{maximumFractionDigits:2});
 const clean=(s:string)=>s.replace(/[\u0000-\u001f]/g,' ').replace(/[\u2010-\u2015]/g,'-').replace(/→/g,' > ');
 export function createPlanPdf(plan:Plan,options:PdfOptions,font:string,backgrounds:Record<string,string>={}){
@@ -44,33 +44,33 @@ export function createPlanPdf(plan:Plan,options:PdfOptions,font:string,backgroun
  table('Telki pontjegyzék',plan.plot.name+' | Magasságok a közös telek-0 szinthez képest.',['Jel','Megnevezés','Típus','X / Y','Magasság'],[14,65,55,40,30],plan.plot.nodes.map((n,i)=>['P'+(i+1),n.name,siteLabels[n.kind],number(n.x)+' / '+number(n.y)+' m',number(nodeHeight(n,plan))+' m']));
  table('Telki nyomvonaljegyzék',plan.plot.name+' | Vízszintes nyomvonal + kezdő- és végpont fel/leállása.',['Jel / megnevezés','Honnan → hová','Vezetés / szint / kábel','Vízszintes','Függőleges','Összesen'],[45,55,60,25,25,25],plan.plot.routes.map((r,i)=>{const l=siteLength(r,plan);return ['T'+(i+1)+' - '+r.name,(plan.plot.nodes.find(n=>n.id===r.from)?.name||'')+' → '+(plan.plot.nodes.find(n=>n.id===r.to)?.name||''),({underground:'Föld alatt',surface:'Felszínen',overhead:'Magasban'})[r.mode]+' / '+number(r.level)+' m / '+r.cable,number(l.horizontal)+' m',number(l.vertical)+' m',number(l.total)+' m']}));
  }
- function boardPage(b:Plan['buildings'][number]){
- const size=boardSize(b),x=margin+10,y=43,unit=(W-2*margin-20)/size.modulesPerRow;
+ function boardPage(b:Plan['buildings'][number],boardId=''){
+ const title=b.name+' / '+boardName(b,boardId),size=boardSize(b,boardId),x=margin+10,y=43,unit=(W-2*margin-20)/size.modulesPerRow;
  for(let start=0;start<size.rows;start+=4){
   const count=Math.min(4,size.rows-start),rowH=(H-43-35)/Math.max(3,count);
-  page('Lakáselosztó - készülékelrendezés',b.name+' | E-01 | '+size.rows+' × '+size.modulesPerRow+' modul | '+(start+1)+'–'+(start+count)+'. sor');
+  page('Lakáselosztó - készülékelrendezés',title+' | '+size.rows+' × '+size.modulesPerRow+' modul | '+(start+1)+'–'+(start+count)+'. sor');
   for(let row=start;row<start+count;row++){
    const yy=y+(row-start)*rowH;doc.setFillColor('#f4f7f8');doc.setDrawColor('#cad6dc');doc.rect(x,yy,unit*size.modulesPerRow,rowH-5,'FD');text((row+1)+'.',margin,yy+10,9);
    for(let slot=0;slot<size.modulesPerRow;slot++){doc.setLineWidth(.15);doc.rect(x+slot*unit,yy,unit,rowH-5);text(String(slot+1),x+(slot+.5)*unit,yy+4,7,'center')}
-   for(const m of plan.modules.filter(m=>m.building===b.id&&m.row===row)){
+   for(const m of plan.modules.filter(m=>m.building===b.id&&inBoard(m,boardId)&&m.row===row)){
     const xx=x+m.slot*unit,ww=m.width*unit;doc.setDrawColor('#6d828e');doc.setFillColor('#fff');doc.setLineWidth(.4);doc.rect(xx+.6,yy+6,ww-1.2,rowH-12,'FD');const c=plan.circuits.find(c=>c.id===m.circuit),fontSize=Math.min(8,(ww-1.5)*1.1);
     text(moduleShort[m.type],xx+ww/2,yy+11,fontSize,'center');text(c?c.curve+c.rating+' A':moduleShort[m.type],xx+ww/2,yy+17,fontSize,'center');
-    const index=plan.modules.filter(m=>m.building===b.id).findIndex(v=>v.id===m.id)+1;text('K'+index,xx+ww/2,yy+23,fontSize,'center');
+    const index=plan.modules.filter(m=>m.building===b.id&&inBoard(m,boardId)).findIndex(v=>v.id===m.id)+1;text('K'+index,xx+ww/2,yy+23,fontSize,'center');
    }
   }
  }
- table('Elosztó - készülékjegyzék',b.name,['Jel','Megnevezés','Típus','Sor / hely','Szélesség','Áramkör'],[12,65,22,28,25,55],plan.modules.filter(m=>m.building===b.id).map((m,i)=>['K'+(i+1),m.name,moduleLabels[m.type],(m.row+1)+' / '+(m.slot+1),m.width+' modul',plan.circuits.find(c=>c.id===m.circuit)?.name||'-']));
- table('Elosztó - áramkörjegyzék',b.name,['Áramkör','Fázis','Védelem','Kábel','ÁVK-csoport','Szerelvény'],[60,18,25,50,35,25],plan.circuits.filter(c=>c.building===b.id).map(c=>[c.name,c.phase,c.curve+c.rating+' A',c.cable,c.rcd||'-',String(b.floors.flatMap(f=>f.devices).filter(d=>d.circuit===c.id).length)]));
- table('Elosztó - bekötési jegyzék',b.name,['Vezeték neve','Honnan / kapocs','Hová / kapocs'],[55,75,75],plan.boardWires.filter(w=>w.building===b.id).map(w=>[w.name,endpointInfo(plan,w.from)?.text||'-',endpointInfo(plan,w.to)?.text||'-']));
- const unconnected=plan.circuits.filter(c=>c.building===b.id).flatMap(c=>circuitPorts(c).filter(port=>!plan.boardWires.some(w=>[w.from,w.to].some(e=>endpointKey(e)===endpointKey({kind:'circuit',id:c.id,port:port.id})))).map(port=>[c.name,port.signal,port.label,'Nincs bekötve']));
- table('Elosztó - be nem kötött szálak',b.name,['Áramkör','Jel','Szál neve','Állapot'],[55,20,85,40],unconnected);
+ table('Elosztó - készülékjegyzék',title,['Jel','Megnevezés','Típus','Sor / hely','Szélesség','Áramkör'],[12,65,22,28,25,55],plan.modules.filter(m=>m.building===b.id&&inBoard(m,boardId)).map((m,i)=>['K'+(i+1),m.name,moduleLabels[m.type],(m.row+1)+' / '+(m.slot+1),m.width+' modul',plan.circuits.find(c=>c.id===m.circuit)?.name||'-']));
+ table('Elosztó - áramkörjegyzék',title,['Áramkör','Fázis','Védelem','Kábel','ÁVK-csoport','Szerelvény'],[60,18,25,50,35,25],plan.circuits.filter(c=>c.building===b.id&&inBoard(c,boardId)).map(c=>[c.name,c.phase,c.curve+c.rating+' A',c.cable,c.rcd||'-',String(b.floors.flatMap(f=>f.devices).filter(d=>d.circuit===c.id).length)]));
+ table('Elosztó - bekötési jegyzék',title,['Vezeték neve','Honnan / kapocs','Hová / kapocs'],[55,75,75],plan.boardWires.filter(w=>w.building===b.id&&endpointInfo(plan,w.from)?.board===boardId).map(w=>[w.name,endpointInfo(plan,w.from)?.text||'-',endpointInfo(plan,w.to)?.text||'-']));
+ const unconnected=plan.circuits.filter(c=>c.building===b.id&&inBoard(c,boardId)).flatMap(c=>circuitPorts(c).filter(port=>!plan.boardWires.some(w=>[w.from,w.to].some(e=>endpointKey(e)===endpointKey({kind:'circuit',id:c.id,port:port.id})))).map(port=>[c.name,port.signal,port.label,'Nincs bekötve']));
+ table('Elosztó - be nem kötött szálak',title,['Áramkör','Jel','Szál neve','Állapot'],[55,20,85,40],unconnected);
  }
- function schematicPage(b:Plan['buildings'][number],mode:SchematicMode){
-  const diagram=buildSchematic(plan,b.id,mode),scale=(W-2*margin)/diagram.width,top=43,usable=H-top-31,tile=usable/scale;
+ function schematicPage(b:Plan['buildings'][number],mode:SchematicMode,boardId=''){
+  const diagram=buildSchematic(plan,b.id,mode,boardId),scale=(W-2*margin)/diagram.width,top=43,usable=H-top-31,tile=usable/scale;
   const cuts=[0];while(cuts.at(-1)!<diagram.height){const start=cuts.at(-1)!,limit=start+tile;const end=diagram.height<=limit?diagram.height:diagram.breaks.filter(y=>y>start&&y<=limit).at(-1)||limit;cuts.push(end)}
   const total=cuts.length-1;
   for(let section=0;section<total;section++){
-   page(schematicTitle(mode),b.name+' | '+(section+1)+' / '+total+' rajzlap | '+diagram.missing.length+' be nem kötött áramköri szál');
+   page(schematicTitle(mode),b.name+' / '+boardName(b,boardId)+' | '+(section+1)+' / '+total+' rajzlap | '+diagram.missing.length+' be nem kötött áramköri szál');
    text('Nem méretarányos. Keresztezés nem jelent kötést. Több lap esetén függőlegesen folytatódik.',margin,39,8);
    const offset=cuts[section],end=cuts[section+1],xx=(x:number)=>margin+x*scale,yy=(y:number)=>top+(y-offset)*scale;
    doc.saveGraphicsState();doc.rect(margin,top,W-2*margin,(end-offset)*scale,null);doc.clip();doc.discardPath();
@@ -84,12 +84,12 @@ export function createPlanPdf(plan:Plan,options:PdfOptions,font:string,backgroun
    doc.restoreGraphicsState();doc.setLineDashPattern([],0);
    text('Rajzi tartomány: '+Math.round(offset)+'–'+Math.round(end)+' | Kapocsjelek: üres = nincs bekötve; kitöltött = megadott kapcsolat.',margin,H-24,8);
   }
-  table('Kapcsolási rajz - bekötési jegyzék',b.name,['Kapcsolat','Megadott végpontok'],[55,160],diagram.edges.map(e=>[e.name,e.detail]));
-  table('Kapcsolási rajz - hiányzó bekötések',b.name,['Áramkör','Jel','Szál neve'],[70,20,120],diagram.missing.map(m=>[m.circuit,m.signal,m.name]));
+  table('Kapcsolási rajz - bekötési jegyzék',b.name+' / '+boardName(b,boardId),['Kapcsolat','Megadott végpontok'],[55,160],diagram.edges.map(e=>[e.name,e.detail]));
+  table('Kapcsolási rajz - hiányzó bekötések',b.name+' / '+boardName(b,boardId),['Áramkör','Jel','Szál neve'],[70,20,120],diagram.missing.map(m=>[m.circuit,m.signal,m.name]));
  }
  const building=plan.buildings.find(b=>b.id===options.buildingId)||plan.buildings[0],floor=building?.floors.find(f=>f.id===options.floorId)||building?.floors[0];
  if(options.scope==='floor'&&(!building||!floor))throw Error('Nincs exportálható szint. Hozz létre egy szintet, vagy válaszd a telek PDF-et.');if(['board','single','multi'].includes(options.scope)&&!building)throw Error('Nincs exportálható épület.');
- if(options.scope==='plot'||options.scope==='all')plotPage();if(options.scope==='floor')floorPage(building,floor);if(options.scope==='board')boardPage(building);if(options.scope==='single'||options.scope==='multi')schematicPage(building,options.scope);if(options.scope==='all')for(const b of plan.buildings){for(const f of [...b.floors].sort((a,b)=>a.elevation-b.elevation))floorPage(b,f);boardPage(b);schematicPage(b,'single');schematicPage(b,'multi')}
+ if(options.scope==='plot'||options.scope==='all')plotPage();if(options.scope==='floor')floorPage(building,floor);if(options.scope==='board')boardPage(building,options.boardId);if(options.scope==='single'||options.scope==='multi')schematicPage(building,options.scope,options.boardId);if(options.scope==='all')for(const b of plan.buildings){for(const f of [...b.floors].sort((a,b)=>a.elevation-b.elevation))floorPage(b,f);for(const cabinet of boards(b)){boardPage(b,cabinet.id);schematicPage(b,'single',cabinet.id);schematicPage(b,'multi',cabinet.id)}}
  for(let i=1;i<=doc.getNumberOfPages();i++){doc.setPage(i);text(i+' / '+doc.getNumberOfPages(),W/2,H-7,8,'center')}
  return doc;
 }

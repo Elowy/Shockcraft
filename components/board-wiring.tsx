@@ -1,4 +1,5 @@
 "use client";
+import {inBoard} from '@/lib/board-size';
 import {useState} from 'react';
 import {Cable,Plus,Trash2,ArrowRight,Unplug} from 'lucide-react';
 import {toast} from 'sonner';
@@ -11,9 +12,9 @@ function NameInput({value,label,onCommit}:{value:string;label:string;onCommit:(v
  const [draft,setDraft]=useState<string|null>(null);
  return <input aria-label={label} maxLength={120} value={draft??value} onChange={e=>setDraft(e.target.value)} onBlur={()=>{if(draft!==null){if(draft.trim())onCommit(draft.trim());setDraft(null)}}} onKeyDown={e=>{if(e.key==='Enter')e.currentTarget.blur();if(e.key==='Escape'){setDraft(null)}}}/>;
 }
-export function BoardWiring({plan,buildingId,change,onModule}:{plan:Plan;buildingId:string;change:(fn:(p:Plan)=>void)=>void;onModule:(id:string)=>void}){
+export function BoardWiring({plan,buildingId,boardId='',change,onModule}:{plan:Plan;buildingId:string;boardId?:string;change:(fn:(p:Plan)=>void)=>void;onModule:(id:string)=>void}){
  const [fromModule,setFromModule]=useState(''),[fromPort,setFromPort]=useState(''),[toModule,setToModule]=useState(''),[toPort,setToPort]=useState(''),[wireName,setWireName]=useState('');
- const circuits=plan.circuits.filter(c=>c.building===buildingId),modules=plan.modules.filter(m=>m.building===buildingId),wires=plan.boardWires.filter(w=>w.building===buildingId);
+ const circuits=plan.circuits.filter(c=>c.building===buildingId&&inBoard(c,boardId)),modules=plan.modules.filter(m=>m.building===buildingId&&inBoard(m,boardId)),wires=plan.boardWires.filter(w=>w.building===buildingId&&endpointInfo(plan,w.from)?.board===boardId);
  const targetOptions=(c:Plan['circuits'][number])=>modules.flatMap(m=>modulePorts(!m.circuit&&['MCB','RCBO'].includes(m.type)?{...m,circuit:c.id}:m,plan).map(p=>({end:{kind:'module',id:m.id,port:p.id} as Endpoint,signal:p.signal,label:m.name+' / '+p.label})));
  const source=modules.find(m=>m.id===fromModule),target=modules.find(m=>m.id===toModule),sourcePorts=source?modulePorts(source,plan):[],signal=sourcePorts.find(p=>p.id===fromPort)?.signal;
  function commitWire(from:Endpoint,to:Endpoint,name:string,replaceId?:string){try{const next=structuredClone(plan);if(replaceId)next.boardWires=next.boardWires.filter(w=>w.id!==replaceId);connectBoard(next,{id:uid(),name,building:buildingId,from,to});change(p=>{p.modules=next.modules;p.boardWires=next.boardWires});return true}catch(e){toast.error(e instanceof Error?e.message:'A bekötés nem hozható létre.');return false}}

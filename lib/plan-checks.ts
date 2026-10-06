@@ -1,3 +1,4 @@
+import {boardName} from './board-size';
 import {labels,type Plan} from './plan';
 import {moduleLabels} from './board';
 import type {SearchResult} from './plan-tools';
@@ -33,7 +34,7 @@ export function checkPlan(plan:Plan):PlanCheck[]{
    }
   }
   for(const m of plan.modules.filter(m=>m.building===b.id)){
-   if((m.type==='MCB'||m.type==='RCBO')&&!m.circuit)add('module-circuit','review','Áramkör nélküli védelmi készülék','Ha a készülék nem tartalék, rendeld a megfelelő áramkörhöz.',{id:m.id,type:'modules',buildingId:b.id,floorId:b.floors[0]?.id||'',title:m.name,subtitle:b.name+' · '+moduleLabels[m.type]+' · '+(m.row+1)+'. sor',x:0,y:0});
+   if((m.type==='MCB'||m.type==='RCBO')&&!m.circuit)add('module-circuit','review','Áramkör nélküli védelmi készülék','Ha a készülék nem tartalék, rendeld a megfelelő áramkörhöz.',{id:m.id,type:'modules',buildingId:b.id,floorId:b.floors[0]?.id||'',title:m.name,subtitle:b.name+' / '+boardName(b,m.board)+' · '+moduleLabels[m.type]+' · '+(m.row+1)+'. sor',x:0,y:0});
   }
  }
  return issues.sort((a,b)=>Number(a.level==='review')-Number(b.level==='review')||a.target.subtitle.localeCompare(b.target.subtitle,'hu')||a.target.title.localeCompare(b.target.title,'hu')||a.code.localeCompare(b.code));

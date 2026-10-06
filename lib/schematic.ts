@@ -1,3 +1,4 @@
+import {inBoard} from './board-size';
 import type {Plan,Point} from './plan';
 import {circuitPorts,modulePorts,moduleLabels,moduleShort,endpointKey,endpointInfo,wireColor,type Endpoint} from './board';
 export type SchematicMode='single'|'multi';
@@ -11,10 +12,10 @@ export type DiagramEdge={id:string;name:string;detail:string;count:number;signal
 export const schematicTitle=(mode:SchematicMode)=>mode==='single'?'Egyvonalas kapcsolási rajz':'Többvonalas kapcsolási rajz';
 const ink='#263b49',muted='#5e7280';
 const words=(value:string,max=33)=>{const result:string[]=[];let line='';for(const word of value.split(/\s+/)){if((line+' '+word).trim().length>max&&line){result.push(line);line=''}for(let i=0;i<word.length;i+=max){const part=word.slice(i,i+max);if(i){result.push(line);line=''}line+=(line?' ':'')+part}}if(line)result.push(line);return result};
-export function buildSchematic(plan:Plan,buildingId:string,mode:SchematicMode){
- const modules=plan.modules.filter(m=>m.building===buildingId).sort((a,b)=>a.row-b.row||a.slot-b.slot||a.id.localeCompare(b.id));
- const circuits=plan.circuits.filter(c=>c.building===buildingId);
- const wires=plan.boardWires.filter(w=>w.building===buildingId&&endpointInfo(plan,w.from)?.building===buildingId&&endpointInfo(plan,w.to)?.building===buildingId);
+export function buildSchematic(plan:Plan,buildingId:string,mode:SchematicMode,boardId=''){
+ const modules=plan.modules.filter(m=>m.building===buildingId&&inBoard(m,boardId)).sort((a,b)=>a.row-b.row||a.slot-b.slot||a.id.localeCompare(b.id));
+ const circuits=plan.circuits.filter(c=>c.building===buildingId&&inBoard(c,boardId));
+ const wires=plan.boardWires.filter(w=>w.building===buildingId&&endpointInfo(plan,w.from)?.board===boardId&&endpointInfo(plan,w.to)?.board===boardId&&endpointInfo(plan,w.from)?.building===buildingId&&endpointInfo(plan,w.to)?.building===buildingId);
  const wireSignal=(wire:Plan['boardWires'][number])=>{const a=endpointInfo(plan,wire.from)!.signal,b=endpointInfo(plan,wire.to)!.signal;return a==='L'?b:a};
  const connected=new Set(wires.flatMap(w=>[endpointKey(w.from),endpointKey(w.to)]));
  const ports=new Map<string,Point>(),nodes:DiagramNode[]=[],edges:DiagramEdge[]=[];

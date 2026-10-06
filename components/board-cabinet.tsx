@@ -7,13 +7,13 @@ import {endpointInfo,endpointKey,moduleShort,moduleLabels,wireColor,type Endpoin
 import {cabinetLayout,cabinetWirePoints,connectionPlan,connectionIssue,connectTerminals,type CabinetPin} from '@/lib/cabinet';
 
 const shorten=(s:string,n:number)=>s.length>n?s.slice(0,Math.max(1,n-1))+'…':s;
-export function BoardCabinet({plan,buildingId,selectedModule,change,onSelect}:{plan:Plan;buildingId:string;selectedModule?:string;change:(fn:(p:Plan)=>void)=>void;onSelect:(id:string|null)=>void}){
+export function BoardCabinet({plan,buildingId,boardId='',selectedModule,change,onSelect}:{plan:Plan;buildingId:string;boardId?:string;selectedModule?:string;change:(fn:(p:Plan)=>void)=>void;onSelect:(id:string|null)=>void}){
  const [start,setStart]=useState<Endpoint|null>(null),[selectedWire,setSelectedWire]=useState(''),[showWires,setShowWires]=useState(true),[zoom,setZoom]=useState(75),[notice,setNotice]=useState('');
  const scroll=useRef<HTMLDivElement>(null);
- const source=start&&endpointInfo(plan,start)?.building===buildingId?start:null;
+ const source=start&&endpointInfo(plan,start)?.building===buildingId&&endpointInfo(plan,start)?.board===boardId?start:null;
  const preview=useMemo(()=>connectionPlan(plan,source?[source]:[]),[plan,source]);
- const layout=useMemo(()=>cabinetLayout(preview,buildingId),[preview,buildingId]);
- const wires=plan.boardWires.filter(w=>w.building===buildingId),wire=wires.find(w=>w.id===selectedWire);
+ const layout=useMemo(()=>cabinetLayout(preview,buildingId,boardId),[preview,buildingId,boardId]);
+ const wires=plan.boardWires.filter(w=>w.building===buildingId&&endpointInfo(plan,w.from)?.board===boardId),wire=wires.find(w=>w.id===selectedWire);
  const pinMap=new Map(layout.pins.map(p=>[endpointKey(p.end),p]));
  const connected=new Set(wires.flatMap(w=>[endpointKey(w.from),endpointKey(w.to)]));
  const fromText=source?endpointInfo(plan,source)?.text:'';

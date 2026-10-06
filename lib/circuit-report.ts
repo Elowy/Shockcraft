@@ -1,3 +1,4 @@
+import {boardName} from './board-size';
 import {type Plan,labels} from './plan';
 import {circuitPorts,endpointInfo,moduleLabels} from './board';
 import {floorLength,floorPoints} from './geometry';
@@ -19,7 +20,7 @@ export function circuitReport(plan:Plan,circuitId:string){
  }
  const moduleTarget=(id:string):SearchResult|null=>{
   const m=plan.modules.find(m=>m.id===id&&m.building===building.id);
-  return m?{id:m.id,type:'modules',buildingId:building.id,floorId:building.floors[0]?.id||'',title:m.name,subtitle:building.name+' · '+moduleLabels[m.type]+' · '+(m.row+1)+'. sor',x:0,y:0}:null;
+  return m?{id:m.id,type:'modules',buildingId:building.id,floorId:building.floors[0]?.id||'',title:m.name,subtitle:building.name+' / '+boardName(building,m.board)+' · '+moduleLabels[m.type]+' · '+(m.row+1)+'. sor',x:0,y:0}:null;
  };
  const modules=plan.modules.filter(m=>m.building===building.id&&m.circuit===circuit.id).map(m=>moduleTarget(m.id)!);
  const ports=circuitPorts(circuit).map(port=>{

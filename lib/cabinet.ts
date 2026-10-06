@@ -1,16 +1,17 @@
 import type {Plan,Point} from './plan';
-import {boardSize} from './board-size';
+import {boardSize,inBoard} from './board-size';
 import {modulePorts,circuitPorts,endpointInfo,endpointKey,compatible,connectBoard,type Endpoint,type Port} from './board';
 
 // Preview an unassigned protection device with the poles of the selected circuit.
 export function connectionPlan(plan:Plan,ends:Endpoint[]):Plan{
- const circuit=ends.find(e=>e.kind==='circuit');if(!circuit)return plan;
- return {...plan,modules:plan.modules.map(m=>!m.circuit&&['MCB','RCBO'].includes(m.type)?{...m,circuit:circuit.id}:m)};
+ const circuit=ends.find(e=>e.kind==='circuit');if(!circuit)return plan;const owner=plan.circuits.find(c=>c.id===circuit.id);if(!owner)return plan;
+ return {...plan,modules:plan.modules.map(m=>m.building===owner.building&&inBoard(m,owner.board)&&!m.circuit&&['MCB','RCBO'].includes(m.type)?{...m,circuit:circuit.id}:m)};
 }
 export function connectionIssue(plan:Plan,from:Endpoint,to:Endpoint):string|null{
  const preview=connectionPlan(plan,[from,to]),a=endpointInfo(preview,from),b=endpointInfo(preview,to);
  if(!a||!b)return 'A kapocs megváltozott. Válaszd ki először az áramköri szálat, majd a készülék kapcsát.';
  if(a.building!==b.building)return 'Másik épülethez tartozó kapocs.';
+ if(a.board!==b.board)return 'Másik elosztóhoz tartozó kapocs.';
  if(from.kind===to.kind&&(from.id===to.id||from.kind==='circuit'))return 'Másik készülék vagy áramköri szál szükséges.';
  if(!compatible(a.signal,b.signal))return 'Eltérő fázisú, N- és PE-kapcsok nem köthetők össze.';
  const c=[from,to].find(e=>e.kind==='circuit'),m=[from,to].find(e=>e.kind==='module');
@@ -30,8 +31,8 @@ export function connectTerminals(plan:Plan,from:Endpoint,to:Endpoint,id:string){
  connectBoard(next,{id,name,building:a.building,from,to});return next;
 }
 export type CabinetPin=Point&{end:Endpoint;port:Port;side:'top'|'bottom';escapeY:number};
-export function cabinetLayout(plan:Plan,buildingId:string){
- const size=boardSize(plan.buildings.find(b=>b.id===buildingId)),unit=80,left=72,width=Math.max(624,size.modulesPerRow*unit+144),modules=plan.modules.filter(m=>m.building===buildingId),circuits=plan.circuits.filter(c=>c.building===buildingId);
+export function cabinetLayout(plan:Plan,buildingId:string,boardId=''){
+ const size=boardSize(plan.buildings.find(b=>b.id===buildingId),boardId),unit=80,left=72,width=Math.max(624,size.modulesPerRow*unit+144),modules=plan.modules.filter(m=>m.building===buildingId&&inBoard(m,boardId)),circuits=plan.circuits.filter(c=>c.building===buildingId&&inBoard(c,boardId));
  const pins:CabinetPin[]=[],devices:{module:Plan['modules'][number];x:number;y:number;w:number;h:number}[]=[],rows:{y:number;bodyY:number;h:number}[]=[];
  let y=18;
  for(let row=0;row<size.rows;row++){

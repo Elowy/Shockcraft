@@ -19,11 +19,12 @@ export function modulePorts(m:Plan['modules'][number],plan:Plan):Port[]{
  const signals=[...phases,...(m.type!=='MCB'?['N']:[]),...(m.type==='SPD'?['PE']:[])];
  return signals.flatMap(s=>(m.type==='SPD'?['']:['in','out']).map(dir=>({id:s+(dir?'-'+dir:''),label:s+(dir==='in'?' · be':dir==='out'?' · ki':''),signal:s==='L'&&c&&c.phase!=='3P'?c.phase:s})));
 }
-export function endpointInfo(plan:Plan,e:Endpoint){const entity=e.kind==='circuit'?plan.circuits.find(c=>c.id===e.id):plan.modules.find(m=>m.id===e.id);if(!entity)return null;const port=(e.kind==='circuit'?circuitPorts(entity as Plan['circuits'][number]):modulePorts(entity as Plan['modules'][number],plan)).find(p=>p.id===e.port);return port?{...port,building:entity.building,name:entity.name,text:e.kind==='circuit'?port.label:entity.name+' / '+port.label}:null}
+export function endpointInfo(plan:Plan,e:Endpoint){const entity=e.kind==='circuit'?plan.circuits.find(c=>c.id===e.id):plan.modules.find(m=>m.id===e.id);if(!entity)return null;const port=(e.kind==='circuit'?circuitPorts(entity as Plan['circuits'][number]):modulePorts(entity as Plan['modules'][number],plan)).find(p=>p.id===e.port);return port?{...port,building:entity.building,board:entity.board||'',name:entity.name,text:e.kind==='circuit'?port.label:entity.name+' / '+port.label}:null}
 export function compatible(a:string,b:string){return a===b||(a==='L'&&b.startsWith('L'))||(b==='L'&&a.startsWith('L'))}
 export function validateBoard(plan:Plan){
  const occupied=new Set<string>(),pairs=new Set<string>();
  for(const w of plan.boardWires){const a=endpointInfo(plan,w.from),b=endpointInfo(plan,w.to);if(!a||!b||a.building!==w.building||b.building!==w.building)throw Error('A bekötés végpontja hiányzik vagy másik épülethez tartozik.');
+  if(a.board!==b.board)throw Error('Külön elosztók kapcsai itt nem köthetők össze. Használd az alaprajzi vagy telki nyomvonalat.');
   if(w.from.kind===w.to.kind&&w.from.id===w.to.id||w.from.kind==='circuit'&&w.to.kind==='circuit')throw Error('Két különböző készüléket, vagy egy áramkört és egy készüléket válassz.');
   if(!compatible(a.signal,b.signal))throw Error('Eltérő fázisú, nulla- vagy PE-kapcsok nem köthetők össze.');
   const pair=[endpointKey(w.from),endpointKey(w.to)].sort().join('|');if(pairs.has(pair))throw Error('Ez a bekötés már szerepel.');pairs.add(pair);
@@ -37,4 +38,4 @@ export function connectBoard(plan:Plan,wire:Plan['boardWires'][number]){
 }
 export function removeBoardLinks(plan:Plan,kind:Endpoint['kind'],id:string){plan.boardWires=plan.boardWires.filter(w=>![w.from,w.to].some(e=>e.kind===kind&&e.id===id))}
 // Phase/assignment edits may change the available poles. Keep only valid links.
-export function pruneBoardLinks(plan:Plan){plan.boardWires=plan.boardWires.filter(w=>{const a=endpointInfo(plan,w.from),b=endpointInfo(plan,w.to);if(!a||!b||!compatible(a.signal,b.signal))return false;const c=[w.from,w.to].find(e=>e.kind==='circuit'),m=[w.from,w.to].find(e=>e.kind==='module');const device=m&&plan.modules.find(x=>x.id===m.id);return !(c&&device&&['MCB','RCBO'].includes(device.type)&&device.circuit!==c.id)})}
+export function pruneBoardLinks(plan:Plan){plan.boardWires=plan.boardWires.filter(w=>{const a=endpointInfo(plan,w.from),b=endpointInfo(plan,w.to);if(!a||!b||a.building!==w.building||b.building!==w.building||a.board!==b.board||!compatible(a.signal,b.signal))return false;const c=[w.from,w.to].find(e=>e.kind==='circuit'),m=[w.from,w.to].find(e=>e.kind==='module');const device=m&&plan.modules.find(x=>x.id===m.id);return !(c&&device&&['MCB','RCBO'].includes(device.type)&&device.circuit!==c.id)})}
