@@ -3,7 +3,7 @@
 Az **Eszközök → Árazás / árajánlat** nézetben készíthető ügyfélnek szóló ajánlat. Projektenként egy szerkeszthető ajánlat tartozik a tervhez. Az adatok a projekt szokásos mentésében, automatikus mentésében és tervelőzményeiben is megmaradnak.
 
 1. A **Tételek átvétele a tervből** gomb a teljes projekt és telek anyagkimutatását másolja át. Az árak üresek; piaci árakat nem feltételez a program.
-2. Add meg az ajánlat azonosítóját, dátumát, ajánlatadó és ügyfél adatait, valamint szükség esetén az érvényességet és a munkavégzés helyét.
+2. Add meg az ajánlat azonosítóját, dátumát, ajánlatadó és ügyfél adatait, valamint szükség esetén az érvényességet és a munkavégzés helyét. Ha a projekthez a felső sáv **Ügyfelek** gombjával ügyfelet rendeltél, az **Ügyféladatok átvétele** gomb kitölti az ügyfél adatait (és az üres munkavégzési helyet) a nyilvántartásból; lásd `docs/ugyfelek-teendok.md`.
 3. Tételenként írd be a nettó anyag-egységárat és munkadíj-egységárat forintban. Ha valamelyik díj nem merül fel, adj meg **0** értéket; az üres mező hiányzó árat jelent.
 4. Saját tételként például kiszállás, mérés vagy munkadíj is felvehető. Egységek: db, m, óra, tétel. A **Bevonva** kapcsolóval egy tétel kihagyható az összegből és a PDF-ből, az árai megőrzése mellett.
 5. Állítsd be a kábelráhagyást, nettó kedvezményt és az ajánlatra alkalmazandó áfát. AAM, 0%, 5%, 18%, 27% választható; a megfelelő beállítást az ajánlatadó választja ki.

@@ -20,6 +20,7 @@ Villanyszerelőknek és lakóépületek villamos tervein dolgozóknak készül.
 - Vendég-mód (böngészőbe ment) és fiókos mód (D1/MySQL adatbázis)
 - Projektkezelés: mentés, verzióvédelem, névátírás, másolat, JSON import/export
 - Projekt életciklus: aktív / archivált / lomtár állapotok
+- Ügyfelek és teendők (fiókszintű): ügyféltörzs, projekt–ügyfél hozzárendelés, határidős teendők, Esedékes nézet, árajánlat-kitöltés ügyféladatokból
 - Sötét/világos mód
 
 **Élő oldal:** https://shockcraft-villanytervezo.lollipopp23.chatgpt.site/ (a `villanyrajz.hu` domain lefoglalva, még nincs élesítve)
@@ -62,6 +63,7 @@ app/                    Next.js App Router oldalak
     billing-profile/    Számlázási profil
     stripe/             Stripe API
     templates/          Sablonkönyvtár
+    workbook/           Ügyfél- és teendő-munkafüzet (GET/PUT)
     transfer-access/    Projekthozzáférés-átvitel
     account-email/      E-mail-visszaigazolás, -csere
     backgrounds/        Háttéralaprajz upload/olvasás
@@ -80,6 +82,7 @@ components/             43 UI komponens
   admin-email.tsx       Admin Resend konfig
   admin-invoicing.tsx   Admin számlázás konfig
   quote-...tsx          Árajánlat komponensek
+  workbook-*.tsx        Ügyfelek és teendők dialógus (dialog, tasks, clients)
 
 lib/                    43 üzleti logika / utility modul
   plan.ts               Plan schema (Zod), seed terv, validatePlan()
@@ -111,6 +114,9 @@ lib/                    43 üzleti logika / utility modul
   draft-backup.ts       Ideiglenes szerkesztés megőrzés
   transfer-access.ts    Projekthozzáférés-átvitel
   templates.ts          Sablon könyvtár
+  workbook.ts           Ügyfél/teendő Zod-sémák, szabályok, esedékesség (tiszta modul)
+  workbook-server.ts    Projektállapotok a munkafüzet-ellenőrzéshez (szerver)
+  workbook-client.ts    /api/workbook kliens hívások
   structure-copy.ts     Szint/épület másolás
   device-copy.ts        Szerelvény másolás
   panel-link.ts         Telki elosztó ↔ alaprajzi jelölés összekötés
@@ -170,6 +176,8 @@ npm run db:generate     # Drizzle migrációk generálása
 
 ### Lokális D1 migrációk (egyszer kell alkalmazni, build után)
 
+Friss adatbázisnál a `drizzle/0000…0009` fájlokat mind sorrendben kell alkalmazni (a minta két parancsa a `--file` cseréjével); meglévő helyi adatbázisnál csak az újakat (legutóbb: `drizzle/0009_wonderful_lucky_pierre.sql`, `workbooks` tábla).
+
 ```bash
 node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js \
   d1 execute DB --local --config dist/server/wrangler.json \
@@ -200,6 +208,7 @@ node tests/auth-flow.mjs   # lokális Worker + D1 szükséges, http://127.0.0.1:
 | `plans` | Tervek (id=projectKey, data JSON, revision, updatedAt, state) |
 | `plan_versions` | Verzióelőzmények (projectId, revision, data, savedAt) |
 | `template_libraries` | Felhasználói sablon könyvtárak |
+| `workbooks` | Felhasználónkénti ügyfél- és teendő-munkafüzet (JSON + revision) |
 | `billing_settings` | Stripe konfig (titkosítva, admin panelről állítható) |
 | `billing_grants` | Projekt jogosultságok (free / live / sub_live mode) |
 | `billing_orders` | Stripe rendelések |
@@ -373,6 +382,8 @@ Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja e
 ### Tesztelés
 - `tests/auth-flow.mjs` – teljes auth flow integrációs teszt lokális Worker ellen
 - `tests/mysql-config.mjs` – MySQL kapcsolat ellenőrzés
+- `tests/workbook.ts` – ügyfél/teendő lib-teszt: `node_modules/.bin/tsx tests/workbook.ts`
+- `tests/workbook-api.ts` – `/api/workbook` route-teszt memóriabeli SQLite-on: `node_modules/.bin/esbuild tests/workbook-api.ts --bundle --platform=node --format=esm --external:mysql2 --alias:cloudflare:workers=./db/node-env.ts --outfile=.sites-runtime/workbook-api.mjs && env -u MYSQL_URL node --no-warnings .sites-runtime/workbook-api.mjs`
 - Unit tesztek nincsenek; a `validatePlan()` (`lib/plan.ts`) az elsődleges validációs pont
 
 ---
@@ -385,4 +396,6 @@ Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja e
 
 3. **Fázisterhelés** (kész) – áramkörönkénti terhelés (megadott vagy becsült), elosztónkénti L1/L2/L3 összesítés, figyelmeztetések, PDF-táblázat. Kód: `lib/phase-load.ts`, `components/phase-load-report.tsx`, doksi: `docs/fazisterheles.md`.
 
-4. **Tervezett:** ügyfél- és feladatkezelés, tervmegosztás/együttműködés, gyártói termékkatalógus, szakmailag ellenőrzött villamos méretezés.
+4. **Ügyfél- és feladatkezelés** (kész) – fiókszintű `workbooks` JSON-munkafüzet revisionnel: ügyféltörzs, projekt–ügyfél hozzárendelés, teendők (projekt / ügyfél / általános), Esedékes nézet és jelvény, árajánlat-kitöltés. Archivált/lomtáras projektre 409, zároltra 402, nem mentettre 409; törlés mindig engedett; a `plans` táblát nem írja. Kód: `lib/workbook*.ts`, `app/api/workbook/route.ts`, `components/workbook-*.tsx`, doksi: `docs/ugyfelek-teendok.md`.
+
+5. **Tervezett:** tervmegosztás/együttműködés, gyártói termékkatalógus, szakmailag ellenőrzött villamos méretezés.

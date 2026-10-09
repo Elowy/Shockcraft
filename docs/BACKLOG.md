@@ -17,12 +17,12 @@ Elfogadási feltételek:
 
 ## Kész
 
+- Ügyfél- és feladatkezelés: ügyféltörzs, projekt–ügyfél hozzárendelés, határidős teendők és Esedékes nézet, árajánlat-kitöltés ügyféladatokból. Lásd `docs/ugyfelek-teendok.md`.
 - Fázisterhelés-összesítés: áramkörönkénti terhelés (megadott vagy szerelvényekből becsült), elosztónkénti L1/L2/L3 összesítés, aszimmetria- és túlterhelés-figyelmeztetés, PDF-táblázat. Lásd `docs/fazisterheles.md`.
 - Árazás és ügyfélnek készíthető árajánlat: tervből átvett tételek, anyagár, munkadíj, saját tételek, útiköltség (km × Ft/km vagy fix), összesítés, PDF.
 
 ## További ütemezett fejlesztések
 
-- Ügyfél- és feladatkezelés.
 - Tervmegosztás és együttműködés.
 - Gyártói termékkatalógus.
 - Szakmailag ellenőrzött villamos méretezés.

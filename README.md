@@ -53,7 +53,7 @@ Az adatbázissémát a db/schema.ts, a migrációkat a drizzle könyvtár tartal
     node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_perfect_absorbing_man.sql
     node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0001_omniscient_iceman.sql
 
-A migrációt helyi adatbázison egyszer kell alkalmazni. Éles telepítésnél a Sites végzi el. A .openai/hosting.json a meglévő Sites-alkalmazást azonosítja.
+A `drizzle/` könyvtár összes `.sql` fájlját sorrendben (0000–0009) kell alkalmazni, a fenti parancs `--file` paraméterét cserélve; meglévő helyi adatbázison csak a még nem alkalmazott, újabb fájlokat (például az ügyfél- és teendőkezeléshez tartozó `drizzle/0009_wonderful_lucky_pierre.sql`-t). A migrációt helyi adatbázison egyszer kell alkalmazni. Éles telepítésnél a Sites végzi el. A .openai/hosting.json a meglévő Sites-alkalmazást azonosítja.
 
 A saját hitelesítés integrációs ellenőrzése a helyi Worker és migrációk elindítása után: `node tests/auth-flow.mjs` (alapértelmezett cím: `http://127.0.0.1:5180`). Tesztfelhasználókat hoz létre kizárólag a helyi adatbázisban. MySQL-beállításellenőrzés: `node --experimental-strip-types tests/mysql-config.mjs`. Tényleges MySQL-kapcsolatot szerver hiányában még nem ellenőriztünk.
 

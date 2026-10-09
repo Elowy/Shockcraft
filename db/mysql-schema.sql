@@ -123,3 +123,10 @@ CREATE TABLE IF NOT EXISTS template_libraries (
  revision INT NOT NULL,
  updated_at VARCHAR(40) NOT NULL
 );
+CREATE TABLE IF NOT EXISTS workbooks (
+ user_id varchar(36) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+ data longtext NOT NULL,
+ revision int NOT NULL,
+ updated_at varchar(40) NOT NULL,
+ CONSTRAINT workbooks_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
