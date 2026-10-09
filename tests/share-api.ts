@@ -190,6 +190,11 @@ for(let i=0;i<120;i++){const f=await open({token:unknown},{ip:'203.0.113.9'});as
 r=await open({token:unknown},{ip:'203.0.113.9'});assert.equal(r.status,429);assert.equal(r.headers.get('retry-after'),'900');assert.equal(r.body.code,'RATE_LIMITED');publicHeaders(r.headers);
 assert.equal(await allowAttempt(db,new Request(ORIGIN+'/',{headers:{'x-real-ip':'203.0.113.9'}}),'x@example.test'),true,'a login ip: kerete érintetlen');
 assert.equal((await open({token:others[0].token},{ip:'198.51.100.7'})).status,200);
+// IPv6: a /64-es előtag számít, a címek forgatása nem ad új keretet; az IPv4-be leképezett cím az IPv4 keretét fogyasztja.
+for(let i=0;i<120;i++){const f=await open({token:unknown},{ip:'2001:db8:1:2::'+(i+1).toString(16)});assert.equal(f.status,404)}
+r=await open({token:unknown},{ip:'2001:DB8:1:2:ffff:ffff:ffff:ffff'});assert.equal(r.status,429,'a /64-en belüli címforgatás nem ad új keretet');
+assert.equal((await open({token:unknown},{ip:'2001:db8:1:3::1'})).status,404,'másik /64 saját keretet kap');
+assert.equal((await open({token:unknown},{ip:'::ffff:203.0.113.9'})).status,429,'az IPv4-be leképezett cím az IPv4 keretét fogyasztja');
 
 // 13. Kliens-segédek (fetch-mock a route-okra).
 let captured:RequestInit|undefined;
@@ -212,4 +217,53 @@ await assert.rejects(fetchShares(OWNER,'default'),(e:unknown)=>e instanceof Shar
 sql.prepare('DELETE FROM users WHERE id = ?').run(OTHER);
 assert.equal((sql.prepare('SELECT COUNT(*) AS n FROM plan_shares WHERE owner_id = ?').get(OTHER) as {n:number}).n,0);
 await gone(pdfLink.token,'törölt fiók linkje');
-console.log('PASS: tervmegosztás API – létrehozás-őrök, csak lenyomat tárolva, adatminimalizált nyilvános nézet és fejlécek, egységes 404, PDF = allow_pdf + exportjog, archiválás/zárolás szüneteltet, lomtár/lejárat/visszavonás/jelszócsere/fióktörlés megszüntet, IDOR és CSRF, 10-es korlát, saját rate limit, fail-closed kliens.');
+// 15. Versenyhelyzetek: a beszúrás egyetlen feltételes utasítás (aktív állapot + 10-es korlát + auth_version).
+const RACE=crypto.randomUUID();
+await db.run('INSERT INTO users (id,email,name,password_hash,created_at) VALUES (?,?,?,?,?)',[RACE,'share-race@example.test','Verseny Fiók','unused',1]);
+const race=await session(RACE),raceKey=projectKey(RACE,'default');
+await insertPlan(RACE,'default',plain('Verseny terv'),'2026-03-01T00:00:00.000Z');
+assert.equal(await claimProject(db,{userId:RACE,email:'share-race@example.test',displayName:'Verseny Fiók'},'default'),true);
+const clearLimits=()=>sql.prepare('DELETE FROM auth_limits').run();
+const raceCreate=()=>create(race,{projectId:'default',userId:RACE});
+let burst=await Promise.all(Array.from({length:30},raceCreate));
+assert.equal(burst.filter(b=>b.status===200).length,10,'30 párhuzamos kérésből pontosan 10 sikerül');
+assert.ok(burst.every(b=>b.status===200||b.status===409&&b.body.code==='SHARE_LIMIT'),'a többi SHARE_LIMIT, nem 503');
+assert.equal(shareRows(raceKey),10,'párhuzamosan sem lépi túl a korlátot');
+assert.equal((await revoke(race,{projectId:'default',userId:RACE,all:true})).body.removed,10);clearLimits();
+for(let i=0;i<9;i++)await made(race,{projectId:'default',userId:RACE});
+burst=await Promise.all(Array.from({length:6},raceCreate));
+assert.equal(burst.filter(b=>b.status===200).length,1,'9 meglévő mellett csak egy fér be');assert.equal(shareRows(raceKey),10);
+// Létrehozás és lomtárba helyezés egyszerre, sokféle ütemezéssel: a lomtár után nem marad link, a visszaállítás sem éleszti újra.
+const tick=async(n:number)=>{for(let i=0;i<n;i++)await new Promise(done=>setImmediate(done))};
+const raceRevision=()=>(sql.prepare('SELECT revision FROM plans WHERE id = ?').get(raceKey) as {revision:number}).revision;
+const raceState=(state:string,revision:number)=>PATCH(new Request(ORIGIN+'/api/plan',{method:'PATCH',headers:{host:HOST,'content-type':'application/json',origin:ORIGIN,cookie:race},body:JSON.stringify({projectId:'default',state,revision,userId:RACE})})).then(reply);
+const orders=new Set<string>();
+for(let n=0;n<60;n++){
+ clearLimits();sql.prepare('DELETE FROM plan_shares WHERE owner_id = ?').run(RACE);sql.prepare('UPDATE plans SET state = ? WHERE id = ?').run('active',raceKey);
+ const [c,p]=await Promise.all([raceCreate(),tick(n).then(()=>raceState('trash',raceRevision()))]);
+ assert.equal(p.status,200,p.text);
+ assert.ok(c.status===200||c.status===409&&c.body.code==='PROJECT_INACTIVE','létrehozás: '+c.status+' '+c.text);
+ assert.equal(shareRows(raceKey),0,'lomtár után nem marad link (ütem: '+n+')');
+ orders.add(c.status===200?'a létrehozás előbb':'a lomtár előbb');
+ if(c.status===200){assert.equal((await raceState('active',raceRevision())).status,200);await gone(token(c.body.link),'lomtár + visszaállítás után sem él (ütem: '+n+')')}
+}
+assert.equal(orders.size,2,'mindkét sorrend előfordult');
+
+// 16. Hiányzó IP-fejléc: közös keret, nem korlátlan. A lejárt keretsorokat a nyilvános útvonal is takarítja.
+clearLimits();
+for(let i=0;i<120;i++)assert.equal((await open({token:unknown})).status,404);
+r=await open({token:unknown});assert.equal(r.status,429,'IP-fejléc nélkül is van keret');
+assert.equal((await open({token:unknown},{ip:'198.51.100.99'})).status,404,'a valódi IP-vel érkező kérés saját keretet kap');
+const expiredLimit=()=>sql.prepare('INSERT INTO auth_limits (`key`,attempts,expires_at) VALUES (?,?,?)').run('lejart-keret',1,Date.now()-1);
+const limitLeft=()=>sql.prepare('SELECT 1 AS x FROM auth_limits WHERE `key` = ?').get('lejart-keret')!==undefined;
+const random=Math.random;
+try{
+ expiredLimit();Math.random=()=>.99;await open({token:unknown},{ip:'198.51.100.98'});assert.equal(limitLeft(),true,'többnyire nem takarít');
+ Math.random=()=>0;await open({token:unknown},{ip:'198.51.100.98'});assert.equal(limitLeft(),false,'ritkán a nyilvános útvonal is takarít');
+}finally{Math.random=random}
+// 17. Hiányzó APP_ORIGIN: 503, árva sor nélkül.
+const appOrigin=(env as Record<string,unknown>).APP_ORIGIN;Object.assign(env,{APP_ORIGIN:''});
+try{const before=shareRows(raceKey);sql.prepare('UPDATE plans SET state = ? WHERE id = ?').run('active',raceKey);clearLimits();
+ r=await create(race,{projectId:'default',userId:RACE});assert.equal(r.status,503);assert.equal(shareRows(raceKey),before,'nem marad árva link')}
+finally{Object.assign(env,{APP_ORIGIN:appOrigin})}
+console.log('PASS: tervmegosztás API – létrehozás-őrök, csak lenyomat tárolva, adatminimalizált nyilvános nézet és fejlécek, egységes 404, PDF = allow_pdf + exportjog, archiválás/zárolás szüneteltet, lomtár/lejárat/visszavonás/jelszócsere/fióktörlés megszüntet, IDOR és CSRF, 10-es korlát (párhuzamosan is), lomtár–létrehozás verseny, saját rate limit (IPv6 /64, hiányzó IP-fejléc), fail-closed kliens.');

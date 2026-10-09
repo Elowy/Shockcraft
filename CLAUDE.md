@@ -176,6 +176,8 @@ tests/
 
 npm run install:ci      # CI-barát telepítés
 npm run dev             # Dev szerver: http://localhost:5173
+# Megosztási és e-mail-linkek helyi kipróbálásához APP_ORIGIN kell (nélküle a link létrehozása 503):
+CLOUDFLARE_INCLUDE_PROCESS_ENV=true APP_ORIGIN=http://localhost:5173 npm run dev
 npm run build           # Cloudflare Sites build (dist/)
 npm run build:node      # Node.js build (dist/, standalone)
 npm run start           # Sites preview (Wrangler local)

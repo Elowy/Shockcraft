@@ -3,7 +3,7 @@ import type {Database} from '@/db/database';
 import {digest,type Account} from '@/lib/auth';
 import {exportAccess,projectAccess} from '@/lib/billing';
 import {projectKey,validProjectId} from '@/lib/projects';
-import {SHARE_LIMITS,SHARE_PROJECT_LIMIT,SHARE_VIEW_TOUCH_MS,newShareToken,sharedPlan,type ShareCreateInput,type ShareProjectStatus,type ShareSummary,type SharedView} from '@/lib/share';
+import {SHARE_CLEANUP_RATE,SHARE_LIMITS,SHARE_PROJECT_LIMIT,SHARE_VIEW_TOUCH_MS,newShareToken,shareIpKey,sharedPlan,type ShareCreateInput,type ShareProjectStatus,type ShareSummary,type SharedView} from '@/lib/share';
 
 // A nyilvános megosztott nézet fejlécei: ne kerüljön gyorsítótárba, keresőbe vagy Referer-be.
 export const shareHeaders={'Cache-Control':'private, no-store, max-age=0','X-Robots-Tag':'noindex, nofollow, noarchive','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'};
@@ -11,6 +11,7 @@ export const shareHeaders={'Cache-Control':'private, no-store, max-age=0','X-Rob
 export const ownerAccount=(userId:string):Account=>({userId,displayName:'',email:''});
 // Ugyanaz a forrás, mint a bejelentkezési korlátnál (lib/auth.ts allowAttempt).
 export function clientIp(req:Request){const node=(env as unknown as Record<string,string>).SHOCKCRAFT_NODE_RUNTIME==='1';return req.headers.get(node?'x-real-ip':'cf-connecting-ip')||''}
+let missingIpLogged=false;
 
 const WINDOW=15*60*1000,DAY=86_400_000;
 // Saját névtér az auth_limits táblában: a megtekintés nem fogyasztja a bejelentkezés ip:/email: keretét.
@@ -42,6 +43,7 @@ export async function listShares(db:Database,user:Account,projectId:string):Prom
  return rows.map(summary);
 }
 
+const activeShareCount=async(db:Database,userId:string,key:string,now:number)=>Number((await db.first<{n:number}>('SELECT COUNT(*) AS n FROM plan_shares s JOIN users u ON u.id = s.owner_id WHERE s.owner_id = ? AND s.project_key = ? AND s.expires_at > ? AND s.auth_version = u.auth_version',[userId,key,now]))?.n||0);
 export type CreateShareResult={ok:true;token:string;share:ShareSummary}|{ok:false;code:'RATE_LIMITED'|'SAVE_REQUIRED'|'PROJECT_INACTIVE'|'SUBSCRIPTION_REQUIRED'|'EXPORT_REQUIRED'|'SHARE_LIMIT'};
 export async function createShare(db:Database,user:Account,input:Omit<ShareCreateInput,'userId'>):Promise<CreateShareResult>{
  if(!await shareLimit(db,'share-create',user.userId,SHARE_LIMITS.create))return {ok:false,code:'RATE_LIMITED'};
@@ -53,13 +55,26 @@ export async function createShare(db:Database,user:Account,input:Omit<ShareCreat
  const now=Date.now(),key=projectKey(user.userId,input.projectId);
  await db.run('DELETE FROM plan_shares WHERE expires_at <= ?',[now]);
  await db.run('DELETE FROM auth_limits WHERE expires_at <= ?',[now]);
- // Puha korlát: versenyhelyzetben +1 link előfordulhat.
- const count=await db.first<{n:number}>('SELECT COUNT(*) AS n FROM plan_shares s JOIN users u ON u.id = s.owner_id WHERE s.owner_id = ? AND s.project_key = ? AND s.expires_at > ? AND s.auth_version = u.auth_version',[user.userId,key,now]);
- if(Number(count?.n||0)>=SHARE_PROJECT_LIMIT)return {ok:false,code:'SHARE_LIMIT'};
- const token=newShareToken(),id=crypto.randomUUID(),expiresAt=now+input.days*DAY;
- // Az auth_version a users sorból jön: egy közben lezajlott jelszócsere után a link eleve érvénytelen.
- const changed=await db.run('INSERT INTO plan_shares (id,token_hash,owner_id,project_id,project_key,label,allow_pdf,auth_version,created_at,expires_at,last_viewed_at) SELECT ?,?,?,?,?,?,?,auth_version,?,?,NULL FROM users WHERE id = ?',[id,await digest(token),user.userId,input.projectId,key,input.label,input.allowPdf?1:0,now,expiresAt,user.userId]);
- if(!changed)throw Error('Share insert failed');
+ const token=newShareToken(),id=crypto.randomUUID(),expiresAt=now+input.days*DAY,hash=await digest(token);
+ // Egyetlen feltételes utasítás: a projekt aktív állapota, a projektenkénti korlát és az auth_version a beszúrással
+ // együtt dől el. Így a közben lomtárba tett projekt nem kap linket (ha a beszúrás előbb fut, a lomtár DELETE-je törli),
+ // és párhuzamos kérések sem lépik túl a korlátot. Az auth_version a users sorból jön: egy közben lezajlott jelszócsere
+ // után a link eleve érvénytelen.
+ // MySQL-en a párhuzamos INSERT…SELECT holtpontba futhat; az egyetlen, visszagörgetett utasítás biztonságosan megismételhető.
+ let changed=0;
+ for(let attempt=1;;attempt++){
+  try{changed=await db.run('INSERT INTO plan_shares (id,token_hash,owner_id,project_id,project_key,label,allow_pdf,auth_version,created_at,expires_at,last_viewed_at) SELECT ?,?,?,?,?,?,?,u.auth_version,?,?,NULL FROM users u WHERE u.id = ? AND EXISTS (SELECT 1 FROM plans p WHERE p.id = ? AND p.state = ?) AND (SELECT COUNT(*) FROM plan_shares s WHERE s.owner_id = u.id AND s.project_key = ? AND s.expires_at > ? AND s.auth_version = u.auth_version) < ?',[id,hash,user.userId,input.projectId,key,input.label,input.allowPdf?1:0,now,expiresAt,user.userId,key,'active',key,now,SHARE_PROJECT_LIMIT]);break}
+  catch(e){if(db.kind!=='mysql'||(e as {code?:string})?.code!=='ER_LOCK_DEADLOCK'||attempt>=4)throw e}
+ }
+ if(!changed){
+  // Nem került be: újraolvasva a pontos okot adjuk vissza (közben lomtárba/archívumba került, vagy betelt a korlát).
+  const again=await projectShareStatus(db,user,input.projectId);
+  if(again==='missing')return {ok:false,code:'SAVE_REQUIRED'};
+  if(again==='inactive')return {ok:false,code:'PROJECT_INACTIVE'};
+  if(again==='locked')return {ok:false,code:'SUBSCRIPTION_REQUIRED'};
+  if(await activeShareCount(db,user.userId,key,now)>=SHARE_PROJECT_LIMIT)return {ok:false,code:'SHARE_LIMIT'};
+  throw Error('Share insert failed');
+ }
  return {ok:true,token,share:{id,label:input.label,allowPdf:input.allowPdf,createdAt:now,expiresAt,lastViewedAt:null}};
 }
 
@@ -73,8 +88,12 @@ export type OpenShareResult={ok:true;view:SharedView}|{ok:true;pdf:true}|{ok:fal
 // A token csak SQL-paraméterként (hash) szerepel; JS-ben nincs token- vagy hash-összehasonlítás.
 export async function openShare(db:Database,req:Request,token:string,purpose:'view'|'pdf'):Promise<OpenShareResult>{
  const ip=clientIp(req);
- if(ip&&!await shareLimit(db,'share-ip',ip,SHARE_LIMITS.ip))return {ok:false,code:'RATE_LIMITED'};
+ // Hiányzó IP-fejlécnél (hibás proxybeállítás) közös keret: a nyilvános útvonal sosem marad korlát nélkül.
+ if(!ip&&!missingIpLogged){missingIpLogged=true;console.warn('Shared plan: missing client IP header; check the proxy configuration')}
+ if(!await shareLimit(db,'share-ip',shareIpKey(ip),SHARE_LIMITS.ip))return {ok:false,code:'RATE_LIMITED'};
  const now=Date.now();
+ // A lejárt keretsorok takarítása ritkán itt is fut, hogy sok különböző IP-ről érkező kérés se növelje a táblát korlátlanul.
+ if(Math.random()<SHARE_CLEANUP_RATE)await db.run('DELETE FROM auth_limits WHERE expires_at <= ?',[now]);
  const row=await db.first<{id:string;owner_id:string;project_id:string;project_key:string;allow_pdf:number;expires_at:number;last_viewed_at:number|null}>('SELECT s.id, s.owner_id, s.project_id, s.project_key, s.allow_pdf, s.expires_at, s.last_viewed_at FROM plan_shares s JOIN users u ON u.id = s.owner_id WHERE s.token_hash = ? AND s.expires_at > ? AND s.auth_version = u.auth_version',[await digest(token),now]);
  if(!row||!validProjectId(row.project_id)||row.project_key!==projectKey(row.owner_id,row.project_id))return {ok:false,code:'NOT_FOUND'};
  if(!await shareLimit(db,'share-link',row.id,SHARE_LIMITS.link))return {ok:false,code:'RATE_LIMITED'};

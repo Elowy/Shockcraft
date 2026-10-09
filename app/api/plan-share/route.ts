@@ -37,7 +37,7 @@ export async function POST(req:Request){
   let data;try{data=shareCreateSchema.parse(JSON.parse(raw))}catch(e){return Response.json({code:'INVALID',error:shareInputError(e)},{status:400,headers})}
   if(data.userId!==user.userId)return Response.json(ACCOUNT_CHANGED,{status:409,headers});
   // Az oldal címe a beszúrás előtt: hibás beállításnál nem marad árva, soha meg nem jelenő link.
-  const origin=publicOrigin();
+  let origin:string;try{origin=publicOrigin()}catch{console.error('Plan share failed: APP_ORIGIN is missing or invalid');return Response.json({error:UNAVAILABLE},{status:503,headers})}
   const result=await createShare(db,user,{projectId:data.projectId,label:data.label,days:data.days,allowPdf:data.allowPdf});
   if(!result.ok){const [status,error]=failures[result.code];return Response.json({code:result.code,error},{status,headers:result.code==='RATE_LIMITED'?{...headers,'Retry-After':'900'}:headers})}
   // A nyers token csak ebben a válaszban szerepel, egyszer.

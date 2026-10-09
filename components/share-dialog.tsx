@@ -10,7 +10,8 @@ import {createShare,fetchShares,revokeShare,type SharesResponse} from '@/lib/sha
 // Tulajdonosi megosztás: csak olvasható, lejáró, visszavonható link a szerverre mentett változathoz.
 // A dialógus a plans táblát nem írja, ezért az automatikus mentéshez nem kell hozzányúlni.
 type Props={userId:string;projectId:string;saved:boolean;dirty:boolean;busy:boolean};
-const when=(value:number)=>new Date(value).toLocaleString('hu-HU');
+// Percre pontos, rövid hónapnévvel: mobilon sem törik három sorra a lista meta-sora.
+const when=(value:number)=>new Date(value).toLocaleString('hu-HU',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
 export function ShareDialog({userId,projectId,saved,dirty,busy}:Props){
  const [open,setOpen]=useState(false),[loading,setLoading]=useState(false),[working,setWorking]=useState(false),[error,setError]=useState(''),[data,setData]=useState<SharesResponse|null>(null);
  const [label,setLabel]=useState(''),[days,setDays]=useState(String(DEFAULT_SHARE_DAYS)),[allowPdf,setAllowPdf]=useState(false),[link,setLink]=useState(''),[confirm,setConfirm]=useState<string|null>(null);
@@ -25,7 +26,7 @@ export function ShareDialog({userId,projectId,saved,dirty,busy}:Props){
  const status=data?.status,shares=data?.shares||[],limit=data?.limit||10,canPdf=!!data?.canPdf;
  const disabled=working||loading||!saved||status!=='active'||shares.length>=limit;
  return <><button className="share-button" disabled={busy||!userId} title={userId?'Csak olvasható link a tervhez':'A megosztáshoz jelentkezz be.'} aria-label="Terv megosztása" onClick={()=>toggle(true)}><Share2/><span>Megosztás</span></button>
- <Dialog open={open} onOpenChange={toggle}><DialogContent className="share-dialog"><DialogHeader><DialogTitle>Terv megosztása</DialogTitle><DialogDescription>Csak olvasható linket készíthetsz a megrendelőnek vagy egy kollégának. Bejelentkezés nélkül megnyitható, lejár, és bármikor visszavonható. A megtekintő a legutóbb mentett változatot látja, árajánlat és háttéralaprajz nélkül.</DialogDescription></DialogHeader>
+ <Dialog open={open} onOpenChange={toggle}><DialogContent className="share-dialog" onOpenAutoFocus={e=>{e.preventDefault();(e.currentTarget as HTMLElement|null)?.focus()}}><DialogHeader><DialogTitle>Terv megosztása</DialogTitle><DialogDescription>Csak olvasható linket készíthetsz a megrendelőnek vagy egy kollégának. Bejelentkezés nélkül megnyitható, lejár, és bármikor visszavonható. A megtekintő a legutóbb mentett változatot látja, árajánlat és háttéralaprajz nélkül.</DialogDescription></DialogHeader>
   {(!saved||status==='missing')&&<p className="warning">Előbb mentsd a projektet. A link mindig a szerverre mentett változatot mutatja.</p>}
   {saved&&dirty&&<p className="warning">Nem mentett módosításaid vannak: a megtekintő csak a mentés után látja őket.</p>}
   {status==='inactive'&&<p className="warning">A projekt archivált vagy lomtárban van, ezért a linkjei szünetelnek. Új link nem készíthető.</p>}
@@ -36,7 +37,7 @@ export function ShareDialog({userId,projectId,saved,dirty,busy}:Props){
     <label className="field"><span>Kinek szól? (csak te látod)</span><input aria-label="Kinek szól? (csak te látod)" value={label} maxLength={SHARE_LABEL_MAX} placeholder="pl. Kovács úr – megrendelő" disabled={working} onChange={e=>setLabel(e.target.value)}/></label>
     <Choice label="Érvényesség" value={days} onChange={setDays} items={SHARE_DAYS.map(d=>[String(d),d+' nap'] as [string,string])}/>
     <label className="share-check"><input type="checkbox" checked={allowPdf&&canPdf} disabled={!canPdf||working} onChange={e=>setAllowPdf(e.target.checked)}/>A megtekintő PDF-et is letölthet</label>
-    <small className="report-note">{canPdf?'A letöltést minden használatkor újra ellenőrizzük.':'Ennél a projektnél a letöltés engedélyezéséhez aktív havi előfizetés kell. Az ingyenes és az egyszer megvásárolt projekt előfizetés nélkül is engedélyezheti.'}</small>
+    {status==='active'&&<small className="report-note">{canPdf?'A letöltést minden használatkor újra ellenőrizzük.':'Ennél a projektnél a letöltés engedélyezéséhez aktív havi előfizetés kell. Az ingyenes és az egyszer megvásárolt projekt előfizetés nélkül is engedélyezheti.'}</small>}
     <button type="submit" className="primary" disabled={disabled}><Link2/>{working?'Folyamatban…':'Link létrehozása'}</button>
    </form>
    {link&&<div className="share-link-once" role="status"><input readOnly aria-label="Megosztási link" value={link} onFocus={e=>e.currentTarget.select()}/><button type="button" onClick={()=>void copy()}><Copy/> Link másolása</button><p>Ezt a linket csak most látod. Aki megkapja, bejelentkezés nélkül megnyithatja a lejáratig. Csak annak küldd el, akinek szól; ha rossz helyre került, vond vissza.</p></div>}

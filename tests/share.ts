@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {seed,validatePlan,type Floor} from '../lib/plan';
 import {newQuote} from '../lib/quote';
-import {DEFAULT_SHARE_DAYS,SHARE_LABEL_MAX,SHARE_TOKEN_KEY,SHARE_TOKEN_RE,floorViewBox,newShareToken,readShareToken,shareCreateSchema,shareInputError,shareLink,shareRevokeSchema,shareViewSchema,sharedPlan} from '../lib/share';
+import {DEFAULT_SHARE_DAYS,SHARE_LABEL_MAX,SHARE_TOKEN_KEY,SHARE_TOKEN_RE,floorViewBox,newShareToken,readShareToken,shareCreateSchema,shareInputError,shareIpKey,shareLink,shareRevokeSchema,shareViewSchema,sharedPlan} from '../lib/share';
 const U='11111111-1111-4111-8111-111111111111';
 const HU=['Érvénytelen projektazonosító.','A címke legfeljebb 80 karakter lehet.','A címke nem tartalmazhat vezérlő- vagy láthatatlan karaktert.','Az érvényesség 1, 7, 30 vagy 90 nap lehet.','Adj meg pontosan egy linket, vagy kérd az összes visszavonását.','A megadott adatok érvénytelenek.'];
 const error=(fn:()=>unknown)=>{try{fn()}catch(e){return shareInputError(e)}assert.fail('a séma elfogadta a hibás bemenetet')};
@@ -85,6 +85,16 @@ const big=floorViewBox(huge);assert.ok(big.w>=2000&&Number.isFinite(big.h),'3000
 const dims:Floor={...empty,dimensions:[{id:'m',name:'M',a:{x:100,y:100},b:{x:300,y:100},mode:'aligned',offset:-120}]},dv=floorViewBox(dims);
 assert.ok(dv.y<=100-120-80,'a méretvonal eltolása is a dobozban');
 
+// 8b. IP-keret kulcsa: IPv6 /64, leképezett IPv4, hiányzó fejléc.
+assert.equal(shareIpKey(''),'unknown');assert.equal(shareIpKey('  '),'unknown');
+assert.equal(shareIpKey('203.0.113.9'),'203.0.113.9');
+for(const ip of ['2001:db8:1:2::1','2001:DB8:0001:0002:ffff:ffff:ffff:ffff','[2001:db8:1:2::abcd]:443','2001:db8:1:2::1%eth0','2001:db8:1:2:3:4:5:6'])assert.equal(shareIpKey(ip),'2001:db8:1:2::/64',ip);
+assert.notEqual(shareIpKey('2001:db8:1:3::1'),shareIpKey('2001:db8:1:2::1'),'másik /64 másik kulcs');
+assert.equal(shareIpKey('::ffff:198.51.100.7'),'198.51.100.7');assert.equal(shareIpKey('::ffff:c633:6407'),'198.51.100.7');
+assert.equal(shareIpKey('2001:db8::'),'2001:db8:0:0::/64');
+for(const ip of ['1::2::3','zzzz::1','1:2:3:4:5:6:7:8:9','::ffff:999.1.1.1'])assert.ok(shareIpKey(ip).startsWith('v6:'),'érvénytelen IPv6 külön, nyers kulcsot kap: '+ip);
+assert.equal(shareIpKey('x'.repeat(500)+':1').length,67,'a nyers kulcs csonkolva');
+
 // 9. Statikus őrök.
 const read=(p:string)=>readFileSync(p,'utf8');
 for(const f of ['components/share-viewer.tsx','components/share-dialog.tsx','components/floor-drawing.tsx'])assert.ok(!read(f).includes('dangerouslySetInnerHTML'),f);
@@ -98,4 +108,14 @@ const client=read('lib/share-client.ts');
 assert.ok(client.includes("credentials:'omit'")&&client.includes("referrerPolicy:'no-referrer'"));
 const server=read('lib/share-server.ts');
 assert.ok(server.split('\n').filter(l=>l.includes('token_hash')).every(l=>/'[^']*token_hash[^']*'/.test(l)),'a token_hash csak SQL-szövegben szerepel');
-console.log('PASS: tervmegosztás – token, adatminimalizálás, sémák (csak magyar hibaüzenet), fragment-link, befoglaló doboz, statikus őrök.');
+// 10. Felületi őrök (mobil és tulajdonosi dialógus).
+const css=read('app/globals.css');
+assert.ok(css.includes('.share-section{display:grid;grid-template-columns:minmax(0,1fr)')&&css.includes('.share-section>*{min-width:0}'),'a megtekintő rácsa nem nyúlik a kapcsolási rajz szélességére');
+assert.ok(css.includes('.share-entry b{overflow-wrap:anywhere}'),'a hosszú címke törhető');
+assert.ok(read('components/plot-editor.tsx').includes("touchAction:readOnly?'auto':'none'"),'csak olvasható telken görgethető az oldal érintéssel');
+assert.ok(viewer.includes('<RouteRegister plan={plan} onLocate={locate} readOnly/>'),'a megtekintő nyomvonaljegyzéke nem ígér tulajdonságpanelt');
+const dialog=read('components/share-dialog.tsx');
+assert.ok(dialog.includes('onOpenAutoFocus'),'megnyitáskor nem ugrik fel a mobil billentyűzet');
+assert.ok(dialog.includes("status==='active'&&<small"),'archivált projektnél nincs félrevezető előfizetési szöveg');
+assert.ok(dialog.includes("minute:'2-digit'})")&&!dialog.includes("toLocaleString('hu-HU');"),'a lista dátuma percre pontos');
+console.log('PASS: tervmegosztás – token, adatminimalizálás, sémák (csak magyar hibaüzenet), fragment-link, befoglaló doboz, IP-kulcs, statikus és felületi őrök.');

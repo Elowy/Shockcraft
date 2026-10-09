@@ -9,7 +9,7 @@
   - **„A megtekintő PDF-et is letölthet”** kapcsoló, alapból kikapcsolva.
 - A link **egyszer jelenik meg**, másolható. A dialógus bezárásakor eltűnik; utólag nem kérhető le újra (a szerver csak a lenyomatát tárolja).
 - Az ablak listázza a projekt érvényes linkjeit: címke, létrehozás, lejárat, PDF-engedély, utolsó megnyitás. Egyenként vagy egyszerre visszavonhatók.
-- Projektenként legfeljebb **10 érvényes link** lehet. Link meghosszabbítása vagy szerkesztése nincs: helyette új linket kell készíteni, a régit visszavonni.
+- Projektenként legfeljebb **10 érvényes link** lehet (szigorú korlát, párhuzamos kéréseknél is). Link meghosszabbítása vagy szerkesztése nincs: helyette új linket kell készíteni, a régit visszavonni.
 - A funkció díjmentes. A megtekintéshez a projektnek elérhetőnek kell lennie (lásd Billing).
 
 ### A megtekintő oldal (`/megosztas#t=…`)
@@ -59,6 +59,8 @@ A megosztó felé a szüneteltetett link „Szünetel” címkével látszik. A 
 - **Fragment:** a token a `#t=` után utazik, így nem kerül szervernaplóba vagy Referer-be. Az API-hoz csak POST JSON-törzsben megy; a query, a path és a süti nem számít. A megtekintő beolvasás után eltávolítja a címsorból (`history.replaceState`), és csak a lap `sessionStorage`-ában tartja (`shockcraft-share-token`) a frissítéshez; localStorage-ba nem ír. 404 esetén a kulcsot törli.
 - **Egységes 404:** hibás formátum, ismeretlen, lejárt, visszavont, jelszócsere utáni, archivált, lomtáras, zárolt link és ismeretlen törzskulcs – betűre azonos válasz (`SHARE_UNAVAILABLE`).
 - **Rate limit** saját névtérben az `auth_limits` táblában, 15 perces ablakkal: `share-ip` 120, `share-link` 300, `share-create` 30. A 121. kérés 429 + `Retry-After: 900`. A bejelentkezés `ip:`/`email:` kerete érintetlen.
+- **IP-kulcs:** IPv6-címnél a /64-es előtag számít (a címek forgatása egy előfizetői tartományon belül nem ad új keretet), IPv4-be leképezett IPv6-nál az IPv4-cím. Hiányzó IP-fejlécnél a kérés közös `unknown` keretre számít (és a szerver egyszer figyelmeztetést naplóz) – a nyilvános útvonal sosem marad keret nélkül. A lejárt keretsorokat a nyilvános megnyitások ~1 %-a is takarítja.
+- **Atomikus létrehozás:** a link beszúrása egyetlen feltételes `INSERT … SELECT` utasítás, amely a projekt aktív állapotát, a 10-es korlátot és az `auth_version`-t is ellenőrzi. Így a létrehozással párhuzamos lomtárba helyezés után sem marad élő link, és párhuzamos kérések sem lépik túl a korlátot. MySQL-en az utasítás holtpont esetén legfeljebb négyszer fut.
 - **Fejlécek:**
   - nyilvános API (`/api/shared-plan`): `Cache-Control: private, no-store, max-age=0`, `X-Robots-Tag: noindex, nofollow, noarchive`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`;
   - tulajdonosi API (`/api/plan-share`): `private, no-store`, `Vary: Cookie`;
@@ -76,7 +78,9 @@ A megosztó felé a szüneteltetett link „Szünetel” címkével látszik. A 
 - A böngészőbe került tervadat fejlesztői eszközzel kinyerhető; ez ugyanaz a kliensoldali kapu-modell, mint a tulajdonos saját exportjánál (a PDF a böngészőben készül).
 - A visszavonás előtt megnyitott lap tartalma a megtekintőnél látható marad (a következő frissítésig).
 - A szüneteltetett ág futásideje eltérhet; ez csak a tokent birtokló számára árulkodó.
-- Irodai NAT mögött a 120 kérés / 15 perc IP-keret szűk lehet (a konstans hangolható). Node-on Nginx nélkül az `X-Real-IP` hamisítható – ez meglévő korlát.
+- Irodai NAT mögött a 120 kérés / 15 perc IP-keret szűk lehet (a konstans hangolható). Node-on Nginx nélkül az `X-Real-IP` hamisítható – ez meglévő korlát; az ajánlott Nginx-minta felülírja a fejlécet.
+- IPv6-on a /64-es kulcs egy nagyobb (pl. /48-as) tartomány birtokosát nem korlátozza; ő /64-enként külön keretet kap. Ez a tokenkitalálást (256 bit) nem teszi reálissá, csak az `auth_limits` írási terhelését növeli.
+- Ha a proxy nem adja át az IP-fejlécet (`X-Real-IP` Node-on, `CF-Connecting-IP` Cloudflare-en), minden megtekintő közös keretre kerül: a megtekintés gyorsan 429-re futhat. Ilyenkor a naplóban „missing client IP header” figyelmeztetés jelenik meg; a proxybeállítást kell javítani.
 
 ## Telepítés
 
@@ -92,7 +96,7 @@ A megosztó felé a szüneteltetett link „Szünetel” címkével látszik. A 
       curl -s -X POST -H 'Origin: https://<domain>' -H 'Content-Type: application/json' -d '{"token":"0000000000000000000000000000000000000000000000000000000000000000"}' -D - https://<domain>/api/shared-plan
 
   Az elsőnél `Cache-Control: no-store…`, `X-Frame-Options: DENY`, `Content-Security-Policy: frame-ancestors 'none'…`, `Referrer-Policy: no-referrer`, `X-Robots-Tag: noindex…` várható; a másodiknál 404 `SHARE_UNAVAILABLE` `no-store`, `noindex` és `no-referrer` fejlécekkel.
-- Az `APP_ORIGIN` legyen beállítva: a link ebből készül (hiánya esetén a létrehozás 503-at ad, árva sor nélkül).
+- Az `APP_ORIGIN` legyen beállítva: a link ebből készül (hiánya esetén a létrehozás 503-at ad, árva sor nélkül, a naplóban „APP_ORIGIN is missing or invalid”). Helyi fejlesztéshez: `CLOUDFLARE_INCLUDE_PROCESS_ENV=true APP_ORIGIN=http://localhost:5173 npm run dev`.
 
 ## Kód és teszt
 

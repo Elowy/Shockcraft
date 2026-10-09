@@ -120,7 +120,7 @@ export default function ShareViewer(){
   if(!plan)return null;
   return <div className="share-section">
    <div className="share-tabs" role="group" aria-label="Jegyzékek">{listTabs.map(([id,label])=><button key={id} className={listTab===id?'active':''} aria-pressed={listTab===id} onClick={()=>setListTab(id)}>{label}</button>)}</div>
-   {listTab==='circuits'?<CircuitReport plan={plan} onLocate={locate}/>:listTab==='routes'?<RouteRegister plan={plan} onLocate={locate}/>:<PhaseLoadReport plan={plan}/>}
+   {listTab==='circuits'?<CircuitReport plan={plan} onLocate={locate}/>:listTab==='routes'?<RouteRegister plan={plan} onLocate={locate} readOnly/>:<PhaseLoadReport plan={plan}/>}
   </div>;
  }
  return <div className="share-site"><PublicHeader/><main className="share-page">
