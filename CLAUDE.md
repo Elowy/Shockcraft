@@ -1,0 +1,383 @@
+# ShockCraft – fejlesztői útmutató (CLAUDE.md)
+
+## Mi ez az alkalmazás?
+
+**ShockCraft** egy magyar nyelvű, böngészőalapú villamos tervszerkesztő SaaS.
+Villanyszerelőknek és lakóépületek villamos tervein dolgozóknak készül.
+
+**Fő funkciók:**
+- Alaprajz-szerkesztő: szobák, falak, ajtók/ablakok, szerelvények (kapcsolók, dugaljak, RJ45, lámpakiállás, kötődoboz, lakáselosztó-jelölés)
+- Kábelnyomvonalak belső/külső vezetéssel, töréspontokkal, beépítési magassággal
+- Telek-nézet: bekötési pont, mérőhely, főelosztó, telki hálózat összekötésekkel
+- Lakáselosztó-tervező: kismegszakítók, FI-relék, PE/N/EPH elemek, modul-elrendezés soronként
+- Áramkörök és kábelvezetékek hozzárendelése szerelvényekhez és nyomvonalakhoz
+- PDF export (A4/A3, fekete-fehér, beágyazott NotoSans betűkészlet), SVG és JSON export
+- Anyaglista (Eszközök → Tervsegéd), nyomvonalhosszak ráhagyással
+- Árajánlat-PDF: tervből átvett tételek, anyagár, munkadíj, összesítés (fejlesztés alatt)
+- Többszintes projektek (épületek → szintek → helyiségek), közös telek-koordináta-rendszerrel
+- Vendég-mód (böngészőbe ment) és fiókos mód (D1/MySQL adatbázis)
+- Projektkezelés: mentés, verzióvédelem, névátírás, másolat, JSON import/export
+- Projekt életciklus: aktív / archivált / lomtár állapotok
+- Sötét/világos mód
+
+**Élő oldal:** https://shockcraft-villanytervezo.lollipopp23.chatgpt.site/
+
+---
+
+## Tech stack
+
+| Réteg | Technológia |
+|---|---|
+| Framework | Next.js 16 (App Router) + React 19 |
+| Language | TypeScript 5.9 |
+| Styling | Tailwind CSS v4, shadcn/ui, Radix UI |
+| Build | Vite 8 + vinext (Next.js–Cloudflare híd) |
+| Cloudflare deploy | Wrangler 4, Cloudflare Workers, D1 (SQLite) |
+| Node.js deploy | Node.js ≥ 22.13 (standalone Next.js) + MySQL |
+| ORM | Drizzle ORM |
+| PDF | jsPDF (vektoros, magyar betűkészlettel) |
+| Charts | Recharts |
+| Billing | Stripe (egyszeri vásárlás + havi előfizetés) |
+| Email | Resend (jelszóvisszaállítás, e-mail-visszaigazolás) |
+| Validation | Zod |
+| Auth | Saját: bcrypt jelszó, lejáró munkamenet-tokenek, rate limiting |
+
+---
+
+## Könyvtárszerkezet
+
+```
+app/                    Next.js App Router oldalak
+  layout.tsx            Gyökér layout (hu lang, CookieNotice)
+  page.tsx              Főoldal (marketing landing)
+  tervezo/page.tsx      A tervező szerkesztő (fő UI)
+  admin/page.tsx        Admin panel (Stripe, email beállítások)
+  api/                  API route-ok
+    auth/               Belépés, regisztráció, kijelentkezés, jelszócsere
+    plan/               Terv mentés/betöltés/lista
+    plan-history/       Verzióelőzmények
+    billing/            Stripe webhook, checkout, előfizetés
+    billing-profile/    Számlázási profil
+    stripe/             Stripe API
+    templates/          Sablonkönyvtár
+    transfer-access/    Projekthozzáférés-átvitel
+    account-email/      E-mail-visszaigazolás, -csere
+    backgrounds/        Háttéralaprajz upload/olvasás
+    admin/              Admin API (billing config, mail config)
+    health/             Health check endpoint
+
+components/             43 UI komponens
+  plan-editor.tsx       Fő rajzoló vászon (SVG alapú)
+  board-cabinet.tsx     Elosztó-tervező
+  plan-controls.tsx     Eszközválasztó, felső toolbar
+  circuit-designer.tsx  Áramkör-szerkesztő panel
+  pdf-dialog.tsx        PDF export dialógus
+  billing-dialog.tsx    Fizetési folyamat
+  account-menu.tsx      Fejléc fiókok menü
+  admin-billing.tsx     Admin Stripe konfig
+  admin-email.tsx       Admin Resend konfig
+  admin-invoicing.tsx   Admin számlázás konfig
+  quote-...tsx          Árajánlat komponensek
+
+lib/                    43 üzleti logika / utility modul
+  plan.ts               Plan schema (Zod), seed terv, validatePlan()
+  auth.ts               Session kezelés, bcrypt, rate limit
+  billing.ts            Projekt jogosultságok, Stripe config, grant logika
+  subscription-access.ts  Előfizetés státusz
+  pdf-export.ts         PDF generálás (jsPDF)
+  projects.ts           ProjectState, blankProject, removeStructure
+  quote.ts              Árajánlat számítás, syncQuote, quoteTotals
+  quote-schema.ts       Quote Zod schema
+  geometry.ts           Geometriai segédfüggvények
+  wall-snap.ts          Falhoz illesztés logika
+  board.ts              Elosztó modul típusok, validáció
+  board-size.ts         Elosztó méretek, boards(), boardSize()
+  schematic.ts          Kapcsolási rajz generálás
+  plan-tools.ts         Anyaglista (materialList), keresés
+  circuit-assignment.ts Áramkör-hozzárendelés
+  route-points.ts       Nyomvonal töréspontok
+  architecture.ts       Ajtók/ablakok Zod schema, validateArchitecture
+  dimensions.ts         Méretvonalak schema és geometria
+  background.ts         Háttéralaprajz schema
+  local-projects.ts     Vendég (localStorage) projekt kezelés
+  plan-api.ts           Kliens oldali API hívások
+  plan-versions.ts      Verzióvédelem logika
+  secrets.ts            seal/unseal (titkosított admin config)
+  stripe-payments.ts    Stripe egyszeri fizetés
+  stripe-subscriptions.ts  Stripe előfizetés kezelés
+  draft-backup.ts       Ideiglenes szerkesztés megőrzés
+  transfer-access.ts    Projekthozzáférés-átvitel
+  templates.ts          Sablon könyvtár
+  structure-copy.ts     Szint/épület másolás
+  device-copy.ts        Szerelvény másolás
+  panel-link.ts         Telki elosztó ↔ alaprajzi jelölés összekötés
+  utils.ts              cn() class merge
+
+db/
+  schema.ts             Drizzle ORM séma (D1/SQLite)
+  database.ts           DB kapcsolat (D1 vagy MySQL)
+  mysql-config.ts       MySQL adapter beállítás
+  mysql-schema.sql      MySQL DDL
+  plan-store.ts         Terv read/write D1/MySQL felett
+  node-env.ts           cloudflare:workers polyfill Node.js-hez
+
+worker/                 Cloudflare Worker entry
+
+scripts/
+  run-framework.mjs     Dev/build wrapper (SHOCKCRAFT_TARGET env alapján)
+  build-node.mjs        Node.js build
+  start-node.mjs        Node.js prod indítás
+  sites-env.mjs         D1/R2 binding injektálás
+  install-ci.mjs        CI npm install
+  mysql-setup.mjs       MySQL séma inicializálás
+
+deploy/
+  nginx.conf            Nginx reverse proxy konfig
+  shockcraft.service    systemd service unit
+  env.production.example  Env változók példa
+
+docs/                   Feature dokumentáció (Markdown)
+  BACKLOG.md            Nyitott fejlesztési feladatok
+  telepites.md          VPS telepítési útmutató
+  stripe.md             Stripe webhook és admin beállítás
+  email.md              Resend beállítás
+  mysql.md              MySQL migráció és beállítás
+
+tests/
+  auth-flow.mjs         Auth integrációs teszt (lokális Worker ellen)
+  mysql-config.mjs      MySQL konfigellenőrzés
+```
+
+---
+
+## Fejlesztés és build
+
+```bash
+# Előfeltétel: Node.js >= 22.13
+
+npm run install:ci      # CI-barát telepítés
+npm run dev             # Dev szerver: http://localhost:5173
+npm run build           # Cloudflare Sites build (dist/)
+npm run build:node      # Node.js build (dist/, standalone)
+npm run start           # Sites preview (Wrangler local)
+npm run start:node      # Node.js prod (igényel .env.production és MySQL-t)
+npm run lint            # ESLint
+npm run db:generate     # Drizzle migrációk generálása
+```
+
+### Lokális D1 migrációk (egyszer kell alkalmazni, build után)
+
+```bash
+node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js \
+  d1 execute DB --local --config dist/server/wrangler.json \
+  --persist-to .wrangler/state --file drizzle/0000_perfect_absorbing_man.sql
+
+node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js \
+  d1 execute DB --local --config dist/server/wrangler.json \
+  --persist-to .wrangler/state --file drizzle/0001_omniscient_iceman.sql
+```
+
+### Auth integrációs teszt
+
+```bash
+node tests/auth-flow.mjs   # lokális Worker + D1 szükséges, http://127.0.0.1:5180
+```
+
+---
+
+## Adatbázis
+
+### Séma – főbb táblák
+
+| Tábla | Leírás |
+|---|---|
+| `users` | Felhasználók (id, email, name, passwordHash, emailVerifiedAt, authVersion) |
+| `sessions` | Munkamenetek (tokenHash, userId, expiresAt, authVersion) |
+| `auth_limits` | Rate limiting (key=hash(email/ip+időbucket), attempts, expiresAt) |
+| `plans` | Tervek (id=projectKey, data JSON, revision, updatedAt, state) |
+| `plan_versions` | Verzióelőzmények (projectId, revision, data, savedAt) |
+| `template_libraries` | Felhasználói sablon könyvtárak |
+| `billing_settings` | Stripe konfig (titkosítva, admin panelről állítható) |
+| `billing_grants` | Projekt jogosultságok (free / live / sub_live mode) |
+| `billing_orders` | Stripe rendelések |
+| `billing_subscriptions` | Stripe előfizetések |
+| `mail_settings` | Resend API konfig (titkosítva) |
+| `account_tokens` | E-mail-visszaigazolás / jelszócsere tokenek |
+| `billing_profiles` | Számlázási profilok |
+| `invoice_jobs` | Számla-generálási feladatok (queue) |
+
+### Projekt kulcsok
+
+```
+account:{userId}                  ← default (első ingyenes) projekt
+account:{userId}:project:{UUID}   ← többletprojektek
+```
+
+### Cloudflare D1 vs MySQL
+
+- **D1**: Cloudflare Sites deploy esetén automatikus. Helyi dev: `.wrangler/state`.
+- **MySQL**: `MYSQL_URL` szerver-oldali secret beállításával aktiválható. Node.js deploy esetén kötelező.
+- A kódban `db.kind === 'mysql'` elágazások kezelik az eltérő SQL szintaxist (pl. `INSERT IGNORE INTO` vs `ON CONFLICT DO NOTHING`).
+
+---
+
+## Autentikáció
+
+- Saját e-mail/jelszó rendszer, ChatGPT-fiók nem szükséges.
+- Jelszó: bcrypt (cost=12), min 12 karakter, max 72 byte.
+- Token: 32 byte crypto random hex, SHA-256 hash tárolva DB-ben, 7 napos lejárat.
+- Cookie: `__Host-shockcraft_session` (HTTPS éles), `shockcraft_session` (localhost).
+- `authVersion`: jelszócsere vagy globális kijelentkezés minden munkamenetet invalidál.
+- Rate limit: 12 kísérlet/15 perc/email cím, 40/IP. `auth_limits` tábla, időbucket alapú.
+- CSRF: `sameOrigin()` ellenőrzés (Origin header + Sec-Fetch-Site: cross-site tiltva).
+
+---
+
+## Billing (Stripe)
+
+```
+MONTHLY_PRICE = 2 490 Ft/hó  → korlátlan projekt + export
+PROJECT_PRICE = 3 490 Ft     → egy extra projekthely egyszeri díjért
+```
+
+**Jogosultság-logika (`lib/billing.ts`):**
+1. Minden usernek van egy `free` grant az első projekthez (`ensureFreeGrant`).
+2. Aktív előfizetéssel: új projektek automatikusan `sub_live` grant-ot kapnak.
+3. Előfizetés nélkül: vásárolt `live` grant-ok foglalhatók le projektekhez.
+4. `projectAccessChecker()`: closuret ad vissza, amely project key-re eldönti az elérhetőséget.
+5. Admin user (`ADMIN_USER_ID` env): test Stripe mode is elérhető az admin panelen.
+
+**Backlog:** export jogosultság-fix – ingyenes és egyszeri vásárolt projekteknél az export ne igényeljen előfizetést (lásd: `docs/BACKLOG.md`).
+
+---
+
+## Tervfájl-séma (`lib/plan.ts`)
+
+A teljes terv egy Zod-dal validált JSON objektum (`planSchema`):
+
+```
+Plan {
+  version: 1
+  name: string
+  quote?: Quote               ← árajánlat (opcionális)
+  plot: {                     ← telektérkép
+    name, w, h                ← méter egységek
+    nodes: SiteNode[]         ← bekötési pont, mérő, főelosztó, lakáselosztó, alelosztó
+    routes: SiteRoute[]       ← telki összekötések (underground/surface/overhead)
+  }
+  buildings: Building[] {
+    id, name, x, y, w, h      ← telken belüli pozíció (méter)
+    floors: Floor[] {
+      id, name
+      elevation               ← szintmagasság méterben
+      rooms: Room[]           ← téglalap szobák (pixel, 40px = 1m)
+      walls: Wall[]           ← szabad falszakaszok (a→b pontok)
+      devices: Device[]       ← szerelvények (kind, x, y, angle, height cm)
+      routes: Route[]         ← kábelnyomvonalak (points[], mode, planeHeight cm)
+      background?: Background ← háttéralaprajz kép
+      dimensions?: Dimension[]← méretvonalak
+    }
+    board?: {rows, modulesPerRow}  ← fő elosztó mérete (max 12×36)
+    extraBoards?: Board[]          ← extra elosztók (max 19)
+  }
+  circuits: Circuit[]         ← áramkörök (phase L1/L2/L3/3P, rating, curve B/C/D, rcd)
+  modules: Module[]           ← elosztó modulok (type, width 1-8, row, slot)
+  boardWires: BoardWire[]     ← elosztón belüli bekötések
+}
+```
+
+**Szerelvény `kind` értékek:**
+`socket`, `double`, `switch1`, `switch2`, `switch5`, `switch6`, `switch7`, `rj45`, `phone`, `light`, `box`, `panel`
+
+---
+
+## Koordináta-rendszer
+
+- **Alaprajz:** pixel egységek, **40 px = 1 méter**
+- **Telektérkép:** méter egységek
+- **Magasságok:** centiméterben (beépítési magasság, nyomvonal síkmagasság, szabad végpontok)
+- **Szintmagasság (elevation):** méterben
+- Közös telek-origó: az épületek x/y pozíciója méterben a telek (0,0) pontjához képest
+
+---
+
+## PDF export
+
+- Motor: **jsPDF**, vektoros output, A4 vagy A3 fekvő, 100%-os nyomtatás = helyes méretarány
+- Betűkészlet: **NotoSans** (beágyazott TTF, teljes magyar ékezet-támogatás)
+- Scope: `floor`, `plot`, `board`, `all`, `single`, `multi`
+- Tartalom: alaprajz + telek rajz + elosztó kapcsolási rajz + szerelvényjegyzék + nyomvonaljegyzék + áramkörlista
+- Méretarány-jelző és dátum minden oldalon
+- Export aktív havi előfizetéshez kötött (backlog: ingyenes/egyszeri projekt kivétel)
+
+---
+
+## Deployment
+
+### Cloudflare Sites (alapértelmezett)
+
+```bash
+npm run build   # → dist/
+# Cloudflare Pages/Sites deploy a dist/ könyvtárból
+# D1 adatbázis a Cloudflare dashboardon konfigurálva
+```
+
+### Node.js / VPS
+
+```bash
+npm run build:node   # SHOCKCRAFT_TARGET=node → dist/ (standalone Next.js)
+npm run start:node   # igényel .env.production és MySQL-t
+```
+
+Részletes útmutató: `docs/telepites.md`, minták: `deploy/` könyvtár.
+
+### Szükséges environment változók
+
+```env
+# Mindkét deploy típusnál
+APP_ORIGIN=https://shockcraft-villanytervezo.lollipopp23.chatgpt.site
+ADMIN_USER_ID=<user UUID az adatbázisból>
+SESSION_SECRET=<64 hex karakter a seal/unseal-hez>
+
+# Node.js / MySQL deploy esetén kötelező
+MYSQL_URL=mysql://user:pass@host:3306/dbname
+SHOCKCRAFT_NODE_RUNTIME=1
+
+# Opcionális (admin panelről is beállítható DB-ben)
+# Stripe és Resend kulcsok
+```
+
+---
+
+## Fontos fejlesztési elvek
+
+### Nyelv
+Az alkalmazás **teljesen magyar nyelvű**. UI szövegek, validációs üzenetek, PDF tartalom, API hibaüzenetek, kommentek – mind magyarul. Új fejlesztésnél is magyarul írj felhasználó felé irányuló szövegeket.
+
+### Két build target
+A `SHOCKCRAFT_TARGET` env változó dönti el:
+- nem definiált → **Cloudflare Sites** (Vite + Wrangler + D1)
+- `node` → **Node.js standalone** (MySQL kötelező)
+
+A `cloudflare:workers` import Node.js build esetén `db/node-env.ts` fájlra van aliasra a vite.config.ts-ben.
+
+### Verzióvédelem
+A tervek `revision` számot kapnak. PUT API ellenőrzi, hogy a kliens a legfrissebb verziót írja-e felül (`plan_versions` tábla). Párhuzamos szerkesztést véd.
+
+### Admin panel
+Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja egyezik az `ADMIN_USER_ID` env változóval. Ellenőrzés: `isAdmin()` a `lib/billing.ts`-ben.
+
+### Tesztelés
+- `tests/auth-flow.mjs` – teljes auth flow integrációs teszt lokális Worker ellen
+- `tests/mysql-config.mjs` – MySQL kapcsolat ellenőrzés
+- Unit tesztek nincsenek; a `validatePlan()` (`lib/plan.ts`) az elsődleges validációs pont
+
+---
+
+## Nyitott feladatok (docs/BACKLOG.md)
+
+1. **Export jogosultság-fix** – ingyenes és egyszeri projektekhez ne kelljen előfizetés az exporthoz. Érintett: billing grant logika, összes export endpoint (JSON, SVG, PDF, CSV, árajánlat-PDF). Részletes elfogadási feltételek a backlogban.
+
+2. **Árajánlat-PDF** (folyamatban) – tervből átvett anyaglista, anyagár + munkadíj, ÁFA-kezelés, összesítés, PDF export. Kód: `lib/quote.ts`, `lib/quote-schema.ts`, `components/quote-*.tsx`.
+
+3. **Tervezett:** ügyfél- és feladatkezelés, tervmegosztás/együttműködés, gyártói termékkatalógus, fázisterhelés-összesítés, szakmailag ellenőrzött villamos méretezés.

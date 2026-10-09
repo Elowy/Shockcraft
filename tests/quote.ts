@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {seed,validatePlan} from '../lib/plan';
-import {newQuote,syncQuote,addQuoteLine,quoteTotals,quoteIssues,lineTotal,quoteSource} from '../lib/quote';
+import {newQuote,syncQuote,addQuoteLine,quoteTotals,quoteIssues,lineTotal,quoteSource,travelCost} from '../lib/quote';
 import {quoteSchema} from '../lib/quote-schema';
 const plan=validatePlan(structuredClone(seed)),before=JSON.stringify(plan),q=syncQuote(plan,newQuote());
 assert.ok(q.lines.length>0);assert.equal(q.sourceSignature,quoteSource(plan));assert.equal(JSON.stringify(plan),before);
@@ -13,6 +13,13 @@ assert.equal(quoteTotals({...test,vat:'AAM'}).vat,0);assert.equal(quoteTotals({.
 assert.equal(lineTotal({...custom,quantity:.333,material:10.01,labor:0},test).material,3.33);
 assert.equal(quoteTotals({...test,lines:[{...custom,material:null}]}).unpriced,1);assert.equal(quoteTotals({...test,lines:[{...custom,material:null,included:false}]}).unpriced,0);
 assert.ok(quoteIssues(newQuote()).length>0);
+// Travel: added after discount, before VAT; not discounted.
+assert.equal(travelCost(newQuote()),0);assert.equal(quoteTotals(test).travel,0);
+const km={...test,travel:{mode:'per_km' as const,km:42.5,ratePerKm:150,fixed:9999}};assert.equal(travelCost(km),6375);
+const tk=quoteTotals(km);assert.equal(tk.net,20425);assert.equal(tk.travel,6375);assert.equal(tk.vat,7236);assert.equal(tk.total,34036);
+const fx={...test,vat:'AAM' as const,travel:{mode:'fixed' as const,km:100,ratePerKm:100,fixed:8000}};assert.equal(quoteTotals(fx).travel,8000);assert.equal(quoteTotals(fx).total,28425);
+assert.equal(quoteTotals({...km,discount:100}).total,8096.25);
+assert.throws(()=>quoteSchema.parse({...km,travel:{...km.travel,km:-1}}));
 for(const bad of [{...test,discount:-1},{...test,allowance:51},{...test,date:'2026-02-30'},{...test,date:'2026-10-09',validUntil:'2026-10-08'},{...test,lines:[custom,custom]},{...test,lines:[{...custom,labor:Infinity}]}])assert.throws(()=>quoteSchema.parse(bad));
 const persisted=validatePlan(JSON.parse(JSON.stringify({...plan,quote:test})));assert.deepEqual(persisted.quote,test);assert.equal(validatePlan(seed).quote,undefined);
 const maximum={...test,lines:Array.from({length:500},()=>({...addQuoteLine(),quantity:10000,material:1000000,labor:1000000}))};assert.ok(Number.isFinite(quoteTotals(maximum).total));
