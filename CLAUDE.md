@@ -21,6 +21,7 @@ Villanyszerelőknek és lakóépületek villamos tervein dolgozóknak készül.
 - Projektkezelés: mentés, verzióvédelem, névátírás, másolat, JSON import/export
 - Projekt életciklus: aktív / archivált / lomtár állapotok
 - Ügyfelek és teendők (fiókszintű): ügyféltörzs, projekt–ügyfél hozzárendelés, határidős teendők, Esedékes nézet, árajánlat-kitöltés ügyféladatokból
+- Tervmegosztás: csak olvasható, lejáró, visszavonható link (`/megosztas#t=…`) a legutóbb mentett tervről, opcionális PDF-engedéllyel
 - Sötét/világos mód
 
 **Élő oldal:** https://shockcraft-villanytervezo.lollipopp23.chatgpt.site/ (a `villanyrajz.hu` domain lefoglalva, még nincs élesítve)
@@ -54,6 +55,7 @@ app/                    Next.js App Router oldalak
   layout.tsx            Gyökér layout (hu lang, CookieNotice)
   page.tsx              Főoldal (marketing landing)
   tervezo/page.tsx      A tervező szerkesztő (fő UI)
+  megosztas/page.tsx    Megosztott terv, csak olvasható nyilvános nézet (#t=<token>, force-dynamic)
   admin/page.tsx        Admin panel (Stripe, email beállítások)
   api/                  API route-ok
     auth/               Belépés, regisztráció, kijelentkezés, jelszócsere
@@ -64,6 +66,8 @@ app/                    Next.js App Router oldalak
     stripe/             Stripe API
     templates/          Sablonkönyvtár
     workbook/           Ügyfél- és teendő-munkafüzet (GET/PUT)
+    plan-share/         Tervmegosztás – tulajdonosi linkkezelés (GET/POST/DELETE)
+    shared-plan/        Tervmegosztás – nyilvános nézet (POST, munkamenet nélkül)
     transfer-access/    Projekthozzáférés-átvitel
     account-email/      E-mail-visszaigazolás, -csere
     backgrounds/        Háttéralaprajz upload/olvasás
@@ -83,6 +87,9 @@ components/             43 UI komponens
   admin-invoicing.tsx   Admin számlázás konfig
   quote-...tsx          Árajánlat komponensek
   workbook-*.tsx        Ügyfelek és teendők dialógus (dialog, tasks, clients)
+  share-dialog.tsx      Tervmegosztás – tulajdonosi ablak (link létrehozása, lista, visszavonás)
+  share-viewer.tsx      Tervmegosztás – megtekintő oldal (alaprajz, telek, elosztó, jegyzékek)
+  floor-drawing.tsx     Közös alaprajzi rajz (FloorShapes, RoomLabels, ScaleBar, PlanLegend) – szerkesztő és megtekintő
 
 lib/                    43 üzleti logika / utility modul
   plan.ts               Plan schema (Zod), seed terv, validatePlan()
@@ -117,6 +124,9 @@ lib/                    43 üzleti logika / utility modul
   workbook.ts           Ügyfél/teendő Zod-sémák, szabályok, esedékesség (tiszta modul)
   workbook-server.ts    Projektállapotok a munkafüzet-ellenőrzéshez (szerver)
   workbook-client.ts    /api/workbook kliens hívások
+  share.ts              Tervmegosztás: token, sémák, adatminimalizálás (sharedPlan), floorViewBox (tiszta modul)
+  share-server.ts       Tervmegosztás szerveroldal: rate limit, állapot, lista, létrehozás, visszavonás, megnyitás
+  share-client.ts       /api/plan-share és /api/shared-plan kliens hívások (fail closed)
   structure-copy.ts     Szint/épület másolás
   device-copy.ts        Szerelvény másolás
   panel-link.ts         Telki elosztó ↔ alaprajzi jelölés összekötés
@@ -176,7 +186,7 @@ npm run db:generate     # Drizzle migrációk generálása
 
 ### Lokális D1 migrációk (egyszer kell alkalmazni, build után)
 
-Friss adatbázisnál a `drizzle/0000…0009` fájlokat mind sorrendben kell alkalmazni (a minta két parancsa a `--file` cseréjével); meglévő helyi adatbázisnál csak az újakat (legutóbb: `drizzle/0009_wonderful_lucky_pierre.sql`, `workbooks` tábla).
+Friss adatbázisnál a `drizzle/0000…0010` fájlokat mind sorrendben kell alkalmazni (a minta két parancsa a `--file` cseréjével); meglévő helyi adatbázisnál csak az újakat (legutóbb: `drizzle/0010_late_king_cobra.sql`, `plan_shares` tábla; előtte `drizzle/0009_wonderful_lucky_pierre.sql`, `workbooks` tábla).
 
 ```bash
 node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js \
@@ -209,6 +219,7 @@ node tests/auth-flow.mjs   # lokális Worker + D1 szükséges, http://127.0.0.1:
 | `plan_versions` | Verzióelőzmények (projectId, revision, data, savedAt) |
 | `template_libraries` | Felhasználói sablon könyvtárak |
 | `workbooks` | Felhasználónkénti ügyfél- és teendő-munkafüzet (JSON + revision) |
+| `plan_shares` | Tervmegosztási linkek (token_hash = SHA-256, owner_id FK CASCADE, project_id/project_key, label, allow_pdf, auth_version, created/expires/last_viewed_at ms) |
 | `billing_settings` | Stripe konfig (titkosítva, admin panelről állítható) |
 | `billing_grants` | Projekt jogosultságok (free / live / sub_live mode) |
 | `billing_orders` | Stripe rendelések |
@@ -384,6 +395,8 @@ Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja e
 - `tests/mysql-config.mjs` – MySQL kapcsolat ellenőrzés
 - `tests/workbook.ts` – ügyfél/teendő lib-teszt: `node_modules/.bin/tsx tests/workbook.ts`
 - `tests/workbook-api.ts` – `/api/workbook` route-teszt memóriabeli SQLite-on: `node_modules/.bin/esbuild tests/workbook-api.ts --bundle --platform=node --format=esm --external:mysql2 --alias:cloudflare:workers=./db/node-env.ts --outfile=.sites-runtime/workbook-api.mjs && env -u MYSQL_URL node --no-warnings .sites-runtime/workbook-api.mjs`
+- `tests/share.ts` – tervmegosztás lib-teszt (token, sémák, adatminimalizálás, statikus őrök): `node_modules/.bin/tsx tests/share.ts`
+- `tests/share-api.ts` – `/api/plan-share` és `/api/shared-plan` route-teszt memóriabeli SQLite-on: `node_modules/.bin/esbuild tests/share-api.ts --bundle --platform=node --format=esm --external:mysql2 --alias:cloudflare:workers=./db/node-env.ts --outfile=.sites-runtime/share-api.mjs && env -u MYSQL_URL node --no-warnings .sites-runtime/share-api.mjs`
 - Unit tesztek nincsenek; a `validatePlan()` (`lib/plan.ts`) az elsődleges validációs pont
 
 ---
@@ -398,4 +411,6 @@ Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja e
 
 4. **Ügyfél- és feladatkezelés** (kész) – fiókszintű `workbooks` JSON-munkafüzet revisionnel: ügyféltörzs, projekt–ügyfél hozzárendelés, teendők (projekt / ügyfél / általános), Esedékes nézet és jelvény, árajánlat-kitöltés. Archivált/lomtáras projektre 409, zároltra 402, nem mentettre 409; törlés mindig engedett; a `plans` táblát nem írja. Kód: `lib/workbook*.ts`, `app/api/workbook/route.ts`, `components/workbook-*.tsx`, doksi: `docs/ugyfelek-teendok.md`.
 
-5. **Tervezett:** tervmegosztás/együttműködés, gyártói termékkatalógus, szakmailag ellenőrzött villamos méretezés.
+5. **Tervmegosztás** (kész, 1. lépés) – csak olvasható, lejáró (1/7/30/90 nap), visszavonható link a legutóbb mentett változatról; `/megosztas#t=<token>`, csak a token SHA-256 lenyomata tárolódik; a megtekintő nem kap árajánlatot, hátteret, tulajdonosi vagy belső azonosítót; PDF/SVG csak `allow_pdf` ÉS a tulajdonos aktuális `exportAccess`-e mellett; archiválás/zárolás szüneteltet, lomtár/jelszó-visszaállítás/fióktörlés megszüntet; egységes 404, saját rate limit (`share-ip`/`share-link`/`share-create`). Kód: `lib/share*.ts`, `app/api/plan-share`, `app/api/shared-plan`, `app/megosztas`, `components/share-*.tsx`, `components/floor-drawing.tsx`, doksi: `docs/tervmegosztas.md`.
+
+6. **Tervezett:** megosztás 2. lépés (megjegyzések, háttér a megosztott nézetben, link meghosszabbítása), közös szerkesztés más fiókból, gyártói termékkatalógus, szakmailag ellenőrzött villamos méretezés.

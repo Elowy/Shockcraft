@@ -93,6 +93,8 @@ A DNS-ben irányítsd a választott aldomaint a VPS-re. Telepíts érvényes HTT
 
 Az Nginx lényege: a 443-as HTTPS-kérések továbbítása a 127.0.0.1:3000 címre. A böngésző az Nginxet éri el. A Node-port ne legyen nyilvánosan elérhető. A mintában a proxy megőrzi a Host fejlécet, felülírja az IP-fejléceket, nem gyorsítótáraz, és nem puffereli az alkalmazás válaszait. A 3 MB-os kéréskorlát mellett az alkalmazás továbbra is legfeljebb 2 MB-os tervet fogad.
 
+A `proxy_cache` maradjon `off`, és Cloudflare mögött se legyen „Cache Everything” vagy edge-TTL szabály a `/api/*` és a `/megosztas` útvonalon: a megosztott terv és a fiókadatok soha nem kerülhetnek közös gyorsítótárba. A megosztott oldal fejléceit telepítés után `curl -sI https://<domain>/megosztas` paranccsal ellenőrizd: `Cache-Control: no-store`, `X-Frame-Options: DENY`, `Content-Security-Policy` (`frame-ancestors 'none'`), `Referrer-Policy: no-referrer` és `X-Robots-Tag: noindex` várható (részletek: [tervmegosztás](tervmegosztas.md)).
+
 A sablon telepítése után az Nginx beállítását ellenőrizd, és csak sikeres ellenőrzés után töltsd újra:
 
 ```bash
