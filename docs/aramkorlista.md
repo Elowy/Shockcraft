@@ -11,4 +11,4 @@ Kattints egy szerelvényre, nyomvonalra vagy elosztókészülékre a megnyitás�
 
 A hosszösszesítés csak a kiválasztott áramkörhöz rendelt alaprajzi nyomvonalakat tartalmazza, azok függőleges szakaszaival együtt. Nem számol telki nyomvonalat, elosztón belüli vezetékhosszt, ráhagyást vagy az egyes erek számával felszorzott hosszt. Nem végez méretezést és nem állapít meg terhelhetőséget.
 
-A nézet minden hozzáférhető projektben használható. Nem tartalmaz exportot; az alkalmazás meglévő import- és exportfunkciói továbbra is aktív havi előfizetést igényelnek.
+A nézet minden hozzáférhető projektben használható. Nem tartalmaz exportot. Az exportálás projektenként jár (ingyenes és megvásárolt projekt előfizetés nélkül, előfizetéses projekt aktív előfizetéssel); az importálás havi előfizetéshez kötött.

@@ -10,4 +10,4 @@ Kijelölés módban a vonal húzásával a teljes méretezés, a végpontok kör
 
 A méret mindig a pontokból számítódik; nem írható felül tetszőleges felirattal. A mért pontok önállóak, nem kapcsolódnak automatikusan a szobákhoz vagy a szerelvényekhez. A háttérkép megfelelő kalibrálásáról külön gondoskodni kell.
 
-A méretek a projekttel együtt mentődnek, módosításuk és törlésük visszavonható. Megjelennek az alaprajzi és az összesített PDF-ben, az SVG-ben és a JSON-adatokban. Az exportálás és importálás továbbra is aktív havi előfizetéshez kötött. Régebbi, méretvonalak nélküli projektek továbbra is megnyithatók.
+A méretek a projekttel együtt mentődnek, módosításuk és törlésük visszavonható. Megjelennek az alaprajzi és az összesített PDF-ben, az SVG-ben és a JSON-adatokban. Az exportálás projektenként jár (ingyenes és megvásárolt projekt előfizetés nélkül, előfizetéses projekt aktív előfizetéssel); az importálás havi előfizetéshez kötött. Régebbi, méretvonalak nélküli projektek továbbra is megnyithatók.

@@ -19,7 +19,7 @@ A másolat külön azonosítókat kap. Módosítása nem változtatja meg a sabl
 
 A kereső név szerint szűr. A kiválasztott sablon átnevezhető vagy archiválható. Az **Archivált sablonok** kapcsolóval előhívható és visszaállítható. Ezek a könyvtári műveletek nem szerepelnek a projekt visszavonási előzményeiben. Több megnyitott ablak egyidejű mentésekor az elavult módosítást a szerver elutasítja; ilyenkor frissítsd a listát és ismételd meg a módosítást.
 
-A sablonkönyvtár belső szerkesztőfunkció, nem fájlexport vagy fájlimport. Nem hoz létre új projektet és nem módosítja a projektek fizetési jogosultságait. A fájlexport és fájlimport továbbra is havi előfizetéshez kötött.
+A sablonkönyvtár belső szerkesztőfunkció, nem fájlexport vagy fájlimport. Nem hoz létre új projektet és nem módosítja a projektek fizetési jogosultságait. Az exportálás projektenként jár (ingyenes és megvásárolt projekt előfizetés nélkül, előfizetéses projekt aktív előfizetéssel); az importálás havi előfizetéshez kötött.
 
 ## Saját tárhely frissítése
 

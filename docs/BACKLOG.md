@@ -1,8 +1,8 @@
 # ShockCraft fejlesztési backlog
 
-## Következő jogosultsági módosítás – export projektenként
+## Export projektenként – kész
 
-Állapot: felvéve, még nincs élesítve. Kérés: az első ingyenes projekthely és minden egyszeri díjért megvásárolt projekthely exportja ne függjön a havi előfizetéstől.
+Állapot: megvalósítva (`exportAccess`, `GET /api/transfer-access?purpose=export`, `tests/export-access.ts`). A jogi szövegek végleges jogi felülvizsgálata az üzemeltető feladata. Kérés: az első ingyenes projekthely és minden egyszeri díjért megvásárolt projekthely exportja ne függjön a havi előfizetéstől.
 
 Elfogadási feltételek:
 
@@ -15,9 +15,9 @@ Elfogadási feltételek:
 - Ellenőrizni kell az admin-, archivált, lomtáras, új még nem mentett, más felhasználóhoz tartozó és előfizetésről egyszeri vásárlásra váltott projektek eseteit is.
 - Frissíteni kell a főoldal, csomagleírások, súgók és érintett jogi szövegek exportálásról szóló tájékoztatását.
 
-## Folyamatban
+## Kész
 
-- Árazás és ügyfélnek készíthető árajánlat: tervből átvett tételek, anyagár, munkadíj, saját tételek, összesítés, PDF.
+- Árazás és ügyfélnek készíthető árajánlat: tervből átvett tételek, anyagár, munkadíj, saját tételek, útiköltség (km × Ft/km vagy fix), összesítés, PDF.
 
 ## További ütemezett fejlesztések
 

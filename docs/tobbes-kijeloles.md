@@ -15,4 +15,4 @@ A nyomvonal bekötött vége követi a mozgatott szerelvényt. A ki nem jelölt 
 
 Egy húzás vagy a panel Mozgatás gombja egyetlen visszavonható módosítás. Az **Esc** megszakítja a folyamatban lévő húzást és megszünteti a kijelölést. Az automatikus és kézi mentés a végleges koordinátákat tárolja. A kijelölés ideiglenes: projekt-, nézet- és szintváltáskor megszűnik. A csoportkeret nem kerül az exportált SVG-be.
 
-A funkció a megnyitható projektekben előfizetés nélkül is használható. Az importálás és exportálás továbbra is havi előfizetéshez kötött.
+A funkció a megnyitható projektekben előfizetés nélkül is használható. Az exportálás projektenként jár (ingyenes és megvásárolt projekt előfizetés nélkül, előfizetéses projekt aktív előfizetéssel); az importálás havi előfizetéshez kötött.

@@ -247,7 +247,7 @@ PROJECT_PRICE = 3 490 Ft     → egy extra projekthely egyszeri díjért
 4. `projectAccessChecker()`: closuret ad vissza, amely project key-re eldönti az elérhetőséget.
 5. Admin user (`ADMIN_USER_ID` env): test Stripe mode is elérhető az admin panelen.
 
-**Backlog:** export jogosultság-fix – ingyenes és egyszeri vásárolt projekteknél az export ne igényeljen előfizetést (lásd: `docs/BACKLOG.md`).
+**Export jogosultság (projektenként):** `exportAccess()` (`lib/billing.ts`) + `GET /api/transfer-access?purpose=export&projectId=…`, kliensen `checkExportAccess()`. `free` vagy egyszeri (`live`/`test` a módnak megfelelően) grant → előfizetés nélkül exportálható; `sub_*` vagy grant nélküli projekt → aktív előfizetés kell; archivált/lomtáras → 409 `PROJECT_INACTIVE`; nem mentett → 409 `SAVE_REQUIRED` (aktív előfizetéssel engedélyezett). Az import (paraméter nélküli hívás) továbbra is csak előfizetéssel. Teszt: `tests/export-access.ts`.
 
 ---
 
@@ -376,8 +376,8 @@ Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja e
 
 ## Nyitott feladatok (docs/BACKLOG.md)
 
-1. **Export jogosultság-fix** – ingyenes és egyszeri projektekhez ne kelljen előfizetés az exporthoz. Érintett: billing grant logika, összes export endpoint (JSON, SVG, PDF, CSV, árajánlat-PDF). Részletes elfogadási feltételek a backlogban.
+1. ~~**Export jogosultság-fix**~~ – kész: ingyenes és egyszeri projektek előfizetés nélkül exportálhatók (lásd fent).
 
-2. **Árajánlat-PDF** (folyamatban) – tervből átvett anyaglista, anyagár + munkadíj, ÁFA-kezelés, összesítés, PDF export. Kód: `lib/quote.ts`, `lib/quote-schema.ts`, `components/quote-*.tsx`.
+2. **Árajánlat-PDF** (kész, útiköltséggel) – tervből átvett anyaglista, anyagár + munkadíj, ÁFA-kezelés, összesítés, PDF export. Kód: `lib/quote.ts`, `lib/quote-schema.ts`, `components/quote-*.tsx`.
 
 3. **Tervezett:** ügyfél- és feladatkezelés, tervmegosztás/együttműködés, gyártói termékkatalógus, fázisterhelés-összesítés, szakmailag ellenőrzött villamos méretezés.

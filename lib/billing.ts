@@ -30,4 +30,16 @@ export async function projectAccessChecker(db:Database,user:Account){
  const sub=await subscriptionStatus(db,user.userId,mode);
  return (key:string)=>{const matching=grants.filter(g=>g.project_id===key);if(matching.some(g=>g.mode==='free'||g.mode===mode))return true;if(matching.some(g=>g.mode==='sub_'+mode))return sub.active;return !matching.length&&(sub.status==='none'||sub.active);};
 }
+// Export is per project: free and one-off project slots export without a subscription;
+// subscription-held and legacy (ungranted) projects require an active subscription.
+export type ExportAccess={allowed:true;via:'subscription'|'project'}|{allowed:false;code:'PROJECT_INACTIVE'|'SAVE_REQUIRED'|'SUBSCRIPTION_REQUIRED'};
+export async function exportAccess(db:Database,user:Account,projectId:string):Promise<ExportAccess>{
+ await ensureFreeGrant(db,user.userId);const key=projectKey(user.userId,projectId),{config}=await getBillingConfig(db),mode=isAdmin(user)?config.mode:'live';
+ const row=await db.first<{state:string}>('SELECT state FROM plans WHERE id = ?',[key]);
+ if(row&&row.state!=='active')return {allowed:false,code:'PROJECT_INACTIVE'};
+ if((await subscriptionStatus(db,user.userId,mode)).active)return {allowed:true,via:'subscription'};
+ if(!row)return {allowed:false,code:'SAVE_REQUIRED'};
+ if(await db.first('SELECT id FROM billing_grants WHERE user_id = ? AND project_id = ? AND (mode = ? OR mode = ?)',[user.userId,key,'free',mode]))return {allowed:true,via:'project'};
+ return {allowed:false,code:'SUBSCRIPTION_REQUIRED'};
+}
 export async function projectAccess(db:Database,user:Account,key:string){return (await projectAccessChecker(db,user))(key)}

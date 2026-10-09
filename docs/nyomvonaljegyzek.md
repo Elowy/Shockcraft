@@ -16,4 +16,4 @@ A hossz a vízszintes és függőleges szakaszok összege, a kapcsolt szerelvén
 
 Az elosztón belüli kapocsvezetékek nem szerepelnek a hosszösszesítésben. Egy nyomvonal egyszer számít, nem szorozzuk meg az erek számával. A szabad alaprajzi végpont szándékos tervezői döntés is lehet.
 
-A jegyzék csak olvassa a tervet, és minden hozzáférhető projektben használható. Nem hoz létre exportfájlt; az importálás és exportálás továbbra is aktív havi előfizetéshez kötött.
+A jegyzék csak olvassa a tervet, és minden hozzáférhető projektben használható. Nem hoz létre exportfájlt. Az exportálás projektenként jár (ingyenes és megvásárolt projekt előfizetés nélkül, előfizetéses projekt aktív előfizetéssel); az importálás havi előfizetéshez kötött.

@@ -23,4 +23,4 @@ A módosítások a tervező Visszavonás gombjával visszavonhatók. Az export p
 
 ## Exportjogosultság
 
-A PDF-export jelenleg a meglévő, aktív havi előfizetést ellenőrző szabályt használja. Az első ingyenes és az egyszer megvásárolt projektek előfizetéstől független exportja külön backlog-tétel; ebben a változatban még nem módosult.
+Az árajánlat-PDF a többi exporttal azonos, projektenkénti szabályt követi: az első ingyenes és az egyszer megvásárolt projektben előfizetés nélkül, az előfizetéses projektekben aktív előfizetéssel tölthető le. Az útiköltség km × Ft/km vagy fix összegként adható meg; a kedvezmény után, az áfa előtt adódik hozzá.

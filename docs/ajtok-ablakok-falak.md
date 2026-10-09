@@ -12,4 +12,4 @@ A nyílászáró a szobához vagy falhoz tartozik: együtt mozog, törlődik és
 
 Az egy vonalra eső közös szobafalakon a nyílás mindkét falvonalat megszakítja. A falhoz igazítás a nyílást kihagyja. Már elhelyezett szerelvényeket és kábelnyomvonalakat nem helyez át automatikusan: ezek ütközését a tervezőnek kell ellenőriznie.
 
-A PDF és SVG az ajtó nyitásívét, az ablak jelét és a falvastagságot is tartalmazza. A PDF-ben külön nyílászárójegyzék sorolja a méreteket. A PDF/SVG/JSON import és export jogosultsága változatlanul havi előfizetéshez kötött. A helyi szerkesztés, mentés és visszavonás minden megnyitható projektben használható.
+A PDF és SVG az ajtó nyitásívét, az ablak jelét és a falvastagságot is tartalmazza. A PDF-ben külön nyílászárójegyzék sorolja a méreteket. Az exportálás projektenként jár (ingyenes és megvásárolt projekt előfizetés nélkül, előfizetéses projekt aktív előfizetéssel); az importálás havi előfizetéshez kötött. A helyi szerkesztés, mentés és visszavonás minden megnyitható projektben használható.
