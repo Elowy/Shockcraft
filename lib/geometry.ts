@@ -29,7 +29,7 @@ export function translateFloor(f:Floor,drag:FloorDrag){const out=structuredClone
  const shift=(p:Point)=>({x:Math.max(0,Math.min(2000,p.x+dx)),y:Math.max(0,Math.min(2000,p.y+dy))});
  if(type==='devices'){const d=out.devices.find(d=>d.id===id);if(d){Object.assign(d,shift(d));if(drag.angle!==undefined)d.angle=drag.angle}}
  if(type==='rooms'){const r=out.rooms.find(r=>r.id===id);if(r)Object.assign(r,shift(r))}
- if(type==='walls'){const w=out.walls.find(w=>w.id===id);if(w){w.a=shift(w.a);w.b=shift(w.b)}}
+ if(type==='walls'){const w=out.walls.find(w=>w.id===id);if(w){const x=Math.max(-Math.min(w.a.x,w.b.x),Math.min(2000-Math.max(w.a.x,w.b.x),dx)),y=Math.max(-Math.min(w.a.y,w.b.y),Math.min(2000-Math.max(w.a.y,w.b.y),dy));w.a={x:w.a.x+x,y:w.a.y+y};w.b={x:w.b.x+x,y:w.b.y+y}} }
  if(type==='routes'){const r=out.routes.find(r=>r.id===id);if(r)r.points=moveRoutePoints(floorPoints(r,f),dx,dy,{startLocked:!!r.startId,endLocked:!!r.endId,handle,segment:drag.segment,maxX:2000,maxY:2000})}
  if(type==='dimensions'){const d=out.dimensions?.find(d=>d.id===id);if(d){if(handle===0)d.a=shift(d.a);else if(handle===1)d.b=shift(d.b);else{const x=Math.max(-Math.min(d.a.x,d.b.x),Math.min(2000-Math.max(d.a.x,d.b.x),dx)),y=Math.max(-Math.min(d.a.y,d.b.y),Math.min(2000-Math.max(d.a.y,d.b.y),dy));d.a={x:d.a.x+x,y:d.a.y+y};d.b={x:d.b.x+x,y:d.b.y+y}}}}
  return out;

@@ -1,12 +1,11 @@
 import type {Floor,Point} from './plan';
+import {wallHosts,solidWallSegments} from './architecture';
 export type WallSnap={point:Point;a:Point;b:Point;angle:number;distance:number};
 const axis=(a:number)=>(a%180+180)%180;
 const angleDifference=(a:number,b:number)=>Math.min(Math.abs(axis(a)-axis(b)),180-Math.abs(axis(a)-axis(b)));
 /** Drawing units are 40 per metre. Ignore zero-length walls and snap to the finite segment. */
 export function wallSnap(p:Point,f:Floor,preferredAngle=0,radius=20):WallSnap|null{
- const segments:[Point,Point][]=[...f.walls.map(w=>[w.a,w.b] as [Point,Point]),...f.rooms.flatMap(r=>{
-  const tl={x:r.x,y:r.y},tr={x:r.x+r.w,y:r.y},bl={x:r.x,y:r.y+r.h},br={x:r.x+r.w,y:r.y+r.h};return [[tl,tr],[tl,bl],[tr,br],[bl,br]] as [Point,Point][];
- })];
+ const segments=wallHosts(f).flatMap(host=>solidWallSegments(f,host));
  let best:WallSnap|null=null;
  for(const [a,b] of segments){const dx=b.x-a.x,dy=b.y-a.y,length=dx*dx+dy*dy;if(length<.000001)continue;
   const t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/length)),point={x:a.x+t*dx,y:a.y+t*dy};

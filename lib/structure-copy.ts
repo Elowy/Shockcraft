@@ -41,9 +41,9 @@ export function copyStructure(plan:Plan,options:StructureCopyOptions){
   const id=ids.get(item.id)!;
   if(item.type==='rooms'){
    const src=floor.rooms.find(r=>r.id===item.id)!;shift({x:src.x+src.w,y:src.y+src.h});
-   target.rooms.push({...structuredClone(src),...shift(src),id,name:room?name:src.name});
+   target.rooms.push({...structuredClone(src),...shift(src),id,name:room?name:src.name,openings:src.openings?.map(o=>({...o,id:uid()}))});
   }
-  if(item.type==='walls'){const src=floor.walls.find(w=>w.id===item.id)!;target.walls.push({...structuredClone(src),id,a:shift(src.a),b:shift(src.b)})}
+  if(item.type==='walls'){const src=floor.walls.find(w=>w.id===item.id)!;target.walls.push({...structuredClone(src),id,a:shift(src.a),b:shift(src.b),openings:src.openings?.map(o=>({...o,id:uid()}))})}
   if(item.type==='devices'){const src=floor.devices.find(d=>d.id===item.id)!;target.devices.push({...structuredClone(src),...shift(src),id,name:room?copiedName(src.name,target.devices.map(d=>d.name)):src.name,circuit:options.keepCircuits?src.circuit:''})}
   if(item.type==='routes'){
    const src=floor.routes.find(r=>r.id===item.id)!,length=floorLength(src,floor);
