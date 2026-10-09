@@ -1,4 +1,5 @@
 import {z} from "zod";
+import {quoteSchema} from "./quote-schema";
 import {openingSchema,validateArchitecture} from "./architecture";
 import {dimensionSchema} from "./dimensions";
 import {backgroundSchema} from './background';
@@ -25,7 +26,7 @@ const siteNode=z.object({id,name,kind:z.enum(siteKinds),x:n,y:n,height:z.number(
 const siteRoute=z.object({id,name,from:id,to:id,via:z.array(point).max(300),level:z.number().finite().min(-30).max(100),mode:z.enum(["underground","surface","overhead"]),cable:z.string().max(80)});
 const endpoint=z.object({kind:z.enum(["circuit","module"]),id,port:z.string().min(1).max(30)});
 const boardWire=z.object({id,name,building:id,from:endpoint,to:endpoint});
-export const planSchema=z.object({version:z.literal(1),name,plot:z.object({name,w:z.number().min(5).max(100),h:z.number().min(5).max(100),nodes:z.array(siteNode).max(300).default([]),routes:z.array(siteRoute).max(1000).default([])}),buildings:z.array(building).max(30),circuits:z.array(circuit).max(300),modules:z.array(moduleSchema).max(300),boardWires:z.array(boardWire).max(3000).default([])});
+export const planSchema=z.object({version:z.literal(1),name,quote:quoteSchema.optional(),plot:z.object({name,w:z.number().min(5).max(100),h:z.number().min(5).max(100),nodes:z.array(siteNode).max(300).default([]),routes:z.array(siteRoute).max(1000).default([])}),buildings:z.array(building).max(30),circuits:z.array(circuit).max(300),modules:z.array(moduleSchema).max(300),boardWires:z.array(boardWire).max(3000).default([])});
 export type Plan=z.infer<typeof planSchema>;export type Floor=Plan["buildings"][number]["floors"][number];export type Point=z.infer<typeof point>;export type Device=z.infer<typeof device>;
 export const uid=()=>crypto.randomUUID();
 export function newFloor(name:string,elevation:number):Floor{return {id:uid(),name,elevation,rooms:[],walls:[],devices:[],routes:[]}}
