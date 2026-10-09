@@ -1,4 +1,5 @@
 import {sqliteTable,text,integer,index,uniqueIndex,primaryKey} from "drizzle-orm/sqlite-core";
+export const templateLibraries=sqliteTable('template_libraries',{userId:text('user_id').primaryKey(),data:text('data').notNull(),revision:integer('revision').notNull(),updatedAt:text('updated_at').notNull()});
 export const planVersions=sqliteTable('plan_versions',{projectId:text('project_id').notNull(),revision:integer('revision').notNull(),data:text('data').notNull(),savedAt:text('saved_at').notNull()},t=>[primaryKey({columns:[t.projectId,t.revision]})]);
 export const plans=sqliteTable("plans",{id:text("id").primaryKey(),data:text("data").notNull(),revision:integer("revision").notNull(),updatedAt:text("updated_at").notNull(),state:text('state').notNull().default('active'),stateChangedAt:text('state_changed_at')});
 export const users=sqliteTable('users',{id:text('id').primaryKey(),email:text('email').notNull().unique(),name:text('name').notNull(),passwordHash:text('password_hash').notNull(),emailVerifiedAt:integer('email_verified_at'),authVersion:integer('auth_version').notNull().default(0),createdAt:integer('created_at').notNull()});
