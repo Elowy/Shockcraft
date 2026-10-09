@@ -5,7 +5,7 @@
 **Villanyrajz** (korábbi nevén ShockCraft) egy magyar nyelvű, böngészőalapú villamos tervszerkesztő SaaS.
 Villanyszerelőknek és lakóépületek villamos tervein dolgozóknak készül.
 
-> **Névváltás:** a felhasználó felé mindenhol „Villanyrajz” szerepel (felület, PDF, e-mail, Stripe-terméknév, számlatétel, letöltött fájlnevek, jogi szövegek). A technikai azonosítók **szándékosan változatlanok**, mert átnevezésük kijelentkeztetné a felhasználókat vagy elveszítené a böngészőben tárolt adatokat: `shockcraft_session` süti, `shockcraft-*` localStorage/sessionStorage kulcsok, `SHOCKCRAFT_*` env változók, `X-ShockCraft-User` fejléc, Stripe idempotencia-kulcsok, `shockcraft.service`, `/srv/shockcraft` útvonalak, `shockcraft` MySQL-adatbázisnév a példákban. Új kódban is ezeket a meglévő kulcsokat használd.
+> **Névváltás:** a felhasználó felé mindenhol „Villanyrajz” szerepel (felület, PDF, e-mail, Stripe-terméknév, számlatétel, letöltött fájlnevek, jogi szövegek). A technikai azonosítók **szándékosan változatlanok**, mert átnevezésük kijelentkeztetné a felhasználókat vagy elveszítené a böngészőben tárolt adatokat: `shockcraft_session` süti, `shockcraft-*` localStorage/sessionStorage kulcsok, `SHOCKCRAFT_*` env változók, `X-ShockCraft-User` fejléc, Stripe idempotencia-kulcsok (a `shockcraft-monthly-portal-vN` kulcs verzióját emeld, ha a portálkonfiguráció tartalma változik), `SC-` számlázási rendelésazonosító-előtag (duplikációvédelem!), `shockcraft.service`, `/srv/shockcraft` útvonalak, `shockcraft` MySQL-adatbázisnév a példákban. Új kódban is ezeket a meglévő kulcsokat használd.
 
 **Fő funkciók:**
 - Alaprajz-szerkesztő: szobák, falak, ajtók/ablakok, szerelvények (kapcsolók, dugaljak, RJ45, lámpakiállás, kötődoboz, lakáselosztó-jelölés)

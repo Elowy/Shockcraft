@@ -13,7 +13,7 @@ A jogi szövegek a `components/legal-page.tsx` fájlban vannak; a közös navig�
 
 ## Sütiablak
 
-A jelenlegi saját alkalmazáskód nem tölt be marketing- vagy analitikai szolgáltatást. Ezért az ablak tájékoztatást és tudomásulvételt kínál; nincs nem létező követést engedélyező kapcsoló. A tudomásulvétel `shockcraft-cookie-notice-v1` kulcson, időbélyeggel marad meg 180 napig, majd az ablak ismét megjelenik. Nem kerül szerverre. A tényleges tárolók és az érvényességi/törlési különbségek a sütitájékoztatóban szerepelnek.
+A jelenlegi saját alkalmazáskód nem tölt be marketing- vagy analitikai szolgáltatást. Ezért az ablak tájékoztatást és tudomásulvételt kínál; nincs nem létező követést engedélyező kapcsoló. A tudomásulvétel `shockcraft-cookie-notice-v1` kulcson, időbélyeggel marad meg 180 napig, majd az ablak ismét megjelenik. Nem kerül szerverre. A tényleges tárolók és az érvényességi/törlési különbségek a sütitájékoztatóban szerepelnek. A tárolók technikai neve (`shockcraft-*`, `shockcraft_session`) a korábbi ShockCraft nevet őrzi; ezt a cookie-tájékoztató táblázata alatti mondat jelzi.
 
 Új analitikai vagy hirdetési eszközt csak megfelelő, célonként választható előzetes hozzájárulás és visszavonás megvalósítása után szabad beépíteni. Az infrastruktúra esetleges további sütijeit külön is fel kell mérni. A „Rendben” nem hozzájárulás ilyen új adatkezeléshez, és nem ÁSZF-elfogadás.
 
