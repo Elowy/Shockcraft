@@ -17,14 +17,14 @@ Sites-hostolásnál a három változót a szerveroldali környezeti beállítás
 ## Stripe beállítása
 
 1. Nyisd meg a saját Stripe Dashboardodat, és válaszd ki a tesztkörnyezetet.
-2. A ShockCraft adminpaneljén add meg a teszt API-kulcsot (`sk_test_…`). A nyilvános `pk_…` kulcsra a használt, Stripe által hosztolt Checkouthoz nincs szükség.
+2. A Villanyrajz adminpaneljén add meg a teszt API-kulcsot (`sk_test_…`). A nyilvános `pk_…` kulcsra a használt, Stripe által hosztolt Checkouthoz nincs szükség.
 3. A Stripe-ban hozz létre egy webhook-végpontot az adminpanelen megjelenő pontos címmel: `https://SAJÁT-DOMAIN/api/stripe/webhook`. A végpontnak publikus HTTPS-en elérhetőnek kell lennie, bejelentkezési átirányítás és proxy által beillesztett HTML nélkül.
-4. Válaszd a `checkout.session.completed` és `checkout.session.async_payment_succeeded` eseményeket. Másold a végpont saját `whsec_…` aláírókulcsát a ShockCraft megfelelő tesztmezőjébe.
+4. Válaszd a `checkout.session.completed` és `checkout.session.async_payment_succeeded` eseményeket. Másold a végpont saját `whsec_…` aláírókulcsát a Villanyrajz megfelelő tesztmezőjébe.
 5. Válaszd a tesztüzemet, engedélyezd az új vásárlásokat és ments. A **Mentett API-kapcsolat ellenőrzése** az API elérhetőségét vizsgálja, a webhookét nem.
 6. Az adminfiókban, a **Projektek → Projekthelyek és fizetés** ablakban indíts tesztvásárlást. Használd a [Stripe hivatalos tesztadatait](https://docs.stripe.com/testing). Ellenőrizd a jóváírást, a fizetési jegyzéket, az új projekt létrehozását, valamint a megszakított fizetést. Tesztüzemben csak az admin indíthat fizetést; a normál felhasználók meglévő tervei elérhetők maradnak.
 7. Az éles működéshez az éles API-kulcsot (`sk_live_…`) és az éles webhook-végpont külön aláírókulcsát is add meg. Válts **Éles fizetés** módra, és ments. A két környezet kulcsait ne keverd össze.
 
-A díj a szerveren rögzített: 3 490 Ft, a Stripe számára 349000 HUF kisegység. A böngésző nem adhat meg árat. A HUF terhelési egységéről a [Stripe pénznemdokumentációja](https://docs.stripe.com/currencies#special-cases) ír. A vásárló a Stripe oldalán adja meg a kártyaadatokat; azok nem kerülnek a ShockCraft adatbázisába. Az AAM számlák automatikus kiállításához kötelező a [Számlázz.hu beállítása](szamlazz-hu.md) és a vásárló számlázási adatainak mentése. A Stripe saját bizonylata nem helyettesíti a Számlázz.hu-számlát.
+A díj a szerveren rögzített: 3 490 Ft, a Stripe számára 349000 HUF kisegység. A böngésző nem adhat meg árat. A HUF terhelési egységéről a [Stripe pénznemdokumentációja](https://docs.stripe.com/currencies#special-cases) ír. A vásárló a Stripe oldalán adja meg a kártyaadatokat; azok nem kerülnek a Villanyrajz adatbázisába. Az AAM számlák automatikus kiállításához kötelező a [Számlázz.hu beállítása](szamlazz-hu.md) és a vásárló számlázási adatainak mentése. A Stripe saját bizonylata nem helyettesíti a Számlázz.hu-számlát.
 
 ## Jóváírás és üzemeltetés
 

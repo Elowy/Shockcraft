@@ -2,7 +2,7 @@
 
 Saját Node.js-tárhelyhez a [teljes telepítési útmutatót](telepites.md) kövesd. Az alábbi Sites-beállítások a jelenlegi online változatra vonatkoznak.
 
-A regisztráció, bejelentkezés és kijelentkezés a ShockCraft saját funkciója. ChatGPT-fiók nem szükséges. A felhasználók neve, e-mail-címe, bcrypt jelszólenyomata és a munkamenetek szerveroldalon tárolódnak. A munkamenetsüti HttpOnly, éles HTTPS-címen Secure, SameSite=Lax; a szerver csak a token SHA-256 lenyomatát tárolja. A munkamenet hét nap után lejár, kijelentkezéskor azonnal érvénytelenné válik.
+A regisztráció, bejelentkezés és kijelentkezés a Villanyrajz saját funkciója. ChatGPT-fiók nem szükséges. A felhasználók neve, e-mail-címe, bcrypt jelszólenyomata és a munkamenetek szerveroldalon tárolódnak. A munkamenetsüti HttpOnly, éles HTTPS-címen Secure, SameSite=Lax; a szerver csak a token SHA-256 lenyomatát tárolja. A munkamenet hét nap után lejár, kijelentkezéskor azonnal érvénytelenné válik.
 
 MySQL-kiszolgáló hiányában a meglévő Cloudflare D1 tárolja ugyanazokat az adatokat. `MYSQL_URL` beállítása esetén a teljes fiók- és tervtárolás MySQL-t használ. Hibás MySQL-kapcsolat esetén a rendszer hibát jelez, nem vált át észrevétlenül másik adatbázisra.
 

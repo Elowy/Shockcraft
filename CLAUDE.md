@@ -1,9 +1,11 @@
-# ShockCraft – fejlesztői útmutató (CLAUDE.md)
+# Villanyrajz – fejlesztői útmutató (CLAUDE.md)
 
 ## Mi ez az alkalmazás?
 
-**ShockCraft** egy magyar nyelvű, böngészőalapú villamos tervszerkesztő SaaS.
+**Villanyrajz** (korábbi nevén ShockCraft) egy magyar nyelvű, böngészőalapú villamos tervszerkesztő SaaS.
 Villanyszerelőknek és lakóépületek villamos tervein dolgozóknak készül.
+
+> **Névváltás:** a felhasználó felé mindenhol „Villanyrajz” szerepel (felület, PDF, e-mail, Stripe-terméknév, számlatétel, letöltött fájlnevek, jogi szövegek). A technikai azonosítók **szándékosan változatlanok**, mert átnevezésük kijelentkeztetné a felhasználókat vagy elveszítené a böngészőben tárolt adatokat: `shockcraft_session` süti, `shockcraft-*` localStorage/sessionStorage kulcsok, `SHOCKCRAFT_*` env változók, `X-ShockCraft-User` fejléc, Stripe idempotencia-kulcsok, `shockcraft.service`, `/srv/shockcraft` útvonalak, `shockcraft` MySQL-adatbázisnév a példákban. Új kódban is ezeket a meglévő kulcsokat használd.
 
 **Fő funkciók:**
 - Alaprajz-szerkesztő: szobák, falak, ajtók/ablakok, szerelvények (kapcsolók, dugaljak, RJ45, lámpakiállás, kötődoboz, lakáselosztó-jelölés)
@@ -20,7 +22,7 @@ Villanyszerelőknek és lakóépületek villamos tervein dolgozóknak készül.
 - Projekt életciklus: aktív / archivált / lomtár állapotok
 - Sötét/világos mód
 
-**Élő oldal:** https://shockcraft-villanytervezo.lollipopp23.chatgpt.site/
+**Élő oldal:** https://shockcraft-villanytervezo.lollipopp23.chatgpt.site/ (a `villanyrajz.hu` domain lefoglalva, még nincs élesítve)
 
 ---
 

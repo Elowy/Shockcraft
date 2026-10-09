@@ -1,4 +1,4 @@
-# ShockCraft – telepítési útmutató
+# Villanyrajz – telepítési útmutató
 
 Node.js-t támogató tárhelyhez és Linux VPS-hez. Frissítve: 2026. október 2.
 
@@ -12,7 +12,7 @@ Használat: [Háttéralaprajz és méretarány](hatteralaprajz.md).
 
 ## 1. Mire lesz szükség?
 
-A ShockCraft szerveroldali webalkalmazás. A felület mellett saját regisztrációt, munkameneteket és tervmentést szolgál ki. Egy egyszerű, csak fájlfeltöltésre vagy PHP-ra alkalmas tárhely nem elegendő.
+A Villanyrajz szerveroldali webalkalmazás. A felület mellett saját regisztrációt, munkameneteket és tervmentést szolgál ki. Egy egyszerű, csak fájlfeltöltésre vagy PHP-ra alkalmas tárhely nem elegendő.
 
 - Node.js 22.13 vagy újabb támogatott kiadás, npm és terminál/SSH vagy tárhelyes build lehetőség. A helyi ellenőrzés Node.js 24 alatt történt.
 - MySQL 8.0 vagy újabb adatbázis, külön adatbázis-felhasználóval.
@@ -75,7 +75,7 @@ A GET /api/health végpont 200 és status: ok választ ad elérhető adatbázisn
 
 A szolgáltató kezelőfelületén a következő beállításokat keresd:
 
-- Alkalmazás gyökere: a teljes ShockCraft projekt könyvtára.
+- Alkalmazás gyökere: a teljes Villanyrajz projekt könyvtára.
 - Node.js verzió: legalább 22.13; a tárhely által támogatott megfelelő kiadás.
 - Telepítés: npm ci --include=dev --include=optional.
 - Build parancs: npm run build:node.
@@ -148,7 +148,7 @@ Mivel még nincs MySQL-szervered, a valódi MySQL-kapcsolatot, a cél tárhelyet
 
 Jelenleg nincs e-mailes címellenőrzés vagy elfelejtettjelszó-levélküldés. Felhasználónként több külön projekt menthető és nyitható meg. A kimutatás a rajzolt geometria alapján számol; nem végez villamos méretezést.
 
-Hivatalos műszaki háttér: a Node.js env-file beállítása, a vinext standalone kimenete és az Nginx proxy-beállításai. Az útmutatóban szereplő alkalmazásparancsok a ShockCraft csomag saját parancsai.
+Hivatalos műszaki háttér: a Node.js env-file beállítása, a vinext standalone kimenete és az Nginx proxy-beállításai. Az útmutatóban szereplő alkalmazásparancsok a Villanyrajz csomag saját parancsai.
 
 - Node.js: https://nodejs.org/api/cli.html#--env-filefile
 - vinext: https://github.com/cloudflare/vinext

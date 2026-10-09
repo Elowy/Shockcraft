@@ -1,4 +1,4 @@
-# ShockCraft fejlesztési backlog
+# Villanyrajz fejlesztési backlog
 
 ## Export projektenként – kész
 

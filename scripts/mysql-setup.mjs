@@ -12,5 +12,5 @@ try{
     if(!columns.length)await db.execute('ALTER TABLE '+table+' ADD COLUMN '+column+' '+definition);
   }
   for(const query of ['SELECT id,email,name,password_hash,created_at,email_verified_at,auth_version FROM users LIMIT 0','SELECT token_hash,user_id,expires_at,created_at,auth_version FROM sessions LIMIT 0','SELECT `key`,attempts,expires_at FROM auth_limits LIMIT 0','SELECT id,data,revision,updated_at FROM plans LIMIT 0'])await db.execute(query);
-  console.log('ShockCraft MySQL schema is ready. No existing data was deleted.');
+  console.log('Villanyrajz MySQL schema is ready. No existing data was deleted.');
 }finally{await db.end()}

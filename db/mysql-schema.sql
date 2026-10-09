@@ -1,4 +1,4 @@
--- MySQL 8.0+. Run once against an empty ShockCraft database before setting MYSQL_URL.
+-- MySQL 8.0+. Run once against an empty Villanyrajz database before setting MYSQL_URL.
 CREATE TABLE IF NOT EXISTS plan_versions (
  project_id varchar(191) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
  revision int NOT NULL,

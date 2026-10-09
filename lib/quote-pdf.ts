@@ -4,10 +4,10 @@ import {quoteTotals,quoteIssues,lineTotal,money,amount,travelCost} from './quote
 const clean=(s:string)=>s.replace(/[\u0000-\u0008\u000b-\u001f]/g,' ').replace(/[\u2010-\u2015]/g,'-');
 export function createQuotePdf(input:Quote,projectName:string,font:string){
  const q=quoteSchema.parse(input),issues=quoteIssues(q);if(issues.length)throw Error(issues[0]);
- const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true,putOnlyUsedFonts:true});doc.addFileToVFS('NotoSans.ttf',font);doc.addFont('NotoSans.ttf','NotoSans','normal');doc.setFont('NotoSans');doc.setProperties({title:'Árajánlat - '+q.number,subject:projectName,creator:'ShockCraft'});
+ const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true,putOnlyUsedFonts:true});doc.addFileToVFS('NotoSans.ttf',font);doc.addFont('NotoSans.ttf','NotoSans','normal');doc.setFont('NotoSans');doc.setProperties({title:'Árajánlat - '+q.number,subject:projectName,creator:'Villanyrajz'});
  const W=297,H=210,M=14,B=H-20;let y=0,pages=0;
  function text(s:string,x:number,yy:number,size=9,align:'left'|'right'='left'){doc.setFontSize(size);doc.setTextColor('#263b49');doc.text(clean(s),x,yy,{align})}
- function page(){if(pages++)doc.addPage();text('ÁRAJÁNLAT',M,17,17);text('ShockCraft',W-M,17,10,'right');doc.setFontSize(9);const lines=doc.splitTextToSize(clean(q.number+' · '+projectName),W-2*M) as string[];doc.text(lines,M,25);y=28+lines.length*4;doc.setDrawColor('#c9d9d5');doc.line(M,y,W-M,y);y+=7}
+ function page(){if(pages++)doc.addPage();text('ÁRAJÁNLAT',M,17,17);text('Villanyrajz',W-M,17,10,'right');doc.setFontSize(9);const lines=doc.splitTextToSize(clean(q.number+' · '+projectName),W-2*M) as string[];doc.text(lines,M,25);y=28+lines.length*4;doc.setDrawColor('#c9d9d5');doc.line(M,y,W-M,y);y+=7}
  const ensure=(height:number)=>{if(y+height>B)page()};
  function paragraph(value:string,size=9){doc.setFontSize(size);const lines=doc.splitTextToSize(clean(value),W-2*M) as string[];for(const line of lines){ensure(5);text(line,M,y,size);y+=4.5}y+=3}
  page();paragraph('Kiállítás: '+q.date+(q.validUntil?'    Érvényes: '+q.validUntil:''));

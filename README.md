@@ -1,6 +1,6 @@
-# ShockCraft
+# Villanyrajz
 
-Magyar nyelvű villamos alaprajz- és lakáselosztó-tervező webalkalmazás.
+Magyar nyelvű villamos alaprajz- és lakáselosztó-tervező webalkalmazás (korábbi nevén ShockCraft; domain: villanyrajz.hu).
 
 ## Használat
 
@@ -30,7 +30,7 @@ A bal oldali struktúrában a szobák, szintek és épületek/lakrészek mellett
 
 ## Fiók és adatbázis
 
-A fejléc Belépés/Fiókom gombja a ShockCraft saját e-mailes regisztrációját, bejelentkezését és kijelentkezését nyitja meg. ChatGPT-fiók nem szükséges. Vendégként a tervek a böngészőben is menthetők; másik eszközön történő megnyitáshoz fiókba mentés vagy JSON-export/import szükséges. A szerver bcrypt jelszólenyomatot és lejáró, visszavonható munkameneteket tárol; a jelszó nem kerül a böngésző tárhelyére.
+A fejléc Belépés/Fiókom gombja a Villanyrajz saját e-mailes regisztrációját, bejelentkezését és kijelentkezését nyitja meg. ChatGPT-fiók nem szükséges. Vendégként a tervek a böngészőben is menthetők; másik eszközön történő megnyitáshoz fiókba mentés vagy JSON-export/import szükséges. A szerver bcrypt jelszólenyomatot és lejáró, visszavonható munkameneteket tárol; a jelszó nem kerül a böngésző tárhelyére.
 
 A `plans` táblában a korábbi mentés `account:<users.id>`, az új projektek `account:<users.id>:project:<UUID>` kulcsot használnak. Az összes projekt tulajdonosa a szerveroldali munkamenetből származik; a korábbi mentés változatlanul megmarad a projektlistában. A GET és PUT végpont is ellenőrzi a szerveroldali munkamenetet. A kliens nem választhat másik tulajdonost. A verzióellenőrzés megakadályozza az elavult ablakból történő felülírást, a fiókváltás ellenőrzése pedig a másik fiókba történő véletlen mentést. Az API-válaszok nem gyorsítótárazhatók.
 
@@ -40,7 +40,7 @@ MySQL-szerver hiányában a meglévő D1 adatbázis működik tovább. A MySQL-a
 
 ## Saját Node.js-tárhely és VPS
 
-A [telepítési útmutató](docs/telepites.md) és a [letölthető PDF](public/docs/ShockCraft-telepitesi-utmutato.pdf) végigvezet a MySQL, környezeti változók, HTTPS, Nginx, systemd, frissítés és mentés beállításán. A `deploy/` könyvtár konfigurációmintákat tartalmaz. Node.js-es fordítás: `npm run build:node`; indítás `.env.production` mellett: `npm run start:node`. A Node-változat MySQL-t igényel. Az alapértelmezett `build` továbbra is a Sites kiadást készíti. A két célt külön kiadási könyvtárban fordítsd, mert mindkettő a `dist/` könyvtárat használja.
+A [telepítési útmutató](docs/telepites.md) és a [letölthető PDF](public/docs/Villanyrajz-telepitesi-utmutato.pdf) végigvezet a MySQL, környezeti változók, HTTPS, Nginx, systemd, frissítés és mentés beállításán. A `deploy/` könyvtár konfigurációmintákat tartalmaz. Node.js-es fordítás: `npm run build:node`; indítás `.env.production` mellett: `npm run start:node`. A Node-változat MySQL-t igényel. Az alapértelmezett `build` továbbra is a Sites kiadást készíti. A két célt külön kiadási könyvtárban fordítsd, mert mindkettő a `dist/` könyvtárat használja.
 
 Az **Eszközök → Tervsegéd** anyagkimutatást ad épületenként vagy teljes projektre, állítható 0–50% kábelráhagyással és magyar Excel-kompatibilis CSV-exporttal. A méteradatok tartalmazzák a függőleges szakaszokat; egy rajzolt nyomvonal egy kábelt jelent. A kapcsolt telki elosztójelölést nem számolja kétszer. A kereső ékezet nélkül is keres szobák, szerelvények, nyomvonalak és elosztókészülékek között; a találat a megfelelő szintet és elemet nyitja meg.
 
