@@ -17,6 +17,7 @@ Elfogadási feltételek:
 
 ## Kész
 
+- Fázisterhelés-összesítés: áramkörönkénti terhelés (megadott vagy szerelvényekből becsült), elosztónkénti L1/L2/L3 összesítés, aszimmetria- és túlterhelés-figyelmeztetés, PDF-táblázat. Lásd `docs/fazisterheles.md`.
 - Árazás és ügyfélnek készíthető árajánlat: tervből átvett tételek, anyagár, munkadíj, saját tételek, útiköltség (km × Ft/km vagy fix), összesítés, PDF.
 
 ## További ütemezett fejlesztések
@@ -24,5 +25,4 @@ Elfogadási feltételek:
 - Ügyfél- és feladatkezelés.
 - Tervmegosztás és együttműködés.
 - Gyártói termékkatalógus.
-- Fázisterhelés és teljesítményösszesítés.
 - Szakmailag ellenőrzött villamos méretezés.

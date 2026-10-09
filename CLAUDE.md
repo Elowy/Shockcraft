@@ -95,6 +95,7 @@ lib/                    43 üzleti logika / utility modul
   schematic.ts          Kapcsolási rajz generálás
   plan-tools.ts         Anyaglista (materialList), keresés
   circuit-assignment.ts Áramkör-hozzárendelés
+  phase-load.ts         Fázisterhelés-összesítés (elosztónként L1/L2/L3, aszimmetria)
   route-points.ts       Nyomvonal töréspontok
   architecture.ts       Ajtók/ablakok Zod schema, validateArchitecture
   dimensions.ts         Méretvonalak schema és geometria
@@ -280,7 +281,7 @@ Plan {
     board?: {rows, modulesPerRow}  ← fő elosztó mérete (max 12×36)
     extraBoards?: Board[]          ← extra elosztók (max 19)
   }
-  circuits: Circuit[]         ← áramkörök (phase L1/L2/L3/3P, rating, curve B/C/D, rcd)
+  circuits: Circuit[]         ← áramkörök (phase L1/L2/L3/3P, rating, curve B/C/D, rcd, load? W)
   modules: Module[]           ← elosztó modulok (type, width 1-8, row, slot)
   boardWires: BoardWire[]     ← elosztón belüli bekötések
 }
@@ -306,7 +307,7 @@ Plan {
 - Motor: **jsPDF**, vektoros output, A4 vagy A3 fekvő, 100%-os nyomtatás = helyes méretarány
 - Betűkészlet: **NotoSans** (beágyazott TTF, teljes magyar ékezet-támogatás)
 - Scope: `floor`, `plot`, `board`, `all`, `single`, `multi`
-- Tartalom: alaprajz + telek rajz + elosztó kapcsolási rajz + szerelvényjegyzék + nyomvonaljegyzék + áramkörlista
+- Tartalom: alaprajz + telek rajz + elosztó kapcsolási rajz + szerelvényjegyzék + nyomvonaljegyzék + áramkörlista + fázisterhelés
 - Méretarány-jelző és dátum minden oldalon
 - Export aktív havi előfizetéshez kötött (backlog: ingyenes/egyszeri projekt kivétel)
 
@@ -380,4 +381,6 @@ Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja e
 
 2. **Árajánlat-PDF** (kész, útiköltséggel) – tervből átvett anyaglista, anyagár + munkadíj, ÁFA-kezelés, összesítés, PDF export. Kód: `lib/quote.ts`, `lib/quote-schema.ts`, `components/quote-*.tsx`.
 
-3. **Tervezett:** ügyfél- és feladatkezelés, tervmegosztás/együttműködés, gyártói termékkatalógus, fázisterhelés-összesítés, szakmailag ellenőrzött villamos méretezés.
+3. **Fázisterhelés** (kész) – áramkörönkénti terhelés (megadott vagy becsült), elosztónkénti L1/L2/L3 összesítés, figyelmeztetések, PDF-táblázat. Kód: `lib/phase-load.ts`, `components/phase-load-report.tsx`, doksi: `docs/fazisterheles.md`.
+
+4. **Tervezett:** ügyfél- és feladatkezelés, tervmegosztás/együttműködés, gyártói termékkatalógus, szakmailag ellenőrzött villamos méretezés.

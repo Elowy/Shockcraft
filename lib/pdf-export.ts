@@ -3,6 +3,7 @@ import {dimensionGeometry} from './dimensions';
 import {boardSize,boards,boardName,inBoard} from './board-size';
 import {buildSchematic,schematicTitle,type SchematicMode} from './schematic';
 import {moduleLabels,moduleShort,endpointInfo,circuitPorts,endpointKey} from "./board";
+import {phaseLoad,phases} from "./phase-load";
 import {jsPDF} from 'jspdf';
 import {labels,siteLabels} from './plan';
 import type {Plan,Floor,Point,Kind} from './plan';
@@ -63,6 +64,8 @@ export function createPlanPdf(plan:Plan,options:PdfOptions,font:string,backgroun
  }
  table('Elosztó - készülékjegyzék',title,['Jel','Megnevezés','Típus','Sor / hely','Szélesség','Áramkör'],[12,65,22,28,25,55],plan.modules.filter(m=>m.building===b.id&&inBoard(m,boardId)).map((m,i)=>['K'+(i+1),m.name,moduleLabels[m.type],(m.row+1)+' / '+(m.slot+1),m.width+' modul',plan.circuits.find(c=>c.id===m.circuit)?.name||'-']));
  table('Elosztó - áramkörjegyzék',title,['Áramkör','Fázis','Védelem','Kábel','ÁVK-csoport','Szerelvény'],[60,18,25,50,35,25],plan.circuits.filter(c=>c.building===b.id&&inBoard(c,boardId)).map(c=>[c.name,c.phase,c.curve+c.rating+' A',c.cable,c.rcd||'-',String(b.floors.flatMap(f=>f.devices).filter(d=>d.circuit===c.id).length)]));
+ const load=phaseLoad(plan,b.id,boardId);
+ table('Elosztó - fázisterhelés',title+' | Összesen '+number(load.total/1000)+' kW | Aszimmetria '+Math.round(load.imbalance)+'%',['Áramkör','Fázis','Védelem','Terhelés','Áram'],[70,18,25,40,40],[...load.circuits.map(c=>[c.circuit.name,c.circuit.phase,c.circuit.curve+c.circuit.rating+' A',number(c.watts)+' W'+(c.estimated?' (becsült)':''),number(c.current)+' A'+(c.circuit.phase==='3P'?' / fázis':'')+(c.overload?' - túlterhelt':'')]),...phases.map(p=>['Összesen '+p,p,'-',number(load.phases[p].watts)+' W',number(load.phases[p].current)+' A'])]);
  table('Elosztó - bekötési jegyzék',title,['Vezeték neve','Honnan / kapocs','Hová / kapocs'],[55,75,75],plan.boardWires.filter(w=>w.building===b.id&&endpointInfo(plan,w.from)?.board===boardId).map(w=>[w.name,endpointInfo(plan,w.from)?.text||'-',endpointInfo(plan,w.to)?.text||'-']));
  const unconnected=plan.circuits.filter(c=>c.building===b.id&&inBoard(c,boardId)).flatMap(c=>circuitPorts(c).filter(port=>!plan.boardWires.some(w=>[w.from,w.to].some(e=>endpointKey(e)===endpointKey({kind:'circuit',id:c.id,port:port.id})))).map(port=>[c.name,port.signal,port.label,'Nincs bekötve']));
  table('Elosztó - be nem kötött szálak',title,['Áramkör','Jel','Szál neve','Állapot'],[55,20,85,40],unconnected);
