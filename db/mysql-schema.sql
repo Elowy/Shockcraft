@@ -147,3 +147,10 @@ CREATE TABLE IF NOT EXISTS plan_shares (
  KEY plan_shares_expiry_idx (expires_at),
  CONSTRAINT plan_shares_owner_fk FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+CREATE TABLE IF NOT EXISTS product_catalogs (
+ user_id varchar(36) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+ data longtext NOT NULL,
+ revision int NOT NULL,
+ updated_at varchar(40) NOT NULL,
+ CONSTRAINT product_catalogs_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;

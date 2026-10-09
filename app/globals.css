@@ -169,3 +169,37 @@ body{background:var(--background)}button,.leftwrap,.toolbar,.right,.field input,
 @media(max-width:420px){.topbar button svg{width:16px;height:16px}.topbar .share-button{padding:5px}}
 @media(max-width:370px){.topbar .iconbutton,.topbar .projects-button,.topbar .workbook-button,.topbar .share-button,.topbar .export-button,.topbar .pdf-button,.topbar .primary,.topbar .account-button{padding:4px}}
 @media(max-width:310px){.topbar{gap:0;padding:0 4px}}
+/* Termékkatalógus (Eszközök → Termékkatalógus) és az ajánlat „Termékek és katalógusárak” része: csak tokenek, így sötét módban is működik. */
+.catalog-manager{display:grid;gap:14px}
+.catalog-manager h3{font-weight:650}.catalog-manager h4{font-weight:600}
+.catalog-body{border:0;padding:0;margin:0;min-width:0;display:grid;gap:14px}
+.catalog-actions,.quote-product-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.catalog-search,.catalog-import-options{display:flex;flex-wrap:wrap;gap:12px;align-items:end}.catalog-search .field{flex:1 1 260px;margin:0}.catalog-import-options .field{flex:0 1 260px;margin:0}
+.catalog-conflict{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.catalog-defaults{display:grid;gap:8px}
+.catalog-table,.quote-product-table{overflow:auto;max-height:420px;border:1px solid var(--border);border-radius:8px}
+.catalog-table table,.quote-product-table table{width:100%;border-collapse:collapse;font-size:12px}
+.catalog-table th,.catalog-table td,.quote-product-table th,.quote-product-table td{padding:7px 8px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+.catalog-table th,.quote-product-table th{position:sticky;top:0;background:var(--background)}
+.catalog-table td,.quote-product-table td{overflow-wrap:break-word}
+.quote-products,.quote-product-table,.catalog-body,.catalog-table,.catalog-import,.catalog-form,.catalog-defaults{min-width:0}
+.catalog-table small,.quote-product-table small,.material-product{display:block;color:var(--muted-foreground)}
+.report-table small.material-product{margin-top:2px}
+.catalog-badge{display:inline-block;margin-left:6px;padding:0 6px;border:1px solid var(--border);border-radius:999px;font-size:11px;color:var(--muted-foreground);white-space:nowrap}
+.catalog-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--muted)}
+.catalog-form .wide{grid-column:1/-1}.catalog-form .field{margin:0}
+.catalog-form input,.catalog-form select{width:100%;border:1px solid var(--border);background:var(--background);border-radius:5px;padding:7px;color:var(--foreground)}
+.catalog-import{display:grid;gap:8px;padding:12px;border:1px solid var(--border);border-radius:8px}
+.catalog-import ul{list-style:disc;padding-left:18px;font-size:12px}
+.catalog-import summary{cursor:pointer;font-size:12px}
+/* A <details> tartalma egy belső dobozba kerül, ezért blokkelrendezés: a széles tábla így a saját dobozában görgethető. */
+.quote-products{border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:block;min-width:0;max-width:100%}.quote-products>*+*{margin-top:10px}
+.quote-products>summary{cursor:pointer;font-weight:600}
+.quote-product-buttons{display:flex;flex-wrap:nowrap;gap:6px}.quote-product-table td:nth-child(2),.quote-product-table td:nth-child(4),.quote-product-table td:nth-child(5),.catalog-table td:nth-child(5),.catalog-table td:nth-child(6){white-space:nowrap}.catalog-table td:last-child button{font-size:12px;padding:5px 8px}.quote-product-buttons button,.quote-product-table td:last-child button{font-size:12px;padding:5px 8px;white-space:nowrap}
+.quote-table .quote-product{margin-top:5px;max-width:100%;justify-content:flex-start;text-align:left;font-size:12px;padding:5px 8px;white-space:normal}
+.product-picker-dialog[data-slot=dialog-content]{width:min(720px,calc(100% - 24px));max-width:720px;max-height:90dvh;overflow-y:auto}
+.product-picker-list{display:grid;gap:6px;max-height:50dvh;overflow-y:auto}
+.product-picker-list>button{justify-content:space-between;text-align:left;white-space:normal;gap:10px}
+.product-picker-list>button>span:first-child{min-width:0;overflow-wrap:anywhere}.product-picker-list small{display:block;color:var(--muted-foreground);font-size:12px;margin-top:3px}
+.product-picker-badges{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
+@media(max-width:760px){.quote-product-table table{min-width:540px}.catalog-table table{min-width:600px}.catalog-form{grid-template-columns:1fr}.quote-product-table td:nth-child(4),.quote-product-table th:nth-child(4),.quote-product-table td:nth-child(5),.quote-product-table th:nth-child(5){display:none}}

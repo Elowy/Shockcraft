@@ -22,6 +22,7 @@ Villanyszerelőknek és lakóépületek villamos tervein dolgozóknak készül.
 - Projekt életciklus: aktív / archivált / lomtár állapotok
 - Ügyfelek és teendők (fiókszintű): ügyféltörzs, projekt–ügyfél hozzárendelés, határidős teendők, Esedékes nézet, árajánlat-kitöltés ügyféladatokból
 - Tervmegosztás: csak olvasható, lejáró, visszavonható link (`/megosztas#t=…`) a legutóbb mentett tervről, opcionális PDF-engedéllyel
+- Termékkatalógus (fiókszintű): saját termék- és árlista (kézzel, CSV-ből, mintakészletből), típusonkénti és soronkénti termékválasztás az ajánlatban, fiók-alapértelmezések, árfrissítés; termék az anyagkimutatásban, a CSV-ben és az ajánlat-PDF-ben
 - Sötét/világos mód
 
 **Élő oldal:** https://shockcraft-villanytervezo.lollipopp23.chatgpt.site/ (a `villanyrajz.hu` domain lefoglalva, még nincs élesítve)
@@ -66,6 +67,7 @@ app/                    Next.js App Router oldalak
     stripe/             Stripe API
     templates/          Sablonkönyvtár
     workbook/           Ügyfél- és teendő-munkafüzet (GET/PUT)
+    catalog/            Termékkatalógus (GET/PUT, revision-CAS)
     plan-share/         Tervmegosztás – tulajdonosi linkkezelés (GET/POST/DELETE)
     shared-plan/        Tervmegosztás – nyilvános nézet (POST, munkamenet nélkül)
     transfer-access/    Projekthozzáférés-átvitel
@@ -90,6 +92,10 @@ components/             43 UI komponens
   share-dialog.tsx      Tervmegosztás – tulajdonosi ablak (link létrehozása, lista, visszavonás)
   share-viewer.tsx      Tervmegosztás – megtekintő oldal (alaprajz, telek, elosztó, jegyzékek)
   floor-drawing.tsx     Közös alaprajzi rajz (FloorShapes, RoomLabels, ScaleBar, PlanLegend) – szerkesztő és megtekintő
+  catalog-manager.tsx   Termékkatalógus fül (Eszközök → Termékkatalógus): CRUD, CSV-import/-export, mintakészlet, fiók-alapértelmezések
+  product-picker.tsx    Termékválasztó dialógus (típushoz vagy ajánlati sorhoz)
+  quote-products.tsx    Ajánlat „Termékek és katalógusárak” része (típusválasztás, alapértelmezések, árfrissítés)
+  use-catalog.ts        useCatalog hook: /api/catalog betöltés és mentés (revision-CAS)
 
 lib/                    43 üzleti logika / utility modul
   plan.ts               Plan schema (Zod), seed terv, validatePlan()
@@ -99,7 +105,13 @@ lib/                    43 üzleti logika / utility modul
   pdf-export.ts         PDF generálás (jsPDF)
   projects.ts           ProjectState, blankProject, removeStructure
   quote.ts              Árajánlat számítás, syncQuote, quoteTotals
-  quote-schema.ts       Quote Zod schema
+  quote-schema.ts       Quote Zod schema (+ opcionális termékpillanatkép: product, productPinned, productDefaults, productDisplay)
+  quote-products.ts     Ajánlat ↔ termék: típusválasztás, soronkénti rögzítés, fiók-alapértelmezés, árfrissítés, productResolver (tiszta modul)
+  product-refs.ts       Gépi típuskulcs (device:/module:/cable:/site:) az anyagkimutatás soraihoz, cableRef normalizálás
+  catalog.ts            Termékkatalógus Zod-séma, keresés, módosítók, productLine (PDF) (tiszta modul)
+  catalog-csv.ts        Katalógus-CSV: dekódolás (UTF-8/UTF-16LE/Windows-1250), parseHuf, import-összefésülés, export
+  catalog-sample.ts     25 tételes „(minta)” készlet
+  catalog-client.ts     /api/catalog kliens hívások
   geometry.ts           Geometriai segédfüggvények
   wall-snap.ts          Falhoz illesztés logika
   board.ts              Elosztó modul típusok, validáció
@@ -188,7 +200,7 @@ npm run db:generate     # Drizzle migrációk generálása
 
 ### Lokális D1 migrációk (egyszer kell alkalmazni, build után)
 
-Friss adatbázisnál a `drizzle/0000…0010` fájlokat mind sorrendben kell alkalmazni (a minta két parancsa a `--file` cseréjével); meglévő helyi adatbázisnál csak az újakat (legutóbb: `drizzle/0010_late_king_cobra.sql`, `plan_shares` tábla; előtte `drizzle/0009_wonderful_lucky_pierre.sql`, `workbooks` tábla).
+Friss adatbázisnál a `drizzle/0000…0011` fájlokat mind sorrendben kell alkalmazni (a minta két parancsa a `--file` cseréjével); meglévő helyi adatbázisnál csak az újakat (legutóbb: `drizzle/0011_colossal_madame_masque.sql`, `product_catalogs` tábla; előtte `drizzle/0010_late_king_cobra.sql`, `plan_shares` tábla, és `drizzle/0009_wonderful_lucky_pierre.sql`, `workbooks` tábla).
 
 ```bash
 node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js \
@@ -221,6 +233,7 @@ node tests/auth-flow.mjs   # lokális Worker + D1 szükséges, http://127.0.0.1:
 | `plan_versions` | Verzióelőzmények (projectId, revision, data, savedAt) |
 | `template_libraries` | Felhasználói sablon könyvtárak |
 | `workbooks` | Felhasználónkénti ügyfél- és teendő-munkafüzet (JSON + revision) |
+| `product_catalogs` | Felhasználónkénti termékkatalógus (JSON: termékek + fiók-alapértelmezések, revision; user_id FK CASCADE) |
 | `plan_shares` | Tervmegosztási linkek (token_hash = SHA-256, owner_id FK CASCADE, project_id/project_key, label, allow_pdf, auth_version, created/expires/last_viewed_at ms) |
 | `billing_settings` | Stripe konfig (titkosítva, admin panelről állítható) |
 | `billing_grants` | Projekt jogosultságok (free / live / sub_live mode) |
@@ -399,6 +412,9 @@ Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja e
 - `tests/workbook-api.ts` – `/api/workbook` route-teszt memóriabeli SQLite-on: `node_modules/.bin/esbuild tests/workbook-api.ts --bundle --platform=node --format=esm --external:mysql2 --alias:cloudflare:workers=./db/node-env.ts --outfile=.sites-runtime/workbook-api.mjs && env -u MYSQL_URL node --no-warnings .sites-runtime/workbook-api.mjs`
 - `tests/share.ts` – tervmegosztás lib-teszt (token, sémák, adatminimalizálás, statikus őrök): `node_modules/.bin/tsx tests/share.ts`
 - `tests/share-api.ts` – `/api/plan-share` és `/api/shared-plan` route-teszt memóriabeli SQLite-on: `node_modules/.bin/esbuild tests/share-api.ts --bundle --platform=node --format=esm --external:mysql2 --alias:cloudflare:workers=./db/node-env.ts --outfile=.sites-runtime/share-api.mjs && env -u MYSQL_URL node --no-warnings .sites-runtime/share-api.mjs`
+- `tests/catalog.ts` – termékkatalógus lib-teszt (séma, CSV-import/-export, mintakészlet, típuskulcs): `node_modules/.bin/tsx tests/catalog.ts`
+- `tests/quote-products.ts` – ajánlat ↔ termék (típusválasztás, árfrissítés, anyagkimutatás-CSV, megosztás, PDF-füst): `node_modules/.bin/tsx tests/quote-products.ts`
+- `tests/catalog-api.ts` – `/api/catalog` route-teszt memóriabeli SQLite-on: `node_modules/.bin/esbuild tests/catalog-api.ts --bundle --platform=node --format=esm --external:mysql2 --alias:cloudflare:workers=./db/node-env.ts --outfile=.sites-runtime/catalog-api.mjs && env -u MYSQL_URL node --no-warnings .sites-runtime/catalog-api.mjs`
 - Unit tesztek nincsenek; a `validatePlan()` (`lib/plan.ts`) az elsődleges validációs pont
 
 ---
@@ -415,4 +431,6 @@ Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja e
 
 5. **Tervmegosztás** (kész, 1. lépés) – csak olvasható, lejáró (1/7/30/90 nap), visszavonható link a legutóbb mentett változatról; `/megosztas#t=<token>`, csak a token SHA-256 lenyomata tárolódik; a megtekintő nem kap árajánlatot, hátteret, tulajdonosi vagy belső azonosítót; PDF/SVG csak `allow_pdf` ÉS a tulajdonos aktuális `exportAccess`-e mellett; archiválás/zárolás szüneteltet, lomtár/jelszó-visszaállítás/fióktörlés megszüntet; egységes 404, saját rate limit (`share-ip`/`share-link`/`share-create`). Kód: `lib/share*.ts`, `app/api/plan-share`, `app/api/shared-plan`, `app/megosztas`, `components/share-*.tsx`, `components/floor-drawing.tsx`, doksi: `docs/tervmegosztas.md`.
 
-6. **Tervezett:** megosztás 2. lépés (megjegyzések, háttér a megosztott nézetben, link meghosszabbítása), közös szerkesztés más fiókból, gyártói termékkatalógus, szakmailag ellenőrzött villamos méretezés.
+6. **Termékkatalógus** (kész, MVP) – fiókszintű `product_catalogs` JSON-blob revisionnel (2000 termék / 1,5 MB, minden fióknak ingyenes); CSV-import (UTF-8/UTF-16LE/Windows-1250, `;`/`,`/tab, magyar számformátum, árrés/bruttó), CSV-export, 25 tételes mintakészlet. A projekt termékválasztása a `plan.quote`-ban él (`productDefaults` + soronkénti `product`/`productPinned` pillanatkép), így visszavonható és a megosztásba nem kerül; illesztés a `MaterialRow.ref` gépi kulccsal, a `materialKey`/`quoteSource` változatlan. Árfrissítés csak gombbal; a munkadíjat csak üres helyre írja. PDF-ben „Termék: …” sor (mód: gyártó+név / +cikkszám / nincs), mintatermék nélkül. Kód: `lib/catalog*.ts`, `lib/product-refs.ts`, `lib/quote-products.ts`, `app/api/catalog`, `components/catalog-manager.tsx`, `components/product-picker.tsx`, `components/quote-products.tsx`, `components/use-catalog.ts`, doksi: `docs/termekkatalogus.md`.
+
+7. **Tervezett:** megosztás 2. lépés (megjegyzések, háttér a megosztott nézetben, link meghosszabbítása), közös szerkesztés más fiókból, termékkatalógus 2. ütem (szerelvényenkénti termék, összeállítás/kit, rendelési lista), szakmailag ellenőrzött villamos méretezés.

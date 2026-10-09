@@ -78,6 +78,13 @@
       "when": 1791570184513,
       "tag": "0010_late_king_cobra",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1791585627534,
+      "tag": "0011_colossal_madame_masque",
+      "breakpoints": true
     }
   ]
 }

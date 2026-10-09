@@ -17,6 +17,7 @@ Elfogadási feltételek:
 
 ## Kész
 
+- Gyártói termékkatalógus: saját, fiókszintű termék- és árlista (kézzel, CSV-ből vagy mintakészletből), típusonkénti és soronkénti termékválasztás az ajánlatban, fiók-alapértelmezések, árfrissítés a katalógusból, termék az anyagkimutatásban, a CSV-ben és az ajánlat-PDF-ben. Lásd `docs/termekkatalogus.md`.
 - Tervmegosztás: csak olvasható, lejáró, visszavonható link, PDF a megosztó engedélyével és exportjogával. Lásd `docs/tervmegosztas.md`.
 - Ügyfél- és feladatkezelés: ügyféltörzs, projekt–ügyfél hozzárendelés, határidős teendők és Esedékes nézet, árajánlat-kitöltés ügyféladatokból. Lásd `docs/ugyfelek-teendok.md`.
 - Fázisterhelés-összesítés: áramkörönkénti terhelés (megadott vagy szerelvényekből becsült), elosztónkénti L1/L2/L3 összesítés, aszimmetria- és túlterhelés-figyelmeztetés, PDF-táblázat. Lásd `docs/fazisterheles.md`.
@@ -26,5 +27,5 @@ Elfogadási feltételek:
 
 - Megosztás 2. lépés: megjegyzések, háttéralaprajz a megosztott nézetben, link meghosszabbítása.
 - Közös szerkesztés más fiókból (szerkesztési zárral).
-- Gyártói termékkatalógus.
+- Termékkatalógus 2. ütem: szerelvényenkénti termék, összeállítás (kit), rendelési lista, kiszerelés-átváltás, soros katalógustábla 2000 tétel fölött.
 - Szakmailag ellenőrzött villamos méretezés.
