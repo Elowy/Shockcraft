@@ -4,7 +4,7 @@
 // 3) A terv (docs/tudastar-terv.md 5.3) golden értékei szó szerint.
 import assert from 'node:assert/strict';
 import {CALCULATORS,bySlug} from '../lib/calc/registry';
-import {checkExample,runCalc,type Raw} from '../lib/calc/core';
+import {checkExample,closeTo,runCalc,type CalcDef,type Raw} from '../lib/calc/core';
 
 type Golden={slug:string;input:Raw;expect:Record<string,number>};
 const EXTRA:Golden[]=[
@@ -66,9 +66,16 @@ const EXTRA:Golden[]=[
  {slug:"kismegszakito",input:{"Ib": "30", "A": "6", "mod": "B2", "szig": "PVC", "erek": "3", "temp": "30", "csop": "1", "gorbe": "C"},expect:{"In": 32.0, "Iz": 34.0, "ZsMax": 0.71875}},
  {slug:"hurokimpedancia",input:{"Ze": "0,2", "L": "60", "A": "4", "gorbe": "B", "In": "20"},expect:{"Zs": 0.875, "Lmax": 186.667}},
  {slug:"terhelhetoseg-tablazat",input:{"mod": "A1", "szig": "PVC", "erek": "3", "temp": "40", "csop": "4"},expect:{"s10": 23.751, "s1_5": 7.63425}},
+ // 4. ellenőrzési kör (review) kiegészítései – IEC 60062:2016 tűrésszín, nagy ellenállású hiányzó tag, °F → °C/K, W-os fázisterhelés, kis UR-ű LED
+ {slug:"ellenallas-szinkod",input:{"savok": "4", "s1": "sarga", "s2": "ibolya", "szorzo": "piros", "tures": "sarga"},expect:{"R": 4700.0, "tol": 0.02}},
+ {slug:"eredo-ellenallas",input:{"mod": "hianyzo", "Re": "999900", "Re.e": "Mohm", "Rk": "1000000", "Rk.e": "Mohm"},expect:{"Rx": 9999000000000000.0}},
+ {slug:"homerseklet",input:{"mod": "atvaltas", "T": "212", "egyseg": "F"},expect:{"C": 100.0, "K": 373.15}},
+ {slug:"fazisterheles",input:{"mod": "W", "P1": "2300", "P2": "0", "P3": "0"},expect:{"I1": 10.0, "IN": 10.0}},
+ {slug:"led-elotet-ellenallas",input:{"Us": "10", "Uf": "3,3", "I": "20", "I.e": "mA", "n": "3"},expect:{"R": 5.0, "Re24": 5.1}},
 ];
 
-const near=(got:number|undefined,want:number,tol=1e-4)=>got!==undefined&&Math.abs(got-want)<=tol*Math.max(1,Math.abs(want));
+// Relatív tűrés (closeTo): 1 alatti elvárt értéknél is ténylegesen ellenőriz (pl. 3,2e-7 F).
+const near=(got:number|undefined,want:number,tol=1e-4)=>got!==undefined&&closeTo(got,want,tol);
 const value=(slug:string,input:Raw,id:string)=>{const d=bySlug(slug)!;const r=runCalc(d,input);assert.ok(r.ok,slug+' '+JSON.stringify(input)+': '+(r.ok?'':r.issues.map(i=>i.text).join('; ')));return r.out.results.find(x=>x.id===id)?.value};
 
 let cases=0;const failures:string[]=[];
@@ -109,5 +116,14 @@ const plan:[string,Raw,string,number,number][]=[
 for(const [slug,input,id,want,tol] of plan){cases++;const got=value(slug,input,id);if(!near(got,want,tol))failures.push('terv 5.3: '+slug+' '+id+' = '+got+', elvárt '+want)}
 
 assert.deepEqual(failures,[],failures.join('\n'));
+// 4) Mutációs próba: a golden-ellenőrzés tényleg észreveszi a hibás motort (relatív tűrés, 1 alatti értéknél is).
+//    Minden kalkulátornál: ha minden eredmény 0,1 %-kal eltér, legalább egy példa elbukik; az eredő kapacitásnál a soros és a párhuzamos képlet felcserélése, illetve ×2 is.
+const mutate=(d:CalcDef,f:(x:number)=>number):CalcDef=>({...d,compute:v=>{const o=d.compute(v);return {...o,results:o.results.map(r=>({...r,value:f(r.value)}))}}});
+for(const d of CALCULATORS)assert.ok(d.examples.some(ex=>checkExample(mutate(d,x=>x*1.001),ex).length>0),d.slug+': a példák nem veszik észre a 0,1 %-os eltérést');
+const cap=bySlug('eredo-kapacitas')!;
+assert.ok(cap.examples.some(ex=>checkExample(mutate(cap,x=>x*2),ex).length>0),'eredő kapacitás ×2 észrevétlen');
+const swapped:CalcDef={...cap,compute:v=>cap.compute({...v,s:(id:string)=>id==='mod'?(v.s('mod')==='soros'?'parhuzamos':'soros'):v.s(id)})};
+assert.ok(cap.examples.filter(ex=>checkExample(swapped,ex).length>0).length===cap.examples.length,'eredő kapacitás: a soros/párhuzamos csere minden példán elbukik');
+assert.equal(near(3.2e-7*1.01,3.2e-7),false,'1 alatti elvárt érték: 1 % eltérés hiba');assert.equal(near(0,0),true);assert.equal(near(1e-9,0),false);
 assert.ok(cases>=150,'legalább 150 golden eset kell (most: '+cases+')');
 console.log('PASS: '+cases+' golden eset ('+CALCULATORS.reduce((s,d)=>s+d.examples.length,0)+' definíciós példa, '+EXTRA.length+' kiegészítő, '+plan.length+' tervbeli érték) – '+CALCULATORS.length+' kalkulátor.');

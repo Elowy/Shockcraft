@@ -1,4 +1,4 @@
-import {ArrowLeft,Blocks,BookOpen,Bookmark,Calculator,ClipboardCheck,Menu,Moon,PlugZap,Search,Sun,Zap} from 'lucide-react';
+import {ArrowLeft,Blocks,BookOpen,Bookmark,Calculator,ClipboardCheck,Menu,PlugZap,Search,Zap} from 'lucide-react';
 import {PublicFooter,PublicHeader} from '@/components/public-shell';
 import {CALC_HUB,HOME,KB_NAME,visibleSections,type Section,type SectionIcon,type SectionId} from '@/lib/kb/categories';
 import type {SearchItem} from '@/lib/kb/search';
@@ -25,20 +25,22 @@ export function AppBar({title,back}:{title:string;back?:{href:string;label:strin
  </header>;
 }
 
-/** A kézikönyv közös kerete egy szekcióhoz: asztali fejléc szekciófülekkel, lábléc alapfigyelmeztetéssel, mobil alsó navigáció és a kliensoldali keret (kereső, menü, kedvencek). */
+/** A kézikönyv közös kerete egy szekcióhoz: asztali fejléc szekciófülekkel, lábléc alapfigyelmeztetéssel, mobil alsó navigáció és a kliensoldali keret (kereső, menü, kedvencek).
+ * Az asztali fejléc műveletei ugyanazok, mint a mobil alkalmazásfejlécé: Keresés, Kedvencek és előzmények (törléssel), Menü (háromállású téma, „/” kapcsoló). */
 export function Shell({section,children}:{section:SectionId;children:React.ReactNode}){
  const metas=calcMetas(kbPreview());
  const sections=visibleSections({kalkulatorok:metas.filter(m=>m.href).length});
  const items:SearchItem[]=metas.map(m=>({id:m.slug,title:m.title,href:m.href,group:'Kalkulátorok',keywords:m.keywords,synonyms:m.synonyms,summary:m.short,note:m.note}));
  const actions=<span className="kk-head-actions">
   <a className="kk-head-btn" href={CALC_HUB+'#kereses'} data-kb-open="search" aria-label="Keresés (/ vagy Ctrl+K)"><Search aria-hidden="true"/><kbd>/</kbd></a>
-  <button type="button" className="kk-head-btn kk-theme-btn" data-kb-theme="" aria-label="Világos vagy sötét megjelenés"><Moon aria-hidden="true" className="kk-moon"/><Sun aria-hidden="true" className="kk-sun"/></button>
+  <a className="kk-head-btn" href={CALC_HUB+'#kedvencek'} data-kb-open="bookmarks" aria-label="Kedvencek és előzmények"><Bookmark aria-hidden="true"/></a>
+  <a className="kk-head-btn" href="#lablec" data-kb-open="menu" aria-label="Menü (megjelenés, beállítások)"><Menu aria-hidden="true"/></a>
  </span>;
  return <div className="kk" data-section={section}>
   <a className="kk-skip" href="#tartalom">Ugrás a tartalomra</a>
   <div className="kk-desktop-head"><PublicHeader current={section==='kalkulatorok'?'kalkulatorok':undefined} actions={actions}/><SectionLinks sections={sections} current={section} className="kk-tabs"/></div>
   {children}
-  <div className="kk-foot"><BaseNotice/></div>
+  <aside className="kk-foot" aria-label="Fontos tudnivaló"><BaseNotice/></aside>
   <PublicFooter/>
   <SectionLinks sections={sections} current={section} className="kk-bottom-nav"/>
   <KbChrome items={items} sections={sections.map(s=>({label:s.label,href:s.href}))}/>

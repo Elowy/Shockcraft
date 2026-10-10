@@ -11,7 +11,10 @@ import {seed,validatePlan} from '../lib/plan';
 
 const NAMES=['SIZING_DISCLAIMER','SIZING_DISCLAIMER_SHORT','SIZING_NOT_COVERED','fmtNum','atMost','fmtPair','cableMessages','cableLabel','parseCable','designCurrent','correctedIz','voltageDropPercent','loopResistance','maxLoopImpedance','maxLengthForDrop','minSectionFor'] as const;
 for(const n of NAMES){assert.ok(n in F,'hiányzik: '+n);assert.equal((S as Record<string,unknown>)[n],(F as Record<string,unknown>)[n],'a lib/sizing.ts ugyanazt re-exportálja: '+n)}
-for(const n of ['designCurrent','correctedIz','voltageDropPercent','loopResistance','maxLoopImpedance','maxLengthForDrop','minSectionFor','parseCable','SIZING_NOT_COVERED','SIZING_DISCLAIMER_SHORT'] as const)assert.equal((C as Record<string,unknown>)[n],(F as Record<string,unknown>)[n],'a lib/calc/formulas.ts is ugyanazt adja tovább: '+n);
+// A lib/calc/formulas.ts szándékosan NEM adja tovább a méretezési képleteket (a T1 definíciók közvetlenül a lib/sizing-formulas.ts-ből importálnak),
+// így a T0 kalkulátorok forrás-ujjlenyomata és kliensszigete nem függ a méretezési moduloktól.
+for(const n of ['designCurrent','correctedIz','voltageDropPercent','loopResistance','maxLoopImpedance','maxLengthForDrop','minSectionFor','parseCable','SIZING_NOT_COVERED','SIZING_DISCLAIMER_SHORT'] as const)assert.ok(!(n in C),'a lib/calc/formulas.ts nem re-exportálja: '+n);
+assert.ok(!/sizing/.test(readFileSync('lib/calc/formulas.ts','utf8').replace(/\/\/.*$/gm,'')),'a lib/calc/formulas.ts nem importál méretezési modult');
 // A modul csak a sizing-tables-t importálja (zod és lib/plan nélkül: a kalkulátorok kliensoldalán is fut).
 const src=readFileSync('lib/sizing-formulas.ts','utf8');
 assert.deepEqual([...src.matchAll(/from\s+'([^']+)'/g)].map(m=>m[1]),['./sizing-tables']);

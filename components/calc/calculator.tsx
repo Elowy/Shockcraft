@@ -4,28 +4,42 @@
 // Az űrlap a keresési sztringből `key`-vel mountolódik újra (nincs setState effectben). Számolás közben nincs hálózati kérés.
 import {useEffect,useId,useMemo,useRef,useState,useSyncExternalStore} from 'react';
 import {Copy,Link2,Plus,Printer,Star,Trash2} from 'lucide-react';
-import {chosenUnit,defaultRaw,fieldUnits,isVisible,rawValue,runCalc,selectValue,splitRows,type CalcDef,type CalcRun,type FieldDef,type ListField,type NumberField,type Raw,type RowsField,type SelectField} from '@/lib/calc/core';
+import {chosenUnit,defaultRaw,fieldUnits,isVisible,mainResults,rawValue,runCalc,selectValue,splitRows,type CalcDef,type CalcRun,type FieldDef,type ListField,type NumberField,type Raw,type RowsField,type SelectField,type Step} from '@/lib/calc/core';
 import {decodeState,encodeState} from '@/lib/calc/url';
 import {calcPath} from '@/lib/kb/categories';
 import {addBookmark,addRecent,bookmarkStore,isBookmarked,removeBookmark,type KbEntry} from '@/lib/kb/storage';
 import {showToast,useKbStore} from '@/components/kezikonyv/kb-client';
 import {CalcFigure} from './calc-figures';
+import {Sub} from './sub';
 
 // ---- URL-pillanatkép: csak az első olvasáskor és visszalépéskor (popstate) frissül, a saját replaceState-ünkre nem (különben gépelés közben újramountolna).
 let urlSnap:string|null=null;
 const getSearch=()=>{if(urlSnap===null)urlSnap=window.location.search;return urlSnap};
 const subscribeUrl=(fn:()=>void)=>{const h=()=>{urlSnap=window.location.search;fn()};window.addEventListener('popstate',h);return ()=>window.removeEventListener('popstate',h)};
 
-const resultText=(def:CalcDef,run:CalcRun)=>run.ok?def.title+': '+run.out.results.filter(r=>r.primary).map(r=>r.label+' = '+(r.text??r.value)).join('; '):'Hibás bemenet: '+run.issues.map(i=>i.text).join(' ');
+const fieldLabel=(def:CalcDef,id?:string)=>def.fields.find(f=>f.id===id)?.label;
+/** Felolvasott és másolt szöveg: a fő eredmény(ek) és a verdikt; hibánál a mező nevével. */
+const resultText=(def:CalcDef,run:CalcRun)=>run.ok
+ ?def.title+': '+mainResults(run.out).map(r=>r.label+' = '+(r.text??r.value)).join('; ')+(run.out.verdict?'. '+run.out.verdict.text:'')
+ :'Hibás bemenet: '+run.issues.map(i=>{const l=fieldLabel(def,i.field);return (l?l+': ':'')+i.text}).join(' ');
+/** Az egyetlen mértékegység (ha nincs választó): a mező akadálymentes nevébe is bekerül. */
+const singleUnit=(f:NumberField|ListField,raw:Raw)=>fieldUnits(f).length>1?'':chosenUnit(f,raw)?.label??f.unit??'';
+/** Negatív szám vagy pontosvessző is kell: a mobil „decimal” billentyűzeten nincs „−” és „;”. */
+const numericMode=(f:NumberField)=>f.allowNegative||(f.min!==undefined&&f.min<0)?'text':f.integer?'numeric':'decimal';
+/** A címke akadálymentes neve: „Keresztmetszet A (mm²)”. A szóköz a címkeszöveg VÉGÉN, egyetlen szövegcsomópontban áll: ha a React
+ * megjegyzéssel elválasztott, csak szóközből álló csomópontot írna, a Chrome a névből elhagyná („KeresztmetszetA”). */
+function FieldLabel({f,htmlFor,unit}:{f:NumberField|ListField;htmlFor:string;unit:string}){
+ return <label htmlFor={htmlFor}>{f.symbol?f.label+' ':f.label}{f.symbol&&<span className="kk-sym"><Sub text={f.symbol}/></span>}{unit&&<span className="sr-only">{' ('+unit+')'}</span>}{f.kind==='number'&&f.optional&&<span className="kk-opt">{' (nem kötelező)'}</span>}</label>;
+}
 
 function FieldError({id,text}:{id:string;text?:string}){return text?<p className="kk-field-error" id={id}>{text}</p>:null}
 
 function NumberInput({f,raw,set,error}:{f:NumberField;raw:Raw;set:(k:string,v:string)=>void;error?:string}){
  const id=useId(),units=fieldUnits(f),unit=chosenUnit(f,raw);
  return <div className="kk-field">
-  <label htmlFor={id}>{f.label}{f.symbol&&<span className="kk-sym"> {f.symbol}</span>}{f.optional&&<span className="kk-opt"> (nem kötelező)</span>}</label>
+  <FieldLabel f={f} htmlFor={id} unit={singleUnit(f,raw)}/>
   <div className="kk-input-row">
-   <input id={id} type="text" inputMode={f.integer&&!f.allowNegative?'numeric':'decimal'} autoComplete="off" spellCheck={false} value={rawValue(f,raw)} placeholder={f.placeholder} aria-invalid={!!error||undefined} aria-describedby={[error?id+'-e':'',f.help?id+'-h':''].filter(Boolean).join(' ')||undefined} onChange={e=>set(f.id,e.target.value)}/>
+   <input id={id} type="text" inputMode={numericMode(f)} autoComplete="off" spellCheck={false} value={rawValue(f,raw)} placeholder={f.placeholder} aria-invalid={!!error||undefined} aria-describedby={[error?id+'-e':'',f.help?id+'-h':''].filter(Boolean).join(' ')||undefined} onChange={e=>set(f.id,e.target.value)}/>
    {units.length>1?<select aria-label={f.label+' mértékegysége'} value={unit!.id} onChange={e=>set(f.id+'.e',e.target.value)}>{units.map(u=><option key={u.id} value={u.id}>{u.label}</option>)}</select>:(unit?.label??f.unit)?<span className="kk-unit">{unit?.label??f.unit}</span>:null}
   </div>
   <FieldError id={id+'-e'} text={error}/>
@@ -42,9 +56,9 @@ function SelectInput({f,raw,set}:{f:SelectField;raw:Raw;set:(k:string,v:string)=
 function ListInput({f,raw,set,error}:{f:ListField;raw:Raw;set:(k:string,v:string)=>void;error?:string}){
  const id=useId(),units=fieldUnits(f),unit=chosenUnit(f,raw);
  return <div className="kk-field">
-  <label htmlFor={id}>{f.label}{f.symbol&&<span className="kk-sym"> {f.symbol}</span>}</label>
+  <FieldLabel f={f} htmlFor={id} unit={singleUnit(f,raw)}/>
   <div className="kk-input-row">
-   <input id={id} type="text" inputMode="decimal" autoComplete="off" spellCheck={false} value={rawValue(f,raw)} aria-invalid={!!error||undefined} aria-describedby={[error?id+'-e':'',id+'-h'].filter(Boolean).join(' ')} onChange={e=>set(f.id,e.target.value)}/>
+   <input id={id} type="text" inputMode="text" autoComplete="off" spellCheck={false} value={rawValue(f,raw)} aria-invalid={!!error||undefined} aria-describedby={[error?id+'-e':'',id+'-h'].filter(Boolean).join(' ')} onChange={e=>set(f.id,e.target.value)}/>
    {units.length>1?<select aria-label={f.label+' mértékegysége'} value={unit!.id} onChange={e=>set(f.id+'.e',e.target.value)}>{units.map(u=><option key={u.id} value={u.id}>{u.label}</option>)}</select>:f.unit?<span className="kk-unit">{f.unit}</span>:null}
   </div>
   <FieldError id={id+'-e'} text={error}/>
@@ -60,7 +74,7 @@ function RowsInput({f,raw,set,error}:{f:RowsField;raw:Raw;set:(k:string,v:string
  return <fieldset className="kk-field kk-rows" aria-describedby={error?id+'-e':undefined}>
   <legend>{f.label}</legend>
   <table><thead><tr>{f.columns.map(c=><th key={c.id} scope="col">{c.label}{c.unit&&<small> ({c.unit})</small>}</th>)}<th scope="col"><span className="sr-only">Sor törlése</span></th></tr></thead>
-   <tbody>{grid.map((r,i)=><tr key={i}>{f.columns.map((c,j)=><td key={c.id}><input type="text" inputMode="decimal" autoComplete="off" aria-label={(i+1)+'. sor, '+c.label} value={r[j]??''} onChange={e=>cell(i,j,e.target.value)}/></td>)}<td><button type="button" className="kk-icon-btn" aria-label={(i+1)+'. sor törlése'} disabled={grid.length<=f.minRows} onClick={()=>write(grid.filter((_,a)=>a!==i))}><Trash2 aria-hidden="true"/></button></td></tr>)}</tbody>
+   <tbody>{grid.map((r,i)=><tr key={i}>{f.columns.map((c,j)=><td key={c.id}><input type="text" inputMode="decimal" autoComplete="off" aria-label={(i+1)+'. sor, '+c.label+(c.unit?' ('+c.unit+')':'')} value={r[j]??''} onChange={e=>cell(i,j,e.target.value)}/></td>)}<td><button type="button" className="kk-icon-btn" aria-label={(i+1)+'. sor törlése'} disabled={grid.length<=f.minRows} onClick={()=>write(grid.filter((_,a)=>a!==i))}><Trash2 aria-hidden="true"/></button></td></tr>)}</tbody>
   </table>
   <button type="button" className="kk-button" disabled={grid.length>=f.maxRows} onClick={()=>write([...grid,f.columns.map(c=>c.default??'')])}><Plus aria-hidden="true"/> Sor hozzáadása</button>
   <FieldError id={id+'-e'} text={error}/>
@@ -80,8 +94,8 @@ function Field({def,f,raw,set,error}:{def:CalcDef;f:FieldDef;raw:Raw;set:(k:stri
 
 function Result({def,run}:{def:CalcDef;run:CalcRun}){
  const figId=useId();
- if(!run.ok)return <div className="kk-result invalid"><p className="kk-result-title">Nincs eredmény</p>{run.issues.filter(i=>!i.field).map((i,n)=><p key={n} className="kk-field-error">{i.text}</p>)}{run.issues.some(i=>i.field)&&<p>Javítsd a pirossal jelölt mezőket.</p>}</div>;
- const {out}=run,primary=out.results.filter(r=>r.primary),rest=out.results.filter(r=>!r.primary);
+ if(!run.ok)return <div className="kk-result invalid"><p className="kk-result-title">Nincs eredmény</p>{run.issues.filter(i=>!i.field).map((i,n)=><p key={n} className="kk-field-error">{i.text}</p>)}{run.issues.some(i=>i.field)&&<p>Javítsd a hibaüzenettel jelölt mezőket.</p>}</div>;
+ const {out}=run,primary=mainResults(out),rest=out.results.filter(r=>!primary.includes(r));
  return <div className="kk-result">
   <p className="kk-result-title">Eredmény{def.tier!=='T0'?' (számítás szerint)':''}</p>
   <div className="kk-result-main">{primary.map(r=><div key={r.id}><span>{r.label}</span><strong>{r.text??r.value}</strong>{r.note&&<small>{r.note}</small>}</div>)}</div>
@@ -95,7 +109,11 @@ function Result({def,run}:{def:CalcDef;run:CalcRun}){
 
 export function Steps({run}:{run:CalcRun}){
  if(!run.ok)return <p className="kk-muted">A levezetés a helyes bemenetek után jelenik meg.</p>;
- return <ol className="kk-steps">{run.out.steps.map((s,i)=><li key={i}><b>{s.label}</b><code>{s.formula}</code><span>{s.substituted}</span><strong>= {s.result}</strong>{s.ref&&<small>Forrás: {s.ref}</small>}</li>)}</ol>;
+ return <StepList steps={run.out.steps}/>;
+}
+/** A levezetés lépései: képlet → behelyettesítés → eredmény → forrás (a kidolgozott példa szerveroldali párja: calc-example.tsx). */
+function StepList({steps}:{steps:readonly Step[]}){
+ return <ol className="kk-steps">{steps.map((s,i)=><li key={i}><b>{s.label}</b><code><Sub text={s.formula}/></code><span><Sub text={s.substituted}/></span><strong>= <Sub text={s.result}/></strong>{s.ref&&<small>Forrás: {s.ref}</small>}</li>)}</ol>;
 }
 
 function CalcForm({def,initial}:{def:CalcDef;initial:Raw}){
@@ -112,8 +130,8 @@ function CalcForm({def,initial}:{def:CalcDef;initial:Raw}){
  useEffect(()=>{if(!touched.current)return;const h=setTimeout(()=>{const url=window.location.pathname+query+window.location.hash;window.history.replaceState(window.history.state,'',url)},600);return ()=>clearTimeout(h)},[query]);
  // Élő régió: 700 ms tétlenség után olvassa fel az eredményt.
  useEffect(()=>{if(!touched.current)return;const h=setTimeout(()=>setAnnounce(resultText(def,run)),700);return ()=>clearTimeout(h)},[def,run]);
- // Előzmények: 1,5 s után (a lekérdezéssel együtt).
- useEffect(()=>{if(!run.ok)return;const h=setTimeout(()=>addRecent({type:'calc',id:def.slug,href:href+query,title:def.title,detail:run.summary,at:Date.now()}),1500);return ()=>clearTimeout(h)},[def,run,href,query]);
+ // Előzmények: csak a felhasználó tényleges módosítása után, 1,5 s tétlenséggel (a puszta megnyitás – megosztott linkkel sem – nem ír a tárolóba).
+ useEffect(()=>{if(!touched.current||!run.ok)return;const h=setTimeout(()=>addRecent({type:'calc',id:def.slug,href:href+query,title:def.title,detail:run.summary,at:Date.now()}),1500);return ()=>clearTimeout(h)},[def,run,href,query]);
  useEffect(()=>{const before=()=>setPrintInfo({url:window.location.origin+href+query,date:new Date().toLocaleString('hu-HU')});window.addEventListener('beforeprint',before);return ()=>window.removeEventListener('beforeprint',before)},[href,query]);
  const entry=():KbEntry=>({type:'calc',id:def.slug,href,title:def.title,at:Date.now()});
  function toggleFav(){

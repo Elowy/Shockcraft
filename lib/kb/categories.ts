@@ -11,6 +11,10 @@ export const HOME='/';
 /** A Kalkulátorok rövid, stabil URL-je; a linkek ebből épülnek (egy helyen, elírás nélkül). */
 export const CALC_HUB='/kalkulatorok';
 export const calcPath=(slug:string)=>CALC_HUB+'/'+slug;
+/** Open Graph alapmezők: az oldalak saját openGraph objektuma a layoutét teljesen felülírja (sekély összevonás), ezért mindenhol ki kell írni. */
+export const OG_BASE={siteName:SITE_NAME,locale:'hu_HU'} as const;
+/** A kalkulátoroldal <title>-je (legfeljebb 60 karakter, terv 3.7): „<cím> – Kalkulátorok – Villanyrajz”, ha belefér; különben „<cím> – Villanyrajz”. */
+export function calcSeoTitle(title:string){const full=title+' – Kalkulátorok – '+SITE_NAME;return full.length<=60?full:title+' – '+SITE_NAME}
 
 export type SectionId='elmelet'|'semak'|'kalkulatorok'|'tesztek'|'konstruktor';
 export type SectionIcon='book-open'|'plug-zap'|'calculator'|'clipboard-check'|'blocks';

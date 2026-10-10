@@ -30,7 +30,7 @@ const def:CalcDef={
  formulas:['DC: I = P / (U · η)','1f: I = P / (U · cos φ · η)','3f: I = P / (√3 · U · cos φ · η)'],
  notes:{
   good:['Fogyasztó áramfelvételének becslése adattábla-teljesítményből (pl. vízmelegítő, főzőlap, kazán).','Annak ellenőrzése, hogy egy fogyasztó nagyságrendileg melyik áramkörre fér rá.'],
-  bad:['Védelem kiválasztására: a kismegszakító névleges árama a vezetéktől is függ (Ib ≤ In ≤ Iz).','Motorok indítási áramára: az a névleges áram többszöröse is lehet (lásd Motor névleges árama).'],
+  bad:['Védelem kiválasztására: a kismegszakító névleges árama a vezetéktől is függ (Ib ≤ In ≤ Iz).','Motorok indítási áramára: az a névleges áram többszöröse is lehet (adattábla, gyártói adat).'],
  },
  safety:['alap','kalkulator'],
  examples:[

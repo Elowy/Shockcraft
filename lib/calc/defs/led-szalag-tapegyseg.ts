@@ -17,9 +17,11 @@ const def:CalcDef={
   const L=v.n('L'),pm=v.n('pm'),U=v.n('U'),r=v.n('r'),P=L*pm,I=P/U,Pmin=P*(1+r/100),psu=nextAtLeast(Pmin,PSU_SIZES.value);
   const issues:Issue[]=[];
   if(psu===null)issues.push({level:'warn',text:'Ehhez a terheléshez egy tápegység helyett több szakaszra bontott betáplálás javasolt.'});
-  const feed=U<=12?5:10;
-  if(L>feed)issues.push({level:'info',text:`${u(L,'m')} hosszú szalagnál a feszültségesés miatt a túlsó vég halványabb lehet; ${U<=12?'12 V-os':'24 V-os'} szalagnál jellemzően ${feed} m-enként javasolt betáplálni – a gyártói adatlap az irányadó.`});
-  const results:ResultItem[]=[{id:'P',label:'A szalag teljesítménye',value:P,unit:'W',text:u(P,'W')},{id:'I',label:'A szalag árama',value:I,unit:'A',text:u(I,'A')},{id:'Pmin',label:'Szükséges tápegység-teljesítmény',value:Pmin,unit:'W',text:u(Pmin,'W')}];
+  // Jellemző betáplálási távolság a szalagfeszültség szerint (tájékoztató); 24 V fölött csak a gyártói adatlap.
+  const feed=U<=5?{m:2,t:'1–2'}:U<=12?{m:5,t:'5'}:U<=24?{m:10,t:'10'}:null;
+  if(feed&&L>feed.m)issues.push({level:'info',text:`${u(L,'m')} hosszú szalagnál a feszültségesés miatt a túlsó vég halványabb lehet; ${u(U,'V')}-os szalagnál jellemzően ${feed.t} m-enként javasolt betáplálni – a gyártói adatlap az irányadó.`});
+  else if(!feed&&L>10)issues.push({level:'info',text:`${u(L,'m')} hosszú szalagnál a feszültségesés miatt a túlsó vég halványabb lehet; a betáplálási távolságot a gyártói adatlap adja meg.`});
+  const results:ResultItem[]=[{id:'P',label:'A szalag teljesítménye',value:P,unit:'W',text:u(P,'W')},{id:'I',label:'A szalag árama',value:I,unit:'A',text:u(I,'A')},{id:'Pmin',label:'Szükséges tápegység-teljesítmény',value:Pmin,unit:'W',text:u(Pmin,'W'),primary:psu===null}];
   if(psu!==null)results.push({id:'psu',label:'Javasolt tápegység (jellemző érték)',value:psu,unit:'W',text:psu+'\u00a0W',primary:true});
   return {results,steps:[step('Szalagteljesítmény','P = L · P/m',`P = ${u(L,'m')} · ${u(pm,'W/m')}`,u(P,'W')),step('Áram','I = P / U',`I = ${u(P,'W')} / ${u(U,'V')}`,u(I,'A')),step('Tartalékkal','Pmin = P · (1 + t)',`Pmin = ${u(P,'W')} · (1 + ${u(r,'%')})`,u(Pmin,'W'))].concat(psu!==null?[step('Tápegység','a legkisebb jellemző érték ≥ Pmin',PSU_SIZES.value.join(', ')+' W',psu+' W',PSU_SIZES.source)]:[]),issues,
    assumptions:['A méterenkénti teljesítmény a szalag névleges feszültségén érvényes.','Állandó feszültségű (CV) szalag és tápegység.']};

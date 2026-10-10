@@ -27,15 +27,15 @@ const def:CalcDef={
    {id:'ev',label:'Éves fogyasztás',value:year,unit:'kWh',text:u(year,'kWh'),primary:price===undefined},
   ];
   const terms=rows.map(([P,h,n])=>`${u(P,'W')} · ${u(h,'h')}${n!==1?' · '+n:''}`).join(' + ');
-  const steps=[step('Napi energia','E_nap = Σ (P · t · db) / 1000',`E_nap = (${terms}) / 1000`,u(day,'kWh')),step('Éves energia','E_év = E_nap · 365',`E_év = ${u(day,'kWh')} · 365`,u(year,'kWh'))];
+  const steps=[step('Napi energia','E_nap = Σ (P · t · db) / 1000',`E_nap = (${terms}) / 1000`,u(day,'kWh')),step('Éves energia','E_év = E_nap · 365',`E_év = ${u(day,'kWh')} · 365`,u(year,'kWh')),step('Havi energia','E_hó = E_év / 12',`E_hó = ${u(year,'kWh')} / 12`,u(month,'kWh'))];
   const issues:Issue[]=[];
   if(price!==undefined){
    results.push({id:'ft_ho',label:'Havi költség',value:month*price,unit:'Ft',text:huf(month*price)},{id:'ft_ev',label:'Éves költség',value:year*price,unit:'Ft',text:huf(year*price),primary:true});
-   steps.push(step('Éves költség','K = E_év · c',`K = ${u(year,'kWh')} · ${u(price,'Ft/kWh')}`,huf(year*price)));
+   steps.push(step('Havi költség','K_hó = E_hó · c',`K_hó = ${u(month,'kWh')} · ${u(price,'Ft/kWh')}`,huf(month*price)),step('Éves költség','K_év = E_év · c',`K_év = ${u(year,'kWh')} · ${u(price,'Ft/kWh')}`,huf(year*price)));
   }else issues.push({level:'info',text:'Add meg az áramdíjat (Ft/kWh) a költséghez. Az ár tarifánként és idővel változik, ezért a program nem tartalmaz árat.'});
   return {results,steps,issues,assumptions:['Az év 365 nap, a hónap az év tizenketted része (≈ 30,4 nap).','Állandó teljesítményfelvétel az üzemidő alatt; a készenléti fogyasztás és a termosztátos ki-be kapcsolás nincs benne.']};
  },
- formulas:['E = P · t (Wh), E[kWh] = P[W] · t[h] / 1000','E_év = E_nap · 365','Költség = E · áramdíj (Ft/kWh)'],
+ formulas:['E = P · t (Wh), E[kWh] = P[W] · t[h] / 1000','E_év = E_nap · 365; E_hó = E_év / 12','Költség = E · áramdíj (Ft/kWh)'],
  notes:{good:['Háztartási készülékek fogyasztásának és költségének összevetése.','Annak becslése, mennyit jelent egy készülék cseréje évente.'],bad:['A villanyszámla pontos előrejelzése: a rendszerhasználati és egyéb díjakat, sávos tarifát nem tartalmazza.','Hőszivattyú, klíma, hűtő: a tényleges üzemidő az időjárástól és a termosztáttól függ.']},
  safety:['alap'],
  examples:[

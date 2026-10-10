@@ -3,7 +3,7 @@
 // Csak belső relatív útvonal fogadható el. Kulcsok: shockcraft-kb-* (a components/legal-page.tsx sütitáblázatában felsorolva).
 
 export type StorageLike={getItem(key:string):string|null;setItem(key:string,value:string):void;removeItem(key:string):void};
-export const KB_KEYS={bookmarks:'shockcraft-kb-bookmarks-v1',recent:'shockcraft-kb-recent-v1'} as const;
+export const KB_KEYS={bookmarks:'shockcraft-kb-bookmarks-v1',recent:'shockcraft-kb-recent-v1',prefs:'shockcraft-kb-prefs-v1'} as const;
 
 /** Belső, relatív útvonal: /kalkulatorok vagy /tudastar alatt, opcionális lekérdezéssel és horgonnyal. */
 export const INTERNAL_PATH=/^\/(?:kalkulatorok|tudastar)(?:\/[a-z0-9-]+)*\/?(?:\?[^#\s<>"']{0,600})?(?:#[a-z0-9-]{1,80})?$/;
@@ -86,6 +86,16 @@ const sameEntry=(a:KbEntry,b:KbEntry)=>a.type===b.type&&a.id===b.id;
 export const bookmarkStore=createStore<KbEntry>({key:KB_KEYS.bookmarks,version:1,validate:validEntry,max:300,dedupe:sameEntry});
 export const recentStore=createStore<KbEntry>({key:KB_KEYS.recent,version:1,validate:validEntry,max:30,dedupe:sameEntry});
 export const searchStore=createStore<string>({key:KB_KEYS.recent,field:'searches',version:1,validate:validSearch,max:8,dedupe:(a,b)=>a===b});
+/** Kikapcsolt kényelmi funkciók (most csak a „/” gyorsbillentyű: 'slash'). Üres lista = alapállapot, ekkor a kulcs nem is jön létre. */
+const PREFS=['slash'] as const;
+export const prefStore=createStore<string>({key:KB_KEYS.prefs,field:'off',version:1,validate:x=>typeof x==='string'&&(PREFS as readonly string[]).includes(x)?x:null,max:PREFS.length,dedupe:(a,b)=>a===b});
+export const slashShortcutOn=(off:readonly string[])=>!off.includes('slash');
+export function setSlashShortcut(on:boolean,storage:()=>StorageLike|null=browserStorage){
+ const next=prefStore.get().filter(x=>x!=='slash').concat(on?[]:['slash']);
+ if(next.length){prefStore.set(next);return}
+ try{storage()?.removeItem(KB_KEYS.prefs)}catch{}
+ prefStore.reset();
+}
 
 /** Elem a lista elejére (azonos típus+azonosító esetén csere). */
 export const pushFront=<T>(list:readonly T[],item:T,same:(a:T,b:T)=>boolean)=>[item,...list.filter(x=>!same(x,item))];
@@ -93,9 +103,10 @@ export const addBookmark=(e:KbEntry)=>bookmarkStore.set(pushFront(bookmarkStore.
 export const removeBookmark=(type:EntryType,id:string)=>bookmarkStore.set(bookmarkStore.get().filter(x=>!(x.type===type&&x.id===id)));
 export const isBookmarked=(list:readonly KbEntry[],type:EntryType,id:string)=>list.some(x=>x.type===type&&x.id===id);
 export const addRecent=(e:KbEntry)=>recentStore.set(pushFront(recentStore.get(),e,sameEntry));
+export const removeRecent=(type:EntryType,id:string)=>recentStore.set(recentStore.get().filter(x=>!(x.type===type&&x.id===id)));
 export const addSearch=(q:string)=>{const v=validSearch(q);if(v)searchStore.set(pushFront(searchStore.get(),v,(a,b)=>a===b))};
-/** „Minden Tudástár-adat törlése”: a könyvjelzők, az előzmények és a keresések. A téma (shockcraft-theme) a tervezővel közös, megmarad. */
+/** „Minden Tudástár-adat törlése”: a könyvjelzők, az előzmények, a keresések és a beállítások. A téma (shockcraft-theme) a tervezővel közös, megmarad. */
 export function clearAll(storage:()=>StorageLike|null=browserStorage){
  try{const s=storage();for(const k of Object.values(KB_KEYS))s?.removeItem(k)}catch{}
- for(const s of [bookmarkStore,recentStore,searchStore])s.reset();
+ for(const s of [bookmarkStore,recentStore,searchStore,prefStore])s.reset();
 }

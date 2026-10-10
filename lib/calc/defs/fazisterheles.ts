@@ -9,7 +9,7 @@ const pf=(id:string,label:string,mode:'A'|'W',def:string)=>mode==='A'
 
 const def:CalcDef={
  slug:'fazisterheles',title:'Fázisterhelés és nullavezető-áram',category:'teljesitmeny',tier:'T0',version:1,updated:'2026-10-10',
- short:'Háromfázisú terhelés fázisonkénti összesítése: aszimmetria a fázisátlaghoz képest és a nullavezető árama (I_N) azonos cos φ mellett.',
+ short:'Háromfázisú terhelés fázisonkénti összesítése: aszimmetria a fázisátlaghoz képest és a nullavezető árama azonos cos φ mellett.',
  keywords:['fázisterhelés','aszimmetria','nullavezető áram','N áram','L1 L2 L3','fáziskiegyenlítés','háromfázisú terhelés'],
  synonyms:['fazisterheles','fazis aszimmetria','nulla aram','nullavezeto aram'],
  fields:[
@@ -22,8 +22,9 @@ const def:CalcDef={
   const watts=mode==='A'?[v.n('L1'),v.n('L2'),v.n('L3')].map(i=>i*PHASE_VOLTAGE):[v.n('P1'),v.n('P2'),v.n('P3')];
   const t=phaseTotals(phases.map((phase,i)=>({phase,watts:watts[i]})));
   const I=phases.map(p=>t.phases[p].current),IN=neutralCurrent(I[0],I[1],I[2]),avg=t.total/3;
+  const dev=watts.map(w=>Math.abs(w-avg)),maxDev=Math.max(...dev),c=I.map(x=>u(x,'',3));
   const issues:Issue[]=[];
-  if(t.total>0&&t.imbalance>IMBALANCE_LIMIT)issues.push({level:'warn',text:`A legnagyobb eltérés az átlagtól ${u(t.imbalance,'%',0)} (tájékoztató határ: ${IMBALANCE_LIMIT}%). Érdemes egyes áramköröket másik fázisra tenni.`});
+  if(t.total>0&&t.imbalance>IMBALANCE_LIMIT)issues.push({level:'warn',text:`A legnagyobb eltérés az átlagtól ${pct(t.imbalance,1)} (tájékoztató határ: ${pct(IMBALANCE_LIMIT,0)}). Érdemes egyes áramköröket másik fázisra tenni.`});
   return {
    results:[
     ...phases.map((p,i)=>({id:'I'+(i+1),label:p+' áram',value:I[i],unit:'A',text:u(I[i],'A')})),
@@ -32,13 +33,15 @@ const def:CalcDef={
     {id:'IN',label:'Nullavezető árama',value:IN,unit:'A',text:u(IN,'A'),primary:true},
    ],
    steps:[
-    ...(mode==='W'?[step('Fázisáramok','I = P / 230 V',phases.map((p,i)=>`${p}: ${u(watts[i],'W')} / 230 V`).join('; '),I.map(x=>u(x,'A')).join('; '))]:[]),
-    step('Átlag','P_átl = (P1 + P2 + P3) / 3',`P_átl = ${si(t.total,'W')} / 3`,si(avg,'W')),
-    step('Aszimmetria','max |Pi − P_átl| / P_átl · 100',`max eltérés / ${si(avg,'W')} · 100`,pct(t.imbalance,1)),
-    step('Nullavezető-áram','I_N = √(I1² + I2² + I3² − I1·I2 − I2·I3 − I3·I1)',`I_N = √(${I.map(x=>u(x,'',3)+'²').join(' + ')} − …)`,u(IN,'A')),
+    mode==='W'?step('Fázisáramok','I = P / 230 V',phases.map((p,i)=>`${p}: ${u(watts[i],'W')} / 230 V`).join('; '),I.map(x=>u(x,'A')).join('; '))
+     :step('Fázisteljesítmények','P = I · 230 V',phases.map((p,i)=>`${p}: ${u(I[i],'A')} · 230 V`).join('; '),watts.map(w=>si(w,'W')).join('; ')),
+    step('Átlag','P_átl = (P1 + P2 + P3) / 3',`P_átl = (${watts.map(w=>si(w,'W')).join(' + ')}) / 3`,si(avg,'W')),
+    step('Legnagyobb eltérés','max(|P1 − P_átl|; |P2 − P_átl|; |P3 − P_átl|)',`max(${dev.map(d=>si(d,'W')).join('; ')})`,si(maxDev,'W')),
+    step('Aszimmetria','max |Pi − P_átl| / P_átl · 100',t.total>0?`${si(maxDev,'W')} / ${si(avg,'W')} · 100`:'nincs terhelés (P_átl = 0)',pct(t.imbalance,1)),
+    step('Nullavezető-áram','I_N = √(I1² + I2² + I3² − I1·I2 − I2·I3 − I3·I1)',`I_N = √(${c[0]}² + ${c[1]}² + ${c[2]}² − ${c[0]}·${c[1]} − ${c[1]}·${c[2]} − ${c[2]}·${c[0]})`,u(IN,'A')),
    ],
    issues,figure:{kind:'phase-bars',unit:'A',phases:phases.map((p,i)=>({label:p,value:I[i]})),neutral:IN},
-   assumptions:['230 V fázisfeszültség, azonos cos φ minden fázisban (a nullavezető-áram képlete csak így érvényes).','Szinuszos áramok: a felharmonikusok (pl. LED-meghajtók, számítógépek) a nullavezető áramát jelentősen növelhetik.','Egyidejűségi tényező nélkül.'],
+   assumptions:['230 V fázisfeszültség, azonos cos φ minden fázisban (a nullavezető-áram képlete csak így érvényes).',...(mode==='W'?['Teljesítmény megadásakor cos φ = 1 (I = P / 230 V); kisebb cos φ-nél a fázis- és a nullavezető-áram 1/cos φ-szer nagyobb.']:[]),'Szinuszos áramok: a felharmonikusok (pl. LED-meghajtók, számítógépek) a nullavezető áramát jelentősen növelhetik.','Egyidejűségi tényező nélkül.'],
   };
  },
  formulas:['I = P / 230 V','aszimmetria = max |Pi − P_átl| / P_átl · 100 %','I_N = √(I1² + I2² + I3² − I1·I2 − I2·I3 − I3·I1)'],

@@ -1,5 +1,5 @@
 import type {CalcDef} from '../core';
-import {SIZING_NOT_COVERED} from '../formulas';
+import {SIZING_NOT_COVERED} from '../../sizing-formulas';
 import {nb,step,u} from '../fields';
 import {fmtNum} from '../../sizing-formulas';
 import {SECTIONS} from '../../sizing-tables';

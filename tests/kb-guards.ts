@@ -9,7 +9,8 @@ import {dirname,join,relative,resolve} from 'node:path';
 const ROOT=resolve('.');
 const walk=(dir:string):string[]=>readdirSync(dir).flatMap(f=>{const p=join(dir,f);return statSync(p).isDirectory()?walk(p):/\.(ts|tsx)$/.test(f)?[p]:[]});
 const rel=(p:string)=>relative(ROOT,p).split('\\').join('/');
-const ROOTS=[...walk('app/(kezikonyv)'),...walk('components/kezikonyv'),...walk('components/calc'),...walk('lib/calc'),...walk('lib/kb'),'app/sitemap.ts','app/robots.ts','lib/site-origin.ts','lib/sizing-formulas.ts'].map(p=>resolve(p));
+// Az app/layout.tsx a kalkulátoroldalak szülő-layoutja: ha cookies()/headers()-t hívna, minden kalkulátoroldal dinamikussá válna.
+const ROOTS=[...walk('app/(kezikonyv)'),...walk('components/kezikonyv'),...walk('components/calc'),...walk('lib/calc'),...walk('lib/kb'),'app/layout.tsx','app/sitemap.ts','app/robots.ts','lib/site-origin.ts','lib/sizing-formulas.ts'].map(p=>resolve(p));
 assert.ok(ROOTS.length>60,'a gyökérfájlok megvannak ('+ROOTS.length+')');
 
 type Imp={spec:string;typeOnly:boolean};
@@ -21,6 +22,7 @@ function imports(file:string):Imp[]{
  }
  for(const m of src.matchAll(/(?:^|[;\n])\s*import\s*['"]([^'"]+)['"]/g))out.push({spec:m[1],typeOnly:false});
  for(const m of src.matchAll(/\bimport\(\s*['"]([^'"]+)['"]\s*\)/g))out.push({spec:m[1],typeOnly:false});
+ for(const m of src.matchAll(/\brequire\(\s*['"]([^'"]+)['"]\s*\)/g))out.push({spec:m[1],typeOnly:false});
  return out;
 }
 function resolveSpec(from:string,spec:string):string|null{
@@ -51,7 +53,10 @@ const all=closure(ROOTS);
 const FORBIDDEN_FILES=[/^db\//,/^lib\/auth\.ts$/,/^lib\/billing\.ts$/,/^lib\/pdf-export\.ts$/,/^lib\/plan\.ts$/,/^lib\/sizing\.ts$/,/^lib\/sizing-schema\.ts$/,/^components\/plan-/,/^components\/phase-load-report/,/^components\/planner-access/,/^app\/tervezo\//,/^app\/api\//,/^lib\/subscription-access/,/^lib\/account-email/,/^lib\/secrets/];
 for(const f of all.files){const r=rel(f);for(const re of FORBIDDEN_FILES)assert.ok(!re.test(r),'tiltott import: '+all.chain(f))}
 const FORBIDDEN_PACKAGES=['zod','jspdf','next/headers','drizzle-orm','mysql2','bcryptjs','stripe','next/dynamic'];
-for(const p of all.packages)assert.ok(!FORBIDDEN_PACKAGES.some(x=>p===x||p.startsWith(x+'/')),'tiltott csomag: '+p);
+// „x”, „x/…” és „x.js” alak is (pl. next/headers.js).
+const forbiddenPackage=(p:string)=>FORBIDDEN_PACKAGES.some(x=>p===x||p.startsWith(x+'/')||p.startsWith(x+'.'));
+for(const p of all.packages)assert.ok(!forbiddenPackage(p),'tiltott csomag: '+p);
+assert.ok(forbiddenPackage('next/headers.js')&&forbiddenPackage('zod/v4')&&!forbiddenPackage('next/navigation'),'a csomagszűrő önellenőrzése');
 // A kliensszigetek nem húznak be szerveroldali modult (env, registry) – a kalkulátoroldal JS-e kicsi marad.
 for(const f of ROOTS.filter(f=>/^['"]use client['"]/.test(readFileSync(f,'utf8').trimStart()))){
  const c=closure([f]);

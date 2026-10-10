@@ -1,6 +1,7 @@
 import {CalcError,type CalcDef} from '../core';
 import {AWG_SOURCE,HP_W,KWH_J,LE_W,awgDiameter,awgLabel} from '../constants';
 import {si,step,u} from '../fields';
+import {formatNum} from '../number';
 
 const area=(d:number)=>Math.PI/4*d*d;
 /** A legvékonyabb AWG-huzal, amelynek keresztmetszete ≥ A (n = −3 … 40). */
@@ -32,7 +33,7 @@ const def:CalcDef={
   if(m==='awg'){
    const n=v.n('awg'),d=awgDiameter(n),A=area(d);
    return {results:[{id:'mm2',label:'Keresztmetszet',value:A,unit:'mm²',text:u(A,'mm²'),primary:true},{id:'d',label:'Átmérő',value:d,unit:'mm',text:u(d,'mm')}],
-    steps:[step('Átmérő','d = 0,127 mm · 92^((36 − n) / 39)',`d = 0,127 mm · 92^((36 − ${n}) / 39)`,u(d,'mm'),AWG_SOURCE),step('Keresztmetszet','A = π · d² / 4',`A = π · (${u(d,'mm')})² / 4`,u(A,'mm²'))],
+    steps:[step('Átmérő','d = 0,127 mm · 92^((36 − n) / 39)',`d = 0,127 mm · 92^((36 − ${n<0?'('+formatNum(n)+')':n}) / 39)`,u(d,'mm'),AWG_SOURCE),step('Keresztmetszet','A = π · d² / 4',`A = π · (${u(d,'mm')})² / 4`,u(A,'mm²'))],
     issues:[{level:'info',text:'AWG '+awgLabel(n)+': tömör huzal névleges keresztmetszete. A sodrott vezetők és az európai mm²-sor értékei ettől eltérnek.'}]};
   }
   if(m==='keresztmetszet'){

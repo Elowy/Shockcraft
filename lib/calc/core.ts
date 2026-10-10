@@ -173,6 +173,8 @@ export function summarize(def:CalcDef,raw:Raw,max=4):string{
  return parts.join(', ');
 }
 
+/** A fő eredmény(ek): a primary jelölésűek; ha egy sincs (pl. nincs választható érték), az első eredmény – a fő doboz sosem üres. */
+export const mainResults=(out:CalcOutput)=>{const p=out.results.filter(r=>r.primary);return p.length?p:out.results.slice(0,1)};
 /** Futtatás: soha nem dob, és NaN/Infinity nem juthat ki az eredményben. */
 export function runCalc(def:CalcDef,raw:Raw):CalcRun{
  try{
@@ -187,7 +189,10 @@ export function runCalc(def:CalcDef,raw:Raw):CalcRun{
  }
 }
 
-/** Golden-példa ellenőrzése: minden elvárt eredmény relatív (vagy kis értéknél abszolút) tűrésen belül. */
+/** Relatív egyezés golden-ellenőrzéshez: |kapott − elvárt| ≤ tol · |elvárt|; elvárt = 0 esetén abszolút 1e-12.
+ * (Szándékosan nem tol · max(1, |elvárt|): 1 alatti értéknél – pl. 3,2e-7 F – az abszolút tűrés semmit nem ellenőrizne.) */
+export const closeTo=(got:number,want:number,tol=1e-4)=>want===0?Math.abs(got)<=1e-12:Math.abs(got-want)<=tol*Math.abs(want);
+/** Golden-példa ellenőrzése: minden elvárt eredmény relatív tűrésen belül (closeTo). */
 export function checkExample(def:CalcDef,ex:CalcExample):string[]{
  const run=runCalc(def,ex.input);
  if(!run.ok)return [def.slug+' / '+ex.title+': '+run.issues.map(i=>i.text).join('; ')];
@@ -195,7 +200,7 @@ export function checkExample(def:CalcDef,ex:CalcExample):string[]{
  for(const [id,want] of Object.entries(ex.expect)){
   const got=run.out.results.find(r=>r.id===id)?.value;
   if(got===undefined){errors.push(def.slug+' / '+ex.title+': nincs „'+id+'” eredmény');continue}
-  if(!(Math.abs(got-want)<=tol*Math.max(1,Math.abs(want))))errors.push(def.slug+' / '+ex.title+': '+id+' = '+got+', elvárt '+want);
+  if(!closeTo(got,want,tol))errors.push(def.slug+' / '+ex.title+': '+id+' = '+got+', elvárt '+want);
  }
  return errors;
 }

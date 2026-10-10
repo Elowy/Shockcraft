@@ -46,6 +46,12 @@ assert.equal(suggest(items,'tranzformator')?.id,'transzformator');
 assert.equal(suggest(items,'xy'),null);
 // A kiadatlan kalkulátor találat, de link nélkül, és azonos erősségnél a közzétett előrébb kerül.
 const h=search(items,'kismegszakító');assert.equal(h[0].item.href,null);assert.ok(h.some(x=>x.item.href));
+// Rövid szinonima (hp → le) nem illeszkedik előtagként (led, levezetés); a rövid lekérdezés javaslata legfeljebb egy elírás.
+assert.equal(first('hp'),'mertekegyseg-atvalto');assert.ok(!top('hp',10).includes('led-elotet-ellenallas'),'hp: '+top('hp',10).join(', '));
+assert.ok(search(items,'hp').length<=3,'hp: kevés, releváns találat ('+search(items,'hp').map(x=>x.item.id).join(', ')+')');
+assert.equal(first('LE'),'mertekegyseg-atvalto','a teljes kulcsszó („kW LE”) megelőzi a „LED” előtagot');
+assert.equal(suggest(items,'rcd'),null,'„RCD” → nincs értelmetlen javaslat (LED)');
+assert.equal(suggest(items,'lde')?.id,'led-elotet-ellenallas','egy elírás rövid lekérdezésnél is');
 // Az index (a kalkulátorok metaadatai) kicsi.
 const size=gzipSync(JSON.stringify(items)).length;assert.ok(size<40*1024,'index ≤ 40 KB gz ('+size+')');
 console.log('PASS: normalizálás, szinonimák (biztosíték → kismegszakító, kábel vastagság → keresztmetszet), elírás-tűrés, rangsor, javaslat, kiadatlan találat link nélkül; index '+size+' B gz.');

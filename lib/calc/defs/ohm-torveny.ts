@@ -54,6 +54,6 @@ const def:CalcDef={
   {title:'5 V, 220 Ω (mA-es áram)',input:{ismert:'UR',U:'5',R:'220'},expect:{I:0.0227273,P:0.113636}},
  ],
  related:['teljesitmeny','eredo-ellenallas','vezetek-ellenallas'],articles:[],
- sources:['Ohm-törvény és a Joule-törvény (P = U · I) – fizikai alapösszefüggések'],
+ sources:['Ohm-törvény (U = I · R) és a villamos teljesítmény összefüggése (P = U · I = I² · R) – fizikai alapösszefüggések'],
 };
 export default def;

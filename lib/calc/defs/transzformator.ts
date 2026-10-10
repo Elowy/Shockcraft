@@ -12,7 +12,7 @@ const def:CalcDef={
   {id:'U1',kind:'number',label:'Primer feszültség',symbol:'U1',units:'voltage',default:'230',positive:true,max:1e6},
   {id:'U2',kind:'number',label:'Szekunder feszültség',symbol:'U2',units:'voltage',default:'12',positive:true,max:1e6},
   {id:'S',kind:'number',label:'Névleges teljesítmény',symbol:'S',units:'apparent',default:'60',positive:true,max:1e9},
-  {id:'N1',kind:'number',label:'Primer menetszám (nem kötelező)',symbol:'N1',unit:'menet',optional:true,integer:true,min:1,max:1e6},
+  {id:'N1',kind:'number',label:'Primer menetszám (nem kötelező)',symbol:'N1',unit:'menet',optional:true,integer:true,min:1,max:1e6,showIf:{field:'rendszer',is:['1f']},help:'Csak egyfázisú transzformátorhoz: háromfázisúnál a menetszám-áttétel a kapcsolási csoporttól (Yy, Dy, Yd) is függ.'},
  ],
  compute(v){
   const tri=v.s('rendszer')==='3f',U1=v.n('U1'),U2=v.n('U2'),S=v.n('S'),N1=v.opt('N1'),k=tri?SQRT3:1,kt=tri?'√3 · ':'';
@@ -20,10 +20,10 @@ const def:CalcDef={
   const steps:Step[]=[step('Áttétel','a = U1 / U2',`a = ${u(U1,'V')} / ${u(U2,'V')}`,u(a,'')),step('Primer áram',`I1 = S / (${kt}U1)`,`I1 = ${si(S,'VA')} / (${kt}${u(U1,'V')})`,si(I1,'A')),step('Szekunder áram',`I2 = S / (${kt}U2)`,`I2 = ${si(S,'VA')} / (${kt}${u(U2,'V')})`,si(I2,'A'))];
   const results:ResultItem[]=[{id:'a',label:'Áttétel (U1/U2)',value:a,text:u(a,'')},{id:'I1',label:'Primer áram',value:I1,unit:'A',text:si(I1,'A')},{id:'I2',label:'Szekunder áram',value:I2,unit:'A',text:si(I2,'A'),primary:true}];
   if(N1){const N2=N1/a;results.push({id:'N2',label:'Szekunder menetszám',value:N2,unit:'menet',text:u(N2,'menet',1)});steps.push(step('Szekunder menetszám','N2 = N1 / a',`N2 = ${N1} / ${u(a,'')}`,u(N2,'menet',1)))}
-  return {results,steps,assumptions:['Ideális (veszteségmentes) transzformátor: a valós szekunder feszültség terhelés alatt kisebb, üresjárásban nagyobb.',...(tri?['Háromfázisú: vonali feszültségek és vonali áramok, szimmetrikus terhelés.']:[])]};
+  return {results,steps,assumptions:['Ideális (veszteségmentes) transzformátor: a valós szekunder feszültség terhelés alatt kisebb, üresjárásban nagyobb.',...(tri?['Háromfázisú: vonali feszültségek és vonali áramok, szimmetrikus terhelés.','A menetszámot háromfázisú módban nem számoljuk: Dy és Yd kapcsolásnál a menetszám-áttétel √3-szor eltér a vonali feszültségek arányától.']:[])]};
  },
  formulas:['a = U1 / U2 = N1 / N2','1f: I = S / U','3f: I = S / (√3 · U)'],
- notes:{good:['Biztonsági (törpefeszültségű) transzformátor áramainak becslése, a szekunder vezeték és biztosíték előzetes kiválasztásához.','Elosztói transzformátor névleges áramainak becslése.'],bad:['Bekapcsolási áramlökés vagy zárlati áram számítására (a drop-feszültség, uk% kell hozzá).','Transzformátor tekercselésének méretezésére.']},
+ notes:{good:['Biztonsági (törpefeszültségű) transzformátor áramainak becslése, a szekunder vezeték és biztosíték előzetes kiválasztásához.','Elosztói transzformátor névleges áramainak becslése.'],bad:['Bekapcsolási áramlökés vagy zárlati áram számítására (ehhez a rövidzárási feszültség, uk [%] kell).','Transzformátor tekercselésének méretezésére.','Háromfázisú transzformátor menetszámára: a kapcsolási csoporttól (Yy, Dy, Yd) függ.']},
  safety:['alap','kalkulator'],
  examples:[
   {title:'230/12 V, 60 VA',input:{rendszer:'1f',U1:'230',U2:'12',S:'60','S.e':'VA'},expect:{I2:5,I1:0.26087,a:19.1667}},

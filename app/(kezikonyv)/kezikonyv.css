@@ -118,6 +118,8 @@
 .kk-seg input{accent-color:var(--kk-primary);width:1rem;height:1rem;margin:0}
 .kk-rows table{width:100%;border-collapse:collapse}
 .kk-rows th{font-size:.8125rem;text-align:left;font-weight:600;padding:.25rem}
+/* Az app/globals.css „th{color:#6e838f}” szabálya a kézikönyvben nem éri el az AA kontrasztot (3,2–3,5:1): a fejléccellák az előtérszínt kapják. */
+.kk th,.kk-layer th{color:var(--kk-fg)}
 .kk-rows td{padding:.2rem}
 .kk-rows input{width:100%;min-height:2.75rem;font-size:1rem}
 .kk-rows>.kk-button{justify-self:start}
@@ -212,6 +214,11 @@ a.kk-card:hover{border-color:var(--kk-primary);box-shadow:0 4px 16px #24414b14}
 .kk-method li{display:flex;gap:.6rem;align-items:flex-start}
 .kk-method li svg{width:1.25rem;height:1.25rem;color:var(--kk-primary);margin-top:.2rem}
 .kk-notfound{padding:2rem 0}
+/* JS nélkül a csak szkripttel működő vezérlők rejtve (a <html> `js` osztályát a téma-indító teszi ki); a lista, a képletek és a kidolgozott példa SSR-ben olvasható. */
+html:not(.js) .kk-calc,html:not(.js) .kk-index-search,html:not(.js) [data-kb-open=search],html:not(.js) [data-kb-open=bookmarks]{display:none}
+.kk-check{display:flex;gap:.5rem;align-items:flex-start;margin:.75rem 0;font-size:.9375rem}
+.kk-check input{margin-top:.3rem;accent-color:var(--kk-primary)}
+.kk-check small{color:var(--kk-muted)}
 
 /* Tervező-blokk (oldalanként egy, a tartalom után) */
 .kk-cta{display:grid;grid-template-columns:auto 1fr;gap:.75rem 1rem;align-items:start;margin:2.5rem 0 1rem;padding:1rem;border:1px solid var(--kk-border);border-radius:var(--kk-radius);background:var(--kk-surface-2)}
@@ -277,9 +284,6 @@ a.kk-card:hover{border-color:var(--kk-primary);box-shadow:0 4px 16px #24414b14}
 .kk-head-btn,.kk .kk-head-btn{display:inline-flex;align-items:center;gap:.35rem;min-height:2.5rem;min-width:2.5rem;justify-content:center;padding:.25rem .5rem;border:1px solid var(--kk-border);border-radius:.5rem;background:var(--kk-bg);color:var(--kk-fg);text-decoration:none;cursor:pointer}
 .kk-head-btn svg{width:1.1rem;height:1.1rem}
 .kk-head-btn kbd{font-size:.75rem;border:1px solid var(--kk-border);border-radius:.25rem;padding:0 .3rem;color:var(--kk-muted)}
-.kk-theme-btn .kk-sun{display:none}
-[data-theme=dark] .kk-theme-btn .kk-sun{display:inline}
-[data-theme=dark] .kk-theme-btn .kk-moon{display:none}
 .kk-tabs{max-width:77.5rem;margin:0 auto;padding:0 2.5rem;display:flex;gap:.25rem;border-bottom:1px solid var(--kk-border)}
 .kk-tabs a{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem .9rem;text-decoration:none;font-weight:600;font-size:.9375rem;color:var(--kk-muted);border-bottom:3px solid transparent;margin-bottom:-1px}
 .kk-tabs a svg{width:1.1rem;height:1.1rem}
@@ -299,10 +303,14 @@ a.kk-card:hover{border-color:var(--kk-primary);box-shadow:0 4px 16px #24414b14}
  .kk-desktop-head{display:block}
  .kk-page{display:grid;gap:2.5rem;padding:1.5rem 2.5rem 4rem;grid-template-columns:13rem minmax(0,1fr)}
  .kk-page-calc{grid-template-columns:13rem minmax(0,1fr)}
+ .kk-page-single{grid-template-columns:minmax(0,1fr)}
  .kk-side{display:block;position:sticky;top:1rem;align-self:start;max-height:calc(100dvh - 2rem);overflow-y:auto}
  .kk-foot{padding:0 2.5rem}
  .kk-toast-region{bottom:1.5rem}
 }
+/* 951–1100 px: a kézikönyv fejlécében a három művelet (keresés, kedvencek, menü) miatt a „Mire használható?” link nem fér el; a főoldalon és a menüben elérhető. */
+@media(min-width:950px) and (max-width:1100px){.kk .public-header nav>a:first-child{display:none}}
+.kk .public-header nav a,.kk .public-header .public-button{white-space:nowrap}
 @media(min-width:1240px){
  .kk-page-calc{grid-template-columns:13rem minmax(0,1fr) 11rem}
  .kk-toc{display:block;position:sticky;top:1rem;align-self:start}

@@ -61,34 +61,55 @@ export function checkRange(value:number,{min,max,integer,allowNegative,positive}
  return {ok:true,value};
 }
 
-/** Tizedesjegyek száma a kiíráshoz: 1 fölött 4 értékes jegy, legfeljebb 3 tizedes (az egészrészt nem kerekítjük);
- * 1 alatt 4 értékes jegy, legfeljebb 6 tizedes. */
+/** A lebegőpontos zaj levágása kiírás és kerekítés előtt (15 értékes jegy): 18651,499999999996 → 18651,5; 139,99999999999997 → 140. */
+export const clean=(n:number)=>n===0||!Number.isFinite(n)?n:+n.toPrecision(15);
+
+/** Tizedesjegyek száma a kiíráshoz. 1 alatt 4 értékes jegy, legfeljebb 6 tizedes; 1 és 10 között 4 értékes jegy (3 tizedes);
+ * 10 fölött legfeljebb 3 tizedes úgy, hogy 10 000-ig 5 értékes jegy maradjon (12,346; 185,67; 9976,6), afölött egész szám
+ * (az egészrészt nem kerekítjük). A terv 5.3 golden értékei (9976,6 W; 10,197 LE) ezt a kiírást követik. */
 export function decimalsFor(n:number){
  const a=Math.abs(n);if(!(a>0)||!Number.isFinite(a))return 0;
  const mag=Math.floor(Math.log10(a));
  return a>=1?Math.max(0,Math.min(3,4-mag)):Math.max(0,Math.min(6,3-mag));
 }
 const minus=(s:string)=>s.replace(/^-/,'\u2212');
-/** Magyar számformátum (tizedesvessző, nem törő szóköz ezreselválasztó, „−” mínuszjel). */
+const SUP:Record<string,string>={'-':'\u207b','0':'\u2070','1':'\u00b9','2':'\u00b2','3':'\u00b3','4':'\u2074','5':'\u2075','6':'\u2076','7':'\u2077','8':'\u2078','9':'\u2079'};
+/** Normálalak nagyon kicsi számhoz (különben „0” jelenne meg): 5·10⁻¹⁵. */
+function scientific(n:number){
+ let e=Math.floor(Math.log10(Math.abs(n))),m=n/10**e;
+ if(Math.abs(+m.toFixed(3))>=10){e++;m/=10}
+ return formatNum(m,3)+'\u00b710'+String(e).split('').map(c=>SUP[c]??c).join('');
+}
+/** Magyar számformátum (tizedesvessző, nem törő szóköz ezreselválasztó, „−” mínuszjel); 10⁻⁶ alatt normálalak. */
 export function formatNum(n:number,decimals?:number):string{
  if(!Number.isFinite(n))return '–';
- const d=decimals??decimalsFor(n);
- const s=nf(0,d).format(n);
+ const x=clean(n);
+ if(decimals===undefined&&x!==0&&Math.abs(x)<1e-6)return scientific(x);
+ const d=decimals??decimalsFor(x);
+ const s=nf(0,d).format(x);
  return s==='-0'?'0':minus(s);
 }
-/** Rögzített tizedesjegyű kiírás (pl. pénznél 0, százaléknál 1–2). */
-export const formatFixed=(n:number,decimals:number)=>Number.isFinite(n)?minus(nf(decimals,decimals).format(n)):'–';
-export const formatInt=(n:number)=>formatNum(Math.round(n),0);
+/** Rögzített tizedesjegyű kiírás (pl. pénznél 0, százaléknál 1–2); a félértékhatáron is helyesen kerekít (18651,5 → 18 652). */
+export const formatFixed=(n:number,decimals:number)=>Number.isFinite(n)?minus(nf(decimals,decimals).format(clean(n))):'–';
+export const formatInt=(n:number)=>formatNum(Math.round(clean(n)),0);
+/** Lefelé kerekítés `decimals` tizedesre, lebegőpontos zaj nélkül (139,99999999999997 → 140, nem 139,9). */
+export const floorTo=(n:number,decimals:number)=>Math.floor(clean(n*10**decimals))/10**decimals;
 
+const sigDecimals=(x:number,sig:number)=>x===0?0:Math.max(0,Math.min(9,sig-1-Math.floor(Math.log10(Math.abs(clean(x))))));
 const PREFIXES:[number,string][]=[[1e9,'G'],[1e6,'M'],[1e3,'k'],[1,''],[1e-3,'m'],[1e-6,'µ'],[1e-9,'n'],[1e-12,'p']];
-/** SI-előtagos kiírás: 0,0123 A → „12,3 mA”, 4700 Ω → „4,7 kΩ”. A `units` megadásával csak az ott felsorolt előtagok jöhetnek szóba. */
-export function formatSI(n:number,unit:string,{allow}:{allow?:string[]}={}):string{
+/** SI-előtagos kiírás: 0,0123 A → „12,3 mA”, 4700 Ω → „4,7 kΩ”. Az `allow` megadásával csak az ott felsorolt előtagok jöhetnek szóba;
+ * a `sig` megadásával ennyi értékes jeggyel (pl. precíziós tűrésnél). Ha a kerekítés elérné az 1000-et (999,9996 mΩ), egy előtaggal feljebb lép (1 Ω). */
+export function formatSI(n:number,unit:string,{allow,sig}:{allow?:string[];sig?:number}={}):string{
  if(!Number.isFinite(n))return '–';
  if(n===0)return '0\u00a0'+unit;
  const list=PREFIXES.filter(([,p])=>!allow||allow.includes(p));
- const a=Math.abs(n);
- const [f,p]=list.find(([f])=>a>=f*(1-1e-12))??list[list.length-1];
- return formatNum(n/f)+'\u00a0'+p+unit;
+ const a=Math.abs(clean(n));
+ let i=list.findIndex(([f])=>a>=f*(1-1e-12));if(i<0)i=list.length-1;
+ const digits=(x:number)=>sig?sigDecimals(x,sig):decimalsFor(x);
+ const mant=n/list[i][0];
+ if(i>0&&Math.abs(+clean(mant).toFixed(digits(mant)))>=1000)i--;
+ const m=n/list[i][0];
+ return formatNum(m,sig?sigDecimals(m,sig):undefined)+'\u00a0'+list[i][1]+unit;
 }
 /** Mértékegységes kiírás nem törő szóközzel. */
 export const withUnit=(text:string,unit:string)=>unit?text+'\u00a0'+unit:text;

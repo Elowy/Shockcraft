@@ -38,7 +38,7 @@ const def:CalcDef={
  formulas:['R = ρθ · l / A','ρθ = ρ20 · (1 + α · (θ − 20 °C))','oda-vissza áramút: R = ρθ · 2 · l / A'],
  notes:{
   good:['Hosszú vezeték ellenállásának becslése (pl. kerti lámpa, melléképület betáplálása).','Mért és számított hurokellenállás összevetése.'],
-  bad:['Terhelhetőség vagy keresztmetszet kiválasztása (lásd a Keresztmetszet-választás kalkulátort).','Sodrott, többszálas vagy ónozott vezetők pontos gyártói értékeinek kiváltása.'],
+  bad:['Terhelhetőség vagy keresztmetszet kiválasztása: ahhoz a szerelési mód, a hőmérséklet és a védelem is kell (tervezői feladat).','Sodrott, többszálas vagy ónozott vezetők pontos gyártói értékeinek kiváltása.'],
  },
  safety:['alap','kalkulator'],
  examples:[

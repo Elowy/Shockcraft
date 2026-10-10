@@ -42,18 +42,19 @@ export const AWG_SOURCE='ASTM B258: d = 0,127 mm · 92^((36 − n)/39)';
 export const awgDiameter=(n:number)=>0.127*92**((36-n)/39);
 export const awgLabel=(n:number)=>n>=0?String(n):'0'.repeat(1-n)+' ('+(1-n)+'/0)';
 
-/** Ellenállás-színkód (IEC 60062). `digit`: számjegy; `mult`: szorzó; `tol`: tűrés %. */
-export const COLOR_SOURCE='IEC 60062 (ellenállások színkódja)';
+/** Ellenállás-színkód (IEC 60062:2016). `digit`: számjegy; `mult`: szorzó; `tol`: tűrés %.
+ * A 2016-os kiadás tűrésszínei: szürke ±0,01 %, narancs ±0,05 %, sárga ±0,02 %; a régebbi EIA RS-279 jelölésben a szürke ±0,05 % volt. */
+export const COLOR_SOURCE='IEC 60062:2016 (ellenállások színkódja)';
 export const COLORS=[
  {id:'fekete',label:'fekete',hex:'#1b1b1b',digit:0,mult:1},
  {id:'barna',label:'barna',hex:'#7a4a24',digit:1,mult:10,tol:1},
  {id:'piros',label:'piros',hex:'#c62828',digit:2,mult:100,tol:2},
- {id:'narancs',label:'narancs',hex:'#ef7d14',digit:3,mult:1e3},
- {id:'sarga',label:'sárga',hex:'#f4cf1b',digit:4,mult:1e4},
+ {id:'narancs',label:'narancs',hex:'#ef7d14',digit:3,mult:1e3,tol:0.05},
+ {id:'sarga',label:'sárga',hex:'#f4cf1b',digit:4,mult:1e4,tol:0.02},
  {id:'zold',label:'zöld',hex:'#2e7d32',digit:5,mult:1e5,tol:0.5},
  {id:'kek',label:'kék',hex:'#1e5bb8',digit:6,mult:1e6,tol:0.25},
  {id:'ibolya',label:'ibolya',hex:'#7b3fb0',digit:7,mult:1e7,tol:0.1},
- {id:'szurke',label:'szürke',hex:'#8a8a8a',digit:8,mult:1e8,tol:0.05},
+ {id:'szurke',label:'szürke',hex:'#8a8a8a',digit:8,mult:1e8,tol:0.01},
  {id:'feher',label:'fehér',hex:'#f7f7f7',digit:9,mult:1e9},
  {id:'arany',label:'arany',hex:'#c9a227',mult:0.1,tol:5},
  {id:'ezust',label:'ezüst',hex:'#b8bec4',mult:0.01,tol:10},

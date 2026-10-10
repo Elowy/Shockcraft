@@ -1,14 +1,14 @@
 import type {CalcDef,Issue} from '../core';
 import {formatCompare} from '../number';
-import {SIZING_NOT_COVERED,loopResistance,maxLoopImpedance} from '../formulas';
-import {step,u} from '../fields';
+import {SIZING_NOT_COVERED,loopResistance,maxLoopImpedance} from '../../sizing-formulas';
+import {floorLength,step,u} from '../fields';
 import {fmtNum} from '../../sizing-formulas';
 import {SIZING_TABLES as T,constantRef,instantaneousRef} from '../../sizing-tables';
 import {curveField,ratingField,tag} from '../sizing-fields';
 
 const def:CalcDef={
  slug:'hurokimpedancia',title:'Hurokimpedancia és zárlati áram',category:'vedelem',tier:'T1',tables:true,version:1,updated:'2026-10-10',
- short:'Hurokimpedancia az áramkör végén (Zs = Ze + ρ1 · L · (1/A + 1/A_PE)), zárlati áram és a pillanatkioldáshoz tartozó legnagyobb hossz TN-rendszerben.',
+ short:'Hurokimpedancia az áramkör végén a hosszból és a keresztmetszetekből, a zárlati áram és a pillanatkioldáshoz tartozó legnagyobb hossz TN-rendszerben.',
  keywords:['hurokimpedancia','Zs','zárlati áram','Ik','érintésvédelem','lekapcsolás','TN rendszer','Ze','hurokellenállás'],
  synonyms:['hurok impedancia','zarlati aram','zs max','hibahurok'],
  fields:[
@@ -24,19 +24,19 @@ const def:CalcDef={
   const m=instantaneousRef(curve),ok=Zs<=max+1e-9*max,[zT,mT]=formatCompare(Zs,max,3),issues:Issue[]=[];
   if(Ze>=max)issues.push({level:'warn',text:'Már az elosztónál mért hurokimpedancia is eléri a megengedett értéket: ezzel a védelemmel az áramkör nem rövidíthető le eléggé.'});
   return {
-   results:[{id:'Zs',label:'Hurokimpedancia az áramkör végén',value:Zs,unit:'Ω',text:zT+'\u00a0Ω',primary:true},{id:'Ik',label:'Zárlati (hiba-) áram',value:Ik,unit:'A',text:u(Ik,'A')},{id:'ZsMax',label:`Megengedett hurokimpedancia (${curve}${In})`,value:max,unit:'Ω',text:mT+'\u00a0Ω'},{id:'Lmax',label:'Legnagyobb hossz ezzel a védelemmel',value:Lmax,unit:'m',text:u(Math.floor(Lmax*10)/10,'m',1)}],
+   results:[{id:'Zs',label:'Hurokimpedancia az áramkör végén',value:Zs,unit:'Ω',text:zT+'\u00a0Ω',primary:true},{id:'Ik',label:'Zárlati (hiba-) áram',value:Ik,unit:'A',text:u(Ik,'A')},{id:'ZsMax',label:`Megengedett hurokimpedancia (${curve}${In})`,value:max,unit:'Ω',text:mT+'\u00a0Ω'},{id:'Lmax',label:'Legnagyobb hossz ezzel a védelemmel',value:Lmax,unit:'m',text:floorLength(Lmax).text}],
    steps:[
     step('Vezeték hurokellenállása','R = ρ1 · L · (1/A + 1/A_PE)',`R = ${u(T.rho1,'Ω·mm²/m',4)} ${tag(constantRef('rho1'))} · ${u(L,'m')} · (1/${u(A,'mm²')} + 1/${u(Ape,'mm²')})`,u(R,'Ω',3)),
     step('Hurokimpedancia','Zs = Ze + R',`Zs = ${u(Ze,'Ω',3)} + ${u(R,'Ω',3)}`,u(Zs,'Ω',3)),
     step('Zárlati áram','Ik = cmin · U0 / Zs',`Ik = ${fmtNum(T.cmin)} · ${u(T.u0,'V')} / ${u(Zs,'Ω',3)}`,u(Ik,'A'),'MSZ HD 60364-4-41 411.4.4'),
     step('Megengedett érték','Zs,max = cmin · U0 / (m · In)',`Zs,max = ${fmtNum(T.cmin)} · ${u(T.u0,'V')} / (${m.value} ${tag(m)} · ${In} A)`,u(max,'Ω',3)),
-    step('Legnagyobb hossz','Lmax = (Zs,max − Ze) / (ρ1 · (1/A + 1/A_PE))',`Lmax = (${u(max,'Ω',3)} − ${u(Ze,'Ω',3)}) / ${u(per,'Ω/m',5)}`,u(Lmax,'m')),
+    step('Legnagyobb hossz','Lmax = max(0; (Zs,max − Ze) / (ρ1 · (1/A + 1/A_PE)))',`Lmax = max(0; (${u(max,'Ω',3)} − ${u(Ze,'Ω',3)}) / ${u(per,'Ω/m',5)})`,floorLength(Lmax).step),
    ],
    issues,verdict:{ok,text:ok?`Számítás szerint a pillanatkioldás feltétele teljesül: Zs = ${zT} Ω ≤ ${mT} Ω.`:`Számítás szerint a pillanatkioldás feltétele nem teljesül: Zs = ${zT} Ω > ${mT} Ω. Lehetséges megoldás: nagyobb keresztmetszet, rövidebb vezeték, B jelleggörbe vagy ÁVK – a döntés a tervező feladata.`},
    assumptions:['TN-rendszer; a hurok a fázis- és a védővezetőn záródik.','Rézvezető, ρ1 = '+u(T.rho1,'Ω·mm²/m',4)+' (üzemi hőmérséklet); a vezeték reaktanciája elhanyagolva.','Kismegszakító (MSZ EN 60898-1) pillanatkioldási tartományának felső határa: '+curve+' → '+m.value+' · In.'],
   };
  },
- formulas:['Zs = Ze + ρ1 · L · (1/A + 1/A_PE)','Ik = cmin · U0 / Zs','Zs ≤ Zs,max = cmin · U0 / (m · In)'],
+ formulas:['Zs = Ze + ρ1 · L · (1/A + 1/A_PE)','Ik = cmin · U0 / Zs','Zs ≤ Zs,max = cmin · U0 / (m · In)','Lmax = max(0; (Zs,max − Ze) / (ρ1 · (1/A + 1/A_PE)))'],
  notes:{good:['Hosszú áramkörök (kert, melléképület) lekapcsolási feltételének előzetes ellenőrzése.','Mért hurokimpedancia és a számított érték összevetése.'],bad:['A helyszíni mérés kiváltására: a kész berendezés hurokimpedanciáját mérni kell.','TT-rendszerre és ÁVK-val védett áramkörök igazolására.']},
  safety:['alap','meretezes'],notCovered:[...SIZING_NOT_COVERED,'az elosztó előtti hálózat impedanciájának változása és a mérési bizonytalanság'],
  examples:[

@@ -1,6 +1,6 @@
 // Gyakran ismétlődő mezőleírók és formázók a kalkulátor-definíciókhoz.
 import type {NumberField,SelectField,Step} from './core';
-import {formatNum,formatSI} from './number';
+import {floorTo,formatNum,formatSI} from './number';
 
 export const SYSTEM_OPTIONS={
  dc:{value:'dc',label:'Egyenáram (DC)',short:'DC'},
@@ -23,3 +23,8 @@ export const u=(n:number,unit:string,d?:number)=>formatNum(n,d)+(unit?nb+unit:''
 export const si=(n:number,unit:string)=>formatSI(n,unit);
 export const step=(label:string,formula:string,substituted:string,result:string,ref?:string):Step=>({label,formula,substituted,result,ref});
 export const pct=(n:number,d?:number)=>formatNum(n,d)+nb+'%';
+/** Hossz lefelé kerekítve 0,1 m-re (biztonságos irány). A `note` csak akkor szöveg, ha a kerekítés látható eltérést okoz. */
+export function floorLength(L:number){
+ const f=floorTo(L,1),shown=u(f,'m',1),changed=formatNum(L)!==formatNum(f,1);
+ return {value:f,text:shown+(changed?' (lefelé kerekítve)':''),step:u(L,'m')+(changed?' → lefelé kerekítve '+shown:'')};
+}

@@ -10,7 +10,8 @@ import {ReportLink} from '@/components/kezikonyv/report-link';
 import {SafetyNotice} from '@/components/kezikonyv/safety-notice';
 import {CALCULATORS,bySlug,calcFingerprint,isPublished,releaseInfo,visibleCalcs} from '@/lib/calc/registry';
 import {categoryLabel} from '@/lib/calc/categories';
-import {CALC_HUB,calcPath} from '@/lib/kb/categories';
+import {CALC_HUB,OG_BASE,calcPath,calcSeoTitle} from '@/lib/kb/categories';
+import {Sub} from '@/components/calc/sub';
 import {SIZING_DISCLAIMER_SHORT} from '@/lib/sizing-formulas';
 import {reviewText} from '@/lib/sizing-tables';
 import {kbPreview,siteOrigin} from '@/lib/site-origin';
@@ -27,7 +28,7 @@ const date=(iso:string)=>new Date(iso+'T12:00:00Z').toLocaleDateString('hu-HU',{
 export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{
  const {slug}=await params,def=find(slug);if(!def)return {};
  const url=calcPath(def.slug),draft=!isPublished(def);
- return {title:def.title,description:def.short,alternates:{canonical:url},openGraph:{type:'article',title:def.title+' – Villanyrajz',description:def.short,url},...(draft?{robots:{index:false,follow:false}}:{})};
+ return {title:{absolute:calcSeoTitle(def.title)},description:def.short,alternates:{canonical:url},openGraph:{...OG_BASE,type:'article',title:def.title+' – Villanyrajz',description:def.short,url},...(draft?{robots:{index:false,follow:false}}:{})};
 }
 
 export default async function CalculatorPage({params}:{params:Promise<{slug:string}>}){
@@ -38,7 +39,10 @@ export default async function CalculatorPage({params}:{params:Promise<{slug:stri
  const siblings=CALCULATORS.filter(c=>c.category===def.category&&isPublished(c));
  const related=def.related.map(bySlug).filter((c):c is NonNullable<typeof c>=>!!c&&isPublished(c));
  const t1=def.tier!=='T0';
- const toc:[string,string][]=[['szamitas','Számítás'],['levezetes','Levezetés'],['pelda','Kidolgozott példa'],['mire-jo','Mire jó, mire nem'],['forrasok','Források']];
+ // A tartalomjegyzék az oldal sorrendjét követi.
+ const toc:[string,string][]=[['szamitas','Számítás'],['levezetes','Levezetés'],['kepletek','Képletek'],['mire-jo','Mire jó, mire nem'],...(t1&&def.notCovered?[['nem-vizsgalt','Nem vizsgált'] as [string,string]]:[]),['pelda','Kidolgozott példa'],...(related.length?[['kapcsolodo','Kapcsolódó kalkulátorok'] as [string,string]]:[]),['forrasok','Források']];
+ // T1: a táblázatalapú számításhoz a „szabványhoz kötött” (táblázatokat említő) figyelmeztetés, a többihez a kalkulátor-figyelmeztetés kiemelt formában.
+ const t1Notice=def.safety.includes('meretezes')?'meretezes' as const:'kalkulator' as const;
  return <>
   <AppBar title="Kalkulátorok" back={{href:CALC_HUB,label:'Kalkulátorok'}}/>
   <div className="kk-page kk-page-calc">
@@ -53,21 +57,21 @@ export default async function CalculatorPage({params}:{params:Promise<{slug:stri
     <h1>{def.title}</h1>
     <p className="kk-lead">{def.short}</p>
     <p className="kk-review">{draft?<span className="kk-badge draft">Tervezet</span>:<a className="kk-badge" href={CALC_HUB+'#modszertan'}><BadgeCheck aria-hidden="true"/>{info.badge}</a>}<span>v{def.version} · {date(info.record?.date??def.updated)}</span></p>
-    {t1&&<SafetyNotice id="meretezes" tone="danger" extra={<p><b>{def.tables?SIZING_DISCLAIMER_SHORT:'Tájékoztató számítás – nem tervezői döntés.'}</b> Az eredmény „számítás szerinti” érték a megadott adatokkal és a lent felsorolt feltételezésekkel.</p>}/>}
-    <section id="szamitas" aria-label="Számítás"><Island/></section>
-    <section className="kk-formulas" aria-labelledby="kepletek-cim"><h2 id="kepletek-cim">Képletek</h2><ul>{def.formulas.map(f=><li key={f}><code>{f}</code></li>)}</ul></section>
+    {t1&&<SafetyNotice id={t1Notice} tone="danger" extra={<p><b>{def.tables?SIZING_DISCLAIMER_SHORT:'Tájékoztató számítás – nem tervezői döntés.'}</b> Az eredmény „számítás szerinti” érték a megadott adatokkal és a lent felsorolt feltételezésekkel.</p>}/>}
+    <section id="szamitas" aria-label="Számítás"><noscript><p className="kk-callout kk-callout-info">A számításhoz JavaScript szükséges. A képletek és a lenti kidolgozott példa nélküle is olvashatók.</p></noscript><Island/></section>
+    <section id="kepletek" className="kk-formulas" aria-labelledby="kepletek-cim"><h2 id="kepletek-cim">Képletek</h2><ul>{def.formulas.map(f=><li key={f}><code><Sub text={f}/></code></li>)}</ul></section>
     <section id="mire-jo" className="kk-notes" aria-labelledby="mire-jo-cim"><h2 id="mire-jo-cim">Mire jó, mire nem</h2>
      <div><h3>Mire jó</h3><ul>{def.notes.good.map(n=><li key={n}>{n}</li>)}</ul></div>
      <div><h3>Mire nem</h3><ul>{def.notes.bad.map(n=><li key={n}>{n}</li>)}</ul></div>
     </section>
-    {t1&&def.notCovered&&<section className="kk-notcovered" aria-labelledby="nem-vizsgalt-cim"><h2 id="nem-vizsgalt-cim">Nem vizsgált</h2><ul>{def.notCovered.map(n=><li key={n}>{n}</li>)}</ul></section>}
+    {t1&&def.notCovered&&<section id="nem-vizsgalt" className="kk-notcovered" aria-labelledby="nem-vizsgalt-cim"><h2 id="nem-vizsgalt-cim">Nem vizsgált</h2><ul>{def.notCovered.map(n=><li key={n}>{n}</li>)}</ul></section>}
     {def.tables&&<p className="kk-table-status" role="note"><b>Táblázatok állapota:</b> {reviewText()}</p>}
     {!t1&&<SafetyNotice id="kalkulator"/>}
     {def.safety.includes('beavatkozas')&&<SafetyNotice id="beavatkozas" tone="warn"/>}
     <CalcExample def={def}/>
-    {!!related.length&&<section className="kk-related" aria-labelledby="kapcsolodo-cim"><h2 id="kapcsolodo-cim">Kapcsolódó kalkulátorok</h2><ul>{related.map(c=><li key={c.slug}><a href={calcPath(c.slug)}><b>{c.title}</b><small>{c.short}</small></a></li>)}</ul></section>}
+    {!!related.length&&<section id="kapcsolodo" className="kk-related" aria-labelledby="kapcsolodo-cim"><h2 id="kapcsolodo-cim">Kapcsolódó kalkulátorok</h2><ul>{related.map(c=><li key={c.slug}><a href={calcPath(c.slug)}><b>{c.title}</b><small>{c.short}</small></a></li>)}</ul></section>}
     <section id="forrasok" className="kk-sources" aria-labelledby="forrasok-cim"><h2 id="forrasok-cim">Források</h2><ul>{def.sources.map(s=><li key={s}>{s}</li>)}</ul></section>
-    <p className="kk-meta">Verzió: v{def.version} · ujjlenyomat: {fp} · frissítve: {date(def.updated)} · {info.record?.kind==='lektoralt'?'Szakmai lektor: '+info.record.reviewer:'Ellenőrzés: '+(draft?'folyamatban':'belső kettős ellenőrzés')} · <ReportLink id={def.slug} version={def.version} fingerprint={fp} url={(origin??'')+url}/></p>
+    <p className="kk-meta">Verzió: v{def.version} · ujjlenyomat: {fp} · frissítve: {date(def.updated)} · {info.record?.kind==='lektoralt'?'Szakmai lektor: '+info.record.reviewer:'Ellenőrzés: '+(draft?'folyamatban':'két független számítás egyezése (automatikus teszt)')} · <ReportLink id={def.slug} version={def.version} fingerprint={fp} url={(origin??'')+url}/></p>
     <PlannerCta/>
    </main>
    <nav className="kk-toc" aria-label="Tartalom"><p className="kk-side-title">Tartalom</p><ul>{toc.map(([id,l])=><li key={id}><a href={'#'+id}>{l}</a></li>)}</ul></nav>

@@ -29,7 +29,7 @@ export function CalcIndex({metas,categories}:{metas:readonly CalcMeta[];categori
  return <>
   <div className="kk-index-search" role="search">
    <label htmlFor="kereses"><Search aria-hidden="true"/><span className="sr-only">Kalkulátor keresése</span></label>
-   <input id="kereses" type="search" placeholder="Keresés: feszültségesés, biztosíték, kábel vastagság, AWG…" value={q} onChange={e=>setQ(e.target.value)} autoComplete="off" spellCheck={false}/>
+   <input id="kereses" type="search" placeholder="Keresés: Ohm-törvény, teljesítmény, fogyasztás, AWG…" value={q} onChange={e=>setQ(e.target.value)} autoComplete="off" spellCheck={false}/>
   </div>
   {hits?<section aria-label="Találatok" className="kk-category">
    <p role="status" className="kk-muted">{hits.length?hits.length+' találat':'Nincs találat. Próbáld másképp (pl. „esés”, „amper”, „kábel”).'}</p>

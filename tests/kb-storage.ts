@@ -2,7 +2,7 @@
 // csak belső útvonal, közös kulcs két mezővel, `storage` esemény. Futtatás: node_modules/.bin/tsx tests/kb-storage.ts
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {INTERNAL_PATH,KB_KEYS,createStore,isInternalPath,pushFront,validEntry,validSearch,type KbEntry,type StorageLike} from '../lib/kb/storage';
+import {INTERNAL_PATH,KB_KEYS,createStore,isInternalPath,prefStore,pushFront,setSlashShortcut,slashShortcutOn,validEntry,validSearch,type KbEntry,type StorageLike} from '../lib/kb/storage';
 
 class Fake implements StorageLike{m=new Map<string,string>();getItem(k:string){return this.m.get(k)??null}setItem(k:string,v:string){this.m.set(k,v)}removeItem(k:string){this.m.delete(k)}}
 class Throwing implements StorageLike{getItem():string|null{throw new DOMException('denied','SecurityError')}setItem(){throw new DOMException('quota','QuotaExceededError')}removeItem(){throw new DOMException('denied','SecurityError')}}
@@ -59,6 +59,12 @@ t.set(pushFront(t.get(),e('y'),same));assert.deepEqual(t.get().map(x=>x.id),['y'
 // Tároló nélkül (SSR): üres, nem dob.
 const none=createStore<KbEntry>({key:'shockcraft-kb-test-ssr',version:1,validate:validEntry,max:300,storage:()=>null});
 assert.deepEqual(none.get(),[]);assert.doesNotThrow(()=>none.set([e('z')]));
+// A „/” gyorsbillentyű kikapcsolható (WCAG 2.1.4); alapállapotban nincs tárolt kulcs, visszakapcsoláskor a kulcs törlődik.
+{const mem=new Map<string,string>(),st:StorageLike={getItem:k=>mem.get(k)??null,setItem:(k,v)=>{mem.set(k,v)},removeItem:k=>{mem.delete(k)}};
+ assert.equal(slashShortcutOn(prefStore.get()),true);
+ setSlashShortcut(false,()=>st);assert.equal(slashShortcutOn(prefStore.get()),false);
+ setSlashShortcut(true,()=>st);assert.equal(slashShortcutOn(prefStore.get()),true);assert.equal(mem.has(KB_KEYS.prefs),false,'visszakapcsolva nincs kulcs');
+ assert.equal(slashShortcutOn(['slash']),false);assert.equal(slashShortcutOn([]),true);}
 // A jogi sütitáblázat felsorolja a kulcsokat.
 const legal=readFileSync('components/legal-page.tsx','utf8');
 for(const k of Object.values(KB_KEYS))assert.ok(legal.includes("'"+k+"'"),'sütitáblázat: '+k);

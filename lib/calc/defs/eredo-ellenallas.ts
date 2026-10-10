@@ -21,7 +21,8 @@ const def:CalcDef={
   if(m==='soros'){const R=v.list('R'),Re=seriesSum(R);return {results:[{id:'Re',label:'Eredő ellenállás',value:Re,unit:'Ω',text:si(Re,'Ω'),primary:true}],steps:[step('Soros eredő','Re = R1 + R2 + … + Rn','Re = '+list(R),si(Re,'Ω'))],issues:[{level:'info',text:'Soros kapcsolásban az eredő mindig nagyobb a legnagyobb tagnál.'}]}}
   if(m==='parhuzamos'){const R=v.list('R'),Re=parallelSum(R);return {results:[{id:'Re',label:'Eredő ellenállás',value:Re,unit:'Ω',text:si(Re,'Ω'),primary:true},{id:'G',label:'Eredő vezetés',value:1/Re,unit:'S',text:si(1/Re,'S')}],steps:[step('Párhuzamos eredő','1/Re = 1/R1 + 1/R2 + … + 1/Rn','1/Re = '+inv(R),si(Re,'Ω'))],issues:[{level:'info',text:'Párhuzamos kapcsolásban az eredő mindig kisebb a legkisebb tagnál.'}]}}
   const Re=v.n('Re'),Rk=v.list('Rk'),g=1/Re-Rk.reduce((s,x)=>s+1/x,0);
-  if(!(g>1e-15))throw new CalcError('A kívánt eredő nem lehet nagyobb vagy egyenlő az ismert ágak párhuzamos eredőjénél ('+si(parallelSum(Rk),'Ω')+').','Re');
+  // Relatív küszöb (a vezetés nagyságrendje 1/Re): a lebegőpontos maradék (pl. 9 × 0,9 Ω ∥ = 0,1 Ω) ne adjon óriási Rx-et, nagy ellenállásoknál pedig ne adjon téves hibát.
+  if(!(g>1e-10/Re))throw new CalcError('A kívánt eredő nem lehet nagyobb vagy egyenlő az ismert ágak párhuzamos eredőjénél ('+si(parallelSum(Rk),'Ω')+').','Re');
   const Rx=1/g;
   return {results:[{id:'Rx',label:'Hiányzó ellenállás',value:Rx,unit:'Ω',text:si(Rx,'Ω'),primary:true}],steps:[step('Hiányzó tag','1/Rx = 1/Re − (1/R1 + … + 1/Rn)',`1/Rx = 1/${si(Re,'Ω')} − (${inv(Rk)})`,si(Rx,'Ω'))]};
  },

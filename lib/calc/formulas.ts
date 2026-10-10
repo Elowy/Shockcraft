@@ -1,6 +1,6 @@
-// Általános villamos képletek (tiszta függvények), valamint a méretezési képletek re-exportja.
-// A méretezési képletek egyetlen forrása a lib/sizing-formulas.ts (és a lib/sizing-tables.ts); itt nem ismételjük őket.
-export {designCurrent,correctedIz,voltageDropPercent,loopResistance,maxLoopImpedance,maxLengthForDrop,minSectionFor,parseCable,SIZING_DISCLAIMER,SIZING_DISCLAIMER_SHORT,SIZING_NOT_COVERED} from '../sizing-formulas';
+// Általános villamos képletek (tiszta függvények).
+// A méretezési képletek egyetlen forrása a lib/sizing-formulas.ts (és a lib/sizing-tables.ts); a T1 definíciók közvetlenül onnan importálnak.
+// Szándékosan nincs itt re-export: így a T0 kalkulátorok forrás-ujjlenyomata (scripts/calc-source.ts) és kliensszigete nem függ a méretezési moduloktól.
 
 export const SQRT3=Math.sqrt(3);
 export const sinOf=(cos:number)=>Math.sqrt(Math.max(0,1-cos*cos));

@@ -36,8 +36,16 @@ const localBindingConfig = {
     : [],
 };
 
+// A méretezési képletek és táblázatok (lib/sizing-formulas.ts, lib/sizing-tables.ts) a tervező és a T1 kalkulátorok közös moduljai:
+// egy kliens-chunkba kerülnek, hogy a tervező ne két külön kéréssel töltse őket (docs/kalkulatorok.md, JS-költségkeret).
+// A lib/sizing.ts szándékosan NINCS benne: az a lib/plan.ts-t (zod) is importálja, ami a kalkulátoroldalakra nem kerülhet.
+const sharedClientChunks={environments:{client:{build:{rolldownOptions:{output:{codeSplitting:{groups:[
+  {name:'sizing-core',test:/[\\/]lib[\\/]sizing-(?:formulas|tables)\.ts$/,priority:20},
+]}}}}}}};
+
 export default defineConfig(async () => {
   if(process.env.SHOCKCRAFT_TARGET==='node')return {
+    ...sharedClientChunks,
     plugins:[vinext()],
     resolve:{alias:[{find:'cloudflare:workers',replacement:fileURLToPath(new URL('./db/node-env.ts',import.meta.url))}]},
   };
@@ -56,6 +64,7 @@ export default defineConfig(async () => {
   const { cloudflare } = await import("@cloudflare/vite-plugin");
 
   return {
+    ...sharedClientChunks,
     server: {
       ...(managedLinux ? { host: "0.0.0.0", allowedHosts: ["terminal.local"] } : {}),
       ...(isCodexSeatbeltSandbox ? { watch: { useFsEvents: false, usePolling: true } } : {}),

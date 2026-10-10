@@ -6,7 +6,7 @@ import {JsonLd,breadcrumbLd} from '@/components/kezikonyv/json-ld';
 import {PlannerCta} from '@/components/kezikonyv/planner-cta';
 import {CALC_CATEGORIES,calcMetas} from '@/lib/calc/registry';
 import {kbPreview,siteOrigin} from '@/lib/site-origin';
-import {CALC_HUB,HOME} from '@/lib/kb/categories';
+import {CALC_HUB,HOME,OG_BASE} from '@/lib/kb/categories';
 
 export const dynamic='force-static';
 export const revalidate=3600;
@@ -14,7 +14,7 @@ export const revalidate=3600;
 const DESCRIPTION='Ingyenes villamos kalkulátorok belépés nélkül: Ohm-törvény, teljesítmény, áram, fogyasztás, fázisterhelés, átváltók – képlettel és levezetéssel.';
 export async function generateMetadata():Promise<Metadata>{
  return {title:{absolute:'Villamos kalkulátorok – ingyen, belépés nélkül | Villanyrajz'},description:DESCRIPTION,alternates:{canonical:CALC_HUB},
-  openGraph:{type:'website',title:'Villamos kalkulátorok – Villanyrajz',description:DESCRIPTION,url:CALC_HUB},...(kbPreview()?{robots:{index:false,follow:false}}:{})};
+  openGraph:{...OG_BASE,type:'website',title:'Villamos kalkulátorok – Villanyrajz',description:DESCRIPTION,url:CALC_HUB},...(kbPreview()?{robots:{index:false,follow:false}}:{})};
 }
 
 export default function KalkulatorokPage(){

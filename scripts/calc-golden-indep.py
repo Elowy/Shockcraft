@@ -44,6 +44,7 @@ def examples():
  # csillag
  s=10*20+20*30+30*10; put('y2d',R12=s/30,R23=s/10,R31=s/20)
  # trafo
+ put('szinkod prec',R=1,tol=0.01,min=1-1e-4,max=1+1e-4)
  put('trafo',I1=60/230,a=230/12); put('trafo 3f',I1=100e3/(S3*10e3),I2=100e3/(S3*400)); put('trafo N2',N2=1000/(230/12)); put('trafo 24',I2=160/24,I1=160/230)
  # akku
  put('akku 50Ah',t=50*24*.5*.85/100,I=100/(24*.85))
@@ -131,6 +132,12 @@ def extra():
  c('kismegszakito',{'Ib':'30','A':'6','mod':'B2','szig':'PVC','erek':'3','temp':'30','csop':'1','gorbe':'C'},In=32,Iz=34,ZsMax=230/320)
  c('hurokimpedancia',{'Ze':'0,2','L':'60','A':'4','gorbe':'B','In':'20'},Zs=0.2+rho1*60*0.5,Lmax=(2.3-0.2)/(rho1*0.5))
  c('terhelhetoseg-tablazat',{'mod':'A1','szig':'PVC','erek':'3','temp':'40','csop':'4'},s10=42*.87*.65,s1_5=13.5*.87*.65)
+ # 4. ellenőrzési kör (review) kiegészítései
+ c('ellenallas-szinkod',{'savok':'4','s1':'sarga','s2':'ibolya','szorzo':'piros','tures':'sarga'},R=4700,tol=0.02)
+ c('eredo-ellenallas',{'mod':'hianyzo','Re':'999900','Re.e':'Mohm','Rk':'1000000','Rk.e':'Mohm'},Rx=999900e6*1e12/(1e12-999900e6))
+ c('homerseklet',{'mod':'atvaltas','T':'212','egyseg':'F'},C=100,K=373.15)
+ c('fazisterheles',{'mod':'W','P1':'2300','P2':'0','P3':'0'},I1=10,IN=10)
+ c('led-elotet-ellenallas',{'Us':'10','Uf':'3,3','I':'20','I.e':'mA','n':'3'},R=(10-9.9)/0.02,Re24=5.1)
  print('const EXTRA:Golden[]=[')
  for slug,inp,exp in cases: print(' {slug:%s,input:%s,expect:%s},'%(json.dumps(slug),json.dumps(inp,ensure_ascii=False),json.dumps(exp)))
  print('];')

@@ -2,13 +2,15 @@
 // Futtatás: node_modules/.bin/tsx tests/calc.ts
 import assert from 'node:assert/strict';
 import {readFileSync,readdirSync} from 'node:fs';
-import {parseNum,formatNum,formatSI,formatCompare,decimalsFor} from '../lib/calc/number';
+import {parseNum,formatNum,formatSI,formatCompare,formatFixed,floorTo,decimalsFor} from '../lib/calc/number';
 import {runCalc,defaultRaw,visibleFields,type CalcDef,type Raw} from '../lib/calc/core';
 import {decodeState,encodeState} from '../lib/calc/url';
 import {UNITS} from '../lib/calc/units';
 import {CALCULATORS,CALC_CATEGORIES,bySlug,calcFingerprint,calcMeta,calcMetas,isPublished,publishedCalcs,releaseInfo,visibleCalcs} from '../lib/calc/registry';
-import {RELEASES,TABLE_GATED,type ReleaseRecord} from '../lib/calc/release';
+import {RELEASES,T1_SLUGS,TABLE_GATED,type ReleaseRecord} from '../lib/calc/release';
+import {calcSourceFiles,sourceFingerprint} from '../scripts/calc-source';
 import {calcHref,calcLinkable,calcQuery} from '../lib/kb/links';
+import {calcSeoTitle} from '../lib/kb/categories';
 import {SIZING_NOT_COVERED,voltageDropPercent,maxLengthForDrop,minSectionFor,loopResistance,maxLoopImpedance} from '../lib/sizing-formulas';
 import {tablesApproved,temperatureFactor,groupingFactor} from '../lib/sizing-tables';
 import {phaseLoad} from '../lib/phase-load';
@@ -38,6 +40,14 @@ assert.equal(formatNum(2.93009),'2,93');assert.equal(formatNum(0.68966),'0,6897'
 assert.equal(formatSI(4700,'Ω'),'4,7\u00a0kΩ');assert.equal(formatSI(0.0123,'A'),'12,3\u00a0mA');assert.equal(formatSI(0,'W'),'0\u00a0W');
 assert.deepEqual(formatCompare(5,5.0004),['5','5,0004']);assert.notEqual(...formatCompare(4.99999,5));
 assert.equal(decimalsFor(1234),1);assert.equal(decimalsFor(12345),0);assert.equal(decimalsFor(0.01234),5);
+// Kiírás: 1–10 között 4, 10 fölött 10 000-ig 5 értékes jegy (dokumentált viselkedés, terv 5.3: 9976,6 W; 10,197 LE).
+assert.equal(formatNum(9.97712),'9,977');assert.equal(formatNum(12.34567),'12,346');assert.equal(formatNum(185.6712),'185,67');assert.equal(formatNum(123456.7),'123\u00a0457');
+// Lebegőpontos zaj: félértéknél helyes kerekítés, lefelé kerekítés műtermék nélkül, SI-előtag határán nincs „1000 mΩ”, nagyon kicsi érték normálalakban.
+assert.equal(formatFixed(18651.499999999996,0),'18\u00a0652');assert.equal(formatNum(139.99999999999997),'140');
+assert.equal(floorTo(139.99999999999997,1),140);assert.equal(floorTo(39.93055,1),39.9);assert.equal(floorTo(140.278,1),140.2);
+assert.equal(formatSI(1/(1+1e-6),'Ω'),'1\u00a0Ω');assert.equal(formatSI(0.9999996,'A'),'1\u00a0A');assert.equal(formatSI(999999.6,'Ω'),'1\u00a0MΩ');assert.equal(formatSI(999.4,'Ω'),'999,4\u00a0Ω');
+assert.equal(formatSI(0.9999,'Ω',{sig:6}),'999,9\u00a0mΩ');assert.equal(formatSI(1.0001,'Ω',{sig:6}),'1,0001\u00a0Ω');
+assert.equal(formatNum(5e-15),'5\u00b710\u207b\u00b9\u2075');assert.equal(formatNum(2.5e-7),'2,5\u00b710\u207b\u2077');assert.equal(formatNum(-9.99999e-7),'\u22121\u00b710\u207b\u2076');assert.equal(formatNum(0.0000012),'0,000001');
 
 // ---------------------------------------------------------------- 3. Registry és definíciók
 const slugs=CALCULATORS.map(c=>c.slug);
@@ -51,6 +61,8 @@ const FORBIDDEN=/szabványos|megfelel a szabványnak|garantáltan|szakmailag ell
 for(const d of CALCULATORS){
  const tag=d.slug;
  assert.ok(d.title.length<=60,tag+': cím ≤ 60');
+ assert.ok(calcSeoTitle(d.title).length<=60,tag+': a kiadott <title> (sablonnal együtt) ≤ 60: '+calcSeoTitle(d.title));
+ assert.ok(!/_/.test(d.short),tag+': a meta description (short) nem tartalmaz programozói alsóindex-jelölést');
  assert.ok(d.short.length>=80&&d.short.length<=160,tag+': a leírás 80–160 karakter ('+d.short.length+')');
  assert.ok(CALC_CATEGORIES.some(c=>c.id===d.category),tag+': kategória');
  assert.ok(d.keywords.length>=3&&d.sources.length>=1&&d.formulas.length>=1&&d.notes.good.length&&d.notes.bad.length,tag+': metaadat');
@@ -79,18 +91,37 @@ for(const s of slugs){assert.ok(islands.includes(`from './${s}'`),'sziget hiány
 assert.equal(readdirSync('lib/calc/defs').filter(f=>f.endsWith('.ts')).length,slugs.length,'minden def a registryben');
 
 // ---------------------------------------------------------------- 4. Kiadási kapu (egyetlen konfigurációs pont: lib/calc/release.ts)
+// Az elvárt állapotot a RELEASES táblából vezetjük le (nem beégetett listából): egy T1 kiadásához csak a release.ts-t kell szerkeszteni.
 const T0=CALCULATORS.filter(c=>c.tier==='T0'),T1=CALCULATORS.filter(c=>c.tier==='T1');
-for(const d of T0){assert.equal(releaseInfo(d).state,'kozzeteve',d.slug+': T0 közzétéve ('+releaseInfo(d).reason+')');assert.equal(releaseInfo(d).badge,'Belsőleg ellenőrizve')}
-for(const d of T1)assert.equal(releaseInfo(d).state,'kiadatlan',d.slug+': T1 a lektori jóváhagyásig kiadatlan');
-assert.deepEqual(publishedCalcs().map(c=>c.slug),T0.map(c=>c.slug));
-// Minden rekord ujjlenyomata egyezik (különben: újra kell ellenőrizni / lektoráltatni – node_modules/.bin/tsx scripts/calc-release.ts list).
-for(const [slug,rec] of Object.entries(RELEASES)){const d=bySlug(slug);assert.ok(d,'ismeretlen rekord: '+slug);assert.equal(rec.fingerprint,calcFingerprint(d!),slug+': az ujjlenyomat eltér – a tartalom a jóváhagyás óta változott');if(d!.tier!=='T0')assert.equal(rec.kind,'lektoralt',slug+': T1-hez lektori rekord kell')}
+assert.deepEqual([...T1_SLUGS].sort(),T1.map(c=>c.slug).sort(),'a release.ts T1_SLUGS listája a definíciók T1 szintjével egyezik');
 for(const s of TABLE_GATED)assert.ok(bySlug(s)?.tables,s+': táblázatalapú');
 assert.deepEqual([...TABLE_GATED].sort(),CALCULATORS.filter(c=>c.tables&&!['feszultseges'].includes(c.slug)).map(c=>c.slug).sort());
+// Minden rekord: ismert kalkulátor, egyező tartalmi és forrás-ujjlenyomat (különben: újra kell ellenőrizni / lektoráltatni –
+// node_modules/.bin/tsx scripts/calc-release.ts list), T1-hez csak lektori rekord.
+for(const [slug,rec] of Object.entries(RELEASES)){
+ const d=bySlug(slug);assert.ok(d,'ismeretlen rekord: '+slug);
+ assert.equal(rec.fingerprint,calcFingerprint(d!),slug+': az ujjlenyomat eltér – a tartalom a jóváhagyás óta változott');
+ assert.equal(rec.source,sourceFingerprint(slug),slug+': a forrás-ujjlenyomat eltér – a számítás kódja (definíció vagy importált modul) a jóváhagyás óta változott ('+calcSourceFiles(slug).join(', ')+')');
+ if(d!.tier!=='T0')assert.equal(rec.kind,'lektoralt',slug+': T1-hez lektori rekord kell');
+ if(rec.kind==='lektoralt')assert.ok(rec.reviewer.trim()&&rec.qualification.trim()&&rec.registry.trim()&&/^\d{4}-\d{2}-\d{2}$/.test(rec.date)&&!/[<>]/.test(rec.reviewer+rec.qualification+rec.registry),slug+': a lektori rekord kitöltött');
+}
+const expectedState=(d:CalcDef)=>{
+ const rec=RELEASES[d.slug];
+ if(!rec)return 'kiadatlan';
+ if(d.tier==='T1'&&rec.kind!=='lektoralt')return 'kiadatlan';
+ if(TABLE_GATED.has(d.slug)&&!tablesApproved())return 'tablazatra-var';
+ return 'kozzeteve';
+};
+// A feladat szerint minden T0 közzétett („Belsőleg ellenőrizve” vagy lektorált).
+for(const d of T0){assert.equal(releaseInfo(d).state,'kozzeteve',d.slug+': T0 közzétéve ('+releaseInfo(d).reason+')');assert.match(releaseInfo(d).badge,/^(Belsőleg ellenőrizve|Szakmailag lektorálta: )/)}
+for(const d of CALCULATORS)assert.equal(releaseInfo(d).state,expectedState(d),d.slug+': kiadási állapot a RELEASES szerint');
+const expectedPublished=CALCULATORS.filter(d=>expectedState(d)==='kozzeteve');
+assert.deepEqual(publishedCalcs().map(c=>c.slug),expectedPublished.map(c=>c.slug));
 // A kapu viselkedése szintetikus rekordokkal.
-const fesz=bySlug('feszultseges')!,ker=bySlug('keresztmetszet')!,ohm=bySlug('ohm-torveny')!;
-const expert=(d:CalcDef,fp=calcFingerprint(d)):ReleaseRecord=>({kind:'lektoralt',reviewer:'Teszt Elek',qualification:'villamos tervező',registry:'00-0000',date:'2026-11-01',fingerprint:fp});
-assert.equal(releaseInfo(fesz,{feszultseges:{...RELEASES['ohm-torveny'],fingerprint:calcFingerprint(fesz)}}).state,'kiadatlan','T1 belső ellenőrzéssel nem adható ki');
+const fesz=bySlug('feszultseges')!,ker=bySlug('keresztmetszet')!,ohm=bySlug('ohm-torveny')!,motor=bySlug('motor-aram')!;
+const expert=(d:CalcDef,fp=calcFingerprint(d)):ReleaseRecord=>({kind:'lektoralt',reviewer:'Teszt Elek',qualification:'villamos tervező',registry:'00-0000',date:'2026-11-01',fingerprint:fp,source:sourceFingerprint(d.slug)});
+const inner=(d:CalcDef):ReleaseRecord=>({kind:'belso',by:'teszt',date:'2026-11-01',fingerprint:calcFingerprint(d),source:sourceFingerprint(d.slug),note:''});
+assert.equal(releaseInfo(fesz,{feszultseges:inner(fesz)}).state,'kiadatlan','T1 belső ellenőrzéssel nem adható ki');
 assert.equal(releaseInfo(fesz,{feszultseges:expert(fesz)}).state,'kozzeteve','T1 lektori jóváhagyással kiadható');
 assert.match(releaseInfo(fesz,{feszultseges:expert(fesz)}).badge,/^Szakmailag lektorálta: Teszt Elek/);
 assert.equal(releaseInfo(fesz,{feszultseges:expert(fesz,'deadbeef')}).state,'ujraellenorzendo','módosult tartalom → újra kell lektorálni');
@@ -100,19 +131,28 @@ assert.equal(releaseInfo(ohm,{}).state,'kiadatlan');
 assert.equal(releaseInfo({...ohm,version:2}).state,'ujraellenorzendo','verzióemelés → új ellenőrzés');
 assert.equal(releaseInfo({...ohm,tier:'T2'}).state,'tiltott');
 assert.equal(tablesApproved(),false,'a méretezési táblázatok jóváhagyása függőben (SIZING_REVIEW)');
-// Hub-metaadat: a kiadatlan T1 link nélküli „Hamarosan” kártya; előnézetben tervezet.
-for(const d of T1){const m=calcMeta(d);assert.equal(m.href,null);assert.equal(m.status,'hamarosan');assert.equal(m.note,'Hamarosan – szakmai lektorálás alatt');assert.equal(!!m.detail,TABLE_GATED.has(d.slug))}
-assert.equal(calcMeta(fesz,true).status,'tervezet');assert.equal(calcMeta(fesz,true).href,'/kalkulatorok/feszultseges');
-assert.equal(visibleCalcs(false).length,19);assert.equal(visibleCalcs(true).length,27);assert.equal(calcMetas().length,27);
+// A tervezői link (links.ts) ugyanezt a szabályt követi a definíciók nélkül: T1-hez lektori rekord kell, a táblázatalapúhoz tablesApproved().
+assert.equal(calcLinkable('motor-aram',{'motor-aram':inner(motor)}),false,'T1 belső rekorddal nem kap tervezői linket');
+assert.equal(calcLinkable('motor-aram',{'motor-aram':expert(motor)}),true);
+assert.equal(calcLinkable('keresztmetszet',{keresztmetszet:expert(ker)},false),false);assert.equal(calcLinkable('keresztmetszet',{keresztmetszet:expert(ker)},true),true);
+assert.equal(calcLinkable('ohm-torveny',{'ohm-torveny':inner(ohm)}),true);assert.equal(calcLinkable('ohm-torveny',{}),false);
+// Hub-metaadat: a kiadatlan kalkulátor link nélküli „Hamarosan” kártya; előnézetben tervezet.
+for(const d of CALCULATORS.filter(d=>expectedState(d)!=='kozzeteve')){const m=calcMeta(d);assert.equal(m.href,null,d.slug);assert.equal(m.status,'hamarosan');assert.match(m.note,/^Hamarosan – /);assert.equal(!!m.detail,TABLE_GATED.has(d.slug)&&!tablesApproved())}
+for(const d of expectedPublished){const m=calcMeta(d);assert.equal(m.href,'/kalkulatorok/'+d.slug);assert.equal(m.status,'kozzeteve')}
+if(expectedState(fesz)!=='kozzeteve'){assert.equal(calcMeta(fesz).note,'Hamarosan – szakmai lektorálás alatt');assert.equal(calcMeta(fesz,true).status,'tervezet');assert.equal(calcMeta(fesz,true).href,'/kalkulatorok/feszultseges')}
+assert.equal(visibleCalcs(false).length,expectedPublished.length);assert.equal(visibleCalcs(true).length,27);assert.equal(calcMetas().length,27);
 // Statikus oldalak és sitemap: csak a közzétettek (az oldal és a sitemap ugyanazt a publishedCalcs/visibleCalcs-t használja).
 const page=readFileSync('app/(kezikonyv)/kalkulatorok/[slug]/page.tsx','utf8'),sitemap=readFileSync('app/sitemap.ts','utf8');
 assert.match(page,/export function generateStaticParams\(\)\{return visibleCalcs\(kbPreview\(\)\)/);assert.match(page,/export const dynamicParams=false/);assert.match(page,/export const dynamic='force-static'/);assert.match(page,/export const revalidate=3600/);
 assert.match(sitemap,/publishedCalcs\(\)/);
 // ---------------------------------------------------------------- 5. Tervezői linkek (lib/kb/links.ts): csak közzétett célra
 for(const d of CALCULATORS)assert.equal(calcLinkable(d.slug),isPublished(d),d.slug+': a tervezői link és a közzététel egyezik');
-assert.equal(calcHref('feszultseges',{I:16}),null);assert.equal(calcHref('nincs-ilyen'),null);
+for(const d of CALCULATORS)assert.equal(calcHref(d.slug)!==null,expectedState(d)==='kozzeteve',d.slug+': calcHref');
+assert.equal(calcHref('nincs-ilyen'),null);
+if(expectedState(fesz)!=='kozzeteve')assert.equal(calcHref('feszultseges',{I:16}),null);
 assert.equal(calcHref('fazisterheles',{mod:'W',P1:600,P2:400.5,P3:0}),'/kalkulatorok/fazisterheles?mod=W&P1=600&P2=400,5&P3=0');
 assert.equal(calcQuery({a:2.5,b:'x;y',c:undefined}),'?a=2,5&b=x;y');
+console.log('Kiadási állapot: '+expectedPublished.length+' közzétett ('+T0.length+' T0, '+expectedPublished.filter(d=>d.tier==='T1').length+' T1); kiadatlan: '+CALCULATORS.filter(d=>expectedState(d)!=='kozzeteve').map(d=>d.slug).join(', '));
 
 // ---------------------------------------------------------------- 6. URL oda-vissza (veszteségmentes)
 const r=rng(42);
@@ -189,4 +229,61 @@ near(fz.results.find(x=>x.id==='I1')!.value,pl.phases.L1.current);
 const link=calcHref('fazisterheles',{mod:'W',P1:pl.phases.L1.watts,P2:pl.phases.L2.watts,P3:pl.phases.L3.watts})!;
 near(runCalc(bySlug('fazisterheles')!,{...defaultRaw(bySlug('fazisterheles')!),...decodeState(bySlug('fazisterheles')!,link.slice(link.indexOf('?')))}).ok?val(bySlug('fazisterheles')!,decodeState(bySlug('fazisterheles')!,link.slice(link.indexOf('?'))),'imbalance'):NaN,pl.imbalance);
 
-console.log('PASS: parseNum/formázás, '+CALCULATORS.length+' definíció ellenőrzése (szóhasználat, metaadat, szigetek), kiadási kapu (T0 közzétéve, T1 kiadatlan, ujjlenyomat, táblázat-kapu, T2 tiltva), tervezői linkek, URL oda-vissza, '+runs+' fuzz-futás, 10 000 seedes tulajdonságteszt, egyezés a Méretezés és a Fázisterhelés számításával.');
+// ---------------------------------------------------------------- 10. Ellenőrzési észrevételek regressziója (4. kör)
+const errText=(slug:string,raw:Raw)=>{const r=runCalc(bySlug(slug)!,raw);assert.ok(!r.ok,slug+' '+JSON.stringify(raw)+': hibát kellett volna adnia');return r.issues.map(i=>i.text).join(' ')};
+const res=(slug:string,raw:Raw)=>out(bySlug(slug)!,raw);
+const txt=(slug:string,raw:Raw,id:string)=>res(slug,raw).results.find(x=>x.id===id)!.text!;
+const stepText=(o:ReturnType<typeof out>)=>o.steps.map(s=>s.label+' '+s.formula+' '+s.substituted+' '+s.result).join('\n');
+// LED: az egzakt UR = 0 lebegőpontosan sem ad értelmetlen (pikoohmos) eredményt.
+assert.match(errText('led-elotet-ellenallas',{Us:'9,9',Uf:'3,3',I:'20','I.e':'mA',n:'3'}),/nincs mire méretezni/);
+assert.match(errText('led-elotet-ellenallas',{Us:'0,9',Uf:'0,3',I:'20','I.e':'mA',n:'3'}),/nincs mire méretezni/);
+assert.match(errText('led-elotet-ellenallas',{Us:'13,8',Uf:'2,76',I:'20','I.e':'mA',n:'5'}),/nincs mire méretezni/);
+// LED-fuzz: századvoltos bemenetre, ha az egzakt UR = 0, mindig hiba; ha UR ≥ 0,01 V, mindig eredmény.
+{const L=rng(99);for(let i=0;i<20000;i++){const n=1+Math.floor(L()*8),uf=Math.round(100+L()*300),us=Math.round(n*uf+(L()<0.5?0:L()*300-150));if(us<=0)continue;const r=runCalc(bySlug('led-elotet-ellenallas')!,{Us:(us/100).toFixed(2).replace('.',','),Uf:(uf/100).toFixed(2).replace('.',','),I:'20','I.e':'mA',n:String(n)});assert.equal(r.ok,us>n*uf,us+' / '+n+' × '+uf)}}
+// Eredő ellenállás, hiányzó tag: relatív küszöb – az egyenlőség hiba, a nagy ellenállású valós eset nem.
+assert.match(errText('eredo-ellenallas',{mod:'hianyzo',Re:'0,1','Re.e':'ohm',Rk:Array(9).fill('0,9').join(';'),'Rk.e':'ohm'}),/nem lehet nagyobb vagy egyenlő/);
+assert.match(errText('eredo-ellenallas',{mod:'hianyzo',Re:'0,0375','Re.e':'ohm',Rk:Array(8).fill('0,3').join(';'),'Rk.e':'ohm'}),/nem lehet nagyobb vagy egyenlő/);
+near(val(bySlug('eredo-ellenallas')!,{mod:'hianyzo',Re:'999900','Re.e':'Mohm',Rk:'1000000','Rk.e':'Mohm'},'Rx'),9.999e15,1e-6);
+{const E=rng(5);const units=[['ohm',1],['mohm',1e-3],['kohm',1e3],['Mohm',1e6]] as const;for(let i=0;i<5000;i++){const n=2+Math.floor(E()*18),[ue]=units[Math.floor(E()*4)],R=+(0.1+E()*999).toPrecision(3),Re=R/n;const r=runCalc(bySlug('eredo-ellenallas')!,{mod:'hianyzo',Re:String(Re),'Re.e':ue,Rk:Array(n).fill(String(R)).join(';'),'Rk.e':ue});if(String(Re).length<=40)assert.ok(!r.ok,'egyenlőség: '+n+' × '+R+' '+ue)}}
+// Transzformátor: háromfázisú módban nincs (kapcsolási csoporttól függő) menetszám.
+assert.ok(!res('transzformator',{rendszer:'3f',U1:'10','U1.e':'kV',U2:'400',S:'100','S.e':'kVA',N1:'1000'}).results.some(x=>x.id==='N2'));
+near(val(bySlug('transzformator')!,{rendszer:'1f',U1:'230',U2:'12',S:'60',N1:'1000'},'N2'),1000*12/230);
+// Lmax: lefelé kerekítve, lebegőpontos műtermék nélkül, a levezetéssel összhangban.
+assert.equal(txt('hurokimpedancia',{Ze:'0,4',L:'10',A:'1,5',gorbe:'B',In:'10'},'Lmax'),'140\u00a0m');
+assert.equal(txt('hurokimpedancia',{Ze:'0,35',L:'25',A:'2,5',gorbe:'B',In:'16'},'Lmax'),'140,2\u00a0m (lefelé kerekítve)');
+assert.match(stepText(res('hurokimpedancia',{Ze:'0,35',L:'25',A:'2,5',gorbe:'B',In:'16'})),/140,28\u00a0m → lefelé kerekítve 140,2\u00a0m/);
+assert.match(stepText(res('hurokimpedancia',{Ze:'3',L:'25',A:'2,5',gorbe:'B',In:'16'})),/Lmax = max\(0; \(2,875/);
+assert.equal(txt('feszultseges',{rendszer:'1f',I:'16',L:'23,4',A:'2,5',cos:'1',hatar:'public-other'},'Lmax'),'39,9\u00a0m (lefelé kerekítve)');
+// Fogyasztás: félértékhatáron helyes kerekítés; havi lépések.
+assert.equal(txt('fogyasztas-koltseg',{sorok:'2000*0,25*1;60*5*3',ar:'36,5'},'ft_ev'),'18\u00a0652\u00a0Ft');
+assert.match(stepText(res('fogyasztas-koltseg',{sorok:'2000*0,25*1',ar:'36'})),/E_hó = 182,5\u00a0kWh \/ 12[\s\S]*K_hó = /);
+// Eredő ellenállás: az előtag határán nincs „1000 mΩ”.
+assert.equal(txt('eredo-ellenallas',{mod:'parhuzamos',R:'1; 1000000','R.e':'ohm'},'Re'),'1\u00a0Ω');
+// Fázisterhelés: teljesen behelyettesített levezetés, egységes %-írás, W módban a cos φ = 1 feltételezés.
+{const o=res('fazisterheles',{mod:'A',L1:'16',L2:'8',L3:'8'}),t=stepText(o);
+ assert.match(t,/L1: 16\u00a0A · 230 V/);assert.match(t,/max\(1,227\u00a0kW; 613,33\u00a0W; 613,33\u00a0W\)/);assert.match(t,/1,227\u00a0kW \/ 2,453\u00a0kW · 100/);
+ assert.match(t,/√\(16² \+ 8² \+ 8² − 16·8 − 8·8 − 8·16\)/);assert.ok(!/…|max eltérés/.test(t),t);
+ assert.match(o.issues![0].text,/50\u00a0% \(tájékoztató határ: 20\u00a0%\)/);
+ assert.ok(res('fazisterheles',{mod:'W',P1:'2300',P2:'0',P3:'0'}).assumptions!.some(a=>/cos φ = 1/.test(a)));}
+// Hőmérséklet: egységenként behelyettesített levezetés.
+assert.match(stepText(res('homerseklet',{mod:'atvaltas',T:'212',egyseg:'F'})),/°C = \(212\u00a0°F − 32\) · 5\/9[\s\S]*K = 100\u00a0°C \+ 273,15/);
+assert.match(stepText(res('homerseklet',{mod:'atvaltas',T:'20',egyseg:'C'})),/K = 20\u00a0°C \+ 273,15/);
+assert.match(stepText(res('homerseklet',{mod:'atvaltas',T:'300',egyseg:'K'})),/°C = 300\u00a0K − 273,15/);
+// AWG: negatív szám zárójelben, unicode mínusszal.
+assert.match(stepText(res('mertekegyseg-atvalto',{mod:'awg',awg:'-3'})),/\(36 − \(−3\)\) \/ 39/);
+// Feszültségosztó: az E24-lépés számokkal.
+assert.match(stepText(res('feszultsegoszto',{mod:'r2',Ube:'12',R1:'10','R1.e':'kohm',Uki:'3,3'})),/Uki = 12\u00a0V · 3,9\u00a0kΩ \/ \(10\u00a0kΩ \+ 3,9\u00a0kΩ\)/);
+// Színkód: IEC 60062:2016 tűrésszínek, a tűréssáv a tűréshez illő pontossággal.
+{const o=res('ellenallas-szinkod',{savok:'5',s1:'barna',s2:'fekete',s3:'fekete',szorzo:'ezust',tures:'szurke'});
+ assert.equal(o.results.find(x=>x.id==='min')!.text,'999,9\u00a0mΩ');assert.equal(o.results.find(x=>x.id==='max')!.text,'1,0001\u00a0Ω');}
+assert.deepEqual(['narancs','sarga','szurke'].map(c=>val(bySlug('ellenallas-szinkod')!,{savok:'4',s1:'barna',s2:'fekete',szorzo:'fekete',tures:c},'tol')),[0.05,0.02,0.01]);
+// LED-szalag: a betáplálási javaslat a tényleges feszültséggel; tápegység nélkül a szükséges teljesítmény a fő eredmény.
+assert.match(res('led-szalag-tapegyseg',{L:'6',pm:'4,8',U:'5',r:'20'}).issues!.map(i=>i.text).join(' '),/5\u00a0V-os szalagnál jellemzően 1–2 m-enként/);
+assert.ok(!/12 V-os|24 V-os/.test(res('led-szalag-tapegyseg',{L:'12',pm:'10',U:'48',r:'20'}).issues!.map(i=>i.text).join(' ')));
+assert.deepEqual(res('led-szalag-tapegyseg',{L:'50',pm:'14,4',U:'24',r:'20'}).results.filter(x=>x.primary).map(x=>x.id),['Pmin']);
+// Akkumulátor: nagyon kicsi üzemidő nem „0 h (0 perc)”.
+assert.match(txt('akkumulator-uzemido',{C:'1','C.e':'mAh',U:'1',dod:'1',eta:'0,05',P:'100','P.e':'MW'},'t'),/10⁻¹⁵\u00a0h \(kevesebb mint 1 perc\)/);
+// Minden példa levezetése behelyettesített: nincs „…” és szöveges számláló, minden behelyettesítésben van szám.
+for(const d of CALCULATORS)for(const ex of d.examples){const r=runCalc(d,ex.input);if(!r.ok)continue;for(const st of r.out.steps){assert.ok(!/…/.test(st.substituted),d.slug+': „…” a behelyettesítésben: '+st.substituted);assert.match(st.substituted,/\d/,d.slug+': behelyettesítés szám nélkül: '+st.label)}}
+
+console.log('PASS: parseNum/formázás, '+CALCULATORS.length+' definíció ellenőrzése (szóhasználat, metaadat, szigetek), kiadási kapu (állapot a RELEASES-ből, T0 közzétéve, tartalmi és forrás-ujjlenyomat, T1 csak lektori rekorddal, táblázat-kapu, T2 tiltva), tervezői linkek, URL oda-vissza, '+runs+' fuzz-futás, 10 000 seedes tulajdonságteszt, egyezés a Méretezés és a Fázisterhelés számításával, a 4. ellenőrzési kör regressziói.');

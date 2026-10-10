@@ -43,10 +43,13 @@ export function editDistance(a:string,b:string,max=2):number{
  return d[a.length][b.length];
 }
 
-/** Egy szó illeszkedése: 1 = teljes szó, 0,85 = előtag (1–2 betűs keresőszónál 0,5), 0,7 = egy elírással (5 betűnél hosszabb szónál), 0 = nincs. */
-function wordMatch(token:string,word:string){
+/** Egy szó illeszkedése: 1 = teljes szó, 0,85 = előtag (1–2 betűs keresőszónál 0,3, hogy egy teljes kulcsszó-találat megelőzze),
+ * 0,7 = egy elírással (5 betűnél hosszabb szónál), 0 = nincs. `exact`: a szinonimaváltozatok rövid (1–2 betűs) tagja csak teljes szóra illeszkedik
+ * (különben a „hp” → „le” bővítés minden „led…”, „levezetés…” szót megtalálna). */
+function wordMatch(token:string,word:string,exact=false){
  if(word===token)return 1;
- if(word.startsWith(token))return token.length>=3?0.85:0.5;
+ if(exact&&token.length<3)return 0;
+ if(word.startsWith(token))return token.length>=3?0.85:0.3;
  if(token.length>5&&(editDistance(token,word.slice(0,token.length),1)<=1||editDistance(token,word,1)<=1))return 0.7;
  return 0;
 }
@@ -59,12 +62,12 @@ function prepare(item:SearchItem):Prepared{
  p={item,title,fields:[{w:WEIGHTS.title,words:title.split(' '),text:title},{w:WEIGHTS.synonym,words:syn.split(' '),text:syn},{w:WEIGHTS.keyword,words:kw.split(' '),text:kw},{w:WEIGHTS.summary,words:sum.split(' '),text:sum}]};
  prepCache.set(item,p);return p;
 }
-function scoreQuery(p:Prepared,q:string){
+function scoreQuery(p:Prepared,q:string,variant=false){
  const tokens=q.split(' ').filter(Boolean);if(!tokens.length)return 0;
  let total=0;
  for(const t of tokens){
   let best=0;
-  for(const f of p.fields){for(const w of f.words){const m=wordMatch(t,w);if(m)best=Math.max(best,m*f.w)}}
+  for(const f of p.fields){for(const w of f.words){const m=wordMatch(t,w,variant);if(m)best=Math.max(best,m*f.w)}}
   if(!best)return 0;
   total+=best;
  }
@@ -86,15 +89,15 @@ export function search(items:readonly SearchItem[],query:string,limit=20):Search
  const hits:SearchHit[]=[];
  for(const item of items){
   const p=prepare(item);
-  let score=0;variants.forEach((v,i)=>{score=Math.max(score,scoreQuery(p,v)*(i?0.95:1))});
+  let score=0;variants.forEach((v,i)=>{score=Math.max(score,scoreQuery(p,v,i>0)*(i?0.95:1))});
   if(score>0)hits.push({item,score:item.href?score:score*0.9});
  }
  return hits.sort((a,b)=>b.score-a.score||a.item.title.localeCompare(b.item.title,'hu')).slice(0,limit);
 }
-/** „Erre gondoltál?” – a legközelebbi címszó legfeljebb két elírással, ha a keresés üres. */
+/** „Erre gondoltál?” – a legközelebbi címszó legfeljebb két elírással (5 betűnél rövidebb keresésnél legfeljebb eggyel), ha a keresés üres. */
 export function suggest(items:readonly SearchItem[],query:string):SearchItem|null{
  const q=normalize(query);if(q.length<3)return null;
- let best:SearchItem|null=null,bestD=3;
+ let best:SearchItem|null=null,bestD=q.length<5?2:3;
  for(const item of items){for(const w of normalize(item.title).split(' ').concat(item.synonyms.map(normalize))){const d=editDistance(q,w.slice(0,Math.max(q.length,w.length)),2);if(d<bestD){bestD=d;best=item}}}
  return best;
 }

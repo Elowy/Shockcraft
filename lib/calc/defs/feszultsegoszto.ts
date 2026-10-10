@@ -27,7 +27,7 @@ const def:CalcDef={
   const Uki=v.n('Uki');
   if(!(Uki<Ube))throw new CalcError('A kimeneti feszültség csak kisebb lehet a bemenetinél.','Uki');
   const R2=R1*Uki/(Ube-Uki),e24=nextSeriesValue(R2,E24),Ue=Ube*e24/(R1+e24);
-  steps.push(step('Alsó ellenállás','R2 = R1 · Uki / (Ube − Uki)',`R2 = ${si(R1,'Ω')} · ${si(Uki,'V')} / (${si(Ube,'V')} − ${si(Uki,'V')})`,si(R2,'Ω')),step('E24-es érték','a legkisebb E24-érték ≥ R2','E24: '+si(e24,'Ω')+' → Uki = Ube · R2 / (R1 + R2)',si(Ue,'V'),E_SERIES_SOURCE));
+  steps.push(step('Alsó ellenállás','R2 = R1 · Uki / (Ube − Uki)',`R2 = ${si(R1,'Ω')} · ${si(Uki,'V')} / (${si(Ube,'V')} − ${si(Uki,'V')})`,si(R2,'Ω')),step('E24-es érték','a legkisebb E24-érték ≥ R2; Uki = Ube · R2(E24) / (R1 + R2(E24))',`R2(E24) = ${si(e24,'Ω')}; Uki = ${si(Ube,'V')} · ${si(e24,'Ω')} / (${si(R1,'Ω')} + ${si(e24,'Ω')})`,si(Ue,'V'),E_SERIES_SOURCE));
   const results:ResultItem[]=[{id:'R2',label:'Számított R2',value:R2,unit:'Ω',text:si(R2,'Ω'),primary:true},{id:'R2e24',label:'Javasolt E24-érték',value:e24,unit:'Ω',text:si(e24,'Ω')},{id:'Ue24',label:'Kimenet az E24-értékkel',value:Ue,unit:'V',text:si(Ue,'V')}];
   return {results,steps};
  },

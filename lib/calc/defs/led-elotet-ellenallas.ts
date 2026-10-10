@@ -15,13 +15,14 @@ const def:CalcDef={
  ],
  compute(v){
   const Us=v.n('Us'),Uf=v.n('Uf'),I=v.n('I'),n=v.n('n'),Ur=Us-n*Uf;
-  if(!(Ur>0))throw new CalcError(`A LED-ek nyitófeszültségének összege (${u(n*Uf,'V')}) nem kisebb a tápfeszültségnél: nincs mire méretezni az ellenállást.`,'Us');
+  // Relatív tűrés: 9,9 V − 3 · 3,3 V lebegőpontosan 1,8e-15 V lenne, ami értelmetlen, pikoohmos eredményt adna.
+  if(!(Ur>1e-9*Us))throw new CalcError(`A LED-ek nyitófeszültségének összege (${u(n*Uf,'V')}) nem kisebb a tápfeszültségnél: nincs mire méretezni az ellenállást.`,'Us');
   const R=Ur/I,Re=nextSeriesValue(R,E24),Ia=Ur/Re,P=Ia*Ia*Re,Prated=nextAtLeast(2*P,RESISTOR_POWERS.value),issues:Issue[]=[];
   if(Ur/Us<0.1)issues.push({level:'warn',text:'Az ellenálláson eső feszültség kicsi a tápfeszültséghez képest: a tápfeszültség kis ingadozása is nagyot változtat a LED áramán. Áramgenerátoros meghajtót érdemes használni.'});
   if(Prated===null)issues.push({level:'warn',text:'A szükséges teljesítmény nagy: áramgenerátoros LED-meghajtó javasolt.'});
   return {
    results:[{id:'R',label:'Számított ellenállás',value:R,unit:'Ω',text:si(R,'Ω'),primary:true},{id:'Re24',label:'Javasolt E24-érték',value:Re,unit:'Ω',text:si(Re,'Ω'),primary:true},{id:'Ia',label:'LED-áram az E24-értékkel',value:Ia,unit:'A',text:si(Ia,'A')},{id:'P',label:'Ellenállás disszipációja',value:P,unit:'W',text:si(P,'W')},...(Prated!==null?[{id:'Prated',label:'Javasolt névleges teljesítmény (2× tartalék)',value:Prated,unit:'W',text:u(Prated,'W')}]:[])],
-   steps:[step('Ellenálláson eső feszültség','UR = U − n · Uf',`UR = ${u(Us,'V')} − ${n} · ${u(Uf,'V')}`,u(Ur,'V')),step('Ellenállás','R = UR / I',`R = ${u(Ur,'V')} / ${si(I,'A')}`,si(R,'Ω')),step('E24-érték és áram','a legkisebb E24-érték ≥ R; I = UR / R_E24',`I = ${u(Ur,'V')} / ${si(Re,'Ω')}`,si(Ia,'A'),E_SERIES_SOURCE),step('Teljesítmény','P = I² · R',`P = (${si(Ia,'A')})² · ${si(Re,'Ω')}`,si(P,'W'))],
+   steps:[step('Ellenálláson eső feszültség','UR = U − n · Uf',`UR = ${u(Us,'V')} − ${n} · ${u(Uf,'V')}`,u(Ur,'V')),step('Ellenállás','R = UR / I',`R = ${u(Ur,'V')} / ${si(I,'A')}`,si(R,'Ω')),step('E24-érték és áram','a legkisebb E24-érték ≥ R; I = UR / R(E24)',`I = ${u(Ur,'V')} / ${si(Re,'Ω')}`,si(Ia,'A'),E_SERIES_SOURCE),step('Teljesítmény','P = I² · R',`P = (${si(Ia,'A')})² · ${si(Re,'Ω')}`,si(P,'W'))],
    issues,assumptions:['A nyitófeszültség állandó (valójában az árammal és a hőmérséklettel kissé változik).','A nagyobb E24-érték miatt az áram kissé kisebb a kívántnál (a LED javára).'],
   };
  },

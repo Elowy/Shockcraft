@@ -1,7 +1,7 @@
 import type {CalcDef,Step} from '../core';
 import {formatCompare} from '../number';
-import {SIZING_NOT_COVERED,maxLengthForDrop,voltageDropPercent} from '../formulas';
-import {nb,pct,step,u} from '../fields';
+import {SIZING_NOT_COVERED,maxLengthForDrop,voltageDropPercent} from '../../sizing-formulas';
+import {floorLength,nb,pct,step,u} from '../fields';
 import {SIZING_TABLES as T,dropLimitRef} from '../../sizing-tables';
 import {tag} from '../sizing-fields';
 
@@ -37,10 +37,10 @@ const def:CalcDef={
    steps.push(step('Feszültségesés (%)',`ΔU% = ${b} · L · I · (ρ1 · cos φ / A + λ · sin φ) / U0 · 100`,`ΔU% = ${b} · ${u(L,'m')} · ${u(I,'A')} · (${u(T.rho1,'Ω·mm²/m',4)} · ${u(cos,'')} / ${u(A,'mm²')} + ${u(T.lambda,'Ω/m',5)} · ${u(sin,'')}) / ${u(T.u0,'V')} · 100`,pct(p,3),'MSZ HD 60364-5-52 G.52.2'),
     step('Feszültségesés (V)',sys==='1f'?'ΔU = ΔU% · 230 V':'ΔU (vonali) = ΔU% · 400 V',`ΔU = ${pct(p,3)} · ${u(Un,'V')}`,u(volts,'V')));
   }
-  steps.push(step('Legnagyobb hossz a határig','Lmax = ΔU%határ / ΔU% · L (az esés a hosszal arányos)',`Lmax = ${pct(limit)} / ${pct(p,3)} · ${u(L,'m')}`,u(Lmax,'m')));
+  steps.push(step('Legnagyobb hossz a határig','Lmax = ΔU%határ / ΔU% · L (az esés a hosszal arányos)',`Lmax = ${pct(limit)} / ${pct(p,3)} · ${u(L,'m')}`,floorLength(Lmax).step));
   const ok=p<=limit+1e-9*limit,[a,bT]=formatCompare(p,limit);
   return {
-   results:[{id:'dU',label:'Feszültségesés',value:volts,unit:'V',text:u(volts,'V')},{id:'pct',label:'Feszültségesés',value:p,unit:'%',text:a+nb+'%',primary:true},{id:'Lmax',label:'Legnagyobb hossz a határig',value:Lmax,unit:'m',text:u(Math.floor(Lmax*10)/10,'m',1)},{id:'limit',label:'Határérték',value:limit,unit:'%',text:limitText}],
+   results:[{id:'dU',label:'Feszültségesés',value:volts,unit:'V',text:u(volts,'V')},{id:'pct',label:'Feszültségesés',value:p,unit:'%',text:a+nb+'%',primary:true},{id:'Lmax',label:'Legnagyobb hossz a határig',value:Lmax,unit:'m',text:floorLength(Lmax).text},{id:'limit',label:'Határérték',value:limit,unit:'%',text:limitText}],
    steps,figure:{kind:'drop-bar',value:p,limit,label:'ΔU'},verdict:{ok,text:ok?`Számítás szerint a határon belül: ${a} % ≤ ${bT} %.`:`Számítás szerint meghaladja a határt: ${a} % > ${bT} %.`},
    assumptions:['Rézvezető; ρ1 = '+u(T.rho1,'Ω·mm²/m',4)+' (üzemi hőmérséklet), λ = '+u(T.lambda,'Ω/m',5)+' (G.52.2).','A teljes terhelés a vezeték végén; az elosztó előtti (fővezeték) esés nincs benne.',...(sys==='3f'?['Szimmetrikus háromfázisú terhelés.']:[]),...(sys==='dc'?['Egyenáram: λ = 0, oda-vissza vezeték.']:[])],
   };

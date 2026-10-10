@@ -22,7 +22,9 @@ const def:CalcDef={
    if(K<-1e-9)throw new CalcError('Az abszolút nulla fok (0 K = −273,15 °C) alatti hőmérséklet nem lehetséges.','T');
    const C=K-KELVIN_OFFSET,F=C*9/5+32;
    return {results:[{id:'C',label:'Celsius',value:C,unit:'°C',text:u(C,'°C'),primary:e!=='C'},{id:'F',label:'Fahrenheit',value:F,unit:'°F',text:u(F,'°F'),primary:e==='C'},{id:'K',label:'Kelvin',value:K,unit:'K',text:u(K,'K'),primary:e!=='K'}],
-    steps:[step('Kelvin','K = °C + 273,15; °C = (°F − 32) · 5/9','a megadott érték kelvinben',u(K,'K')),step('Fahrenheit','°F = °C · 9/5 + 32',`°F = ${u(C,'°C')} · 9/5 + 32`,u(F,'°F'))]};
+    steps:e==='C'?[step('Kelvin','K = °C + 273,15',`K = ${u(T,'°C')} + 273,15`,u(K,'K')),step('Fahrenheit','°F = °C · 9/5 + 32',`°F = ${u(T,'°C')} · 9/5 + 32`,u(F,'°F'))]
+     :e==='F'?[step('Celsius','°C = (°F − 32) · 5/9',`°C = (${u(T,'°F')} − 32) · 5/9`,u(C,'°C')),step('Kelvin','K = °C + 273,15',`K = ${u(C,'°C')} + 273,15`,u(K,'K'))]
+     :[step('Celsius','°C = K − 273,15',`°C = ${u(T,'K')} − 273,15`,u(C,'°C')),step('Fahrenheit','°F = °C · 9/5 + 32',`°F = ${u(C,'°C')} · 9/5 + 32`,u(F,'°F'))]};
   }
   const m=MATERIALS[v.s('anyag') as Material],R1=v.n('R1'),t1=v.n('t1'),t2=v.n('t2');
   const R2=R1*(1+m.alpha*(t2-20))/(1+m.alpha*(t1-20));
@@ -30,7 +32,7 @@ const def:CalcDef={
    steps:[step('Ellenállás θ2-n','R2 = R1 · (1 + α · (θ2 − 20)) / (1 + α · (θ1 − 20))',`R2 = ${u(R1,'Ω')} · (1 + ${u(m.alpha,'1/K',5)} · (${u(t2,'°C')} − 20)) / (1 + ${u(m.alpha,'1/K',5)} · (${u(t1,'°C')} − 20))`,u(R2,'Ω'),m.source)],
    assumptions:['Lineáris hőmérsékletfüggés (−50 … +250 °C között jó közelítés tiszta fémre).']};
  },
- formulas:['K = °C + 273,15','°F = °C · 9/5 + 32','R2 = R1 · (1 + α · (θ2 − 20)) / (1 + α · (θ1 − 20))'],
+ formulas:['K = °C + 273,15','°F = °C · 9/5 + 32','°C = (°F − 32) · 5/9','R2 = R1 · (1 + α · (θ2 − 20)) / (1 + α · (θ1 − 20))'],
  notes:{good:['Külföldi adatlapok hőmérsékleteinek átváltása.','Tekercs- vagy vezetékellenállás átszámítása üzemi hőmérsékletre.'],bad:['Motortekercs melegedésének hivatalos mérése (arra a gyártói és a vonatkozó szabvány szerinti eljárás vonatkozik).','Ötvözetek, félvezetők, NTC/PTC ellenállások hőmérsékletfüggésére.']},
  safety:['alap'],
  examples:[

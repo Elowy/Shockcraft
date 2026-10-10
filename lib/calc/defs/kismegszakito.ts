@@ -1,6 +1,6 @@
 import type {CalcDef,ResultItem} from '../core';
 import {MCB_RATINGS} from '../constants';
-import {SIZING_NOT_COVERED,maxLoopImpedance} from '../formulas';
+import {SIZING_NOT_COVERED,maxLoopImpedance} from '../../sizing-formulas';
 import {step,u} from '../fields';
 import {atMost,fmtNum} from '../../sizing-formulas';
 import {SIZING_TABLES as T,instantaneousRef} from '../../sizing-tables';

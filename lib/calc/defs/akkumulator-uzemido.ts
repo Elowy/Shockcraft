@@ -2,7 +2,7 @@ import type {CalcDef} from '../core';
 import {step,u} from '../fields';
 
 /** Óra → „5 óra 46 perc”. */
-function hoursText(h:number){const m=Math.round(h*60);const hh=Math.floor(m/60),mm=m%60;return hh?hh+' óra'+(mm?' '+mm+' perc':''):mm+' perc'}
+function hoursText(h:number){const m=Math.round(h*60);if(m===0)return 'kevesebb mint 1 perc';const hh=Math.floor(m/60),mm=m%60;return hh?hh+' óra'+(mm?' '+mm+' perc':''):mm+' perc'}
 
 const def:CalcDef={
  slug:'akkumulator-uzemido',title:'Akkumulátor üzemideje',category:'gepek',tier:'T0',version:1,updated:'2026-10-10',
