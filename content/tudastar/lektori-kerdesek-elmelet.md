@@ -1,5 +1,5 @@
 # Tudástár – Elmélet: kérdések a szakmai lektornak
-Az 1. vázlatkör (2026-10-10) független szakmai ellenőrzése során gyűlt össze. A cikkek forrásvázlatai:  (ai: vázlat). A szabványkiadások és pontszámok emlékezetből kerültek a vázlatokba, ezért mindegyik ellenőrizendő.
+Az 1. vázlatkör (2026-10-10) független szakmai ellenőrzése során gyűlt össze. A cikkek forrásvázlatai: `content/tudastar/elmelet/*.md` (ai: vázlat). A szabványkiadások és pontszámok emlékezetből kerültek a vázlatokba, ezért mindegyik ellenőrizendő.
 
 ## Alapfogalmak
 1. MSZ EN 50160 (elektromos-feszultseg): a kiadás (MSZ EN 50160:2011 és módosításai, vagy az EN 50160:2022 hazai átvétele) és a 4.2.2 pontszám ellenőrizendő. Ellenőrizendő az általam pontosított tartalom is: a heti 10 perces átlagok 95 %-a Un ±10 %-on belül, és minden 10 perces átlag +10 %/−15 %-on belül (207–253 V, illetve 195,5–253 V).
