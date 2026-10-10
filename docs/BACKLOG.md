@@ -29,3 +29,24 @@ Elfogadási feltételek:
 - Közös szerkesztés más fiókból (szerkesztési zárral).
 - Termékkatalógus 2. ütem: szerelvényenkénti termék, összeállítás (kit), rendelési lista, kiszerelés-átváltás, soros katalógustábla 2000 tétel fölött.
 - Szakmailag ellenőrzött villamos méretezés.
+
+## Tudástár (oktatóanyag) – új menüpont, ötletgyűjtés
+
+Állapot: ötletgyűjtés, a terméktulajdonos további ötleteket ad hozzá. Munkanév: **Tudástár** (lehetséges szinonimák: Oktatóanyag, Tananyag, Szakmai kézikönyv, Villanyszerelő-kézikönyv). Külön menüpont a tervezőben és a nyilvános oldalon (a főoldalról is elérhető, keresőbarát, nyomtatható).
+
+Közös követelmények:
+
+- Saját szöveg és saját ábrák. Külső oldalak (pl. megaohm.hu) csak témaforrásként szolgálhatnak, szöveget és képet nem veszünk át (szerzői jog).
+- A kapcsolási rajzok a tervező meglévő rajzjeleivel, SVG-ben készülnek, sötét módban is olvashatóan.
+- Szakmai lektorálás kötelező (biztonságkritikus tartalom), és minden oldalon látható figyelmeztetés: villamos szerelést csak szakképzett személy végezhet, a mérőhelyi és csatlakozási munkákra az elosztói engedélyes szabályai vonatkoznak.
+- Kapcsolat a tervezővel: a szerelvénytípusokból (pl. váltó- és keresztkapcsoló) és a Tervsegédből egy kattintással nyílik a megfelelő Tudástár-szakasz; a kalkulátorok a meglévő számításokat (fázisterhelés, később méretezés) használják újra.
+
+### 1. ötlet: kapcsolások, bekötések, mérők és számítások egy oldalon
+
+Egyetlen, tartalomjegyzékkel tagolt oldal, kalkulátorokkal:
+
+- **Világítási kapcsolók bekötése és működése:** 101 egypólusú, 102 kétpólusú, 103 hárompólusú, 105 csillár (kétáramkörös), 106 váltó (alternatív), 106+6 kettős váltó, 107 keresztkapcsoló; rajzjel, bekötési rajz, működés, tipikus felhasználás (pl. lépcsőház, folyosó).
+- **Földelési (hálózati) rendszerek:** IT, TT, TN-C, TN-S, TN-C-S – felépítés, PEN-vezető szétválasztása, tipikus hazai alkalmazás. (Pontosítandó a terméktulajdonossal: a kérésben „It, nc, nc-s” szerepelt.)
+- **Fogyasztásmérők:** egy- és háromfázisú, közvetlen és áramváltós mérés, vezérelt (H- és GEO-tarifás) mérés, a bekötés elve – az elosztói engedélyes szabályaira hivatkozva.
+- **Számítások kalkulátorral, levezetéssel:** Ohm-törvény (U = I · R), teljesítmény (egyfázis P = U · I · cos φ, háromfázis P = √3 · U · I · cos φ), vezeték-ellenállás (R = ρ · l / A), soros és párhuzamos ellenállás, feszültségesés, energiafogyasztás és költség (kWh × Ft/kWh), kismegszakító- és keresztmetszet-választás alapjai.
+- Minden képlet mellett mértékegységek, kidolgozott példa és a kalkulátor; a kalkulátor bemenetei ellenőrzöttek, az eredmény kerekítése és mértékegysége egyértelmű.
