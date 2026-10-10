@@ -6,13 +6,13 @@ import type {Plan} from '@/lib/plan';
 
 const fmt=(n:number,d=1)=>n.toLocaleString('hu-HU',{maximumFractionDigits:d});
 const kw=(w:number)=>fmt(w/1000,2)+' kW';
-export function PhaseLoadReport({plan}:{plan:Plan}){
+export function PhaseLoadReport({plan,sizingHint=true}:{plan:Plan;sizingHint?:boolean}){
  const [scope,setScope]=useState('all');
  const area=plan.buildings.some(b=>b.id===scope)?scope:'all';
  const loads=projectPhaseLoads(plan,area);
  return <section className="phase-load" aria-label="Fázisterhelés">
   <div className="report-controls"><Choice label="Fázisterhelés területe" value={area} onChange={setScope} items={[["all","Teljes projekt"],...plan.buildings.map(b=>[b.id,b.name] as [string,string])]}/></div>
-  <p className="report-note">Elosztónként összesítjük az áramkörök terhelését. Ahol az áramkörjegyzékben nincs megadott terhelés, a hozzárendelt szerelvényekből becsülünk (dugalj {estimatedPower.socket} W, kettős dugalj {estimatedPower.double} W, lámpakiállás {estimatedPower.light} W). A háromfázisú áramkör terhelése egyenlően oszlik a fázisok között. Számítás 230 V fázisfeszültséggel, cos φ = 1 és egyidejűségi tényező nélkül; ez tájékoztató összesítés, nem méretezés.</p>
+  <p className="report-note">Elosztónként összesítjük az áramkörök terhelését. Ahol az áramkörjegyzékben nincs megadott terhelés, a hozzárendelt szerelvényekből becsülünk (dugalj {estimatedPower.socket} W, kettős dugalj {estimatedPower.double} W, lámpakiállás {estimatedPower.light} W). A háromfázisú áramkör terhelése egyenlően oszlik a fázisok között. Számítás 230 V fázisfeszültséggel, cos φ = 1 és egyidejűségi tényező nélkül; ez tájékoztató összesítés, nem méretezés.{sizingHint&&' A szerkesztő Eszközök → Méretezés fülén tervezői ellenőrzést segítő vezeték- és feszültségesés-számítás készíthető.'}</p>
   {loads.map(({building,board,load})=>{const max=Math.max(1,...phases.map(p=>load.phases[p].watts));return <div className="phase-load-board" key={building.id+':'+board.id}>
    <h3>{building.name} · {board.name}</h3>
    <div className="report-totals"><div><span>Összes terhelés</span><strong>{kw(load.total)}</strong></div><div><span>Aszimmetria</span><strong className={load.imbalance>IMBALANCE_LIMIT?'phase-warn':''}>{fmt(load.imbalance,0)}%</strong></div><div><span>Áramkörök</span><strong>{load.circuits.length} db</strong></div></div>

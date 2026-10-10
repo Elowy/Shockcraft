@@ -17,6 +17,7 @@ Elfogadási feltételek:
 
 ## Kész
 
+- Méretezési segédszámítás (tervezői ellenőrzést segítő): Iz/In/Ib, I2, legkisebb keresztmetszet, feszültségesés, opcionális hurokimpedancia, Tervsegéd-fül, PDF-táblák, tervellenőrzés. A táblázatértékek tervezői jóváhagyása függőben. Lásd `docs/meretezes.md`.
 - Gyártói termékkatalógus: saját, fiókszintű termék- és árlista (kézzel, CSV-ből vagy mintakészletből), típusonkénti és soronkénti termékválasztás az ajánlatban, fiók-alapértelmezések, árfrissítés a katalógusból, termék az anyagkimutatásban, a CSV-ben és az ajánlat-PDF-ben. Lásd `docs/termekkatalogus.md`.
 - Tervmegosztás: csak olvasható, lejáró, visszavonható link, PDF a megosztó engedélyével és exportjogával. Lásd `docs/tervmegosztas.md`.
 - Ügyfél- és feladatkezelés: ügyféltörzs, projekt–ügyfél hozzárendelés, határidős teendők és Esedékes nézet, árajánlat-kitöltés ügyféladatokból. Lásd `docs/ugyfelek-teendok.md`.
@@ -28,7 +29,7 @@ Elfogadási feltételek:
 - Megosztás 2. lépés: megjegyzések, háttéralaprajz a megosztott nézetben, link meghosszabbítása.
 - Közös szerkesztés más fiókból (szerkesztési zárral).
 - Termékkatalógus 2. ütem: szerelvényenkénti termék, összeállítás (kit), rendelési lista, kiszerelés-átváltás, soros katalógustábla 2000 tétel fölött.
-- Szakmailag ellenőrzött villamos méretezés.
+- Méretezés 2. lépés: nyomvonalankénti szerelési mód, topológiai hossz, XLPE- és E-táblázat jóváhagyás után, áramkörjegyzék-oszlop, megosztott nézet.
 
 ## Tudástár (oktatóanyag) – új menüpont, ötletgyűjtés
 

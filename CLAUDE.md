@@ -22,6 +22,7 @@ Villanyszerelőknek és lakóépületek villamos tervein dolgozóknak készül.
 - Projekt életciklus: aktív / archivált / lomtár állapotok
 - Ügyfelek és teendők (fiókszintű): ügyféltörzs, projekt–ügyfél hozzárendelés, határidős teendők, Esedékes nézet, árajánlat-kitöltés ügyféladatokból
 - Tervmegosztás: csak olvasható, lejáró, visszavonható link (`/megosztas#t=…`) a legutóbb mentett tervről, opcionális PDF-engedéllyel
+- Méretezési segédszámítás (Eszközök → Méretezés): áramkörönkénti, tervezői ellenőrzést segítő számítás (Ib ≤ In ≤ Iz, I2, legkisebb keresztmetszet, feszültségesés, opcionális hurokimpedancia), feltételezésekkel és forrásokkal; opcionális PDF-táblák; „nem felel meg”/„nem számítható” a tervellenőrzésben. Nem tervezői méretezés; a táblázatértékek tervezői jóváhagyása függőben
 - Termékkatalógus (fiókszintű): saját termék- és árlista (kézzel, CSV-ből, mintakészletből), típusonkénti és soronkénti termékválasztás az ajánlatban, fiók-alapértelmezések, árfrissítés; termék az anyagkimutatásban, a CSV-ben és az ajánlat-PDF-ben
 - Sötét/világos mód
 
@@ -94,6 +95,7 @@ components/             43 UI komponens
   floor-drawing.tsx     Közös alaprajzi rajz (FloorShapes, RoomLabels, ScaleBar, PlanLegend) – szerkesztő és megtekintő
   catalog-manager.tsx   Termékkatalógus fül (Eszközök → Termékkatalógus): CRUD, CSV-import/-export, mintakészlet, fiók-alapértelmezések
   product-picker.tsx    Termékválasztó dialógus (típushoz vagy ajánlati sorhoz)
+  sizing-report.tsx     Méretezési segédszámítás fül (Eszközök → Méretezés): felelősségi doboz, áramkörönkénti ellenőrzések, áramköri/projekt/elosztó beállítások, Iz0-felülírások
   quote-products.tsx    Ajánlat „Termékek és katalógusárak” része (típusválasztás, alapértelmezések, árfrissítés)
   use-catalog.ts        useCatalog hook: /api/catalog betöltés és mentés (revision-CAS)
 
@@ -120,6 +122,9 @@ lib/                    43 üzleti logika / utility modul
   plan-tools.ts         Anyaglista (materialList), keresés
   circuit-assignment.ts Áramkör-hozzárendelés
   phase-load.ts         Fázisterhelés-összesítés (elosztónként L1/L2/L3, aszimmetria)
+  sizing-tables.ts      Méretezési segédszámítás: MINDEN számérték és forrás egy helyen (PVC Iz0, B.52.14, B.52.17, G.52.1, ρ1, λ, U0, cmin, m), lookupok, ujjlenyomat, SIZING_REVIEW (kezdetben „ellenőrizendő” – soha ne állítsd jóváhagyottra)
+  sizing-schema.ts      circuit.sizing / plan.sizing opcionális Zod-séma, pruneSizing (validatePlan végén)
+  sizing.ts             Kábeljelölés-értelmezés, képletek, circuitSizing/boardSizing/projectSizing, sizingTarget, PDF-sorok, mutáló segédek (tiszta modul)
   route-points.ts       Nyomvonal töréspontok
   architecture.ts       Ajtók/ablakok Zod schema, validateArchitecture
   dimensions.ts         Méretvonalak schema és geometria
@@ -318,7 +323,12 @@ Plan {
     board?: {rows, modulesPerRow}  ← fő elosztó mérete (max 12×36)
     extraBoards?: Board[]          ← extra elosztók (max 19)
   }
-  circuits: Circuit[]         ← áramkörök (phase L1/L2/L3/3P, rating, curve B/C/D, rcd, load? W)
+  circuits: Circuit[]         ← áramkörök (phase L1/L2/L3/3P, rating, curve B/C/D, rcd, load? W,
+                                 sizing? {method, insulation, ambient, grouped, length, cosPhi, usage})
+  sizing?: {                  ← méretezési segédszámítás projektbeállításai (mind opcionális)
+    methodInside, methodOutside, insulation, ambient, grouped, supply, earthing,
+    boards?: {building, board, upstreamDrop?, zs?}[], overrides?: {method, insulation, loaded, section, iz, note}[]
+  }
   modules: Module[]           ← elosztó modulok (type, width 1-8, row, slot)
   boardWires: BoardWire[]     ← elosztón belüli bekötések
 }
@@ -345,6 +355,7 @@ Plan {
 - Betűkészlet: **NotoSans** (beágyazott TTF, teljes magyar ékezet-támogatás)
 - Scope: `floor`, `plot`, `board`, `all`, `single`, `multi`
 - Tartalom: alaprajz + telek rajz + elosztó kapcsolási rajz + szerelvényjegyzék + nyomvonaljegyzék + áramkörlista + fázisterhelés
+- `PdfOptions.sizing === true` (alapból ki): az elosztóoldalakra „méretezési segédszámítás” és „méretezés indoklása” tábla, módosított lábléc; a NotoSans-ból hiányzó ≤ ≥ ≈ √ jeleket a `clean()` cseréli
 - Méretarány-jelző és dátum minden oldalon
 - Export aktív havi előfizetéshez kötött (backlog: ingyenes/egyszeri projekt kivétel)
 
@@ -414,6 +425,8 @@ Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja e
 - `tests/share-api.ts` – `/api/plan-share` és `/api/shared-plan` route-teszt memóriabeli SQLite-on: `node_modules/.bin/esbuild tests/share-api.ts --bundle --platform=node --format=esm --external:mysql2 --alias:cloudflare:workers=./db/node-env.ts --outfile=.sites-runtime/share-api.mjs && env -u MYSQL_URL node --no-warnings .sites-runtime/share-api.mjs`
 - `tests/catalog.ts` – termékkatalógus lib-teszt (séma, CSV-import/-export, mintakészlet, típuskulcs): `node_modules/.bin/tsx tests/catalog.ts`
 - `tests/quote-products.ts` – ajánlat ↔ termék (típusválasztás, árfrissítés, anyagkimutatás-CSV, megosztás, PDF-füst): `node_modules/.bin/tsx tests/quote-products.ts`
+- `tests/sizing-tables.ts` – méretezési táblázatok (relációk, források, lookupok, ujjlenyomat, jóváhagyási kapu): `node --no-warnings --import tsx tests/sizing-tables.ts`
+- `tests/sizing.ts` – méretezési segédszámítás kézzel számolt példákkal (kábeljelölés, képletek, seed, ellenőrzések, séma, tervellenőrzés, PDF, szóhasználat, megosztás): `node --no-warnings --import tsx tests/sizing.ts`
 - `tests/catalog-api.ts` – `/api/catalog` route-teszt memóriabeli SQLite-on: `node_modules/.bin/esbuild tests/catalog-api.ts --bundle --platform=node --format=esm --external:mysql2 --alias:cloudflare:workers=./db/node-env.ts --outfile=.sites-runtime/catalog-api.mjs && env -u MYSQL_URL node --no-warnings .sites-runtime/catalog-api.mjs`
 - Unit tesztek nincsenek; a `validatePlan()` (`lib/plan.ts`) az elsődleges validációs pont
 
@@ -433,4 +446,6 @@ Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja e
 
 6. **Termékkatalógus** (kész, MVP) – fiókszintű `product_catalogs` JSON-blob revisionnel (2000 termék / 1,5 MB, minden fióknak ingyenes); CSV-import (UTF-8/UTF-16LE/Windows-1250, `;`/`,`/tab, magyar számformátum, árrés/bruttó), CSV-export, 25 tételes mintakészlet. A projekt termékválasztása a `plan.quote`-ban él (`productDefaults` + soronkénti `product`/`productPinned` pillanatkép), így visszavonható és a megosztásba nem kerül; illesztés a `MaterialRow.ref` gépi kulccsal, a `materialKey`/`quoteSource` változatlan. Árfrissítés csak gombbal; a munkadíjat csak üres helyre írja. PDF-ben „Termék: …” sor (mód: gyártó+név / +cikkszám / nincs), mintatermék nélkül. Kód: `lib/catalog*.ts`, `lib/product-refs.ts`, `lib/quote-products.ts`, `app/api/catalog`, `components/catalog-manager.tsx`, `components/product-picker.tsx`, `components/quote-products.tsx`, `components/use-catalog.ts`, doksi: `docs/termekkatalogus.md`.
 
-7. **Tervezett:** megosztás 2. lépés (megjegyzések, háttér a megosztott nézetben, link meghosszabbítása), közös szerkesztés más fiókból, termékkatalógus 2. ütem (szerelvényenkénti termék, összeállítás/kit, rendelési lista), szakmailag ellenőrzött villamos méretezés.
+7. **Méretezési segédszámítás** (kész, jóváhagyás függőben) – tervezői ellenőrzést segítő számítás áramkörönként: legkisebb keresztmetszet, Ib ≤ In ≤ Iz, I2 ≤ 1,45 · Iz, feszültségesés (G.52.1), Zs megadása esetén hurokimpedancia (TN). Minden szám a `lib/sizing-tables.ts`-ben, forrással; `SIZING_REVIEW` ujjlenyomathoz kötött, kezdetben „ellenőrizendő”; XLPE-tábla `null` (PVC-tartalék, feltételezésként). Bemenetek opcionális tervmezőkben (`circuits[].sizing`, `sizing`), nincs új tábla/migráció/API; a megosztott tervből törlődnek. Tervsegéd „Méretezés” fül, `PdfOptions.sizing` (alapból ki), `checkPlan(plan,{sizing:true})` (csak fail/na). Kód: `lib/sizing*.ts`, `components/sizing-report.tsx`, doksi: `docs/meretezes.md`.
+
+8. **Tervezett:** megosztás 2. lépés (megjegyzések, háttér a megosztott nézetben, link meghosszabbítása), közös szerkesztés más fiókból, termékkatalógus 2. ütem (szerelvényenkénti termék, összeállítás/kit, rendelési lista), méretezés 2. lépés (nyomvonalankénti szerelési mód, topológiai hossz, XLPE/E-táblázat jóváhagyás után, megosztott nézet).

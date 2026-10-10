@@ -63,7 +63,7 @@ Az új változat ellenőrzése: magasságot figyelembe vevő geometria, kapcsolt
 
 TypeScript-ellenőrzés és gyártási build sikeres. Böngészőben ellenőrizve: szobarajzolás, falra illesztett dugalj, töréspontos nyomvonal, elosztómodul hozzáadás, visszavonás, mentés, mobilmenü. Célzottan ellenőrizve: geometria, modulátfedés, tartós visszaolvasás, elavult és hibás mentési kérések elutasítása. A read_electrical_plan WebMCP eszköz érvényes és hibás bemenettel ellenőrizve.
 
-Első tervezőszerkesztő-változat: téglalap alakú szobák, külön rajzolható falszakaszok, felhasználónként több mentett projekt, épületenként egy 72 modulos elosztó. Az SVG jelölések alkalmazássaját jelölések. Nincs automatikus villamos méretezés, szelektivitás-, feszültségesés- vagy szabványmegfelelőség-vizsgálat; a mintaterv értékei szerkeszthető példaadatok.
+Első tervezőszerkesztő-változat: téglalap alakú szobák, külön rajzolható falszakaszok, felhasználónként több mentett projekt, épületenként egy 72 modulos elosztó. Az SVG jelölések alkalmazássaját jelölések. A Méretezés fül tervezői ellenőrzést segítő segédszámítást ad (terhelhetőség, túlterhelés-védelem, feszültségesés, opcionálisan hurokimpedancia); szelektivitás-, zárlati szilárdság- és szabványmegfelelőség-vizsgálat nincs; a mintaterv értékei szerkeszthető példaadatok.
 
 
 ## Projektdíjak és Stripe

@@ -34,6 +34,6 @@ Az elosztó PDF-exportja (Elosztó és Teljes projekt hatókör) „Elosztó - f
 
 ## Korlátok
 
-Tájékoztató összesítés, nem villamos méretezés. Nem számol egyidejűséggel, teljesítménytényezővel, indítási árammal, feszültségeséssel vagy vezeték-terhelhetőséggel. A végleges méretezés a tervező felelőssége.
+Tájékoztató összesítés, nem villamos méretezés. Nem számol egyidejűséggel, teljesítménytényezővel, indítási árammal, feszültségeséssel vagy vezeték-terhelhetőséggel. A végleges méretezés a tervező felelőssége. A vezeték-terhelhetőség és a feszültségesés tervezői ellenőrzést segítő számítását lásd: `docs/meretezes.md`.
 
 Kód: `lib/phase-load.ts`, `components/phase-load-report.tsx`. Teszt: `tests/phase-load.ts`.

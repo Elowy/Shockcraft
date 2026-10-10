@@ -64,6 +64,9 @@ export type SharedView={plan:Plan;updatedAt:string;expiresAt:number;pdf:boolean;
 export function sharedPlan(raw:unknown):{plan:Plan;backgroundFloors:string[]}{
  const plan=validatePlan(raw),backgroundFloors:string[]=[];
  delete plan.quote;
+ // A méretezési segédszámítás beállításai (projekt-felülírások forrásmegjegyzése, mért Zs, áramkörönkénti adatok) a tulajdonos munkaadatai; a megosztott nézetben nincs Méretezés (B fázis).
+ delete plan.sizing;
+ for(const c of plan.circuits)delete c.sizing;
  for(const b of plan.buildings)for(const f of b.floors)if(f.background){backgroundFloors.push(f.id);delete f.background}
  return {plan,backgroundFloors};
 }

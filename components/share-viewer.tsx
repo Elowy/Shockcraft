@@ -120,7 +120,7 @@ export default function ShareViewer(){
   if(!plan)return null;
   return <div className="share-section">
    <div className="share-tabs" role="group" aria-label="Jegyzékek">{listTabs.map(([id,label])=><button key={id} className={listTab===id?'active':''} aria-pressed={listTab===id} onClick={()=>setListTab(id)}>{label}</button>)}</div>
-   {listTab==='circuits'?<CircuitReport plan={plan} onLocate={locate}/>:listTab==='routes'?<RouteRegister plan={plan} onLocate={locate} readOnly/>:<PhaseLoadReport plan={plan}/>}
+   {listTab==='circuits'?<CircuitReport plan={plan} onLocate={locate}/>:listTab==='routes'?<RouteRegister plan={plan} onLocate={locate} readOnly/>:<PhaseLoadReport plan={plan} sizingHint={false}/>}
   </div>;
  }
  return <div className="share-site"><PublicHeader/><main className="share-page">
@@ -131,7 +131,7 @@ export default function ShareViewer(){
     <div><h1>{plan.name}</h1><p className="share-meta">Csak megtekinthető terv · Utoljára mentve: {stamp(view.updatedAt)} · A link érvényes: {stamp(view.expiresAt)}-ig</p></div>
     <div className="share-actions">
      <button disabled={loading} onClick={()=>void load(token)}><RefreshCw/> {loading?'Frissítés…':'Frissítés'}</button>
-     {view.pdf&&<PdfDialog plan={plan} buildingId={building?.id||''} floorId={floor?.id||''} boardId={boardId} view={pdfView} requireAccess={pdfAccess} note="A PDF a megosztott terv legutóbb mentett változatából készül, árajánlat és háttéralaprajz nélkül."/>}
+     {view.pdf&&<PdfDialog plan={plan} buildingId={building?.id||''} floorId={floor?.id||''} boardId={boardId} view={pdfView} requireAccess={pdfAccess} sizingOption={false} note="A PDF a megosztott terv legutóbb mentett változatából készül, árajánlat és háttéralaprajz nélkül."/>}
      <button className="iconbutton" aria-label={dark?'Világos mód':'Sötét mód'} title={dark?'Világos mód':'Sötét mód'} onClick={toggleTheme}>{dark?<Sun/>:<Moon/>}</button>
     </div>
    </div>

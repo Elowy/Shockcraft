@@ -30,6 +30,7 @@ A szerver fehérlistás választ ad (`plan`, `updatedAt`, `expiresAt`, `pdf`, `b
 
 - az árajánlat (`quote`, benne az ügyfél adataival);
 - a háttéralaprajz (assetId, fájlnév) – a szint csak jelzést kap, hogy van háttere;
+- a méretezési segédszámítás beállításai (`sizing`, `circuits[].sizing`: projekt-felülírások forrásmegjegyzéssel, elosztónkénti Zs és fővezeték-esés); a megosztott nézetben nincs Méretezés fül, és a PDF-ben sincs méretezési tábla (a 2. lépés része lehet);
 - a megosztó neve, e-mail-címe, felhasználói azonosítója;
 - a projektazonosító és -kulcs, a link azonosítója és címkéje, a revision.
 
