@@ -6,7 +6,8 @@ import {routeRegister,filterRouteRegister,routeModeLabels,type RouteFilters,type
 import type {Plan} from '@/lib/plan';
 const fmt=(n:number)=>n.toLocaleString('hu-HU',{maximumFractionDigits:2});
 const initial:RouteFilters={building:'all',circuit:'all',mode:'all',query:'',freeOnly:false,sort:'name'};
-export function RouteRegister({plan,onLocate}:{plan:Plan;onLocate:(r:RouteTarget)=>void}){
+// readOnly: a megosztott nézetben nincs tulajdonságpanel, a kattintás csak a rajzon mutatja a nyomvonalat.
+export function RouteRegister({plan,onLocate,readOnly=false}:{plan:Plan;onLocate:(r:RouteTarget)=>void;readOnly?:boolean}){
  const [filters,setFilters]=useState(initial),[limit,setLimit]=useState(100);
  const building=['all','plot','floors'].includes(filters.building)||plan.buildings.some(b=>b.id===filters.building)?filters.building:'all';
  const circuits=plan.circuits.filter(c=>building==='all'||building==='floors'||c.building===building);
@@ -21,7 +22,7 @@ export function RouteRegister({plan,onLocate}:{plan:Plan;onLocate:(r:RouteTarget
   <div className="route-register-options">{building!=='plot'&&<label><input type="checkbox" checked={filters.freeOnly} onChange={e=>patch({freeOnly:e.target.checked})}/> Csak szabad alaprajzi végponttal</label>}<button onClick={()=>{setFilters(initial);setLimit(100)}}>Szűrők törlése</button></div>
   <div className="report-totals"><div><span>Szűrt nyomvonalak</span><strong>{visible.length} db</strong></div><div><span>Teljes hossz</span><strong>{fmt(totals.total)} m</strong></div><div><span>Ebből függőleges</span><strong>{fmt(totals.vertical)} m</strong></div></div>
   <p className="report-note">Alaprajzi és telki nyomvonalak, ráhagyás nélkül. A telki magasságok a közös telek-0 szinthez, az alaprajziak a saját szinthez képest értendők. Épületszűrésnél az alaprajzi szerelvényhez kapcsolt telki vezetékek is szerepelnek. Az áramkörszűrés csak az alaprajzi nyomvonalakra vonatkozik. Az elosztón belüli kapocsvezetékeknek itt nincs számított hosszuk.</p>
-  <p className="report-note" role="status">{visible.length?`${visible.length} találat. Kattints a nyomvonalra a rajz és a tulajdonságok megnyitásához.`:'Nincs a szűrésnek megfelelő nyomvonal.'}</p>
+  <p className="report-note" role="status">{visible.length?`${visible.length} találat. ${readOnly?'Kattints a nyomvonalra a rajzon való megjelenítéshez.':'Kattints a nyomvonalra a rajz és a tulajdonságok megnyitásához.'}`:'Nincs a szűrésnek megfelelő nyomvonal.'}</p>
   <div className="route-register-list">{visible.slice(0,limit).map(r=><button key={r.target.id} onClick={()=>onLocate(r.target)} aria-label={r.target.title+' nyomvonal megnyitása'}><span className="route-register-body"><b><span className="route-register-kind">{r.kind==='plot'?'Telek':'Alaprajz'}</span>{r.target.title}</b><small>{r.location} · {r.circuit}</small><span>{r.cable} · {routeModeLabels[r.mode]}</span><span>Kezdet: {r.start} · Vég: {r.end}</span><span>Vezetés: {fmt(r.plane)} m · végpontok: {fmt(r.startHeight)} / {fmt(r.endHeight)} m</span>{r.freeEnds>0&&<span className="route-register-free">{r.freeEnds} szabad végpont</span>}</span><span className="route-register-length"><b>{fmt(r.total)} m</b><small>{fmt(r.horizontal)} m vízszintes<br/>{fmt(r.vertical)} m függőleges</small><MapPin aria-hidden="true"/></span></button>)}</div>
   {visible.length>limit&&<button onClick={()=>setLimit(n=>n+100)}>További nyomvonalak ({visible.length-limit})</button>}
  </section>;

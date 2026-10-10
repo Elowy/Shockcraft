@@ -1,0 +1,238 @@
+{
+ "format": "kb-netlista/1",
+ "id": "ketpolusu-kapcsolo-102",
+ "title": "Kétpólusú kapcsoló (102): a fázis- és a nullavezető együttes bontása",
+ "short": "102 – két pólus",
+ "article": "ketpolusu-kapcsolo-102-bekotese",
+ "figure": "abra-1",
+ "version": 1,
+ "note": "Tervezet a szakmai lektornak (R3). Egy lehetséges, következetes érszín-kiosztás: barna = betáp fázis, fekete = kapcsolt fázis, szürke = váltóvezetékek (felirattal megkülönböztetve), kék = nullavezető, zöld-sárga = védővezető. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. Ebben a változatban a betáp a kapcsolódobozon át megy a fogyasztóhoz; a védővezető a kapcsolódobozban, kapcsolón kívül, vezetékösszekötővel folytatódik. A fogyasztóhoz háromeres kábel megy, ezért itt – a fenti kiosztástól eltérően – a kapcsolt fázis barna, a kapcsolt nulla kék.",
+ "components": [
+  {
+   "id": "T",
+   "type": "tap",
+   "label": "Betáp",
+   "symbol": "panel",
+   "megjegyzes": "Az áramkör betápja az elosztóból, a kismegszakító és az áram-védőkapcsoló (FI-relé) után.",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ]
+  },
+  {
+   "id": "S1",
+   "type": "kapcsolo-102",
+   "label": "Kapcsoló (102)",
+   "symbol": "switch2",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L kapocs (betáp)"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N kapocs (betáp)"
+    },
+    {
+     "id": "1",
+     "role": "kapcsolt",
+     "label": "L kimenet"
+    },
+    {
+     "id": "2",
+     "role": "kapcsolt-N",
+     "label": "N kimenet"
+    }
+   ],
+   "states": [
+    {
+     "name": "ki",
+     "connect": []
+    },
+    {
+     "name": "be",
+     "connect": [
+      [
+       "L",
+       "1"
+      ],
+      [
+       "N",
+       "2"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "PB",
+   "type": "kotoelem",
+   "label": "Kapcsolódoboz",
+   "at": "S1",
+   "terminals": [
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE-összekötő"
+    }
+   ]
+  },
+  {
+   "id": "E1",
+   "type": "lampa",
+   "label": "Lámpa (vagy más fogyasztó)",
+   "symbol": "light",
+   "class": "I",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L (fázis)"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ]
+  }
+ ],
+ "sections": [
+  {
+   "id": "W0",
+   "from": "T",
+   "to": "S1",
+   "label": "Betáp – kapcsolódoboz",
+   "kind": "kapcsolo"
+  },
+  {
+   "id": "W1",
+   "from": "S1",
+   "to": "E1",
+   "label": "Kapcsolódoboz – lámpa",
+   "kind": "lampa"
+  }
+ ],
+ "wires": [
+  {
+   "id": "w1",
+   "from": "T.L",
+   "to": "S1.L",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna",
+   "section": "W0"
+  },
+  {
+   "id": "w2",
+   "from": "T.N",
+   "to": "S1.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék",
+   "section": "W0"
+  },
+  {
+   "id": "w3",
+   "from": "T.PE",
+   "to": "PB.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "W0"
+  },
+  {
+   "id": "w4",
+   "from": "S1.1",
+   "to": "E1.L",
+   "conductor": "kapcsolt fázis",
+   "role": "Lk",
+   "color": "barna",
+   "section": "W1"
+  },
+  {
+   "id": "w5",
+   "from": "S1.2",
+   "to": "E1.N",
+   "conductor": "kapcsolt nulla",
+   "role": "Nk",
+   "color": "kék",
+   "section": "W1"
+  },
+  {
+   "id": "w6",
+   "from": "PB.PE",
+   "to": "E1.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "W1"
+  }
+ ],
+ "truthTable": [
+  {
+   "states": {
+    "S1": "ki"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "be"
+   },
+   "lamps": {
+    "E1": true
+   }
+  }
+ ],
+ "checks": {
+  "allPoleDisconnect": [
+   "E1"
+  ]
+ },
+ "layout": {
+  "view": "bekotes",
+  "viewBox": "0 0 360 240",
+  "parts": {
+   "T": [
+    20,
+    40
+   ],
+   "S1": [
+    180,
+    190
+   ],
+   "PB": [
+    180,
+    150
+   ],
+   "E1": [
+    320,
+    40
+   ]
+  },
+  "megjegyzes": "Durva elhelyezés a Bekötés nézethez; a vezetékútvonalat (path) az ábramotor vagy a rajzoló adja."
+ }
+}

@@ -1,0 +1,857 @@
+{
+ "format": "kb-netlista/1",
+ "id": "p22-106-6-ket-aramkor-athidalva",
+ "title": "PRÓBA (szándékosan hibás): 106+6: a 2. kör külön áramkörről kap fázist a C2-re, de a C1–C2 áthidaló megmaradt → a két áramkör fázisa összekötve",
+ "short": "106+6 – két kör, két hely",
+ "article": "kettos-valtokapcsolo-106-6-bekotese",
+ "figure": "abra-1",
+ "version": 1,
+ "note": "Tervezet a szakmai lektornak (R3). Egy lehetséges, következetes érszín-kiosztás: barna = betáp fázis, fekete = kapcsolt fázis, szürke = váltóvezetékek (felirattal megkülönböztetve), kék = nullavezető, zöld-sárga = védővezető. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A két billentyű közös kapcsát (C1, C2) itt az A helyen áthidaló köti ugyanarra a fázisra; ahol a gyártó a két közös kapcsot belül összeköti, az áthidaló elmarad. A váltóvezetékek: 1a, 2a (1. kör) és 1b, 2b (2. kör).",
+ "components": [
+  {
+   "id": "T",
+   "type": "tap",
+   "label": "Betáp",
+   "symbol": "panel",
+   "megjegyzes": "Az áramkör betápja az elosztóból, a kismegszakító és az áram-védőkapcsoló (FI-relé) után.",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ]
+  },
+  {
+   "id": "T2",
+   "type": "tap",
+   "label": "Betáp – 2. áramkör",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L"
+    },
+    {
+     "id": "N",
+     "role": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE"
+    }
+   ]
+  },
+  {
+   "id": "KD",
+   "type": "kotodoboz",
+   "label": "Kötődoboz",
+   "symbol": "box",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L-kötés"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N-kötés"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE-kötés"
+    },
+    {
+     "id": "K1A",
+     "role": "valto-1",
+     "label": "1a váltóvezeték kötése"
+    },
+    {
+     "id": "K2A",
+     "role": "valto-2",
+     "label": "2a váltóvezeték kötése"
+    },
+    {
+     "id": "K1B",
+     "role": "valto-1",
+     "label": "1b váltóvezeték kötése"
+    },
+    {
+     "id": "K2B",
+     "role": "valto-2",
+     "label": "2b váltóvezeték kötése"
+    },
+    {
+     "id": "LK1",
+     "role": "kapcsolt",
+     "label": "1. lámpa kapcsoltfázis-kötése"
+    },
+    {
+     "id": "LK2",
+     "role": "kapcsolt",
+     "label": "2. lámpa kapcsoltfázis-kötése"
+    },
+    {
+     "id": "L2",
+     "role": "L",
+     "label": "2. áramkör L-kötése"
+    },
+    {
+     "id": "N2",
+     "role": "N",
+     "label": "2. áramkör N-kötése"
+    }
+   ]
+  },
+  {
+   "id": "S1",
+   "type": "kapcsolo-106-6",
+   "label": "K1 (A hely)",
+   "symbol": "switch6",
+   "terminals": [
+    {
+     "id": "C1",
+     "role": "kozos",
+     "label": "1. billentyű közös kapcsa (C1)"
+    },
+    {
+     "id": "1a",
+     "role": "valto-1",
+     "label": "1a kapocs"
+    },
+    {
+     "id": "2a",
+     "role": "valto-2",
+     "label": "2a kapocs"
+    },
+    {
+     "id": "C2",
+     "role": "kozos",
+     "label": "2. billentyű közös kapcsa (C2)"
+    },
+    {
+     "id": "1b",
+     "role": "valto-1",
+     "label": "1b kapocs"
+    },
+    {
+     "id": "2b",
+     "role": "valto-2",
+     "label": "2b kapocs"
+    }
+   ],
+   "keys": [
+    {
+     "id": "b1",
+     "label": "1. billentyű",
+     "states": [
+      {
+       "name": "0",
+       "label": "C1–1a",
+       "connect": [
+        [
+         "C1",
+         "1a"
+        ]
+       ]
+      },
+      {
+       "name": "1",
+       "label": "C1–2a",
+       "connect": [
+        [
+         "C1",
+         "2a"
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "id": "b2",
+     "label": "2. billentyű",
+     "states": [
+      {
+       "name": "0",
+       "label": "C2–1b",
+       "connect": [
+        [
+         "C2",
+         "1b"
+        ]
+       ]
+      },
+      {
+       "name": "1",
+       "label": "C2–2b",
+       "connect": [
+        [
+         "C2",
+         "2b"
+        ]
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "S2",
+   "type": "kapcsolo-106-6",
+   "label": "K2 (B hely)",
+   "symbol": "switch6",
+   "terminals": [
+    {
+     "id": "C1",
+     "role": "kozos",
+     "label": "1. billentyű közös kapcsa (C1)"
+    },
+    {
+     "id": "1a",
+     "role": "valto-1",
+     "label": "1a kapocs"
+    },
+    {
+     "id": "2a",
+     "role": "valto-2",
+     "label": "2a kapocs"
+    },
+    {
+     "id": "C2",
+     "role": "kozos",
+     "label": "2. billentyű közös kapcsa (C2)"
+    },
+    {
+     "id": "1b",
+     "role": "valto-1",
+     "label": "1b kapocs"
+    },
+    {
+     "id": "2b",
+     "role": "valto-2",
+     "label": "2b kapocs"
+    }
+   ],
+   "keys": [
+    {
+     "id": "b1",
+     "label": "1. billentyű",
+     "states": [
+      {
+       "name": "0",
+       "label": "C1–1a",
+       "connect": [
+        [
+         "C1",
+         "1a"
+        ]
+       ]
+      },
+      {
+       "name": "1",
+       "label": "C1–2a",
+       "connect": [
+        [
+         "C1",
+         "2a"
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "id": "b2",
+     "label": "2. billentyű",
+     "states": [
+      {
+       "name": "0",
+       "label": "C2–1b",
+       "connect": [
+        [
+         "C2",
+         "1b"
+        ]
+       ]
+      },
+      {
+       "name": "1",
+       "label": "C2–2b",
+       "connect": [
+        [
+         "C2",
+         "2b"
+        ]
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "E1",
+   "type": "lampa",
+   "label": "1. lámpa",
+   "symbol": "light",
+   "class": "I",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L (fázis)"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ]
+  },
+  {
+   "id": "E2",
+   "type": "lampa",
+   "label": "2. lámpa",
+   "symbol": "light",
+   "class": "I",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L (fázis)"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ]
+  }
+ ],
+ "sections": [
+  {
+   "id": "W0",
+   "from": "T",
+   "to": "KD",
+   "label": "Elosztó – kötődoboz",
+   "kind": "betap"
+  },
+  {
+   "id": "W1",
+   "from": "KD",
+   "to": "S1",
+   "label": "Kötődoboz – K1 (A hely)",
+   "kind": "kapcsolo"
+  },
+  {
+   "id": "W2",
+   "from": "KD",
+   "to": "S2",
+   "label": "Kötődoboz – K2 (B hely)",
+   "kind": "kapcsolo"
+  },
+  {
+   "id": "W3",
+   "from": "KD",
+   "to": "E1",
+   "label": "Kötődoboz – 1. lámpa",
+   "kind": "lampa"
+  },
+  {
+   "id": "W4",
+   "from": "KD",
+   "to": "E2",
+   "label": "Kötődoboz – 2. lámpa",
+   "kind": "lampa"
+  },
+  {
+   "id": "W0b",
+   "from": "T2",
+   "to": "KD",
+   "label": "Elosztó – kötődoboz (2. áramkör)",
+   "kind": "betap"
+  }
+ ],
+ "wires": [
+  {
+   "id": "w1",
+   "from": "T.L",
+   "to": "KD.L",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna",
+   "section": "W0"
+  },
+  {
+   "id": "w2",
+   "from": "T.N",
+   "to": "KD.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék",
+   "section": "W0"
+  },
+  {
+   "id": "w3",
+   "from": "T.PE",
+   "to": "KD.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "W0"
+  },
+  {
+   "id": "w4",
+   "from": "KD.L",
+   "to": "S1.C1",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna",
+   "section": "W1"
+  },
+  {
+   "id": "w5",
+   "from": "S1.C1",
+   "to": "S1.C2",
+   "conductor": "áthidaló",
+   "role": "L",
+   "color": "barna"
+  },
+  {
+   "id": "w6",
+   "from": "S1.1a",
+   "to": "KD.K1A",
+   "conductor": "váltóvezeték",
+   "role": "K1",
+   "color": "szürke",
+   "label": "1a",
+   "section": "W1"
+  },
+  {
+   "id": "w7",
+   "from": "S1.2a",
+   "to": "KD.K2A",
+   "conductor": "váltóvezeték",
+   "role": "K2",
+   "color": "szürke",
+   "label": "2a",
+   "section": "W1"
+  },
+  {
+   "id": "w8",
+   "from": "S1.1b",
+   "to": "KD.K1B",
+   "conductor": "váltóvezeték",
+   "role": "K1",
+   "color": "szürke",
+   "label": "1b",
+   "section": "W1"
+  },
+  {
+   "id": "w9",
+   "from": "S1.2b",
+   "to": "KD.K2B",
+   "conductor": "váltóvezeték",
+   "role": "K2",
+   "color": "szürke",
+   "label": "2b",
+   "section": "W1"
+  },
+  {
+   "id": "w10",
+   "from": "KD.K1A",
+   "to": "S2.1a",
+   "conductor": "váltóvezeték",
+   "role": "K1",
+   "color": "szürke",
+   "label": "1a",
+   "section": "W2"
+  },
+  {
+   "id": "w11",
+   "from": "KD.K2A",
+   "to": "S2.2a",
+   "conductor": "váltóvezeték",
+   "role": "K2",
+   "color": "szürke",
+   "label": "2a",
+   "section": "W2"
+  },
+  {
+   "id": "w12",
+   "from": "KD.K1B",
+   "to": "S2.1b",
+   "conductor": "váltóvezeték",
+   "role": "K1",
+   "color": "szürke",
+   "label": "1b",
+   "section": "W2"
+  },
+  {
+   "id": "w13",
+   "from": "KD.K2B",
+   "to": "S2.2b",
+   "conductor": "váltóvezeték",
+   "role": "K2",
+   "color": "szürke",
+   "label": "2b",
+   "section": "W2"
+  },
+  {
+   "id": "w14",
+   "from": "S2.C1",
+   "to": "KD.LK1",
+   "conductor": "kapcsolt fázis",
+   "role": "Lk",
+   "color": "fekete",
+   "label": "1",
+   "section": "W2"
+  },
+  {
+   "id": "w15",
+   "from": "S2.C2",
+   "to": "KD.LK2",
+   "conductor": "kapcsolt fázis",
+   "role": "Lk",
+   "color": "fekete",
+   "label": "2",
+   "section": "W2"
+  },
+  {
+   "id": "w16",
+   "from": "KD.LK1",
+   "to": "E1.L",
+   "conductor": "kapcsolt fázis",
+   "role": "Lk",
+   "color": "fekete",
+   "label": "1",
+   "section": "W3"
+  },
+  {
+   "id": "w17",
+   "from": "KD.N",
+   "to": "E1.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék",
+   "section": "W3"
+  },
+  {
+   "id": "w18",
+   "from": "KD.PE",
+   "to": "E1.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "W3"
+  },
+  {
+   "id": "w19",
+   "from": "KD.LK2",
+   "to": "E2.L",
+   "conductor": "kapcsolt fázis",
+   "role": "Lk",
+   "color": "fekete",
+   "label": "2",
+   "section": "W4"
+  },
+  {
+   "id": "w20",
+   "from": "KD.N2",
+   "to": "E2.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék",
+   "section": "W4"
+  },
+  {
+   "id": "w21",
+   "from": "KD.PE",
+   "to": "E2.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "W4"
+  },
+  {
+   "id": "x1",
+   "from": "T2.L",
+   "to": "KD.L2",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna",
+   "section": "W0b"
+  },
+  {
+   "id": "x1b",
+   "from": "KD.L2",
+   "to": "S1.C2",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna",
+   "section": "W1"
+  },
+  {
+   "id": "x2",
+   "from": "T2.N",
+   "to": "KD.N2",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék",
+   "section": "W0b"
+  },
+  {
+   "id": "x3",
+   "from": "T2.PE",
+   "to": "KD.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "W0b"
+  }
+ ],
+ "truthTable": [
+  {
+   "states": {
+    "S1.b1": "0",
+    "S1.b2": "0",
+    "S2.b1": "0",
+    "S2.b2": "0"
+   },
+   "lamps": {
+    "E1": true,
+    "E2": true
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "0",
+    "S1.b2": "0",
+    "S2.b1": "0",
+    "S2.b2": "1"
+   },
+   "lamps": {
+    "E1": true,
+    "E2": false
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "0",
+    "S1.b2": "0",
+    "S2.b1": "1",
+    "S2.b2": "0"
+   },
+   "lamps": {
+    "E1": false,
+    "E2": true
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "0",
+    "S1.b2": "0",
+    "S2.b1": "1",
+    "S2.b2": "1"
+   },
+   "lamps": {
+    "E1": false,
+    "E2": false
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "0",
+    "S1.b2": "1",
+    "S2.b1": "0",
+    "S2.b2": "0"
+   },
+   "lamps": {
+    "E1": true,
+    "E2": false
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "0",
+    "S1.b2": "1",
+    "S2.b1": "0",
+    "S2.b2": "1"
+   },
+   "lamps": {
+    "E1": true,
+    "E2": true
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "0",
+    "S1.b2": "1",
+    "S2.b1": "1",
+    "S2.b2": "0"
+   },
+   "lamps": {
+    "E1": false,
+    "E2": false
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "0",
+    "S1.b2": "1",
+    "S2.b1": "1",
+    "S2.b2": "1"
+   },
+   "lamps": {
+    "E1": false,
+    "E2": true
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "1",
+    "S1.b2": "0",
+    "S2.b1": "0",
+    "S2.b2": "0"
+   },
+   "lamps": {
+    "E1": false,
+    "E2": true
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "1",
+    "S1.b2": "0",
+    "S2.b1": "0",
+    "S2.b2": "1"
+   },
+   "lamps": {
+    "E1": false,
+    "E2": false
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "1",
+    "S1.b2": "0",
+    "S2.b1": "1",
+    "S2.b2": "0"
+   },
+   "lamps": {
+    "E1": true,
+    "E2": true
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "1",
+    "S1.b2": "0",
+    "S2.b1": "1",
+    "S2.b2": "1"
+   },
+   "lamps": {
+    "E1": true,
+    "E2": false
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "1",
+    "S1.b2": "1",
+    "S2.b1": "0",
+    "S2.b2": "0"
+   },
+   "lamps": {
+    "E1": false,
+    "E2": false
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "1",
+    "S1.b2": "1",
+    "S2.b1": "0",
+    "S2.b2": "1"
+   },
+   "lamps": {
+    "E1": false,
+    "E2": true
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "1",
+    "S1.b2": "1",
+    "S2.b1": "1",
+    "S2.b2": "0"
+   },
+   "lamps": {
+    "E1": true,
+    "E2": false
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "1",
+    "S1.b2": "1",
+    "S2.b1": "1",
+    "S2.b2": "1"
+   },
+   "lamps": {
+    "E1": true,
+    "E2": true
+   }
+  }
+ ],
+ "layout": {
+  "view": "bekotes",
+  "viewBox": "0 0 380 240",
+  "parts": {
+   "T": [
+    20,
+    40
+   ],
+   "KD": [
+    180,
+    40
+   ],
+   "S1": [
+    100,
+    190
+   ],
+   "S2": [
+    260,
+    190
+   ],
+   "E1": [
+    300,
+    30
+   ],
+   "E2": [
+    340,
+    80
+   ]
+  },
+  "megjegyzes": "Durva elhelyezés a Bekötés nézethez; a vezetékútvonalat (path) az ábramotor vagy a rajzoló adja."
+ }
+}

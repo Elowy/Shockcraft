@@ -2,12 +2,14 @@ import {boardName} from './board-size';
 import {labels,type Plan} from './plan';
 import {moduleLabels} from './board';
 import type {SearchResult} from './plan-tools';
+import {projectSizing,sizingContext,sizingTarget} from './sizing';
 
 export type CheckLevel='missing'|'review';
 export type PlanCheck={id:string;code:string;level:CheckLevel;title:string;detail:string;target:SearchResult};
 export const checkLevels={missing:'Hiányzó adat',review:'Átnézendő tétel'};
 /** Checks recorded data only; it does not infer electrical connections from overlapping lines. */
-export function checkPlan(plan:Plan):PlanCheck[]{
+/** `options.sizing`: a méretezési segédszámítás „nem felel meg” és „nem számítható” áramkörei is (a figyelmeztetések nem). */
+export function checkPlan(plan:Plan,options:{sizing?:boolean}={}):PlanCheck[]{
  const issues:PlanCheck[]=[];
  const add=(code:string,level:CheckLevel,title:string,detail:string,target:SearchResult)=>issues.push({id:code+':'+target.id,code,level,title,detail,target});
  for(const b of plan.buildings){
@@ -35,6 +37,15 @@ export function checkPlan(plan:Plan):PlanCheck[]{
   }
   for(const m of plan.modules.filter(m=>m.building===b.id)){
    if((m.type==='MCB'||m.type==='RCBO')&&!m.circuit)add('module-circuit','review','Áramkör nélküli védelmi készülék','Ha a készülék nem tartalék, rendeld a megfelelő áramkörhöz.',{id:m.id,type:'modules',buildingId:b.id,floorId:b.floors[0]?.id||'',title:m.name,subtitle:b.name+' / '+boardName(b,m.board)+' · '+moduleLabels[m.type]+' · '+(m.row+1)+'. sor',x:0,y:0});
+  }
+ }
+ if(options.sizing){
+  const ctx=sizingContext(plan);
+  for(const {results} of projectSizing(plan))for(const r of results){
+   if(r.status!=='fail'&&r.status!=='na')continue;
+   const target=sizingTarget(plan,r.circuitId,ctx);if(!target)continue;
+   const fail=r.status==='fail',detail=r.checks.filter(c=>c.status===r.status&&!(c.code==='i2'&&r.checks.some(o=>o.code==='overload'&&o.status===c.status))).slice(0,2).map(c=>c.title+': '+(c.detail||c.calculation)).join(' ');
+   add(fail?'sizing-fail':'sizing-na',fail?'review':'missing',fail?'Méretezési segédszámítás: nem felel meg':'Méretezési segédszámítás: nem számítható',(detail?detail+' ':'')+'Részletek: Eszközök → Méretezés.',target);
   }
  }
  return issues.sort((a,b)=>Number(a.level==='review')-Number(b.level==='review')||a.target.subtitle.localeCompare(b.target.subtitle,'hu')||a.target.title.localeCompare(b.target.title,'hu')||a.code.localeCompare(b.code));

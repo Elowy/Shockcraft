@@ -1,4 +1,4 @@
-# ShockCraft – telepítési útmutató
+# Villanyrajz – telepítési útmutató
 
 Node.js-t támogató tárhelyhez és Linux VPS-hez. Frissítve: 2026. október 2.
 
@@ -12,7 +12,7 @@ Használat: [Háttéralaprajz és méretarány](hatteralaprajz.md).
 
 ## 1. Mire lesz szükség?
 
-A ShockCraft szerveroldali webalkalmazás. A felület mellett saját regisztrációt, munkameneteket és tervmentést szolgál ki. Egy egyszerű, csak fájlfeltöltésre vagy PHP-ra alkalmas tárhely nem elegendő.
+A Villanyrajz szerveroldali webalkalmazás. A technikai nevek (környezeti változók, szolgáltatásnév, útvonalak, adatbázisnév) a meglévő telepítésekkel való kompatibilitás miatt a korábbi ShockCraft nevet őrzik. A felület mellett saját regisztrációt, munkameneteket és tervmentést szolgál ki. Egy egyszerű, csak fájlfeltöltésre vagy PHP-ra alkalmas tárhely nem elegendő.
 
 - Node.js 22.13 vagy újabb támogatott kiadás, npm és terminál/SSH vagy tárhelyes build lehetőség. A helyi ellenőrzés Node.js 24 alatt történt.
 - MySQL 8.0 vagy újabb adatbázis, külön adatbázis-felhasználóval.
@@ -75,7 +75,7 @@ A GET /api/health végpont 200 és status: ok választ ad elérhető adatbázisn
 
 A szolgáltató kezelőfelületén a következő beállításokat keresd:
 
-- Alkalmazás gyökere: a teljes ShockCraft projekt könyvtára.
+- Alkalmazás gyökere: a Villanyrajz forráskódjának gyökérkönyvtára (ahol a package.json található).
 - Node.js verzió: legalább 22.13; a tárhely által támogatott megfelelő kiadás.
 - Telepítés: npm ci --include=dev --include=optional.
 - Build parancs: npm run build:node.
@@ -92,6 +92,8 @@ A proxy őrizze meg a valódi Host fejlécet, és állítsa felül az X-Real-IP 
 A DNS-ben irányítsd a választott aldomaint a VPS-re. Telepíts érvényes HTTPS-tanúsítványt a szolgáltatód vagy az általad választott ACME-kliens útmutatója szerint. A deploy/nginx.conf kész mintát tartalmaz; a domain és a tanúsítványútvonal átírandó. Tanúsítvány nélkül a TLS-es blokk nem indul el.
 
 Az Nginx lényege: a 443-as HTTPS-kérések továbbítása a 127.0.0.1:3000 címre. A böngésző az Nginxet éri el. A Node-port ne legyen nyilvánosan elérhető. A mintában a proxy megőrzi a Host fejlécet, felülírja az IP-fejléceket, nem gyorsítótáraz, és nem puffereli az alkalmazás válaszait. A 3 MB-os kéréskorlát mellett az alkalmazás továbbra is legfeljebb 2 MB-os tervet fogad.
+
+A `proxy_cache` maradjon `off`, és Cloudflare mögött se legyen „Cache Everything” vagy edge-TTL szabály a `/api/*` és a `/megosztas` útvonalon: a megosztott terv és a fiókadatok soha nem kerülhetnek közös gyorsítótárba. A megosztott oldal fejléceit telepítés után `curl -sI https://<domain>/megosztas` paranccsal ellenőrizd: `Cache-Control: no-store`, `X-Frame-Options: DENY`, `Content-Security-Policy` (`frame-ancestors 'none'`), `Referrer-Policy: no-referrer` és `X-Robots-Tag: noindex` várható (részletek: [tervmegosztás](tervmegosztas.md)).
 
 A sablon telepítése után az Nginx beállítását ellenőrizd, és csak sikeres ellenőrzés után töltsd újra:
 
@@ -148,7 +150,7 @@ Mivel még nincs MySQL-szervered, a valódi MySQL-kapcsolatot, a cél tárhelyet
 
 Jelenleg nincs e-mailes címellenőrzés vagy elfelejtettjelszó-levélküldés. Felhasználónként több külön projekt menthető és nyitható meg. A kimutatás a rajzolt geometria alapján számol; nem végez villamos méretezést.
 
-Hivatalos műszaki háttér: a Node.js env-file beállítása, a vinext standalone kimenete és az Nginx proxy-beállításai. Az útmutatóban szereplő alkalmazásparancsok a ShockCraft csomag saját parancsai.
+Hivatalos műszaki háttér: a Node.js env-file beállítása, a vinext standalone kimenete és az Nginx proxy-beállításai. Az útmutatóban szereplő alkalmazásparancsok a Villanyrajz alkalmazás (npm-csomag) saját parancsai.
 
 - Node.js: https://nodejs.org/api/cli.html#--env-filefile
 - vinext: https://github.com/cloudflare/vinext

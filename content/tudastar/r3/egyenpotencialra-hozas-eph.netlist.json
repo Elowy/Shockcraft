@@ -1,0 +1,761 @@
+{
+ "format": "kb-netlista/1",
+ "id": "eph-alapok",
+ "title": "Egyenpotenciálra hozás: a fő EPH-sín és a vízvezeték bekötése (TN-C-S)",
+ "short": "EPH",
+ "article": "egyenpotencialra-hozas-eph",
+ "figure": "abra-1",
+ "version": 1,
+ "note": "Tervezet a szakmai lektornak (R3). Elvi rajz: a táppont az elosztói engedélyes transzformátora, a hálózat és a csatlakozás az elosztói engedélyes hatásköre; a rajz nem szerelési utasítás. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A keresztmetszet, a túláramvédelem névleges árama és a földelési ellenállás méretezés kérdése, ezért az ábra nem ad számot. A hibahely (testzárlat) és az érintési pont jelképes, nem szerelt vezeték. A táblázat a hiba fennállásának pillanatát mutatja, a lekapcsolás előtt. A fém vízvezeték az épületbe a talajból lép be, ezért a szimulációban a talajjal is érintkezik. A gázvezeték bekötését az elosztói és a gázszolgáltatói előírások szabályozzák; az ábra nem mutatja.",
+ "earthing": {
+  "system": "TN-C-S"
+ },
+ "components": [
+  {
+   "id": "TR",
+   "type": "tap",
+   "label": "T1 elosztói transzformátor, kisfeszültségű tekercs",
+   "short": "T1",
+   "at": "TR",
+   "terminals": [
+    {
+     "id": "L1",
+     "role": "L1",
+     "label": "L1"
+    },
+    {
+     "id": "L2",
+     "role": "L2",
+     "label": "L2"
+    },
+    {
+     "id": "L3",
+     "role": "L3",
+     "label": "L3"
+    },
+    {
+     "id": "PEN",
+     "role": "PEN",
+     "label": "csillagpont (PEN)"
+    }
+   ]
+  },
+  {
+   "id": "RB",
+   "type": "foldelo",
+   "label": "RB üzemi földelő (a csillagpont földelése)",
+   "short": "RB",
+   "at": "TR",
+   "kind": "uzemi",
+   "terminals": [
+    {
+     "id": "K",
+     "role": "FK",
+     "label": "földelőkapocs"
+    }
+   ]
+  },
+  {
+   "id": "PSZ",
+   "type": "pen-szetvalaszto",
+   "label": "PSZ PEN-szétválasztási pont (PE-sín és N-sín, összekötő híddal)",
+   "short": "PSZ",
+   "at": "EL",
+   "terminals": [
+    {
+     "id": "PEN",
+     "role": "PEN",
+     "label": "PEN (érkező)"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N-sín"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE-sín"
+    }
+   ],
+   "bridges": [
+    [
+     "PEN",
+     "N",
+     "PE"
+    ]
+   ]
+  },
+  {
+   "id": "MET",
+   "type": "fofoldelo-sin",
+   "label": "Fő EPH-sín (főföldelő sín)",
+   "short": "fő EPH-sín",
+   "at": "EL",
+   "terminals": [
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "gyűjtőkapocs"
+    }
+   ]
+  },
+  {
+   "id": "RA",
+   "type": "foldelo",
+   "label": "RA alapföldelő",
+   "short": "RA",
+   "at": "EL",
+   "kind": "vedo",
+   "terminals": [
+    {
+     "id": "K",
+     "role": "FK",
+     "label": "földelőkapocs"
+    }
+   ]
+  },
+  {
+   "id": "VIZ",
+   "type": "idegen",
+   "label": "VIZ fém vízvezeték (idegen vezetőképes rész)",
+   "short": "vízvezeték",
+   "at": "VIZ",
+   "earthContact": true,
+   "bonded": true,
+   "terminals": [
+    {
+     "id": "K",
+     "role": "idegen",
+     "label": "csőbilincs (EPH-kötés)"
+    }
+   ]
+  },
+  {
+   "id": "Q1",
+   "type": "fi-rele",
+   "label": "Q1 áram-védőkapcsoló (FI-relé), kétpólusú",
+   "short": "Q1",
+   "at": "EL",
+   "poles": [
+    [
+     "1",
+     "2"
+    ],
+    [
+     "N-be",
+     "N-ki"
+    ]
+   ],
+   "terminals": [
+    {
+     "id": "1",
+     "role": "L",
+     "label": "1 (fázis, táp oldal)"
+    },
+    {
+     "id": "2",
+     "role": "L",
+     "label": "2 (fázis, védett oldal)"
+    },
+    {
+     "id": "N-be",
+     "role": "N",
+     "label": "N (táp oldal)"
+    },
+    {
+     "id": "N-ki",
+     "role": "N",
+     "label": "N (védett oldal)"
+    }
+   ],
+   "states": [
+    {
+     "name": "be",
+     "label": "bekapcsolva",
+     "connect": [
+      [
+       "1",
+       "2"
+      ],
+      [
+       "N-be",
+       "N-ki"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "F1",
+   "type": "kismegszakito",
+   "label": "F1 kismegszakító (túláramvédelem)",
+   "short": "F1",
+   "at": "EL",
+   "terminals": [
+    {
+     "id": "1",
+     "role": "L",
+     "label": "1 (be)"
+    },
+    {
+     "id": "2",
+     "role": "L",
+     "label": "2 (ki)"
+    }
+   ],
+   "states": [
+    {
+     "name": "be",
+     "label": "bekapcsolva",
+     "connect": [
+      [
+       "1",
+       "2"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "M1",
+   "type": "fogyaszto",
+   "label": "M1 fémházas mosógép (I. érintésvédelmi osztály)",
+   "outputLabel": "M1 fogyasztó",
+   "at": "M1",
+   "class": "I",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "fémház (PE)"
+    }
+   ]
+  },
+  {
+   "id": "H1",
+   "type": "hibaut",
+   "label": "H1 testzárlat M1-ben (fázis → fémház)",
+   "at": "M1",
+   "outputLabel": "H1: hibaáram útja",
+   "terminals": [
+    {
+     "id": "a",
+     "role": "L",
+     "label": "fázisoldali hibahely"
+    },
+    {
+     "id": "b",
+     "role": "PE",
+     "label": "fémház"
+    }
+   ],
+   "states": [
+    {
+     "name": "nincs",
+     "active": false
+    },
+    {
+     "name": "fennáll",
+     "active": true
+    }
+   ]
+  },
+  {
+   "id": "FOLD",
+   "type": "fold",
+   "label": "Föld (talaj)",
+   "at": "FOLD",
+   "terminals": [
+    {
+     "id": "E",
+     "role": "E",
+     "label": "föld"
+    }
+   ]
+  }
+ ],
+ "sections": [
+  {
+   "id": "S1",
+   "from": "TR",
+   "to": "EL",
+   "label": "Elosztói hálózat és csatlakozás (az engedélyes hatásköre)",
+   "kind": "halozat"
+  },
+  {
+   "id": "S2",
+   "from": "EL",
+   "to": "M1",
+   "label": "Fogyasztói áramkör",
+   "kind": "aramkor"
+  },
+  {
+   "id": "S3",
+   "from": "EL",
+   "to": "VIZ",
+   "label": "Fő EPH-vezető a vízvezetékhez",
+   "kind": "eph"
+  }
+ ],
+ "wires": [
+  {
+   "id": "w1",
+   "from": "TR.PEN",
+   "to": "RB.K",
+   "conductor": "földelővezető",
+   "role": "PE",
+   "color": "zöld-sárga"
+  },
+  {
+   "id": "w2",
+   "from": "TR.L1",
+   "to": "Q1.1",
+   "conductor": "L1",
+   "role": "L1",
+   "color": "barna",
+   "section": "S1"
+  },
+  {
+   "id": "w3",
+   "from": "TR.PEN",
+   "to": "PSZ.PEN",
+   "conductor": "PEN",
+   "role": "PEN",
+   "color": "zöld-sárga",
+   "section": "S1"
+  },
+  {
+   "id": "w4",
+   "from": "PSZ.N",
+   "to": "Q1.N-be",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék"
+  },
+  {
+   "id": "w5",
+   "from": "PSZ.PE",
+   "to": "MET.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "label": "(fő védővezető)"
+  },
+  {
+   "id": "w6",
+   "from": "MET.PE",
+   "to": "RA.K",
+   "conductor": "földelővezető",
+   "role": "PE",
+   "color": "zöld-sárga"
+  },
+  {
+   "id": "w7",
+   "from": "MET.PE",
+   "to": "VIZ.K",
+   "conductor": "EPH-vezető",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "S3"
+  },
+  {
+   "id": "w8",
+   "from": "Q1.2",
+   "to": "F1.1",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna"
+  },
+  {
+   "id": "w9",
+   "from": "F1.2",
+   "to": "M1.L",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna",
+   "section": "S2"
+  },
+  {
+   "id": "w10",
+   "from": "Q1.N-ki",
+   "to": "M1.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék",
+   "section": "S2"
+  },
+  {
+   "id": "w11",
+   "from": "MET.PE",
+   "to": "M1.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "S2"
+  },
+  {
+   "id": "w12",
+   "from": "H1.a",
+   "to": "M1.L",
+   "conductor": "hibahely"
+  },
+  {
+   "id": "w13",
+   "from": "H1.b",
+   "to": "M1.PE",
+   "conductor": "hibahely"
+  }
+ ],
+ "breaks": [
+  {
+   "id": "EPH1",
+   "label": "EPH1 a vízvezeték EPH-bekötése",
+   "wire": "w7",
+   "states": [
+    {
+     "name": "bekötve"
+    },
+    {
+     "name": "hiányzik",
+     "broken": true
+    }
+   ]
+  },
+  {
+   "id": "SZ",
+   "label": "SZ PEN-szakadás a hálózatban",
+   "wire": "w3",
+   "states": [
+    {
+     "name": "ép"
+    },
+    {
+     "name": "szakadt",
+     "broken": true
+    }
+   ]
+  }
+ ],
+ "touch": [
+  {
+   "id": "U1",
+   "label": "M1 fémháza és a vízcsap",
+   "a": "M1.PE",
+   "b": "VIZ.K"
+  },
+  {
+   "id": "U2",
+   "label": "M1 fémháza és a föld",
+   "a": "M1.PE",
+   "b": "FOLD.E"
+  }
+ ],
+ "truthTable": [
+  {
+   "states": {
+    "Q1": "be",
+    "F1": "be",
+    "H1": "nincs",
+    "EPH1": "bekötve",
+    "SZ": "ép"
+   },
+   "lamps": {
+    "M1": true
+   },
+   "consumers": {
+    "M1": "mukodik"
+   },
+   "loops": {
+    "H1": "nincs-hiba"
+   },
+   "trips": {
+    "Q1": false
+   },
+   "overcurrent": {
+    "F1": false
+   },
+   "touch": {
+    "U1": "nincs",
+    "U2": "nincs"
+   }
+  },
+  {
+   "states": {
+    "Q1": "be",
+    "F1": "be",
+    "H1": "nincs",
+    "EPH1": "bekötve",
+    "SZ": "szakadt"
+   },
+   "lamps": {
+    "M1": false
+   },
+   "consumers": {
+    "M1": "rendellenes"
+   },
+   "loops": {
+    "H1": "nincs-hiba"
+   },
+   "trips": {
+    "Q1": false
+   },
+   "overcurrent": {
+    "F1": false
+   },
+   "touch": {
+    "U1": "nincs",
+    "U2": "tartosan"
+   }
+  },
+  {
+   "states": {
+    "Q1": "be",
+    "F1": "be",
+    "H1": "nincs",
+    "EPH1": "hiányzik",
+    "SZ": "ép"
+   },
+   "lamps": {
+    "M1": true
+   },
+   "consumers": {
+    "M1": "mukodik"
+   },
+   "loops": {
+    "H1": "nincs-hiba"
+   },
+   "trips": {
+    "Q1": false
+   },
+   "overcurrent": {
+    "F1": false
+   },
+   "touch": {
+    "U1": "nincs",
+    "U2": "nincs"
+   }
+  },
+  {
+   "states": {
+    "Q1": "be",
+    "F1": "be",
+    "H1": "nincs",
+    "EPH1": "hiányzik",
+    "SZ": "szakadt"
+   },
+   "lamps": {
+    "M1": false
+   },
+   "consumers": {
+    "M1": "rendellenes"
+   },
+   "loops": {
+    "H1": "nincs-hiba"
+   },
+   "trips": {
+    "Q1": false
+   },
+   "overcurrent": {
+    "F1": false
+   },
+   "touch": {
+    "U1": "tartosan",
+    "U2": "tartosan"
+   }
+  },
+  {
+   "states": {
+    "Q1": "be",
+    "F1": "be",
+    "H1": "fennáll",
+    "EPH1": "bekötve",
+    "SZ": "ép"
+   },
+   "lamps": {
+    "M1": true
+   },
+   "consumers": {
+    "M1": "mukodik"
+   },
+   "loops": {
+    "H1": "femes"
+   },
+   "trips": {
+    "Q1": true
+   },
+   "overcurrent": {
+    "F1": true
+   },
+   "touch": {
+    "U1": "lekapcsolasig",
+    "U2": "lekapcsolasig"
+   }
+  },
+  {
+   "states": {
+    "Q1": "be",
+    "F1": "be",
+    "H1": "fennáll",
+    "EPH1": "bekötve",
+    "SZ": "szakadt"
+   },
+   "lamps": {
+    "M1": false
+   },
+   "consumers": {
+    "M1": "rendellenes"
+   },
+   "loops": {
+    "H1": "fold"
+   },
+   "trips": {
+    "Q1": true
+   },
+   "overcurrent": {
+    "F1": false
+   },
+   "touch": {
+    "U1": "lekapcsolasig",
+    "U2": "lekapcsolasig"
+   }
+  },
+  {
+   "states": {
+    "Q1": "be",
+    "F1": "be",
+    "H1": "fennáll",
+    "EPH1": "hiányzik",
+    "SZ": "ép"
+   },
+   "lamps": {
+    "M1": true
+   },
+   "consumers": {
+    "M1": "mukodik"
+   },
+   "loops": {
+    "H1": "femes"
+   },
+   "trips": {
+    "Q1": true
+   },
+   "overcurrent": {
+    "F1": true
+   },
+   "touch": {
+    "U1": "lekapcsolasig",
+    "U2": "lekapcsolasig"
+   }
+  },
+  {
+   "states": {
+    "Q1": "be",
+    "F1": "be",
+    "H1": "fennáll",
+    "EPH1": "hiányzik",
+    "SZ": "szakadt"
+   },
+   "lamps": {
+    "M1": false
+   },
+   "consumers": {
+    "M1": "rendellenes"
+   },
+   "loops": {
+    "H1": "fold"
+   },
+   "trips": {
+    "Q1": true
+   },
+   "overcurrent": {
+    "F1": false
+   },
+   "touch": {
+    "U1": "lekapcsolasig",
+    "U2": "lekapcsolasig"
+   }
+  }
+ ],
+ "places": {
+  "TR": {
+   "label": "Transzformátorállomás (elosztói engedélyes)",
+   "inner": "a táppontnál"
+  },
+  "EL": {
+   "label": "Épület: csatlakozás, PEN-szétválasztás, fő EPH-sín, elosztó",
+   "inner": "elosztón belül"
+  },
+  "M1": {
+   "label": "Fogyasztó",
+   "inner": "a fogyasztó csatlakozásánál"
+  },
+  "FOLD": {
+   "label": "Föld (talaj)"
+  },
+  "VIZ": {
+   "label": "Vízvezeték (belépés és csaptelep)"
+  }
+ },
+ "layout": {
+  "view": "bekotes",
+  "viewBox": "0 0 500 260",
+  "parts": {
+   "TR": [
+    20,
+    40
+   ],
+   "RB": [
+    20,
+    200
+   ],
+   "PSZ": [
+    170,
+    110
+   ],
+   "MET": [
+    170,
+    170
+   ],
+   "RA": [
+    170,
+    230
+   ],
+   "VIZ": [
+    420,
+    210
+   ],
+   "Q1": [
+    170,
+    40
+   ],
+   "F1": [
+    250,
+    40
+   ],
+   "M1": [
+    400,
+    60
+   ],
+   "H1": [
+    450,
+    100
+   ],
+   "FOLD": [
+    300,
+    245
+   ]
+  },
+  "megjegyzes": "Durva elhelyezés; az útvonalakat az ábramotor adja."
+ }
+}

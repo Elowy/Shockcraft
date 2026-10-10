@@ -48,8 +48,8 @@ const movable=structuredClone(p);movable.boardWires=[];movable.modules.at(-1)!.c
 const font=readFileSync('public/fonts/NotoSans-Regular.ttf').toString('base64');
 const mainPdf=createPlanPdf(p,{scope:'board',paper:'a4',buildingId:'house',floorId:'ground'},font);
 const subPdf=createPlanPdf(p,{scope:'board',paper:'a4',buildingId:'house',floorId:'ground',boardId:'sub'},font);
-assert.equal(mainPdf.getNumberOfPages(),4);assert.equal(subPdf.getNumberOfPages(),5);
+assert.equal(mainPdf.getNumberOfPages(),5);assert.equal(subPdf.getNumberOfPages(),6);
 const all=createPlanPdf(p,{scope:'all',paper:'a4',buildingId:'house',floorId:'ground'},font);
 const oldAll=createPlanPdf(validatePlan(seed),{scope:'all',paper:'a4',buildingId:'house',floorId:'ground'},font);
-assert.equal(all.getNumberOfPages()-oldAll.getNumberOfPages(),11,'all export includes sub-board layout, registers and both schematics');
+assert.equal(all.getNumberOfPages()-oldAll.getNumberOfPages(),12,'all export includes sub-board layout, registers, phase load and both schematics');
 console.log('PASS: legacy compatibility, independent board sizing/slots/circuits/wires, invalid references, cross-board guards, panel links, search, round-trip persistence, movement/deletion guards and PDF pagination.');

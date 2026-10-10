@@ -1,4 +1,4 @@
-# ShockCraft – Számlázz.hu automatikus számlázás
+# Villanyrajz – Számlázz.hu automatikus számlázás
 
 2026. szeptember 29.
 
@@ -8,7 +8,7 @@ Az integráció a kifizetett **3 490 Ft-os projekthelyhez**, valamint a **2 490 
 
 1. A Számlázz.hu-fiókban ellenőrizd az eladó hivatalos adatait, az AAM adózást, az e-számlázási és NAV-beállításokat, valamint a Számla Agent jogosultságot. Az eladó adatait a számlázó saját fiókjából veszi, nem az oldal kapcsolatfelvételi blokkjából.
 2. Kapcsold be a Számlázz.hu **Rendelésszám ismétlődés tiltása** funkcióját minden használt fiókban. Ez az alkalmazás saját védelmét kiegészíti.
-3. Jelentkezz be a kijelölt ShockCraft-adminfiókkal. A `/admin` oldalon keresd a **Számlázz.hu · automatikus számlázás** részt.
+3. Jelentkezz be a kijelölt Villanyrajz-adminfiókkal. A `/admin` oldalon keresd a **Számlázz.hu · automatikus számlázás** részt.
 4. A **tesztfiók Agent-kulcsát** és az **éles fiók Agent-kulcsát** a megfelelő külön mezőbe írd. A tesztmezőbe is beírt éles kulcs valódi számlát készíthet: a program a kulcsból nem tudja felismerni a fiók típusát. A Stripe tesztüzem kizárólag a tesztmezőt használja, soha nem helyettesíti azt az éles kulccsal.
 5. A számlaszám-előtag opcionális; csak a Számlázz.hu-ban beállított előtagot használd. A válaszcím alapértéke `info@luiz-tech.hu`.
 6. Jelöld, hogy a rendelésszám-ismétlődés tiltását bekapcsoltad, engedélyezd az automatikus számlázást és ments. A mentés önmagában nem ellenőrzi a külső fiókot és nem állít ki számlát. Az üres kulcsmező megtartja a korábban mentett kulcsot.

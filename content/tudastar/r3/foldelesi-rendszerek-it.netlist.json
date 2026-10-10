@@ -1,0 +1,737 @@
+{
+ "format": "kb-netlista/1",
+ "id": "foldeles-it",
+ "title": "IT rendszer: földeletlen táppont, földelt fémházak",
+ "short": "IT",
+ "article": "foldelesi-rendszerek",
+ "figure": "abra-5",
+ "version": 1,
+ "note": "Tervezet a szakmai lektornak (R3). Elvi rajz: a táppont az elosztói engedélyes transzformátora, a hálózat és a csatlakozás az elosztói engedélyes hatásköre; a rajz nem szerelési utasítás. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A keresztmetszet, a túláramvédelem névleges árama és a földelési ellenállás méretezés kérdése, ezért az ábra nem ad számot. A hibahely (testzárlat) és az érintési pont jelképes, nem szerelt vezeték. A táblázat a hiba fennállásának pillanatát mutatja, a lekapcsolás előtt. IT-rendszer jellemzően saját transzformátorral készül (például ipari üzemben vagy kórházi helyiségben); a nullavezetőt itt nem vezetik ki. A szigetelésfigyelő megfigyelő elem: a szimulációban nem vezet.",
+ "earthing": {
+  "system": "IT"
+ },
+ "components": [
+  {
+   "id": "TR",
+   "type": "tap",
+   "label": "T1 transzformátor (IT-táppont), kisfeszültségű tekercs",
+   "short": "T1",
+   "at": "TR",
+   "terminals": [
+    {
+     "id": "L1",
+     "role": "L1",
+     "label": "L1"
+    },
+    {
+     "id": "L2",
+     "role": "L2",
+     "label": "L2"
+    },
+    {
+     "id": "L3",
+     "role": "L3",
+     "label": "L3"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "csillagpont (N)"
+    }
+   ]
+  },
+  {
+   "id": "SZF",
+   "type": "szigetelesfigyelo",
+   "label": "SZF szigetelésfigyelő",
+   "short": "SZF szigetelésfigyelő",
+   "at": "TR",
+   "terminals": [
+    {
+     "id": "A",
+     "role": "L1",
+     "label": "mérőkapocs a hálózaton"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ]
+  },
+  {
+   "id": "XPE",
+   "type": "pe-sin",
+   "label": "PE-sín",
+   "at": "TR",
+   "terminals": [
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ]
+  },
+  {
+   "id": "RA",
+   "type": "foldelo",
+   "label": "RA védőföldelő (a fémházak közös földelője)",
+   "short": "RA",
+   "at": "TR",
+   "kind": "vedo",
+   "terminals": [
+    {
+     "id": "K",
+     "role": "FK",
+     "label": "földelőkapocs"
+    }
+   ]
+  },
+  {
+   "id": "Q1",
+   "type": "kismegszakito",
+   "label": "Q1 háromfázisú kismegszakító (M1)",
+   "short": "Q1",
+   "at": "TR",
+   "terminals": [
+    {
+     "id": "1",
+     "role": "L1",
+     "label": "1 (L1 be)"
+    },
+    {
+     "id": "2",
+     "role": "L1",
+     "label": "2 (L1 ki)"
+    },
+    {
+     "id": "3",
+     "role": "L2",
+     "label": "3 (L2 be)"
+    },
+    {
+     "id": "4",
+     "role": "L2",
+     "label": "4 (L2 ki)"
+    },
+    {
+     "id": "5",
+     "role": "L3",
+     "label": "5 (L3 be)"
+    },
+    {
+     "id": "6",
+     "role": "L3",
+     "label": "6 (L3 ki)"
+    }
+   ],
+   "states": [
+    {
+     "name": "be",
+     "label": "bekapcsolva",
+     "connect": [
+      [
+       "1",
+       "2"
+      ],
+      [
+       "3",
+       "4"
+      ],
+      [
+       "5",
+       "6"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "Q2",
+   "type": "kismegszakito",
+   "label": "Q2 háromfázisú kismegszakító (M2)",
+   "short": "Q2",
+   "at": "TR",
+   "terminals": [
+    {
+     "id": "1",
+     "role": "L1",
+     "label": "1 (L1 be)"
+    },
+    {
+     "id": "2",
+     "role": "L1",
+     "label": "2 (L1 ki)"
+    },
+    {
+     "id": "3",
+     "role": "L2",
+     "label": "3 (L2 be)"
+    },
+    {
+     "id": "4",
+     "role": "L2",
+     "label": "4 (L2 ki)"
+    },
+    {
+     "id": "5",
+     "role": "L3",
+     "label": "5 (L3 be)"
+    },
+    {
+     "id": "6",
+     "role": "L3",
+     "label": "6 (L3 ki)"
+    }
+   ],
+   "states": [
+    {
+     "name": "be",
+     "label": "bekapcsolva",
+     "connect": [
+      [
+       "1",
+       "2"
+      ],
+      [
+       "3",
+       "4"
+      ],
+      [
+       "5",
+       "6"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "M1",
+   "type": "fogyaszto",
+   "label": "M1 háromfázisú fémházas fogyasztó",
+   "outputLabel": "M1 fogyasztó",
+   "at": "M1",
+   "class": "I",
+   "terminals": [
+    {
+     "id": "L1",
+     "role": "L1",
+     "label": "L1"
+    },
+    {
+     "id": "L2",
+     "role": "L2",
+     "label": "L2"
+    },
+    {
+     "id": "L3",
+     "role": "L3",
+     "label": "L3"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "fémház (PE)"
+    }
+   ]
+  },
+  {
+   "id": "M2",
+   "type": "fogyaszto",
+   "label": "M2 háromfázisú fémházas fogyasztó",
+   "outputLabel": "M2 fogyasztó",
+   "at": "M2",
+   "class": "I",
+   "terminals": [
+    {
+     "id": "L1",
+     "role": "L1",
+     "label": "L1"
+    },
+    {
+     "id": "L2",
+     "role": "L2",
+     "label": "L2"
+    },
+    {
+     "id": "L3",
+     "role": "L3",
+     "label": "L3"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "fémház (PE)"
+    }
+   ]
+  },
+  {
+   "id": "H1",
+   "type": "hibaut",
+   "label": "H1 testzárlat M1-ben (L1 → fémház)",
+   "at": "M1",
+   "outputLabel": "H1: hibaáram útja",
+   "terminals": [
+    {
+     "id": "a",
+     "role": "L1",
+     "label": "fázisoldali hibahely"
+    },
+    {
+     "id": "b",
+     "role": "PE",
+     "label": "fémház"
+    }
+   ],
+   "states": [
+    {
+     "name": "nincs",
+     "active": false
+    },
+    {
+     "name": "fennáll",
+     "active": true
+    }
+   ]
+  },
+  {
+   "id": "H2",
+   "type": "hibaut",
+   "label": "H2 testzárlat M2-ben (L2 → fémház)",
+   "at": "M2",
+   "outputLabel": "H2: hibaáram útja",
+   "terminals": [
+    {
+     "id": "a",
+     "role": "L2",
+     "label": "fázisoldali hibahely"
+    },
+    {
+     "id": "b",
+     "role": "PE",
+     "label": "fémház"
+    }
+   ],
+   "states": [
+    {
+     "name": "nincs",
+     "active": false
+    },
+    {
+     "name": "fennáll",
+     "active": true
+    }
+   ]
+  },
+  {
+   "id": "FOLD",
+   "type": "fold",
+   "label": "Föld (talaj)",
+   "at": "FOLD",
+   "terminals": [
+    {
+     "id": "E",
+     "role": "E",
+     "label": "föld"
+    }
+   ]
+  }
+ ],
+ "sections": [
+  {
+   "id": "S1",
+   "from": "TR",
+   "to": "M1",
+   "label": "Áramkör M1-hez",
+   "kind": "aramkor"
+  },
+  {
+   "id": "S2",
+   "from": "TR",
+   "to": "M2",
+   "label": "Áramkör M2-höz",
+   "kind": "aramkor"
+  }
+ ],
+ "wires": [
+  {
+   "id": "w1",
+   "from": "TR.L1",
+   "to": "SZF.A",
+   "conductor": "L1",
+   "role": "L1",
+   "color": "barna"
+  },
+  {
+   "id": "w2",
+   "from": "SZF.PE",
+   "to": "XPE.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga"
+  },
+  {
+   "id": "w3",
+   "from": "XPE.PE",
+   "to": "RA.K",
+   "conductor": "földelővezető",
+   "role": "PE",
+   "color": "zöld-sárga"
+  },
+  {
+   "id": "w4",
+   "from": "TR.L1",
+   "to": "Q1.1",
+   "conductor": "L1",
+   "role": "L1",
+   "color": "barna"
+  },
+  {
+   "id": "w5",
+   "from": "TR.L2",
+   "to": "Q1.3",
+   "conductor": "L2",
+   "role": "L2",
+   "color": "fekete"
+  },
+  {
+   "id": "w6",
+   "from": "TR.L3",
+   "to": "Q1.5",
+   "conductor": "L3",
+   "role": "L3",
+   "color": "szürke"
+  },
+  {
+   "id": "w7",
+   "from": "TR.L1",
+   "to": "Q2.1",
+   "conductor": "L1",
+   "role": "L1",
+   "color": "barna"
+  },
+  {
+   "id": "w8",
+   "from": "TR.L2",
+   "to": "Q2.3",
+   "conductor": "L2",
+   "role": "L2",
+   "color": "fekete"
+  },
+  {
+   "id": "w9",
+   "from": "TR.L3",
+   "to": "Q2.5",
+   "conductor": "L3",
+   "role": "L3",
+   "color": "szürke"
+  },
+  {
+   "id": "w10",
+   "from": "Q1.2",
+   "to": "M1.L1",
+   "conductor": "L1",
+   "role": "L1",
+   "color": "barna",
+   "section": "S1"
+  },
+  {
+   "id": "w11",
+   "from": "Q1.4",
+   "to": "M1.L2",
+   "conductor": "L2",
+   "role": "L2",
+   "color": "fekete",
+   "section": "S1"
+  },
+  {
+   "id": "w12",
+   "from": "Q1.6",
+   "to": "M1.L3",
+   "conductor": "L3",
+   "role": "L3",
+   "color": "szürke",
+   "section": "S1"
+  },
+  {
+   "id": "w13",
+   "from": "XPE.PE",
+   "to": "M1.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "S1"
+  },
+  {
+   "id": "w14",
+   "from": "Q2.2",
+   "to": "M2.L1",
+   "conductor": "L1",
+   "role": "L1",
+   "color": "barna",
+   "section": "S2"
+  },
+  {
+   "id": "w15",
+   "from": "Q2.4",
+   "to": "M2.L2",
+   "conductor": "L2",
+   "role": "L2",
+   "color": "fekete",
+   "section": "S2"
+  },
+  {
+   "id": "w16",
+   "from": "Q2.6",
+   "to": "M2.L3",
+   "conductor": "L3",
+   "role": "L3",
+   "color": "szürke",
+   "section": "S2"
+  },
+  {
+   "id": "w17",
+   "from": "XPE.PE",
+   "to": "M2.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "S2"
+  },
+  {
+   "id": "w18",
+   "from": "H1.a",
+   "to": "M1.L1",
+   "conductor": "hibahely"
+  },
+  {
+   "id": "w19",
+   "from": "H1.b",
+   "to": "M1.PE",
+   "conductor": "hibahely"
+  },
+  {
+   "id": "w20",
+   "from": "H2.a",
+   "to": "M2.L2",
+   "conductor": "hibahely"
+  },
+  {
+   "id": "w21",
+   "from": "H2.b",
+   "to": "M2.PE",
+   "conductor": "hibahely"
+  }
+ ],
+ "touch": [
+  {
+   "id": "U1",
+   "label": "M1 fémháza és a föld",
+   "a": "M1.PE",
+   "b": "FOLD.E"
+  }
+ ],
+ "compare": [
+  {
+   "label": "Első testzárlat",
+   "states": {
+    "H1": "fennáll"
+   }
+  },
+  {
+   "label": "Második testzárlat másik fázison",
+   "states": {
+    "H1": "fennáll",
+    "H2": "fennáll"
+   }
+  }
+ ],
+ "truthTable": [
+  {
+   "states": {
+    "Q1": "be",
+    "Q2": "be",
+    "H1": "nincs",
+    "H2": "nincs"
+   },
+   "lamps": {
+    "M1": true,
+    "M2": true
+   },
+   "consumers": {
+    "M1": "mukodik",
+    "M2": "mukodik"
+   },
+   "loops": {
+    "H1": "nincs-hiba",
+    "H2": "nincs-hiba"
+   },
+   "overcurrent": {
+    "Q1": false,
+    "Q2": false
+   },
+   "imd": {
+    "SZF": false
+   },
+   "touch": {
+    "U1": "nincs"
+   }
+  },
+  {
+   "states": {
+    "Q1": "be",
+    "Q2": "be",
+    "H1": "nincs",
+    "H2": "fennáll"
+   },
+   "lamps": {
+    "M1": true,
+    "M2": true
+   },
+   "consumers": {
+    "M1": "mukodik",
+    "M2": "mukodik"
+   },
+   "loops": {
+    "H1": "nincs-hiba",
+    "H2": "nincs-hurok"
+   },
+   "overcurrent": {
+    "Q1": false,
+    "Q2": false
+   },
+   "imd": {
+    "SZF": true
+   },
+   "touch": {
+    "U1": "nincs"
+   }
+  },
+  {
+   "states": {
+    "Q1": "be",
+    "Q2": "be",
+    "H1": "fennáll",
+    "H2": "nincs"
+   },
+   "lamps": {
+    "M1": true,
+    "M2": true
+   },
+   "consumers": {
+    "M1": "mukodik",
+    "M2": "mukodik"
+   },
+   "loops": {
+    "H1": "nincs-hurok",
+    "H2": "nincs-hiba"
+   },
+   "overcurrent": {
+    "Q1": false,
+    "Q2": false
+   },
+   "imd": {
+    "SZF": true
+   },
+   "touch": {
+    "U1": "nincs"
+   }
+  },
+  {
+   "states": {
+    "Q1": "be",
+    "Q2": "be",
+    "H1": "fennáll",
+    "H2": "fennáll"
+   },
+   "lamps": {
+    "M1": true,
+    "M2": true
+   },
+   "consumers": {
+    "M1": "mukodik",
+    "M2": "mukodik"
+   },
+   "loops": {
+    "H1": "femes",
+    "H2": "femes"
+   },
+   "overcurrent": {
+    "Q1": true,
+    "Q2": true
+   },
+   "imd": {
+    "SZF": true
+   },
+   "touch": {
+    "U1": "lekapcsolasig"
+   }
+  }
+ ],
+ "places": {
+  "TR": {
+   "label": "IT-táppont és elosztó",
+   "inner": "a táppontnál"
+  },
+  "M1": {
+   "label": "M1 fogyasztó"
+  },
+  "M2": {
+   "label": "M2 fogyasztó"
+  },
+  "FOLD": {
+   "label": "Föld (talaj)"
+  }
+ },
+ "layout": {
+  "view": "bekotes",
+  "viewBox": "0 0 480 260",
+  "parts": {
+   "TR": [
+    20,
+    40
+   ],
+   "SZF": [
+    20,
+    150
+   ],
+   "XPE": [
+    180,
+    170
+   ],
+   "RA": [
+    180,
+    225
+   ],
+   "Q1": [
+    180,
+    30
+   ],
+   "Q2": [
+    180,
+    90
+   ],
+   "M1": [
+    380,
+    30
+   ],
+   "M2": [
+    380,
+    130
+   ],
+   "H1": [
+    440,
+    60
+   ],
+   "H2": [
+    440,
+    160
+   ],
+   "FOLD": [
+    260,
+    245
+   ]
+  },
+  "megjegyzes": "Durva elhelyezés; az útvonalakat az ábramotor adja."
+ }
+}
