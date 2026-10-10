@@ -23,5 +23,6 @@ if(cmd==='list'){
  const fp=calcFingerprint(d),src=sourceFingerprint(d.slug);
  console.log(d.tier==='T0'
   ?`'${d.slug}':internal('${fp}','${src}'),`
-  :`'${d.slug}':{kind:'lektoralt',reviewer:'<név>',qualification:'<minősítés, pl. MMK villamos tervező>',registry:'<névjegyzéki szám>',date:'<ÉÉÉÉ-HH-NN>',fingerprint:'${fp}',source:'${src}',approvalRef:'Lektori csomag LK-<n> (<kiadás dátuma>), csomag: <csomag-ujjlenyomat>, 3. rész: <kalkulátor-ujjlenyomat>; jóváhagyó lap: <iktatási hely>',showName:false},  // showName: true csak a jóváhagyó lapon jelölt hozzájárulással`);
+  :`'${d.slug}':{kind:'lektoralt',qualification:'<jogosultság a jóváhagyó lapról>',date:'<ÉÉÉÉ-HH-NN>',fingerprint:'${fp}',source:'${src}',approvalRef:'Lektori csomag LK-<n> (<kiadás dátuma>), csomag: <csomag-ujjlenyomat>, kalkulátor: ${fp}/${src}; jóváhagyó lap: <iktatási hely>',showName:false},\n`+
+   `// Név és névjegyzéki szám CSAK a jóváhagyó lapon jelölt hozzájárulással: showName:true, reviewer:'<név>', registry:'<névjegyzéki szám>' (a modul a kliensoldali kódba is bekerül).`);
 }else{console.error('Használat: scripts/calc-release.ts list | record <slug>');process.exit(1)}

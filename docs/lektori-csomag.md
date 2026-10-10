@@ -7,11 +7,11 @@ Szakmai lektori ellenőrzőcsomag a méretezési segédszámításhoz és a szab
 | Adat | Érték |
 |---|---|
 | Csomagverzió | LK-3 (2026. 10. 10.) |
-| Csomag-ujjlenyomat | d8648424 (a csomag teljes szövegéé: bevezető, tételek, jóváhagyó lap) |
+| Csomag-ujjlenyomat | 77cbe404 (a csomag teljes szövegéé: bevezető, tételek, jóváhagyó lap) |
 | Táblázatváltozat | 2026.10-1 |
 | 1. rész – táblázat-ujjlenyomat | c78b23ee (ehhez köti a program a jóváhagyást) |
-| 2. rész – képlet-ujjlenyomat | 0f127c02 (a fejlesztési folyamat automatikus tesztje ellenőrzi) |
-| 3. rész – kalkulátor-ujjlenyomat | bd293e1b (a 3. rész egészéé; kalkulátoronként: a döntési táblázatban) |
+| 2. rész – képlet-ujjlenyomat | 25b6c94f (a fejlesztési folyamat automatikus tesztje ellenőrzi) |
+| 3. rész – kalkulátor-ujjlenyomat | e65e37f3 (a 3. rész egészéé; kalkulátoronként: a döntési táblázatban) |
 | Jóváhagyási állapot (1. rész) | ellenőrizendő – jogosult tervező még nem hagyta jóvá |
 | Ellenőrizendő tételek | 1. rész: 146; 2. rész: 38; 3. rész: 126 (összesen 310) |
 | Becsült ráfordítás | kb. 6 óra 5 perc |
@@ -42,8 +42,9 @@ A Villanyszerelő Tudástár ingyenes, belépés nélkül használható kalkulá
 ### Mire használjuk a jóváhagyott tartalmat?
 
 - Jóváhagyásig a program minden táblázatértéket „ellenőrizendő” állapotúként jelöl a felületen, a számítási sorokban és a PDF-ben.
-- Jóváhagyás után a tervező Méretezés fülén (Eszközök → Tervsegéd → Méretezés) minden felhasználónak; minden felhasználó exportált terv-PDF-jében, ha a méretezési táblákat bekapcsolja, az elosztóoldalak „méretezés indoklása” táblájának „Táblázatok – Állapot” sorában (ugyanennek a táblának az utolsó sora a terv tervezőjének „Tervezői ellenőrzés” aláírósora); a nyilvános, keresőkben is megtalálható kalkulátoroldalakon a táblázatokat használó kalkulátorok (Feszültségesés, Keresztmetszet-választás, Kismegszakító-választás, Hurokimpedancia és zárlati áram, Terhelhetőségi táblázat) „Táblázatok állapota” sorában és a Vezeték-ellenállás kalkulátor ρ1 szerinti tájékoztató sorában a következő szöveg jelenik meg – a jóváhagyó kifejezett hozzájárulásával: „A táblázatértékeket szakmailag lektorálta: [név] ([névjegyzéki szám]), [dátum]. Táblázatváltozat: 2026.10-1, ujjlenyomat: c78b23ee.”; hozzájárulás nélkül: „A táblázatértékeket jogosult villamos tervező szakmailag lektorálta, [dátum]. Táblázatváltozat: 2026.10-1, ujjlenyomat: c78b23ee.” A szöveg a táblázatértékek lektorálását jelzi, nem az adott terv jóváhagyását. A 3. részből jóváhagyott kalkulátorok oldalán (jelvény; lábléc-sor) hozzájárulással „Szakmailag lektorálta: [név], [minősítés] · [dátum]; Szakmai lektor: [név], [minősítés]”, anélkül „Szakmailag lektorálta: [minősítés] · [dátum]; Szakmai lektor: [minősítés]” áll. A név csak hozzájárulással jelenik meg (Jóváhagyó lap); a jóváhagyás érvénye ettől nem függ.
-- A 3. rész T1 kalkulátorai kalkulátoronként, a jóváhagyott tartalmi és forrás-ujjlenyomattal rögzített lektori rekorddal jelennek meg a nyilvános kalkulátoroldalakon; a táblázat-kapus kalkulátorok (Keresztmetszet-választás, Kismegszakító-választás, Hurokimpedancia és zárlati áram, Terhelhetőségi táblázat) ezen felül csak az 1. rész jóváhagyása után. Ha egy kalkulátor a jóváhagyás után bármiben változik, a program nem teszi közzé, illetve az automatikus teszt elbukik, amíg új jóváhagyás nem készül.
+- Jóváhagyás után a tervező Méretezés fülén (Eszközök → Tervsegéd → Méretezés) minden felhasználónak; minden felhasználó exportált terv-PDF-jében, ha a méretezési táblákat bekapcsolja, az elosztóoldalak „méretezés indoklása” táblájának „Táblázatok – Állapot” sorában (ugyanennek a táblának az utolsó sora a terv tervezőjének „Tervezői ellenőrzés” aláírósora); a nyilvános, keresőkben is megtalálható kalkulátoroldalakon a táblázatokat használó kalkulátorok (Feszültségesés, Keresztmetszet-választás, Kismegszakító-választás, Hurokimpedancia és zárlati áram, Terhelhetőségi táblázat) „Táblázatok állapota” sorában és a Vezeték-ellenállás kalkulátor ρ1 szerinti tájékoztató sorában a következő szöveg jelenik meg – a jóváhagyó kifejezett hozzájárulásával: „A táblázatértékeket szakmailag lektorálta: [név], [jogosultság] ([névjegyzéki szám]), [dátum]. Táblázatváltozat: 2026.10-1, ujjlenyomat: c78b23ee.”; hozzájárulás nélkül: „A táblázatértékeket szakmailag lektorálta: [jogosultság], [dátum]. Táblázatváltozat: 2026.10-1, ujjlenyomat: c78b23ee.” A szöveg a táblázatértékek lektorálását jelzi, nem az adott terv jóváhagyását. A 3. részből jóváhagyott kalkulátorok saját oldalán (jelvény; lábléc-sor) hozzájárulással „Szakmailag lektorálta: [név], [jogosultság] · [dátum]; Szakmai lektor: [név], [jogosultság]”, anélkül „Szakmailag lektorálta: [jogosultság] · [dátum]; Szakmai lektor: [jogosultság]” áll; a kalkulátorlistán (/kalkulatorok) és a keresőben a jelvény mindig név nélküli: „Szakmailag lektorálta: [jogosultság] · [dátum]”. A [jogosultság] a Jóváhagyó lap „Jogosultság megnevezése” mezőjének szövege.
+- A név és a névjegyzéki szám csak hozzájárulással jelenik meg (Jóváhagyó lap), és csak ekkor kerül a programba: a program kódja a nyilvános oldalakon olvasható, ezért hozzájárulás nélkül a programban sem rögzítjük. Ilyenkor a jóváhagyást a jogosultság megnevezése, a dátum és a hivatkozás (csomagkiadás, ujjlenyomatok, a Jóváhagyó lap iktatási helye) azonosítja; az aláírt lapot a megbízó a programon kívül őrzi. A jóváhagyás érvénye a név megjelenítésétől nem függ.
+- A 3. rész T1 kalkulátorai kalkulátoronként, a jóváhagyott tartalmi és forrás-ujjlenyomattal rögzített lektori rekorddal jelennek meg a nyilvános kalkulátoroldalakon; a táblázat-kapus kalkulátorok (Feszültségesés, Keresztmetszet-választás, Kismegszakító-választás, Hurokimpedancia és zárlati áram, Terhelhetőségi táblázat) ezen felül csak az 1. rész jóváhagyása után. Ha egy kalkulátor a jóváhagyás után bármiben változik, a program nem teszi közzé, illetve az automatikus teszt elbukik, amíg új jóváhagyás nem készül.
 - Az 1. rész jóváhagyása a programban ujjlenyomathoz kötött: ha később bármely táblázatérték, forrásmegjelölés, szabványpont vagy leírás megváltozik, a program automatikusan „ellenőrizendő” állapotra áll vissza.
 - A 2. rész (képletek, döntések) jóváhagyását a program állapota nem követi. Ezt a fejlesztési folyamat biztosítja: jóváhagyott állapotban az automatikus teszt elbukik, ha a 2. rész a jóváhagyott ujjlenyomattól eltér; ilyenkor új kiadás és új jóváhagyás kell.
 
@@ -755,13 +756,13 @@ A kábeljelölésből a program a szigetelést és a vezetőanyagot az alábbi k
 | Azonosító | Kulcsszó a jelölésben | Besorolás | ✓ | ✗ | Helyes érték / megjegyzés |
 |---|---|---|:-:|:-:|---|
 | D-JEL-AL | Al, alu, alumínium, aluminium, NAYY…, NA2X…, AYKY…, AMKA | alumínium → „Nem számítható” (D-BLOKK) | ☐ | ☐ | |
-| D-JEL-GUMI | H03R…, H05R…, H07R… (RN, RR, RT), GT, gumi… (szó elején, ékezetes folytatással is: gumis, gumikábel, gumiszigetelésű, Gumi-kábel) | gumiszigetelés (60 °C) → „Nem számítható” (D-BLOKK) | ☐ | ☐ | |
+| D-JEL-GUMI | H03R…, H05R…, H07R… (RN, RR, RT; szóközzel vagy kötőjellel is: H07 RN-F, H07-RN-F), RN-F, GT, gumi… (szó elején, ékezetes folytatással is: gumis, gumikábel, gumiszigetelésű, gumitömlő, Gumi-kábel); nem számít a tartozékszó: gumicső, gumitömítés, gumialátét, gumigyűrű, gumidugó, gumiszalag | gumiszigetelés (60 °C) → „Nem számítható” (D-BLOKK); minden más „gumi…” szó (pl. „Gumi Kft.” cégnév) is – a biztonság javára | ☐ | ☐ | |
 | D-JEL-XLPE | N2X…, 2XY, XLPE, EPR | XLPE (90 °C; D-XLPE szerint PVC-értékkel) | ☐ | ☐ | |
 | D-JEL-PVC | NYM…, NYY…, NYCWY, MBCu, MCu, MKCu, MT, MYY, YKY…, CYKY…, H03V…, H05V…, H07V…, PVC | PVC (70 °C) | ☐ | ☐ | |
 | D-JEL-NINCS | Más vagy hiányzó jelölés (pl. NHXH, „3 × 2,5 mm²”) | nem ismerhető fel → áramköri, majd projekt-alapérték, végül PVC (D-ALAP-SZIG) | ☐ | ☐ | |
 | D-JEL-SORREND | Több kulcsszó egy jelölésben | az első egyező: alumínium, gumi, XLPE, PVC | ☐ | ☐ | |
 
-Programmal összevetve: igen – 46 eset (kábeljelölés), automatikus tesztben.
+Programmal összevetve: igen – 58 eset (kábeljelölés), automatikus tesztben.
 
 ☐ A blokk minden tétele egyezik (D-JEL).
 
@@ -773,7 +774,7 @@ Forrás: Programozott döntések (kerekítés, tartalék, korlátok, állapotok)
 
 #### D-KEREK – Lépcsőre kerekítés iránya
 
-**Szabály.** Táblázati lépcsők közötti bemenetnél a program a kedvezőtlenebb lépcsőt választja, interpoláció nélkül: környezeti hőmérséklet → a következő nagyobb vagy egyenlő lépcső (T-KT), áramkörszám → a következő nagyobb vagy egyenlő oszlop (T-KCS). A számított értékeket (Ib, Iz, ΔU, Zs) nem kerekíti; a kijelzés 2, Zs-nél 3 tizedes.
+**Szabály.** Táblázati lépcsők közötti bemenetnél a program a kedvezőtlenebb lépcsőt választja, interpoláció nélkül: környezeti hőmérséklet → a következő nagyobb vagy egyenlő lépcső (T-KT), áramkörszám → a következő nagyobb vagy egyenlő oszlop (T-KCS). A számított értékeket (Ib, Iz, ΔU, Zs) nem kerekíti; a kijelzés 2, Zs-nél 3 tizedes. A megengedett hurokimpedancia (Zs,max) kijelzése lefelé kerekít (a számítási sorban 3, az összesítő táblában 2 tizedesre), így a kiírt határ soha nem nagyobb a valódinál; ha a kerekített kiírás a feltétellel ellentétes viszonyt mutatna, több tizedes jelenik meg.
 
 **Indoklás.** A nagyobb hőmérséklethez és áramkörszámhoz kisebb tényező tartozik, így a kerekítés a biztonság javára téved. A bemenet korlátai (10–60 °C, 1–20 áramkör) miatt a táblázat széle nem léphető túl.
 
@@ -1019,7 +1020,7 @@ Megjegyzés a blokkhoz (forrás, kiadás):
 
 A Villanyszerelő Tudástár szabványhoz vagy biztonsághoz kötött (T1) kalkulátorai csak szakmai lektori jóváhagyás után jelennek meg. Kalkulátoronként egy blokk: cél és kiadási adatok, mire jó és mire nem, a „Nem vizsgált” lista, a képletek a kalkulátoroldalon megjelenő alakban, a feltételezések, a bemenetek érvényességi tartománya, a felhasznált állandók forrással, majd a képletek behelyettesíthető alakban és a programozott döntések, kézzel számolt példákkal. A közös működést (számbevitel, kiírás, szóhasználat, figyelmeztetések) a KAL-KOZOS blokk írja le.
 
-A táblázatértékekre (ρ1, λ, U0, Iz0, kθ, kcs, G.52.1 határok, m, cmin, I2/In) csak az 1. rész azonosítójával hivatkozunk: ezek helyességét az 1. rész jóváhagyása fedi, itt nem kell újra összevetni. Ahol a kalkulátor a méretezési segédszámítás programfüggvényét használja, a blokk a 2. rész tételére is hivatkozik.
+A táblázatértékekre (ρ1, λ, U0, Iz0, kθ, kcs, G.52.1 határok, m, cmin, I2/In) csak az 1. rész azonosítójával hivatkozunk: ezek helyességét az 1. rész jóváhagyása fedi, itt nem kell újra összevetni. Ezért minden ilyen értéket használó kalkulátor (Feszültségesés, Keresztmetszet-választás, Kismegszakító-választás, Hurokimpedancia és zárlati áram, Terhelhetőségi táblázat) táblázat-kapus: csak az 1. rész jóváhagyása után jelenik meg, akkor is, ha a blokkja jóvá van hagyva. Ahol a kalkulátor a méretezési segédszámítás programfüggvényét használja, a blokk a 2. rész tételére is hivatkozik.
 
 Minden példát és bemeneti korlátot automatikus teszt vet össze a kalkulátor tényleges futtatásával (ugyanazzal a számítómotorral, amely a kalkulátoroldalon fut). A blokk elején álló tartalmi és forrás-ujjlenyomat azonosítja a jóváhagyott kalkulátort: a program csak az ezzel az ujjlenyomat-párral rögzített lektori rekorddal teszi közzé, és ha a kalkulátor bármiben változik, új kiadás és új jóváhagyás kell. A jóváhagyás kalkulátoronként a Jóváhagyó lap „3. rész – kalkulátoronkénti döntés” táblázatában jelölhető.
 
@@ -1043,9 +1044,11 @@ Az itt leírt viselkedés és szövegek minden T1 kalkulátorra érvényesek; a 
 
 **Szabály.** A számmezők tizedesvesszőt és tizedespontot is elfogadnak; ha csak pont vagy csak vessző szerepel, az a tizedesjel („1.500” = 1,5). Szóközös ezres csoport („1 000”), unicode mínuszjel és normálalak („1e3”) is megadható. Nem szám, hiányzó kötelező érték vagy tartományon kívüli érték esetén a mező alatt magyar hibaüzenet jelenik meg, és eredmény nem készül: a program a bevitelt nem igazítja a tartományba. A tartományokat kalkulátoronként a …-BEM- tételek sorolják fel; a tételek összevetése a tartomány szélein elfogadott és a határon túl elutasított értéket próbál.
 
-**Indoklás.** A csendes korrekció (pl. a tartomány szélére állítás) félrevezető eredményt adna. A „1.500” = 1,5 értelmezés a tizedespontot használó bevitel (pl. másolt érték) miatt választott; ezres csoport csak szóközzel adható meg.
+**Indoklás.** A csendes korrekció (pl. a tartomány szélére állítás) félrevezető eredményt adna. A „1.500” = 1,5 értelmezés a tizedespontot használó bevitel (pl. másolt érték) miatt választott; ezres csoport csak szóközzel adható meg. Kockázata: aki ponttal ír ezres csoportot („1.500” m-t 1500 m-re gondolva), 1,5 m-rel kap eredményt, ami hossznál a biztonság kárára téved (pl. a feszültségesés „határon belül” lesz) – a kalkulátor erre nem figyelmeztet.
 
 **Kézzel számolt példa.** Feszültségesés, terhelőáram (megengedett: > 0 és ≤ 1000 A): „16,0” és „16.0” → 16 A; „1 000” → 1000 A; „1001” → „Legfeljebb 1000 A lehet.”; „0” → „Nullánál nagyobb számot adj meg.”; „abc” → „Csak számot írj; a mértékegységet mellette választhatod.”; vezetékhossz „23.4” → 23,4 m (ΔU% = 2,9301%, mint „23,4”-nél).
+
+**Kérdés a lektorhoz.** Elfogadható-e a T1 kalkulátoroknál, hogy a pontosan három számjegyet követő egyetlen pont („1.500”) tizedespontnak számít (1,5)? Ha nem, a programnak az ilyen kétértelmű bevitelt el kell utasítania vagy rá kell kérdeznie (a lektor döntése szerint; ez minden T1 kalkulátort érint).
 
 **Forrás.** – (programozott döntés: a kalkulátorok számbevitele)
 
@@ -1057,15 +1060,15 @@ Az itt leírt viselkedés és szövegek minden T1 kalkulátorra érvényesek; a 
 
 #### KAL-KOZOS-KIIRAS – Kerekítés és kiírás
 
-**Szabály.** A számítás kerekítés nélkül fut, csak a kiírás kerekít: 1 alatt és 1–10 között 4 értékes jegy, 10 fölött legfeljebb 3 tizedes (10 000-ig 5 értékes jegy), afölött egész szám; 10⁻⁶ alatt normálalak. A hosszakat (Lmax) 0,1 m-re lefelé kerekítve írja ki, „(lefelé kerekítve)” jelöléssel, ha a kerekítés látható. Határérték-összevetésnél, ha a kerekített kiírás egyenlőséget mutatna, de a feltétel nem teljesül, a két oldal több tizedessel jelenik meg.
+**Szabály.** A számítás kerekítés nélkül fut, csak a kiírás kerekít: 1 alatt és 1–10 között 4 értékes jegy, 10 fölött legfeljebb 3 tizedes (10 000-ig 5 értékes jegy), afölött egész szám; 10⁻⁶ alatt normálalak. Rögzített tizedesek: az ohmban kiírt értékek (R, Zs, Zs,max) és a levezetésben a ΔU% 3 tizedessel. A felső határként használt megengedett hurokimpedanciát (Zs,max) 3 tizedesre, a hosszakat (Lmax) 0,1 m-re lefelé kerekítve írja ki, „(lefelé kerekítve)” jelöléssel, ha a kerekítés látható; a többi érték a szokásos módon kerekül. Határérték-összevetésnél, ha a kerekített kiírás egyenlőséget vagy a feltétellel ellentétes viszonyt mutatna (pl. „5 % > 5 %”, „1,437 ≤ 1,436”), a két oldal több tizedessel jelenik meg.
 
-**Indoklás.** A lefelé kerekített hossz a biztonság javára téved; a több tizedes azt akadályozza meg, hogy a kiírás „5 % > 5 %” alakú, ellentmondásosnak látszó szöveget adjon.
+**Indoklás.** A lefelé kerekített határ és hossz a biztonság javára téved: a kiírt Zs,max-nál nagyobb mért érték biztosan nem teljesíti a feltételt (felfelé kerekítve egy a határt kissé meghaladó érték is megfelelőnek látszana). A több tizedes az ellentmondásosnak látszó kiírást akadályozza meg.
 
-**Kézzel számolt példa.** Feszültségesés, 16 A, 23,4 m, 2,5 mm² (KAL-FESZULTSEGES-K1): ΔU% = 2,930087 → „2,93 %”; ΔU = 6,7392 V → „6,739 V”; Lmax = 39,9306 m → „39,9 m (lefelé kerekítve)”. 39,931 m-nél ΔU% = 5,000056 → „Számítás szerint meghaladja a határt: 5,0001 % > 5 %.”
+**Kézzel számolt példa.** Feszültségesés, 16 A, 23,4 m, 2,5 mm² (KAL-FESZULTSEGES-K1): ΔU% = 2,930087 → „2,93 %”; ΔU = 6,7392 V → „6,739 V”; Lmax = 39,9306 m → „39,9 m (lefelé kerekítve)”. 39,931 m-nél ΔU% = 5,000056 → „Számítás szerint meghaladja a határt: 5,0001 % > 5 %.” Hurokimpedancia, C16: Zs,max = 1,4375 Ω → „1,437 Ω (lefelé kerekítve)”; B16: 2,875 Ω → „2,875 Ω”.
 
 **Forrás.** – (programozott döntés: a kalkulátorok kiírása)
 
-**Összevetés.** Programmal összevetve: igen – 2 eset (kalkulátor-futtatás), automatikus tesztben.
+**Összevetés.** Programmal összevetve: igen – 5 eset (kalkulátor-futtatás), automatikus tesztben.
 
 | Azonosító | ✓ | ✗ | Helyes érték / megjegyzés |
 |---|:-:|:-:|---|
@@ -1097,18 +1100,18 @@ Forrás: MSZ HD 60364-5-52:2011, 525 és G melléklet (G.52.1 határértékek, G
 
 Cél: Feszültségesés rézvezetéken egy-, háromfázisú és egyenáramú körben, a megengedett legnagyobb hosszal – a tervező Méretezés fülével azonos képlettel.
 
-Kiadás: T1 (csak szakmai lektori jóváhagyással), verzió v1 (2026. 10. 10.); táblázat-kapu: nem – a kiadáshoz a kalkulátor jóváhagyása elég. Tartalmi ujjlenyomat: 937ce6f9; forrás-ujjlenyomat: 4e8e3830. A program a kalkulátort csak ezzel az ujjlenyomat-párral rögzített lektori rekorddal teszi közzé.
+Kiadás: T1 (csak szakmai lektori jóváhagyással), verzió v1 (2026. 10. 10.); táblázat-kapu: igen – a kalkulátor az 1. rész jóváhagyása nélkül akkor sem jelenik meg, ha ez a blokk jóvá van hagyva. Tartalmi ujjlenyomat: f1be2f7d; forrás-ujjlenyomat: c0f73c97. A program a kalkulátort csak ezzel az ujjlenyomat-párral rögzített lektori rekorddal teszi közzé.
 
 | Azonosító | Tétel | Leírás / érték | ✓ | ✗ | Helyes érték / megjegyzés |
 |---|---|---|:-:|:-:|---|
 | KAL-FESZULTSEGES-HAT | Mire jó / mire nem (a kalkulátoroldalon) | Mire jó: Hosszú leágazások (kert, melléképület, garázs) keresztmetszetének előzetes ellenőrzése. A tervező Méretezés fülén kapott érték gyors ellenőrzése. Mire nem: Tervezői méretezés kiváltására: a terhelhetőség, a zárlati védelem és a hurokimpedancia is számít. Motorindítás pillanatnyi feszültségesésére. | ☐ | ☐ | |
 | KAL-FESZULTSEGES-NV | Nem vizsgált (a kalkulátoroldalon) | a méretezési segédszámítással azonos lista (D-HATOKOR) | ☐ | ☐ | |
-| KAL-FESZULTSEGES-KEPLET | Képletek (a kalkulátoroldal „Képletek” szakasza) | ΔU% = b · L · I · (ρ1 · cos φ / A + λ · sin φ) / U0 · 100 (b = 2 egyfázisú, 1 háromfázisú) · DC: ΔU = 2 · L · I · ρ1 / A · Lmax = ΔU%határ · U0 / (100 · b · I · (ρ1 · cos φ / A + λ · sin φ)) | ☐ | ☐ | |
-| KAL-FESZULTSEGES-FELT | Feltételezések (a számítás mellett) | 1) Rézvezető; ρ1 = 0,0225 Ω·mm²/m (üzemi hőmérséklet), λ = 0,00008 Ω/m (G.52.2). 2) A teljes terhelés a vezeték végén; az elosztó előtti (fővezeték) esés nincs benne. 3) Szimmetrikus háromfázisú terhelés. 4) Egyenáram: λ = 0, oda-vissza vezeték. | ☐ | ☐ | |
+| KAL-FESZULTSEGES-KEPLET | Képletek (a kalkulátoroldal „Képletek” szakasza) | 1) ΔU% = b · L · I · (ρ1 · cos φ / A + λ · sin φ) / U0 · 100 (b = 2 egyfázisú, 1 háromfázisú) 2) DC: ΔU = 2 · L · I · ρ1 / A 3) Lmax = ΔU%határ · U0 / (100 · b · I · (ρ1 · cos φ / A + λ · sin φ)) | ☐ | ☐ | |
+| KAL-FESZULTSEGES-FELT | Feltételezések (a számítás mellett; a feltételes sorok a feltétellel) | 1) (csak ha Rendszer: „Egyfázisú (230 V)” vagy „Háromfázisú (400 V)”) Rézvezető; ρ1 = 0,0225 Ω·mm²/m (üzemi hőmérséklet), λ = 0,00008 Ω/m (G.52.2). 2) A teljes terhelés a vezeték végén; az elosztó előtti (fővezeték) esés nincs benne. 3) (csak ha Rendszer: „Háromfázisú (400 V)”) Szimmetrikus háromfázisú terhelés. 4) (csak ha Rendszer: „Egyenáram”) Rézvezető; ρ1 = 0,0225 Ω·mm²/m (üzemi hőmérséklet, G.52.2). 5) (csak ha Rendszer: „Egyenáram”) Egyenáram: oda-vissza vezeték, reaktancia nélkül. | ☐ | ☐ | |
 | KAL-FESZULTSEGES-BEM-RENDSZER | Rendszer | választható: Egyfázisú (230 V); Háromfázisú (400 V); Egyenáram; alapérték: Egyfázisú (230 V) | ☐ | ☐ | |
 | KAL-FESZULTSEGES-BEM-I | I – Terhelőáram (A) | alapérték: 16 A; megengedett: > 0 és ≤ 1000 A | ☐ | ☐ | |
 | KAL-FESZULTSEGES-BEM-L | L – Vezetékhossz (egy irányban), m | alapérték: 23,4 m; megengedett: > 0 és ≤ 10 000 m; egység: m, km (a korlát m egységben értendő) | ☐ | ☐ | |
-| KAL-FESZULTSEGES-BEM-A | A – Keresztmetszet (mm²) | alapérték: 2,5 mm²; megengedett: > 0 és ≤ 1000 mm² | ☐ | ☐ | |
+| KAL-FESZULTSEGES-BEM-A | A – Keresztmetszet (mm²) | alapérték: 2,5 mm²; megengedett: > 0 és ≤ 35 mm²; súgó: „Rézvezető, legfeljebb 35 mm² (a segédszámítás tartománya); a táblázati lépcsőn kívüli érték is megadható.” | ☐ | ☐ | |
 | KAL-FESZULTSEGES-BEM-COS | cos φ – Teljesítménytényező | alapérték: 1; megengedett: > 0 és ≤ 1; csak: Egyfázisú (230 V), Háromfázisú (400 V) | ☐ | ☐ | |
 | KAL-FESZULTSEGES-BEM-UDC | U – Névleges feszültség (V) | alapérték: 24 V; megengedett: > 0 és ≤ 1500 V; csak: Egyenáram | ☐ | ☐ | |
 | KAL-FESZULTSEGES-BEM-HATAR | Határérték (G.52.1, tájékoztató) | választható: a négy G.52.1 szerinti határ: T-DU-KOZ-EGY, T-DU-KOZ-VIL, T-DU-SAJ-EGY, T-DU-SAJ-VIL (közcélú hálózat / saját táppont; egyéb fogyasztó / világítás); alapérték: közcélú hálózat, egyéb fogyasztó (T-DU-KOZ-EGY); csak: Egyfázisú (230 V), Háromfázisú (400 V) | ☐ | ☐ | |
@@ -1182,19 +1185,19 @@ Programmal összevetve: igen – 25 eset (a program listája, bemeneti korlát),
 |---|:-:|:-:|---|
 | KAL-FESZULTSEGES-D1 | ☐ | ☐ | |
 
-#### KAL-FESZULTSEGES-D2 – Szabad keresztmetszet, háromfázisú voltérték, kiadási feltétel
+#### KAL-FESZULTSEGES-D2 – Keresztmetszet, háromfázisú voltérték, táblázat-kapu
 
-**Szabály.** A keresztmetszet szabadon megadható (> 0 és ≤ 1000 mm²), nem csak a T-KM-SOR lépcsői; a kalkulátor sem a terhelhetőséget, sem a legkisebb keresztmetszetet nem vizsgálja. Háromfázisnál a voltban kiírt esés a 400 V-os vonali névleges feszültségre vonatkozik. A kalkulátor nem táblázat-kapus: lektori jóváhagyással az 1. rész jóváhagyása nélkül is kiadható; a felhasznált T-K-RHO1, T-K-LAMBDA, T-K-U0 és T-DU értékeket az oldal a táblázatok állapotával együtt mutatja.
+**Szabály.** A keresztmetszet 35 mm²-ig szabadon megadható (> 0 és ≤ 35 mm², a méretezési segédszámítás tartománya), nem csak a T-KM-SOR lépcsői; a kalkulátor sem a terhelhetőséget, sem a legkisebb keresztmetszetet nem vizsgálja. Háromfázisnál a voltban kiírt esés a 400 V-os vonali névleges feszültségre vonatkozik. A kalkulátor táblázat-kapus: a felhasznált T-K-RHO1, T-K-LAMBDA, T-K-U0 és T-DU értékek miatt csak az 1. rész jóváhagyása után jelenik meg, akkor is, ha ez a blokk jóvá van hagyva.
 
-**Indoklás.** A feszültségesés a keresztmetszettel fordítottan arányos, a táblázati lépcsőhöz nem kötött; a terhelhetőséget a Keresztmetszet-választás és a Terhelhetőségi táblázat kalkulátor vizsgálja. A 400 V a vonali névleges feszültség (MSZ EN 60038); √3 · 230 V = 398,4 V-tal a kiírt érték 0,4%-kal kisebb lenne.
+**Indoklás.** A feszültségesés a keresztmetszettel fordítottan arányos, a táblázati lépcsőhöz nem kötött; a terhelhetőséget a Keresztmetszet-választás és a Terhelhetőségi táblázat kalkulátor vizsgálja. A 35 mm² feletti keresztmetszet a „Nem vizsgált” lista (D-HATOKOR) szerint kívül esik a segédszámítás hatókörén, ezért a bevitel sem engedi. A 400 V a vonali névleges feszültség (MSZ EN 60038); √3 · 230 V = 398,4 V-tal a kiírt érték 0,4%-kal kisebb lenne.
 
-**Kézzel számolt példa.** 3 mm², egyfázis, 16 A, 23,4 m: ΔU% = 2 · 23,4 · 16 · 0,0225 / 3 / 230 · 100 = 2,4417% (a Méretezés fül a nem szabványos keresztmetszettel nem számol, D-BLOKK). Háromfázis (K1): 2,3721% · 400 V = 9,4883 V.
+**Kézzel számolt példa.** 3 mm², egyfázis, 16 A, 23,4 m: ΔU% = 2 · 23,4 · 16 · 0,0225 / 3 / 230 · 100 = 2,4417% (a Méretezés fül a nem szabványos keresztmetszettel nem számol, D-BLOKK); 35 mm² elfogadott, 36 mm² „Legfeljebb 35 mm² lehet.”. Háromfázis (K1): 2,3721% · 400 V = 9,4883 V.
 
-**Kérdés a lektorhoz.** 1) Elfogadható-e, hogy a Feszültségesés kalkulátor a táblázatok (1. rész) jóváhagyása nélkül, a táblázatállapot kiírásával is kiadható? 2) Elfogadható-e háromfázisnál a 400 V-hoz viszonyított voltérték? 3) A „Nem vizsgált” lista (D-HATOKOR) a 35 mm² feletti keresztmetszetet is említi, a kalkulátor viszont 1000 mm²-ig enged bevitelt – elegendő-e a lista, vagy korlátozni kell a bevitelt?
+**Kérdés a lektorhoz.** Elfogadható-e háromfázisnál a 400 V-hoz viszonyított voltérték?
 
-**Forrás.** MSZ EN 60038 (400 V); T-KM-SOR (1. rész); D-BLOKK (2. rész)
+**Forrás.** MSZ EN 60038 (400 V); T-KM-SOR, T-K-RHO1, T-K-LAMBDA, T-K-U0 (1. rész); D-BLOKK, D-HATOKOR (2. rész)
 
-**Összevetés.** Programmal összevetve: igen – 2 eset (kalkulátor-futtatás), automatikus tesztben.
+**Összevetés.** Programmal összevetve: igen – 3 eset (kalkulátor-futtatás), automatikus tesztben.
 
 | Azonosító | ✓ | ✗ | Helyes érték / megjegyzés |
 |---|:-:|:-:|---|
@@ -1216,8 +1219,8 @@ Kiadás: T1 (csak szakmai lektori jóváhagyással), verzió v1 (2026. 10. 10.);
 |---|---|---|:-:|:-:|---|
 | KAL-MOTOR-ARAM-HAT | Mire jó / mire nem (a kalkulátoroldalon) | Mire jó: Hiányos adattáblájú motor áramának becslése. A kábel- és védelemválasztás előtti nagyságrendi becslés. Mire nem: Motorvédő kapcsoló vagy hőrelé beállítására: ahhoz az adattábla névleges árama kell. Frekvenciaváltós, csillag–delta indítású vagy részterhelésű üzem áramára. | ☐ | ☐ | |
 | KAL-MOTOR-ARAM-NV | Nem vizsgált (a kalkulátoroldalon) | az indítás módja (közvetlen, csillag–delta, lágyindító, frekvenciaváltó); részterhelés, túlterhelés és üzemmód (S1–S10); a motorvédelem beállítása és szelektivitása; a tápkábel méretezése és feszültségesése indításkor; egyfázisú motor kondenzátora | ☐ | ☐ | |
-| KAL-MOTOR-ARAM-KEPLET | Képletek (a kalkulátoroldal „Képletek” szakasza) | 3f: In = P / (√3 · U · cos φ · η) · 1f: In = P / (U · cos φ · η) · Ia = (Ia/In) · In | ☐ | ☐ | |
-| KAL-MOTOR-ARAM-FELT | Feltételezések (a számítás mellett) | 1) Névleges terhelés, névleges feszültség és frekvencia. 2) Szimmetrikus háromfázisú motor; vonali áram. | ☐ | ☐ | |
+| KAL-MOTOR-ARAM-KEPLET | Képletek (a kalkulátoroldal „Képletek” szakasza) | 1) 3f: In = P / (√3 · U · cos φ · η) 2) 1f: In = P / (U · cos φ · η) 3) Ia = (Ia/In) · In | ☐ | ☐ | |
+| KAL-MOTOR-ARAM-FELT | Feltételezések (a számítás mellett; a feltételes sorok a feltétellel) | 1) Névleges terhelés, névleges feszültség és frekvencia. 2) (csak ha Rendszer: „Háromfázisú (400 V)”) Szimmetrikus háromfázisú motor; vonali áram. | ☐ | ☐ | |
 | KAL-MOTOR-ARAM-BEM-RENDSZER | Rendszer | választható: Egyfázisú (230 V); Háromfázisú (400 V); alapérték: Háromfázisú (400 V) | ☐ | ☐ | |
 | KAL-MOTOR-ARAM-BEM-P | P – Leadott (tengely-) teljesítmény (W) | alapérték: 5,5 kW; megengedett: > 0 és ≤ 10 000 000 W; egység: kW, W, LE, hp (a korlát W egységben értendő) | ☐ | ☐ | |
 | KAL-MOTOR-ARAM-BEM-U | U – Feszültség (V) | alapérték: 230 V; megengedett: > 0 és ≤ 10 000 V; csak: Egyfázisú (230 V) | ☐ | ☐ | |
@@ -1228,7 +1231,7 @@ Kiadás: T1 (csak szakmai lektori jóváhagyással), verzió v1 (2026. 10. 10.);
 | KAL-MOTOR-ARAM-LE | 1 LE (metrikus lóerő), a teljesítmény mértékegysége | 735,49875 W (75 kp · m/s; definíció) | ☐ | ☐ | |
 | KAL-MOTOR-ARAM-HP | 1 hp (angolszász mechanikai lóerő), a teljesítmény mértékegysége | 745,6998715822702 W (550 ft · lbf/s; definíció) | ☐ | ☐ | |
 
-Programmal összevetve: igen – 27 eset (bemeneti korlát, kalkulátor-futtatás), automatikus tesztben.
+Programmal összevetve: igen – 28 eset (a program listája, bemeneti korlát, kalkulátor-futtatás), automatikus tesztben.
 
 #### KAL-MOTOR-ARAM-K1 – Névleges áram, háromfázisú motor
 
@@ -1328,8 +1331,8 @@ Kiadás: T1 (csak szakmai lektori jóváhagyással), verzió v1 (2026. 10. 10.);
 |---|---|---|:-:|:-:|---|
 | KAL-LED-SZALAG-TAPEGYSEG-HAT | Mire jó / mire nem (a kalkulátoroldalon) | Mire jó: Állandó feszültségű LED-szalag tápegységének kiválasztása. A szalag áramának becslése a vezeték és a kapcsoló kiválasztásához. Mire nem: Állandó áramú (CC) LED-ekhez. A tápegység hálózati oldalának bekötésére és védelmére (az erősáramú rész szakember feladata). | ☐ | ☐ | |
 | KAL-LED-SZALAG-TAPEGYSEG-NV | Nem vizsgált (a kalkulátoroldalon) | a szalag menti feszültségesés pontos számítása; a tápegység hőmérséklete, beépítési módja és IP-védettsége; a bekapcsolási áramlökés és a kismegszakító kiválasztása; dimmerek és vezérlők kompatibilitása | ☐ | ☐ | |
-| KAL-LED-SZALAG-TAPEGYSEG-KEPLET | Képletek (a kalkulátoroldal „Képletek” szakasza) | P = L · P/m · I = P / U · Pmin = P · (1 + tartalék) | ☐ | ☐ | |
-| KAL-LED-SZALAG-TAPEGYSEG-FELT | Feltételezések (a számítás mellett) | 1) A méterenkénti teljesítmény a szalag névleges feszültségén érvényes. 2) Állandó feszültségű (CV) szalag és tápegység. | ☐ | ☐ | |
+| KAL-LED-SZALAG-TAPEGYSEG-KEPLET | Képletek (a kalkulátoroldal „Képletek” szakasza) | 1) P = L · P/m 2) I = P / U 3) Pmin = P · (1 + tartalék) | ☐ | ☐ | |
+| KAL-LED-SZALAG-TAPEGYSEG-FELT | Feltételezések (a számítás mellett; a feltételes sorok a feltétellel) | 1) A méterenkénti teljesítmény a szalag névleges feszültségén érvényes. 2) Állandó feszültségű (CV) szalag és tápegység. | ☐ | ☐ | |
 | KAL-LED-SZALAG-TAPEGYSEG-BEM-L | L – Szalaghossz (m) | alapérték: 5 m; megengedett: > 0 és ≤ 1000 m | ☐ | ☐ | |
 | KAL-LED-SZALAG-TAPEGYSEG-BEM-PM | P/m – Teljesítmény méterenként (W/m) | alapérték: 14,4 W/m; megengedett: > 0 és ≤ 200 W/m; súgó: „A szalag adatlapjáról.” | ☐ | ☐ | |
 | KAL-LED-SZALAG-TAPEGYSEG-BEM-U | U – Szalagfeszültség (V) | alapérték: 24 V; megengedett: > 0 és ≤ 60 V; súgó: „Jellemzően 5, 12 vagy 24 V (törpefeszültség).” | ☐ | ☐ | |
@@ -1337,7 +1340,7 @@ Kiadás: T1 (csak szakmai lektori jóváhagyással), verzió v1 (2026. 10. 10.);
 | KAL-LED-SZALAG-TAPEGYSEG-PSU | Jellemző tápegység-teljesítmények (a javaslat ebből választ) | 15; 25; 35; 50; 60; 75; 100; 120; 150; 200; 240; 320; 480; 600 W – Jellemző kereskedelmi teljesítménysor (tájékoztató, gyártónként eltér) | ☐ | ☐ | |
 | KAL-LED-SZALAG-TAPEGYSEG-BETAP | Betáplálási távolság, amely felett tájékoztató sor jelenik meg | szalagfeszültség ≤ 5 V: 2 m (kiírva: „1–2 m-enként”); ≤ 12 V: 5 m; ≤ 24 V: 10 m; 24 V felett: 10 m (kiírva: „a gyártói adatlap adja meg”) – programozott tájékoztató érték, forrás nélkül | ☐ | ☐ | |
 
-Programmal összevetve: igen – 23 eset (bemeneti korlát, kalkulátor-futtatás), automatikus tesztben.
+Programmal összevetve: igen – 24 eset (a program listája, bemeneti korlát, kalkulátor-futtatás), automatikus tesztben.
 
 #### KAL-LED-SZALAG-TAPEGYSEG-K1 – Teljesítmény, áram, szükséges tápegység
 
@@ -1405,8 +1408,8 @@ Kiadás: T1 (csak szakmai lektori jóváhagyással), verzió v1 (2026. 10. 10.);
 |---|---|---|:-:|:-:|---|
 | KAL-FAZISJAVITAS-HAT | Mire jó / mire nem (a kalkulátoroldalon) | Mire jó: Egyedi fázisjavítás (pl. motor) kondenzátorteljesítményének előzetes becslése. A fázisjavítás áramcsökkentő hatásának szemléltetése. Mire nem: Fázisjavító telep tervezésére felharmonikusokkal terhelt hálózatban (rezonanciaveszély). A kondenzátorok bekötésére: a kisütő ellenállás és a védelem szakember feladata. | ☐ | ☐ | |
 | KAL-FAZISJAVITAS-NV | Nem vizsgált (a kalkulátoroldalon) | felharmonikusok és rezonancia (fojtós telep szükségessége); túlkompenzálás kis terhelésnél, fokozatszabályozás; a kondenzátor feszültségtűrése, kisütése és védelme (MSZ EN 60831); kapcsolási tranziensek; az elosztói engedélyes meddőelszámolási szabályai | ☐ | ☐ | |
-| KAL-FAZISJAVITAS-KEPLET | Képletek (a kalkulátoroldal „Képletek” szakasza) | Qc = P · (tan φ1 − tan φ2) · Δ: C = Qc / (3 · ω · U²) · Y és 1f: C = Qc / (ω · U²), ω = 2π · f | ☐ | ☐ | |
-| KAL-FAZISJAVITAS-FELT | Feltételezések (a számítás mellett) | 1) Szinuszos feszültség, a terhelés hatásos teljesítménye állandó. 2) Szimmetrikus háromfázisú telep, három azonos kondenzátor. 3) Egyfázisú kondenzátor a fogyasztóval párhuzamosan. | ☐ | ☐ | |
+| KAL-FAZISJAVITAS-KEPLET | Képletek (a kalkulátoroldal „Képletek” szakasza) | 1) Qc = P · (tan φ1 − tan φ2) 2) Δ: C = Qc / (3 · ω · U²) 3) Y és 1f: C = Qc / (ω · U²), ω = 2π · f | ☐ | ☐ | |
+| KAL-FAZISJAVITAS-FELT | Feltételezések (a számítás mellett; a feltételes sorok a feltétellel) | 1) Szinuszos feszültség, a terhelés hatásos teljesítménye állandó. 2) (csak ha Kondenzátorok kapcsolása: „Háromfázisú, delta (Δ)” vagy „Háromfázisú, csillag (Y)”) Szimmetrikus háromfázisú telep, három azonos kondenzátor. 3) (csak ha Kondenzátorok kapcsolása: „Egyfázisú”) Egyfázisú kondenzátor a fogyasztóval párhuzamosan. | ☐ | ☐ | |
 | KAL-FAZISJAVITAS-BEM-P | P – Hatásos teljesítmény (W) | alapérték: 10 kW; megengedett: > 0 és ≤ 1 000 000 000 W; egység: W, kW, MW (a korlát W egységben értendő) | ☐ | ☐ | |
 | KAL-FAZISJAVITAS-BEM-COS1 | cos φ1 – Jelenlegi cos φ | alapérték: 0,7; megengedett: > 0 és ≤ 1 | ☐ | ☐ | |
 | KAL-FAZISJAVITAS-BEM-COS2 | cos φ2 – Kívánt cos φ | alapérték: 0,95; megengedett: > 0 és ≤ 1 | ☐ | ☐ | |
@@ -1415,7 +1418,7 @@ Kiadás: T1 (csak szakmai lektori jóváhagyással), verzió v1 (2026. 10. 10.);
 | KAL-FAZISJAVITAS-BEM-U | U – Feszültség (V) | alapérték: 230 V; megengedett: > 0 és ≤ 100 000 V; csak: Egyfázisú | ☐ | ☐ | |
 | KAL-FAZISJAVITAS-BEM-F | f – Frekvencia (Hz) | alapérték: 50 Hz; megengedett: > 0 és ≤ 1000 Hz | ☐ | ☐ | |
 
-Programmal összevetve: igen – 24 eset (bemeneti korlát), automatikus tesztben.
+Programmal összevetve: igen – 25 eset (a program listája, bemeneti korlát), automatikus tesztben.
 
 #### KAL-FAZISJAVITAS-K1 – Kondenzátorteljesítmény
 
@@ -1491,15 +1494,15 @@ Forrás: MSZ HD 60364-5-52:2011 B.52.2, B.52.4 (Iz0), B.52.14 (kθ), B.52.17 (kc
 
 Cél: A legkisebb rézvezeték-keresztmetszet, amelynek javított terhelhetősége (Iz = Iz0 · kθ · kcs) eléri a védelem névleges áramát – a Méretezés fül táblázataival.
 
-Kiadás: T1 (csak szakmai lektori jóváhagyással), verzió v1 (2026. 10. 10.); táblázat-kapu: igen – a kalkulátor az 1. rész jóváhagyása nélkül akkor sem jelenik meg, ha ez a blokk jóvá van hagyva. Tartalmi ujjlenyomat: ff172351; forrás-ujjlenyomat: 17321a6b. A program a kalkulátort csak ezzel az ujjlenyomat-párral rögzített lektori rekorddal teszi közzé.
+Kiadás: T1 (csak szakmai lektori jóváhagyással), verzió v1 (2026. 10. 10.); táblázat-kapu: igen – a kalkulátor az 1. rész jóváhagyása nélkül akkor sem jelenik meg, ha ez a blokk jóvá van hagyva. Tartalmi ujjlenyomat: b7b5caee; forrás-ujjlenyomat: fb81ce00. A program a kalkulátort csak ezzel az ujjlenyomat-párral rögzített lektori rekorddal teszi közzé.
 
 | Azonosító | Tétel | Leírás / érték | ✓ | ✗ | Helyes érték / megjegyzés |
 |---|---|---|:-:|:-:|---|
-| KAL-KERESZTMETSZET-HAT | Mire jó / mire nem (a kalkulátoroldalon) | Mire jó: Egy áramkör vezeték-keresztmetszetének előzetes ellenőrzése a védelem névleges áramához. A tervező Méretezés fülén kapott javaslat gyors ellenőrzése. Mire nem: Tervezői méretezés kiváltására (feszültségesés, zárlati szilárdság, hurokimpedancia is kell). Földben vagy szabad levegőn vezetett kábelre, alumíniumvezetőre. | ☐ | ☐ | |
+| KAL-KERESZTMETSZET-HAT | Mire jó / mire nem (a kalkulátoroldalon) | Mire jó: Egy áramkör vezeték-keresztmetszetének előzetes ellenőrzése a védelem névleges áramához. A tervező Méretezés fülén kapott javaslat gyors ellenőrzése. Mire nem: Tervezői méretezés kiváltására (feszültségesés, zárlati szilárdság, hurokimpedancia is kell). Földben vagy szabad levegőn vezetett kábelre, alumíniumvezetőre. Olvadóbiztosítóval védett áramkör önálló ellenőrzésére (az I2 feltételt külön kell vizsgálni). | ☐ | ☐ | |
 | KAL-KERESZTMETSZET-NV | Nem vizsgált (a kalkulátoroldalon) | a méretezési segédszámítással azonos lista (D-HATOKOR) | ☐ | ☐ | |
-| KAL-KERESZTMETSZET-KEPLET | Képletek (a kalkulátoroldal „Képletek” szakasza) | Iz = Iz0 · kθ · kcs · feltétel: Ib ≤ In ≤ Iz (MSZ HD 60364-4-43 433.1) | ☐ | ☐ | |
-| KAL-KERESZTMETSZET-FELT | Feltételezések (a számítás mellett) | 1) Rézvezető, a táblázat szerinti referencia-szerelési móddal; hőszigetelésben futó hosszú szakasz nélkül. 2) A legkisebb keresztmetszet (1,5 mm² réz) a táblázat első sora. 3) Csak a túlterhelés elleni védelem feltétele (In ≤ Iz); a feszültségesést és a hurokimpedanciát külön kell ellenőrizni. | ☐ | ☐ | |
-| KAL-KERESZTMETSZET-BEM-IN | In – A védelem névleges árama (A) | alapérték: 20 A; megengedett: > 0 és ≤ 500 A | ☐ | ☐ | |
+| KAL-KERESZTMETSZET-KEPLET | Képletek (a kalkulátoroldal „Képletek” szakasza) | 1) Iz = Iz0 · kθ · kcs 2) feltétel: In ≤ Iz (MSZ HD 60364-4-43 433.1) | ☐ | ☐ | |
+| KAL-KERESZTMETSZET-FELT | Feltételezések (a számítás mellett; a feltételes sorok a feltétellel) | 1) Rézvezető, a táblázat szerinti referencia-szerelési móddal; hőszigetelésben futó hosszú szakasz nélkül. 2) A legkisebb keresztmetszet (1,5 mm² réz) a táblázat első sora. 3) Kismegszakító vagy RCBO (I2 = 1,45 · In, MSZ EN 60898-1, MSZ EN 61009-1): az I2 ≤ 1,45 · Iz feltétel az In ≤ Iz-vel együtt teljesül. Olvadóbiztosítónál az I2 ≤ 1,45 · Iz feltételt külön kell ellenőrizni. 4) Csak a túlterhelés elleni védelem In ≤ Iz feltétele; az Ib ≤ In feltételt, a feszültségesést és a hurokimpedanciát külön kell ellenőrizni. 5) (csak ha Szigetelés: „XLPE (90 °C) – jóváhagyásig PVC-értékkel”) XLPE-szigetelés: a programban nincs jóváhagyott XLPE-táblázat, ezért a PVC-értékekkel számol (kedvezőtlenebb irányban). | ☐ | ☐ | |
+| KAL-KERESZTMETSZET-BEM-IN | In – A védelem névleges árama (A) | alapérték: 20 A; megengedett: > 0 és ≤ 500 A; súgó: „Kismegszakító vagy RCBO névleges árama. Olvadóbiztosítónál az I2 ≤ 1,45 · Iz feltételt külön kell ellenőrizni.” | ☐ | ☐ | |
 | KAL-KERESZTMETSZET-BEM-MOD | Szerelési mód | választható: A1, A2, B1, B2, C – leírásuk: L-MOD-A1, L-MOD-A2, L-MOD-B1, L-MOD-B2, L-MOD-C; alapérték: B2 (L-MOD-B2) | ☐ | ☐ | |
 | KAL-KERESZTMETSZET-BEM-SZIG | Szigetelés | választható: PVC, XLPE – leírásuk: L-SZIG-PVC, L-SZIG-XLPE (XLPE a D-XLPE szerint PVC-értékkel); alapérték: PVC | ☐ | ☐ | |
 | KAL-KERESZTMETSZET-BEM-EREK | Terhelt erek | választható: 2 ér (egyfázisú); 3 ér (háromfázisú); alapérték: 2 ér (egyfázisú) | ☐ | ☐ | |
@@ -1540,17 +1543,19 @@ Programmal összevetve: igen – 17 eset (a program listája, bemeneti korlát),
 |---|:-:|:-:|---|
 | KAL-KERESZTMETSZET-K2 | ☐ | ☐ | |
 
-#### KAL-KERESZTMETSZET-D1 – Nincs elegendő keresztmetszet; csak In ≤ Iz
+#### KAL-KERESZTMETSZET-D1 – Nincs elegendő keresztmetszet; csak In ≤ Iz, kismegszakítóra vagy RCBO-ra
 
-**Szabály.** Ha a T-KM-SOR legnagyobb (35 mm²) keresztmetszete sem elegendő, nincs eredmény, az In mező alatt: „A segédszámítás táblázatában (legfeljebb 35 mm²) nincs olyan keresztmetszet, amely ezzel a szerelési móddal elegendő. …”. A kalkulátor csak az In ≤ Iz feltételt vizsgálja (az I2 feltétel kismegszakítónál ezzel együtt teljesül, K-I2); a feszültségesést, a hurokimpedanciát és az Ib ≤ In-t nem – ezt a feltételezés-sor kimondja. A legkisebb keresztmetszet a táblázat első sora (1,5 mm², T-K-AMIN).
+**Szabály.** Ha a T-KM-SOR legnagyobb (35 mm²) keresztmetszete sem elegendő, nincs eredmény, az In mező alatt: „A segédszámítás táblázatában (legfeljebb 35 mm²) nincs olyan keresztmetszet, amely ezzel a szerelési móddal elegendő. …”. A kalkulátor csak az In ≤ Iz feltételt vizsgálja. Kismegszakítót vagy RCBO-t feltételez (I2 = 1,45 · In, K-I2): így az I2 ≤ 1,45 · Iz feltétel az In ≤ Iz-vel együtt teljesül; olvadóbiztosítónál ezt külön kell ellenőrizni. Mindkettőt feltételezés-sor mondja ki, és a mező súgója is; az Ib ≤ In-t, a feszültségesést és a hurokimpedanciát a kalkulátor nem vizsgálja (feltételezés-sor). A legkisebb keresztmetszet a táblázat első sora (1,5 mm², T-K-AMIN).
 
-**Indoklás.** Nagyobb keresztmetszetre a táblázat nem tartalmaz értéket; a többi feltételt a Feszültségesés, a Hurokimpedancia és a Kismegszakító-választás kalkulátor vizsgálja.
+**Indoklás.** Nagyobb keresztmetszetre a táblázat nem tartalmaz értéket; a többi feltételt a Feszültségesés, a Hurokimpedancia és a Kismegszakító-választás kalkulátor vizsgálja. Olvadóbiztosítónál (gG, a megállapodás szerinti kioldóáram jellemzően I2 ≈ 1,6 · In) az In ≤ Iz önmagában nem elég az I2 ≤ 1,45 · Iz feltételhez, ezért a kalkulátor erre külön figyelmeztet.
 
 **Kézzel számolt példa.** In = 125 A, A2, 3 terhelt ér, 30 °C: 35 mm²: Iz0 = 83 A < 125 A → nincs eredmény (hibaüzenet).
 
+**Kérdés a lektorhoz.** Elegendő-e, hogy a kalkulátor kismegszakítót vagy RCBO-t feltételez, és olvadóbiztosítóra (gG) csak a feltételezés-sor és a mező súgója figyelmeztet, vagy a védelem típusát is kérnie kell (gG esetén az I2 ≤ 1,45 · Iz feltétel külön vizsgálatával)?
+
 **Forrás.** T-PVC3-A2-35, T-K-AMIN (1. rész); K-I2 (2. rész)
 
-**Összevetés.** Programmal összevetve: igen – 2 eset (kalkulátor-futtatás), automatikus tesztben.
+**Összevetés.** Programmal összevetve: igen – 3 eset (kalkulátor-futtatás), automatikus tesztben.
 
 | Azonosító | ✓ | ✗ | Helyes érték / megjegyzés |
 |---|:-:|:-:|---|
@@ -1582,14 +1587,14 @@ Forrás: MSZ HD 60364-4-43:2010 433.1; MSZ EN 60898-1 (I2 = 1,45 · In; pillanat
 
 Cél: A kismegszakító névleges árama az előnyös értéksorból, a terhelés és a vezeték terhelhetősége közé (Ib ≤ In ≤ Iz), a megengedett hurokimpedanciával.
 
-Kiadás: T1 (csak szakmai lektori jóváhagyással), verzió v1 (2026. 10. 10.); táblázat-kapu: igen – a kalkulátor az 1. rész jóváhagyása nélkül akkor sem jelenik meg, ha ez a blokk jóvá van hagyva. Tartalmi ujjlenyomat: a8ff2c9b; forrás-ujjlenyomat: c91e55eb. A program a kalkulátort csak ezzel az ujjlenyomat-párral rögzített lektori rekorddal teszi közzé.
+Kiadás: T1 (csak szakmai lektori jóváhagyással), verzió v1 (2026. 10. 10.); táblázat-kapu: igen – a kalkulátor az 1. rész jóváhagyása nélkül akkor sem jelenik meg, ha ez a blokk jóvá van hagyva. Tartalmi ujjlenyomat: a8ff2c9b; forrás-ujjlenyomat: 48c4f6af. A program a kalkulátort csak ezzel az ujjlenyomat-párral rögzített lektori rekorddal teszi közzé.
 
 | Azonosító | Tétel | Leírás / érték | ✓ | ✗ | Helyes érték / megjegyzés |
 |---|---|---|:-:|:-:|---|
 | KAL-KISMEGSZAKITO-HAT | Mire jó / mire nem (a kalkulátoroldalon) | Mire jó: A kismegszakító névleges áramának előzetes kiválasztása adott vezetékhez és terheléshez. Annak ellenőrzése, hogy egy meglévő védelem nem nagyobb-e a vezetéknél. Mire nem: Szelektivitás és zárlati megszakítóképesség (Icn) ellenőrzésére. ÁVK (FI-relé) kiválasztására. | ☐ | ☐ | |
 | KAL-KISMEGSZAKITO-NV | Nem vizsgált (a kalkulátoroldalon) | a méretezési segédszámítással azonos lista (D-HATOKOR) | ☐ | ☐ | |
-| KAL-KISMEGSZAKITO-KEPLET | Képletek (a kalkulátoroldal „Képletek” szakasza) | Ib ≤ In ≤ Iz · I2 = 1,45 · In ≤ 1,45 · Iz · Zs,max = cmin · U0 / (m · In); m = 5 (B), 10 (C), 20 (D) | ☐ | ☐ | |
-| KAL-KISMEGSZAKITO-FELT | Feltételezések (a számítás mellett) | 1) Rézvezető, a táblázat szerinti referencia-szerelési móddal; hőszigetelésben futó hosszú szakasz nélkül. 2) MSZ EN 60898-1 szerinti kismegszakító (I2 = 1,45 · In). 3) A jelleggörbét a fogyasztó bekapcsolási árama határozza meg (B: általános, C: motoros, induktív terhelés). | ☐ | ☐ | |
+| KAL-KISMEGSZAKITO-KEPLET | Képletek (a kalkulátoroldal „Képletek” szakasza) | 1) Ib ≤ In ≤ Iz 2) I2 = 1,45 · In ≤ 1,45 · Iz 3) Zs,max = cmin · U0 / (m · In); m = 5 (B), 10 (C), 20 (D) | ☐ | ☐ | |
+| KAL-KISMEGSZAKITO-FELT | Feltételezések (a számítás mellett; a feltételes sorok a feltétellel) | 1) Rézvezető, a táblázat szerinti referencia-szerelési móddal; hőszigetelésben futó hosszú szakasz nélkül. 2) MSZ EN 60898-1 szerinti kismegszakító (I2 = 1,45 · In). 3) A jelleggörbét a fogyasztó bekapcsolási árama határozza meg (B: általános, C: motoros, induktív terhelés). 4) (csak ha Szigetelés: „XLPE (90 °C) – jóváhagyásig PVC-értékkel”) XLPE-szigetelés: a programban nincs jóváhagyott XLPE-táblázat, ezért a PVC-értékekkel számol (kedvezőtlenebb irányban). | ☐ | ☐ | |
 | KAL-KISMEGSZAKITO-BEM-IB | Ib – Tervezett terhelőáram (A) | alapérték: 13 A; megengedett: > 0 és ≤ 500 A | ☐ | ☐ | |
 | KAL-KISMEGSZAKITO-BEM-A | Keresztmetszet | választható: 1,5; 2,5; 4; 6; 10; 16; 25; 35 mm² (T-KM-SOR); alapérték: 2,5 mm² | ☐ | ☐ | |
 | KAL-KISMEGSZAKITO-BEM-MOD | Szerelési mód | választható: A1, A2, B1, B2, C – leírásuk: L-MOD-A1, L-MOD-A2, L-MOD-B1, L-MOD-B2, L-MOD-C; alapérték: B2 (L-MOD-B2) | ☐ | ☐ | |
@@ -1619,7 +1624,7 @@ Programmal összevetve: igen – 17 eset (a program listája, bemeneti korlát),
 
 #### KAL-KISMEGSZAKITO-K2 – Kioldási áram és megengedett hurokimpedancia
 
-**Szabály.** I2 = k · In (T-K-I2, k = 1,45); a feltétel I2 ≤ 1,45 · Iz kismegszakítónál az In ≤ Iz-vel együtt teljesül (K-I2), a levezetés ezt külön sorban írja ki. Zs,max = cmin · U0 / (m · In) a legkisebb választható In-re (K-ZS), m a jelleggörbe szerint (T-K-M-B, T-K-M-C, T-K-M-D).
+**Szabály.** I2 = k · In (T-K-I2, k = 1,45); a feltétel I2 ≤ 1,45 · Iz kismegszakítónál az In ≤ Iz-vel együtt teljesül (K-I2), a levezetés ezt külön sorban írja ki. Zs,max = cmin · U0 / (m · In) a legkisebb választható In-re (K-ZS), m a jelleggörbe szerint (T-K-M-B, T-K-M-C, T-K-M-D); kiírás 3 tizedesre lefelé kerekítve (KAL-KOZOS-KIIRAS).
 
 **Indoklás.** A hurokimpedancia-határ a választott védelemhez tartozik; a tényleges Zs-t a kalkulátor nem ismeri, ezért a verdikt felhívja a mérésre vagy számításra (Hurokimpedancia kalkulátor).
 
@@ -1661,18 +1666,18 @@ Forrás: MSZ HD 60364-4-41:2007 411.4.4 (Zs · Ia ≤ U0); MSZ EN 60898-1 (pilla
 
 Cél: Hurokimpedancia az áramkör végén a hosszból és a keresztmetszetekből, a zárlati áram és a pillanatkioldáshoz tartozó legnagyobb hossz TN-rendszerben.
 
-Kiadás: T1 (csak szakmai lektori jóváhagyással), verzió v1 (2026. 10. 10.); táblázat-kapu: igen – a kalkulátor az 1. rész jóváhagyása nélkül akkor sem jelenik meg, ha ez a blokk jóvá van hagyva. Tartalmi ujjlenyomat: c09f3818; forrás-ujjlenyomat: 8c985e02. A program a kalkulátort csak ezzel az ujjlenyomat-párral rögzített lektori rekorddal teszi közzé.
+Kiadás: T1 (csak szakmai lektori jóváhagyással), verzió v1 (2026. 10. 10.); táblázat-kapu: igen – a kalkulátor az 1. rész jóváhagyása nélkül akkor sem jelenik meg, ha ez a blokk jóvá van hagyva. Tartalmi ujjlenyomat: 293f288b; forrás-ujjlenyomat: b6d0b20e. A program a kalkulátort csak ezzel az ujjlenyomat-párral rögzített lektori rekorddal teszi közzé.
 
 | Azonosító | Tétel | Leírás / érték | ✓ | ✗ | Helyes érték / megjegyzés |
 |---|---|---|:-:|:-:|---|
 | KAL-HUROKIMPEDANCIA-HAT | Mire jó / mire nem (a kalkulátoroldalon) | Mire jó: Hosszú áramkörök (kert, melléképület) lekapcsolási feltételének előzetes ellenőrzése. Mért hurokimpedancia és a számított érték összevetése. Mire nem: A helyszíni mérés kiváltására: a kész berendezés hurokimpedanciáját mérni kell. TT-rendszerre és ÁVK-val védett áramkörök igazolására. | ☐ | ☐ | |
-| KAL-HUROKIMPEDANCIA-NV | Nem vizsgált (a kalkulátoroldalon) | a méretezési segédszámítással azonos lista (D-HATOKOR), kiegészítve: „az elosztó előtti hálózat impedanciájának változása és a mérési bizonytalanság” | ☐ | ☐ | |
-| KAL-HUROKIMPEDANCIA-KEPLET | Képletek (a kalkulátoroldal „Képletek” szakasza) | Zs = Ze + ρ1 · L · (1/A + 1/A_PE) · Ik = cmin · U0 / Zs · Zs ≤ Zs,max = cmin · U0 / (m · In) · Lmax = max(0; (Zs,max − Ze) / (ρ1 · (1/A + 1/A_PE))) | ☐ | ☐ | |
-| KAL-HUROKIMPEDANCIA-FELT | Feltételezések (a számítás mellett) | 1) TN-rendszer; a hurok a fázis- és a védővezetőn záródik. 2) Rézvezető, ρ1 = 0,0225 Ω·mm²/m (üzemi hőmérséklet); a vezeték reaktanciája elhanyagolva. 3) Kismegszakító (MSZ EN 60898-1) pillanatkioldási tartományának felső határa: B → 5 · In. 4) Kismegszakító (MSZ EN 60898-1) pillanatkioldási tartományának felső határa: C → 10 · In. | ☐ | ☐ | |
+| KAL-HUROKIMPEDANCIA-NV | Nem vizsgált (a kalkulátoroldalon) | a méretezési segédszámítás listája (D-HATOKOR), ebből elhagyva: „alumínium vezető, 35 mm² feletti keresztmetszet, gumiszigetelésű (60 °C-os) vezeték, csökkentett keresztmetszetű N- vagy PE-ér”; kiegészítve: „alumínium vezető, gumiszigetelésű (60 °C-os) vezeték”, „a védővezető keresztmetszetének méretezése és zárlati szilárdsága (543.1)”, „az elosztó előtti hálózat impedanciájának változása és a mérési bizonytalanság” | ☐ | ☐ | |
+| KAL-HUROKIMPEDANCIA-KEPLET | Képletek (a kalkulátoroldal „Képletek” szakasza) | 1) Zs = Ze + ρ1 · L · (1/A + 1/A_PE) 2) Ik = cmin · U0 / Zs 3) Zs ≤ Zs,max = cmin · U0 / (m · In) 4) Lmax = max(0; (Zs,max − Ze) / (ρ1 · (1/A + 1/A_PE))) | ☐ | ☐ | |
+| KAL-HUROKIMPEDANCIA-FELT | Feltételezések (a számítás mellett; a feltételes sorok a feltétellel) | 1) TN-rendszer; a hurok a fázis- és a védővezetőn záródik. 2) Rézvezető, ρ1 = 0,0225 Ω·mm²/m (üzemi hőmérséklet); a vezeték reaktanciája elhanyagolva. 3) (csak ha Kioldási jelleggörbe: „B”) Kismegszakító (MSZ EN 60898-1) pillanatkioldási tartományának felső határa: B → 5 · In. 4) (csak ha Kioldási jelleggörbe: „C”) Kismegszakító (MSZ EN 60898-1) pillanatkioldási tartományának felső határa: C → 10 · In. 5) (csak ha Kioldási jelleggörbe: „D”) Kismegszakító (MSZ EN 60898-1) pillanatkioldási tartományának felső határa: D → 20 · In. | ☐ | ☐ | |
 | KAL-HUROKIMPEDANCIA-BEM-ZE | Ze – Hurokimpedancia az elosztónál (Ω) | alapérték: 0,35 Ω; megengedett: 0 … 20 Ω; súgó: „Mért vagy az elosztói engedélyestől kapott érték az áramkör kezdetén.” | ☐ | ☐ | |
 | KAL-HUROKIMPEDANCIA-BEM-L | L – Vezetékhossz (egy irányban), m | alapérték: 25 m; megengedett: > 0 és ≤ 5000 m | ☐ | ☐ | |
-| KAL-HUROKIMPEDANCIA-BEM-A | A – Fázisvezető keresztmetszete (mm²) | alapérték: 2,5 mm²; megengedett: > 0 és ≤ 300 mm² | ☐ | ☐ | |
-| KAL-HUROKIMPEDANCIA-BEM-APE | A_PE – Védővezető keresztmetszete (mm²) | alapérték: nincs (üres); megengedett: > 0 és ≤ 300 mm²; nem kötelező; súgó: „Üresen a fázisvezetővel azonos.” | ☐ | ☐ | |
+| KAL-HUROKIMPEDANCIA-BEM-A | A – Fázisvezető keresztmetszete (mm²) | alapérték: 2,5 mm²; megengedett: > 0 és ≤ 35 mm²; súgó: „Rézvezető, legfeljebb 35 mm² (a segédszámítás tartománya).” | ☐ | ☐ | |
+| KAL-HUROKIMPEDANCIA-BEM-APE | A_PE – Védővezető keresztmetszete (mm²) | alapérték: nincs (üres); megengedett: > 0 és ≤ 35 mm²; nem kötelező; súgó: „Üresen a fázisvezetővel azonos. A védővezető méretezését (543.1) a kalkulátor nem vizsgálja.” | ☐ | ☐ | |
 | KAL-HUROKIMPEDANCIA-BEM-GORBE | Kioldási jelleggörbe | választható: B, C, D – pillanatkioldás: T-K-M-B, T-K-M-C, T-K-M-D; alapérték: B | ☐ | ☐ | |
 | KAL-HUROKIMPEDANCIA-BEM-IN | Névleges áram | választható: a KAL-KOZOS-MCB szerinti előnyös névleges áramok; alapérték: 16 A | ☐ | ☐ | |
 
@@ -1696,7 +1701,7 @@ Programmal összevetve: igen – 18 eset (a program listája, bemeneti korlát),
 
 #### KAL-HUROKIMPEDANCIA-K2 – Megengedett hurokimpedancia és legnagyobb hossz
 
-**Szabály.** Zs,max = cmin · U0 / (m · In) (K-ZS; m: T-K-M-B, T-K-M-C, T-K-M-D; In a KAL-KOZOS-MCB sorból). Feltétel: Zs ≤ Zs,max (relatív 10⁻⁹ tűréssel). Lmax = max(0; (Zs,max − Ze) / (ρ1 · (1/A + 1/A_PE))), kiírás 0,1 m-re lefelé kerekítve.
+**Szabály.** Zs,max = cmin · U0 / (m · In) (K-ZS; m: T-K-M-B, T-K-M-C, T-K-M-D; In a KAL-KOZOS-MCB sorból), kiírás 3 tizedesre lefelé kerekítve (KAL-KOZOS-KIIRAS). Feltétel: Zs ≤ Zs,max (relatív 10⁻⁹ tűréssel, a kerekítetlen értékekkel). Lmax = max(0; (Zs,max − Ze) / (ρ1 · (1/A + 1/A_PE))), kiírás 0,1 m-re lefelé kerekítve.
 
 **Indoklás.** A pillanatkioldás felső határán (m · In) a kismegszakító a kikapcsolási időn belül old; az Lmax a feltétel átrendezése a hosszra.
 
@@ -1714,15 +1719,15 @@ Programmal összevetve: igen – 18 eset (a program listája, bemeneti korlát),
 
 #### KAL-HUROKIMPEDANCIA-D1 – Nem teljesülő feltétel
 
-**Szabály.** Ha Zs > Zs,max: „Számítás szerint a pillanatkioldás feltétele nem teljesül: … Lehetséges megoldás: nagyobb keresztmetszet, rövidebb vezeték, B jelleggörbe vagy ÁVK – a döntés a tervező feladata.” ÁVK-val védett áramkört és TT-rendszert a kalkulátor nem igazol (Mire nem).
+**Szabály.** Ha Zs > Zs,max: „Számítás szerint a pillanatkioldás feltétele nem teljesül: … Lehetséges megoldás: … – a döntés a tervező feladata.” A felsorolt megoldások: nagyobb keresztmetszet és rövidebb vezeték (csak ha Ze < Zs,max, mert különben a vezeték nem segít), B jelleggörbe a bekapcsolási áram ellenőrzésével (csak C vagy D jelleggörbénél), kisebb névleges áram, ÁVK. A tervező Méretezés füle ugyanezt a felsorolást használja. ÁVK-val védett áramkört és TT-rendszert a kalkulátor nem igazol (Mire nem).
 
-**Indoklás.** A kalkulátor nem dönti el, melyik megoldás alkalmazható; csak a lehetőségeket sorolja fel.
+**Indoklás.** A kalkulátor nem dönti el, melyik megoldás alkalmazható; csak az adott esetben ténylegesen segítő lehetőségeket sorolja fel (a kisebb névleges áramnál az Ib ≤ In feltételt is ellenőrizni kell).
 
-**Kézzel számolt példa.** Ze = 0,35 Ω, L = 100 m, A = 1,5 mm², C16: R = 0,0225 · 100 · (2/1,5) = 3 Ω; Zs = 3,35 Ω > Zs,max = 1,4375 Ω → nem teljesül; Lmax = (1,4375 − 0,35) / 0,03 = 36,25 m → 36,2 m (lefelé kerekítve).
+**Kézzel számolt példa.** Ze = 0,35 Ω, L = 100 m, A = 1,5 mm², C16: R = 0,0225 · 100 · (2/1,5) = 3 Ω; Zs = 3,35 Ω > Zs,max = 1,4375 Ω → nem teljesül; Lmax = (1,4375 − 0,35) / 0,03 = 36,25 m → 36,2 m (lefelé kerekítve); megoldás: „nagyobb keresztmetszet, rövidebb vezeték, B jelleggörbe (a bekapcsolási áram ellenőrzésével), kisebb névleges áram vagy ÁVK”. Ugyanez B16-tal: Zs,max = 2,875 Ω, 3,35 > 2,875 → „nagyobb keresztmetszet, rövidebb vezeték, kisebb névleges áram vagy ÁVK”. Ze = 3 Ω, B16 (Ze ≥ Zs,max): „kisebb névleges áram vagy ÁVK”; Ze = 1,5 Ω, C16 (Ze ≥ 1,4375 Ω): „B jelleggörbe (a bekapcsolási áram ellenőrzésével), kisebb névleges áram vagy ÁVK”.
 
-**Forrás.** T-K-M-C (1. rész); K-ZS, D-AVK (2. rész)
+**Forrás.** T-K-M-B, T-K-M-C (1. rész); K-ZS, D-AVK (2. rész)
 
-**Összevetés.** Programmal összevetve: igen – 1 eset (kalkulátor-futtatás), automatikus tesztben.
+**Összevetés.** Programmal összevetve: igen – 4 eset (kalkulátor-futtatás), automatikus tesztben.
 
 | Azonosító | ✓ | ✗ | Helyes érték / megjegyzés |
 |---|:-:|:-:|---|
@@ -1730,17 +1735,17 @@ Programmal összevetve: igen – 18 eset (a program listája, bemeneti korlát),
 
 #### KAL-HUROKIMPEDANCIA-D2 – Csökkentett védővezető és túl nagy Ze
 
-**Szabály.** A védővezető keresztmetszete külön megadható (A_PE); üresen a fázisvezetővel azonos. Ha már Ze ≥ Zs,max, figyelmeztetés: „Már az elosztónál mért hurokimpedancia is eléri a megengedett értéket: ezzel a védelemmel az áramkör nem rövidíthető le eléggé.”, és Lmax = 0. Ze = 0 is megadható.
+**Szabály.** A védővezető keresztmetszete külön megadható (A_PE, legfeljebb 35 mm²); üresen a fázisvezetővel azonos. Ha már Ze ≥ Zs,max, figyelmeztetés: „Már az elosztónál mért hurokimpedancia is eléri a megengedett értéket: ezzel a védelemmel az áramkör nem rövidíthető le eléggé.”, és Lmax = 0. Ze = 0 is megadható. A „Nem vizsgált” lista a méretezésétől eltér: a kalkulátor számol a csökkentett védővezetővel, és 35 mm² felett nem enged bevitelt, ezért ezek nem szerepelnek benne; helyettük „a védővezető keresztmetszetének méretezése és zárlati szilárdsága (543.1)” (KAL-HUROKIMPEDANCIA-NV).
 
-**Indoklás.** A tervező Méretezés füle a csökkentett PE-erű kábelt nem számolja (D-BLOKK, D-PE), a kalkulátor viszont a megadott A_PE-vel számol – a „Nem vizsgált” lista (D-HATOKOR) ugyanakkor a csökkentett N- vagy PE-eret is felsorolja.
+**Indoklás.** A tervező Méretezés füle a csökkentett PE-erű kábelt nem számolja (D-BLOKK, D-PE), mert ott a kábeljelölésből kellene kiolvasni; a kalkulátor a megadott A_PE-vel számol, de a PE méretezését (543.1) nem vizsgálja.
 
 **Kézzel számolt példa.** A = 2,5 mm², A_PE = 1,5 mm², L = 20 m, Ze = 0,3 Ω, B16: R = 0,0225 · 20 · (1/2,5 + 1/1,5) = 0,48 Ω; Zs = 0,78 Ω; Lmax = (2,875 − 0,3) / (0,0225 · (1/2,5 + 1/1,5)) = 107,292 m → 107,2 m (lefelé kerekítve). Ze = 3 Ω, B16 (Zs,max = 2,875 Ω): figyelmeztetés, Lmax = 0 m.
 
-**Kérdés a lektorhoz.** A „Nem vizsgált” lista a csökkentett keresztmetszetű N- vagy PE-eret is felsorolja, a kalkulátor pedig A_PE megadását engedi. Elfogadható-e ez így (a lista a méretezési segédszámítással közös), vagy a kalkulátor listáját módosítani kell?
+**Kérdés a lektorhoz.** Elegendő-e, hogy a kalkulátor a megadott (csökkentett) védővezetővel számol, de a védővezető keresztmetszetének méretezését (543.1) nem vizsgálja, csak a „Nem vizsgált” lista említi?
 
 **Forrás.** D-BLOKK, D-PE, D-HATOKOR (2. rész)
 
-**Összevetés.** Programmal összevetve: igen – 3 eset (kalkulátor-futtatás), automatikus tesztben.
+**Összevetés.** Programmal összevetve: igen – 4 eset (kalkulátor-futtatás), automatikus tesztben.
 
 | Azonosító | ✓ | ✗ | Helyes érték / megjegyzés |
 |---|:-:|:-:|---|
@@ -1756,14 +1761,14 @@ Forrás: MSZ HD 60364-5-52:2011 B.52.2, B.52.4, B.52.14, B.52.17 – a lib/sizin
 
 Cél: Rézvezetékek terhelhetősége (Iz0) 1,5–35 mm²-ig a választott szerelési módra, hőmérsékletre és csoportosításra javítva (Iz = Iz0 · kθ · kcs).
 
-Kiadás: T1 (csak szakmai lektori jóváhagyással), verzió v1 (2026. 10. 10.); táblázat-kapu: igen – a kalkulátor az 1. rész jóváhagyása nélkül akkor sem jelenik meg, ha ez a blokk jóvá van hagyva. Tartalmi ujjlenyomat: 135442b5; forrás-ujjlenyomat: 15759e83. A program a kalkulátort csak ezzel az ujjlenyomat-párral rögzített lektori rekorddal teszi közzé.
+Kiadás: T1 (csak szakmai lektori jóváhagyással), verzió v1 (2026. 10. 10.); táblázat-kapu: igen – a kalkulátor az 1. rész jóváhagyása nélkül akkor sem jelenik meg, ha ez a blokk jóvá van hagyva. Tartalmi ujjlenyomat: 135442b5; forrás-ujjlenyomat: 5f043d00. A program a kalkulátort csak ezzel az ujjlenyomat-párral rögzített lektori rekorddal teszi közzé.
 
 | Azonosító | Tétel | Leírás / érték | ✓ | ✗ | Helyes érték / megjegyzés |
 |---|---|---|:-:|:-:|---|
 | KAL-TERHELHETOSEG-TABLAZAT-HAT | Mire jó / mire nem (a kalkulátoroldalon) | Mire jó: Gyors áttekintés: melyik keresztmetszet mekkora áramot bír az adott szerelési módban. A Keresztmetszet-választás és a Kismegszakító-választás eredményeinek ellenőrzése. Mire nem: Gyártói adatlap helyett speciális kábelekre (pl. gumiszigetelésű, árnyékolt, hőálló). Földben, szabad levegőn vagy kábeltálcán vezetett kábelekre (D, E, F, G mód). | ☐ | ☐ | |
 | KAL-TERHELHETOSEG-TABLAZAT-NV | Nem vizsgált (a kalkulátoroldalon) | a méretezési segédszámítással azonos lista (D-HATOKOR) | ☐ | ☐ | |
-| KAL-TERHELHETOSEG-TABLAZAT-KEPLET | Képletek (a kalkulátoroldal „Képletek” szakasza) | Iz = Iz0 · kθ · kcs | ☐ | ☐ | |
-| KAL-TERHELHETOSEG-TABLAZAT-FELT | Feltételezések (a számítás mellett) | 1) Rézvezető, a táblázat szerinti referencia-szerelési móddal; hőszigetelésben futó hosszú szakasz nélkül. | ☐ | ☐ | |
+| KAL-TERHELHETOSEG-TABLAZAT-KEPLET | Képletek (a kalkulátoroldal „Képletek” szakasza) | 1) Iz = Iz0 · kθ · kcs | ☐ | ☐ | |
+| KAL-TERHELHETOSEG-TABLAZAT-FELT | Feltételezések (a számítás mellett; a feltételes sorok a feltétellel) | 1) Rézvezető, a táblázat szerinti referencia-szerelési móddal; hőszigetelésben futó hosszú szakasz nélkül. 2) (csak ha Szigetelés: „XLPE (90 °C) – jóváhagyásig PVC-értékkel”) XLPE-szigetelés: a programban nincs jóváhagyott XLPE-táblázat, ezért a PVC-értékekkel számol (kedvezőtlenebb irányban). | ☐ | ☐ | |
 | KAL-TERHELHETOSEG-TABLAZAT-BEM-MOD | Szerelési mód | választható: A1, A2, B1, B2, C – leírásuk: L-MOD-A1, L-MOD-A2, L-MOD-B1, L-MOD-B2, L-MOD-C; alapérték: B2 (L-MOD-B2) | ☐ | ☐ | |
 | KAL-TERHELHETOSEG-TABLAZAT-BEM-SZIG | Szigetelés | választható: PVC, XLPE – leírásuk: L-SZIG-PVC, L-SZIG-XLPE (XLPE a D-XLPE szerint PVC-értékkel); alapérték: PVC | ☐ | ☐ | |
 | KAL-TERHELHETOSEG-TABLAZAT-BEM-EREK | Terhelt erek | választható: 2 ér (egyfázisú); 3 ér (háromfázisú); alapérték: 2 ér (egyfázisú) | ☐ | ☐ | |
@@ -1879,14 +1884,14 @@ A 3. rész kalkulátoronként hagyható jóvá. „Jóváhagyom”: a kalkuláto
 
 | Kalkulátor | Blokk | Tartalmi ujjlenyomat | Forrás-ujjlenyomat | Táblázat-kapu | Döntés |
 |---|---|---|---|---|---|
-| Feszültségesés | KAL-FESZULTSEGES | 937ce6f9 | 4e8e3830 | nem | ☐ Jóváhagyom · ☐ Javítás után / nem |
+| Feszültségesés | KAL-FESZULTSEGES | f1be2f7d | c0f73c97 | igen | ☐ Jóváhagyom · ☐ Javítás után / nem |
 | Motor névleges árama | KAL-MOTOR-ARAM | d3861940 | 81ecfbc6 | nem | ☐ Jóváhagyom · ☐ Javítás után / nem |
 | LED-szalag tápegysége | KAL-LED-SZALAG-TAPEGYSEG | 12c6bbe4 | 48423097 | nem | ☐ Jóváhagyom · ☐ Javítás után / nem |
 | Fázisjavítás (meddőkompenzálás) | KAL-FAZISJAVITAS | 9d9f7219 | 737957ec | nem | ☐ Jóváhagyom · ☐ Javítás után / nem |
-| Keresztmetszet-választás | KAL-KERESZTMETSZET | ff172351 | 17321a6b | igen | ☐ Jóváhagyom · ☐ Javítás után / nem |
-| Kismegszakító-választás | KAL-KISMEGSZAKITO | a8ff2c9b | c91e55eb | igen | ☐ Jóváhagyom · ☐ Javítás után / nem |
-| Hurokimpedancia és zárlati áram | KAL-HUROKIMPEDANCIA | c09f3818 | 8c985e02 | igen | ☐ Jóváhagyom · ☐ Javítás után / nem |
-| Terhelhetőségi táblázat | KAL-TERHELHETOSEG-TABLAZAT | 135442b5 | 15759e83 | igen | ☐ Jóváhagyom · ☐ Javítás után / nem |
+| Keresztmetszet-választás | KAL-KERESZTMETSZET | b7b5caee | fb81ce00 | igen | ☐ Jóváhagyom · ☐ Javítás után / nem |
+| Kismegszakító-választás | KAL-KISMEGSZAKITO | a8ff2c9b | 48c4f6af | igen | ☐ Jóváhagyom · ☐ Javítás után / nem |
+| Hurokimpedancia és zárlati áram | KAL-HUROKIMPEDANCIA | 293f288b | b6d0b20e | igen | ☐ Jóváhagyom · ☐ Javítás után / nem |
+| Terhelhetőségi táblázat | KAL-TERHELHETOSEG-TABLAZAT | 135442b5 | 5f043d00 | igen | ☐ Jóváhagyom · ☐ Javítás után / nem |
 
 ### Teendő eltérés esetén
 
@@ -1904,11 +1909,11 @@ A jóváhagyott csomag:
 | Adat | Érték |
 |---|---|
 | Csomagverzió | LK-3 (2026. 10. 10.) |
-| Csomag-ujjlenyomat | d8648424 (a csomag teljes szövegéé: bevezető, tételek, jóváhagyó lap) |
+| Csomag-ujjlenyomat | 77cbe404 (a csomag teljes szövegéé: bevezető, tételek, jóváhagyó lap) |
 | Táblázatváltozat | 2026.10-1 |
 | 1. rész – táblázat-ujjlenyomat | c78b23ee (ehhez köti a program a jóváhagyást) |
-| 2. rész – képlet-ujjlenyomat | 0f127c02 (a fejlesztési folyamat automatikus tesztje ellenőrzi) |
-| 3. rész – kalkulátor-ujjlenyomat | bd293e1b (a 3. rész egészéé; kalkulátoronként: a döntési táblázatban) |
+| 2. rész – képlet-ujjlenyomat | 25b6c94f (a fejlesztési folyamat automatikus tesztje ellenőrzi) |
+| 3. rész – kalkulátor-ujjlenyomat | e65e37f3 (a 3. rész egészéé; kalkulátoronként: a döntési táblázatban) |
 
 Döntés:
 
@@ -1916,11 +1921,11 @@ Döntés:
 - ☐ Az 1–2. részt a jelölt eltérések javítása után hagyom jóvá; a javított kiadás változott tételeit ellenőrzöm.
 - ☐ Az 1–2. részt nem hagyom jóvá (indoklás a megjegyzésben).
 
-Alulírott kijelentem, hogy a Villanyrajz lektori csomag ezen a lapon megjelölt, 59 oldalas kiadásának 1. (méretezési táblázatok), 2. (képletek és programozott döntések) és 3. (szabványhoz kötött kalkulátorok) részét a hivatkozott szabványok hatályos kiadásával összevetettem, és a tételeket a fenti döntés, valamint a kalkulátoronkénti döntés szerint jelöltem. A 3. részből kizárólag a kalkulátoronkénti döntésben „Jóváhagyom” jelölésű kalkulátorokat hagyom jóvá. A jóváhagyás kizárólag a csomagban, a megjelölt ujjlenyomatokkal azonosított tartalomra vonatkozik; nem minősül a programmal készült egyes tervekért vagy a kalkulátorokkal végzett egyes számításokért vállalt tervezői felelősségnek, és nem terjed ki a csomag 4–6. részére.
+Alulírott kijelentem, hogy a Villanyrajz lektori csomag ezen a lapon megjelölt, 61 oldalas kiadásának 1. (méretezési táblázatok), 2. (képletek és programozott döntések) és 3. (szabványhoz kötött kalkulátorok) részét a hivatkozott szabványok hatályos kiadásával összevetettem, és a tételeket a fenti döntés, valamint a kalkulátoronkénti döntés szerint jelöltem. A 3. részből kizárólag a kalkulátoronkénti döntésben „Jóváhagyom” jelölésű kalkulátorokat hagyom jóvá. A jóváhagyás kizárólag a csomagban, a megjelölt ujjlenyomatokkal azonosított tartalomra vonatkozik; nem minősül a programmal készült egyes tervekért vagy a kalkulátorokkal végzett egyes számításokért vállalt tervezői felelősségnek, és nem terjed ki a csomag 4–6. részére.
 
 Az 1. rész ujjlenyomatát a program maga ellenőrzi: eltérésnél „ellenőrizendő” állapotra áll vissza. A 2. rész ujjlenyomatát a fejlesztési folyamat automatikus tesztje veti össze a jóváhagyottal. A 3. részben kalkulátoronként a tartalmi és a forrás-ujjlenyomat kerül a kiadási rekordba: tartalmi eltérésnél a program a kalkulátort nem teszi közzé, forráseltérésnél az automatikus teszt elbukik. Bármelyik eltérésénél új kiadás és új jóváhagyás kell.
 
-Jogosultság például: épületvillamossági tervező (MMK-névjegyzék) vagy érintésvédelmi szabványossági felülvizsgáló.
+A „Jogosultság megnevezése” a programban a lektorálás jelzésében szó szerint megjelenik (név nélkül is); például: épületvillamossági tervező (MMK-névjegyzék) vagy érintésvédelmi szabványossági felülvizsgáló.
 
 | Adat | Kitöltés |
 |---|---|
@@ -1930,7 +1935,7 @@ Jogosultság például: épületvillamossági tervező (MMK-névjegyzék) vagy �
 | Hely | |
 | Dátum | |
 | Aláírás | |
-| Jóváhagyott csomagverzió és ujjlenyomatok | LK-3 (2026. 10. 10.); csomag: d8648424; 1. rész: c78b23ee; 2. rész: 0f127c02; 3. rész: bd293e1b |
+| Jóváhagyott csomagverzió és ujjlenyomatok | LK-3 (2026. 10. 10.); csomag: 77cbe404; 1. rész: c78b23ee; 2. rész: 25b6c94f; 3. rész: e65e37f3 |
 | Megjegyzések | |
 
-☐ Hozzájárulok, hogy nevem, névjegyzéki számom és a jóváhagyás dátuma a tervező Méretezés fülén (Eszközök → Tervsegéd → Méretezés) minden felhasználónak; minden felhasználó exportált terv-PDF-jében, ha a méretezési táblákat bekapcsolja, az elosztóoldalak „méretezés indoklása” táblájának „Táblázatok – Állapot” sorában (ugyanennek a táblának az utolsó sora a terv tervezőjének „Tervezői ellenőrzés” aláírósora); a nyilvános, keresőkben is megtalálható kalkulátoroldalakon a táblázatokat használó kalkulátorok (Feszültségesés, Keresztmetszet-választás, Kismegszakító-választás, Hurokimpedancia és zárlati áram, Terhelhetőségi táblázat) „Táblázatok állapota” sorában és a Vezeték-ellenállás kalkulátor ρ1 szerinti tájékoztató sorában – ezzel a szöveggel megjelenjen: „A táblázatértékeket szakmailag lektorálta: [név] ([névjegyzéki szám]), [dátum]. Táblázatváltozat: 2026.10-1, ujjlenyomat: c78b23ee.”; továbbá hogy a 3. részből általam jóváhagyott kalkulátorok oldalán nevem és minősítésem így megjelenjen: „Szakmailag lektorálta: [név], [minősítés] · [dátum]; Szakmai lektor: [név], [minősítés]”. Hozzájárulás hiányában a program a nevem nélkül jelzi a lektorálást: „A táblázatértékeket jogosult villamos tervező szakmailag lektorálta, [dátum]. Táblázatváltozat: 2026.10-1, ujjlenyomat: c78b23ee.”, illetve „Szakmailag lektorálta: [minősítés] · [dátum]; Szakmai lektor: [minősítés]”. A jóváhagyás érvénye a hozzájárulástól nem függ.
+☐ Hozzájárulok, hogy nevem, névjegyzéki számom, jogosultságom és a jóváhagyás dátuma a tervező Méretezés fülén (Eszközök → Tervsegéd → Méretezés) minden felhasználónak; minden felhasználó exportált terv-PDF-jében, ha a méretezési táblákat bekapcsolja, az elosztóoldalak „méretezés indoklása” táblájának „Táblázatok – Állapot” sorában (ugyanennek a táblának az utolsó sora a terv tervezőjének „Tervezői ellenőrzés” aláírósora); a nyilvános, keresőkben is megtalálható kalkulátoroldalakon a táblázatokat használó kalkulátorok (Feszültségesés, Keresztmetszet-választás, Kismegszakító-választás, Hurokimpedancia és zárlati áram, Terhelhetőségi táblázat) „Táblázatok állapota” sorában és a Vezeték-ellenállás kalkulátor ρ1 szerinti tájékoztató sorában – ezzel a szöveggel megjelenjen: „A táblázatértékeket szakmailag lektorálta: [név], [jogosultság] ([névjegyzéki szám]), [dátum]. Táblázatváltozat: 2026.10-1, ujjlenyomat: c78b23ee.”; továbbá hogy a 3. részből általam jóváhagyott kalkulátorok saját oldalán (jelvény; lábléc-sor) nevem és jogosultságom így megjelenjen: „Szakmailag lektorálta: [név], [jogosultság] · [dátum]; Szakmai lektor: [név], [jogosultság]”. Tudomásul veszem, hogy ehhez nevem és névjegyzéki számom a program nyilvános oldalainak kódjába is bekerül. Hozzájárulás hiányában a program nevemet és névjegyzéki számomat nem rögzíti, és a lektorálást a jogosultságom megnevezésével jelzi: „A táblázatértékeket szakmailag lektorálta: [jogosultság], [dátum]. Táblázatváltozat: 2026.10-1, ujjlenyomat: c78b23ee.”, illetve „Szakmailag lektorálta: [jogosultság] · [dátum]; Szakmai lektor: [jogosultság]”. A kalkulátorlistán és a keresőben a jelvény név nélküli. A jóváhagyás érvénye a hozzájárulástól nem függ.

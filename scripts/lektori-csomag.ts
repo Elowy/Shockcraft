@@ -16,12 +16,12 @@
 import {execFileSync} from 'node:child_process';
 import {existsSync,readFileSync,writeFileSync} from 'node:fs';
 import {jsPDF} from 'jspdf';
-import {CLAUSES,INSTALL_METHODS,INSULATIONS,SIZING_REVIEW,SIZING_TABLES as T,SOURCES,fingerprint,insulationLabels,methodLabels,reviewText,reviewedContent,tablesApproved,tablesFingerprint,type InstallMethod,type Insulation,type IzOverride,type SizingReview,type SourceKey} from '../lib/sizing-tables';
+import {CLAUSES,INSTALL_METHODS,INSULATIONS,SIZING_REVIEW,SIZING_TABLES as T,SOURCES,fingerprint,insulationLabels,methodLabels,reviewNameShown,reviewText,reviewedContent,tablesApproved,tablesFingerprint,type InstallMethod,type Insulation,type IzOverride,type SizingReview,type SourceKey} from '../lib/sizing-tables';
 import type {CircuitSizing,PlanSizing} from '../lib/sizing-schema';
 import {estimatedPower} from '../lib/phase-load';
 import {SIZING_DISCLAIMER_SHORT,SIZING_NOT_COVERED} from '../lib/sizing';
 import {runCalc,type CalcDef,type FieldDef,type NumberField,type Raw} from '../lib/calc/core';
-import {bySlug,calcFingerprint,expertMeta,releaseInfo} from '../lib/calc/registry';
+import {bySlug,calcFingerprint,calcMeta,expertMeta,releaseInfo} from '../lib/calc/registry';
 import {RELEASES,T1_SLUGS,TABLE_GATED,type ExpertReview,type ReleaseRecord} from '../lib/calc/release';
 import {HP_W,LE_W,MCB_RATINGS,PSU_SIZES} from '../lib/calc/constants';
 import {UNITS,unitById,type Unit,type UnitKind} from '../lib/calc/units';
@@ -29,18 +29,25 @@ import {SAFETY} from '../lib/kb/safety';
 import {sourceFingerprint} from './calc-source';
 
 // ---------------------------------------------------------------- Kiadások
-export type Edition={number:number;date:string;content:string;note?:string};
 /**
- * A csomag kiadásainak előzménylistája; a legutolsó az aktuális. Meglévő bejegyzést soha ne írj át.
- * Ha a csomag tartalma (bármely szöveg, tétel, érték vagy űrlapelem) változik, a generátor megáll, és új bejegyzést
- * kér a lista végére: number + 1, a mai dátum, az új csomag-ujjlenyomat. A dátum szándékosan rögzített (nem a futás
- * napja), így a kimenet determinisztikus és a --check megbízható. A már commitolt kiadás tartalmának átírását a
- * generátor a git HEAD-ben lévő docs/lektori-csomag.md-vel összevetve is jelzi.
+ * Egy csomagkiadás. `draft`: belső tervezet – lektornak nem küldhető, jóváhagyás nem hivatkozhat rá. `sent`: a lektornak való kiküldés
+ * dátuma; a kiküldött kiadás bejegyzése többé nem írható át (a generátor a git HEAD-ben lévő EDITIONS-szel összevetve ellenőrzi).
+ * Nem tervezet kiadásnál kötelező a jóváhagyott tartalom ujjlenyomata részenként: `tables` (1. rész), `formulas` (2. rész) és
+ * kalkulátoronként `calcs[slug]` = „tartalmi/forrás” ujjlenyomat-pár – a jóváhagyások (SIZING_REVIEW.approvalRef, a kalkulátorok
+ * lektori rekordja) ehhez kötődnek (reviewRefProblems, releaseRefProblems).
+ */
+export type Edition={number:number;date:string;content:string;draft?:true;sent?:string;tables?:string;formulas?:string;calcs?:Readonly<Record<string,string>>;note?:string};
+/**
+ * A csomag kiadásainak előzménylistája; a legutolsó az aktuális. Ha a csomag tartalma (bármely szöveg, tétel, érték vagy űrlapelem)
+ * változik, a generátor megáll, és kiírja a bejegyzést: a még ki nem küldött (sent nélküli) utolsó kiadásé átírható, különben új
+ * bejegyzés kell a lista végére (number + 1, a mai dátum). A dátum szándékosan rögzített (nem a futás napja), így a kimenet
+ * determinisztikus és a --check megbízható. A korábbi (nem utolsó) és a kiküldött bejegyzések a git HEAD-hez képest nem
+ * változhatnak (editionProblems, committedEditions).
  */
 export const EDITIONS:readonly Edition[]=[
- {number:1,date:'2026-10-10',content:'48479e60',note:'belső tervezet, lektornak nem küldve; az ujjlenyomat még csak a tételeket fedte'},
- {number:2,date:'2026-10-10',content:'4f9723b6',note:'belső tervezet, lektornak nem küldve'},
- {number:3,date:'2026-10-10',content:'d8648424'},
+ {number:1,date:'2026-10-10',content:'48479e60',draft:true,note:'belső tervezet, lektornak nem küldve; az ujjlenyomat még csak a tételeket fedte'},
+ {number:2,date:'2026-10-10',content:'4f9723b6',draft:true,note:'belső tervezet, lektornak nem küldve'},
+ {number:3,date:'2026-10-10',content:'77cbe404',tables:'c78b23ee',formulas:'25b6c94f',calcs:{'feszultseges':'f1be2f7d/c0f73c97','motor-aram':'d3861940/81ecfbc6','led-szalag-tapegyseg':'12c6bbe4/48423097','fazisjavitas':'9d9f7219/737957ec','keresztmetszet':'b7b5caee/fb81ce00','kismegszakito':'a8ff2c9b/48c4f6af','hurokimpedancia':'293f288b/b6d0b20e','terhelhetoseg-tablazat':'135442b5/5f043d00'}},
 ];
 export const EDITION=EDITIONS[EDITIONS.length-1];
 export const PATHS={md:'docs/lektori-csomag.md',pdf:'docs/lektori-csomag.pdf',font:'public/fonts/NotoSans-Regular.ttf',sizingDoc:'docs/meretezes.md'} as const;
@@ -235,7 +242,7 @@ const schema=(scope:'circuit'|'plan'|'board'|'override',field:string,ok:unknown[
 const pc=(text:string,expect:Extract<ProgramCheck,{fn:'parseCable'}>['expect']):ProgramCheck=>({fn:'parseCable',args:[text],expect});
 const pvcOk=(text:string,section:number,insulation:Insulation|null):ProgramCheck=>pc(text,{ok:true,section,insulation});
 
-/** A docs/meretezes.md „## Mit nem vizsgál” felsorolása (a teszt ezt veti össze a program listájával, és eltérésnél figyelmeztet). */
+/** A docs/meretezes.md „## Mit nem vizsgál” felsorolása (a teszt ezt veti össze a program listájával; eltérésnél a teszt elbukik). */
 export function notCoveredFrom(md:string):string[]{
  const lines=md.split(/\r?\n/),start=lines.findIndex(l=>l.trim()==='## Mit nem vizsgál');
  if(start<0)throw Error(PATHS.sizingDoc+': nem található a „## Mit nem vizsgál” szakasz.');
@@ -393,8 +400,9 @@ function formulasPart(notCovered:string[]):Part{
  const JEL:ValueItem[]=[
   value('D-JEL-AL','Al, alu, alumínium, aluminium, NAYY…, NA2X…, AYKY…, AMKA','alumínium → „Nem számítható” (D-BLOKK)',[],
    [...['Al 4x16','alu 3x2,5','alumínium 4x16','aluminium 4x16','NAYY 4x16','NA2XY 4x16','AYKY 4x10','AMKA 4x16'].map(t=>pc(t,{ok:false,code:'aluminium'})),pvcOk('alá 3x2,5',2.5,null)]),
-  value('D-JEL-GUMI','H03R…, H05R…, H07R… (RN, RR, RT), GT, gumi… (szó elején, ékezetes folytatással is: gumis, gumikábel, gumiszigetelésű, Gumi-kábel)','gumiszigetelés (60 °C) → „Nem számítható” (D-BLOKK)',[],
-   [...['H07RN-F 3G2,5','H05RR-F 3G1,5','H07RT 3x2,5','GT 3x2,5','gumi 3x2,5','GUMI 3x2,5','gumis 3x2,5','gumikábel 3x2,5','gumiszigetelésű 3x2,5','Gumi kábel 3x2,5','gumikabel 3x2,5','Gumi-kábel 3x2,5'].map(t=>pc(t,{ok:false,code:'rubber'})),pvcOk('ragumi 3x2,5',2.5,null)]),
+  value('D-JEL-GUMI','H03R…, H05R…, H07R… (RN, RR, RT; szóközzel vagy kötőjellel is: H07 RN-F, H07-RN-F), RN-F, GT, gumi… (szó elején, ékezetes folytatással is: gumis, gumikábel, gumiszigetelésű, gumitömlő, Gumi-kábel); nem számít a tartozékszó: gumicső, gumitömítés, gumialátét, gumigyűrű, gumidugó, gumiszalag','gumiszigetelés (60 °C) → „Nem számítható” (D-BLOKK); minden más „gumi…” szó (pl. „Gumi Kft.” cégnév) is – a biztonság javára',[],
+   [...['H07RN-F 3G2,5','H05RR-F 3G1,5','H07RT 3x2,5','H07 RN-F 3G2,5','H07-RN-F 3G2,5','H05 RR-F 3G1,5','RN-F 3G2,5','GT 3x2,5','gumi 3x2,5','GUMI 3x2,5','gumis 3x2,5','gumikábel 3x2,5','gumiszigetelésű 3x2,5','gumitömlő 3x2,5','Gumi kábel 3x2,5','gumikabel 3x2,5','Gumi-kábel 3x2,5','NYM-J 3x2,5 (Gumi Kft.)'].map(t=>pc(t,{ok:false,code:'rubber'})),
+    pvcOk('ragumi 3x2,5',2.5,null),pvcOk('NYM-J 3x2,5 gumicsőben',2.5,'PVC'),pvcOk('NYM-J 3x2,5 gumitömítéssel',2.5,'PVC'),pvcOk('gumialátét 3x2,5',2.5,null),pvcOk('gumigyűrű 3x2,5',2.5,null),pvcOk('gumidugó 3x2,5',2.5,null),pvcOk('Gumiszalag 3x2,5',2.5,null)]),
   value('D-JEL-XLPE','N2X…, 2XY, XLPE, EPR','XLPE (90 °C; D-XLPE szerint PVC-értékkel)',[],
    [pvcOk('N2XH 3×4',4,'XLPE'),pvcOk('N2XY 3x2,5',2.5,'XLPE'),pvcOk('2XY 3x2,5',2.5,'XLPE'),pvcOk('XLPE 3x2,5',2.5,'XLPE'),pvcOk('EPR 3x2,5',2.5,'XLPE')]),
   value('D-JEL-PVC','NYM…, NYY…, NYCWY, MBCu, MCu, MKCu, MT, MYY, YKY…, CYKY…, H03V…, H05V…, H07V…, PVC','PVC (70 °C)',[],
@@ -406,7 +414,7 @@ function formulasPart(notCovered:string[]):Part{
  ];
  const D:RuleItem[]=[
   rule('D-KEREK','Lépcsőre kerekítés iránya',
-   'Táblázati lépcsők közötti bemenetnél a program a kedvezőtlenebb lépcsőt választja, interpoláció nélkül: környezeti hőmérséklet → a következő nagyobb vagy egyenlő lépcső (T-KT), áramkörszám → a következő nagyobb vagy egyenlő oszlop (T-KCS). A számított értékeket (Ib, Iz, ΔU, Zs) nem kerekíti; a kijelzés 2, Zs-nél 3 tizedes.',
+   'Táblázati lépcsők közötti bemenetnél a program a kedvezőtlenebb lépcsőt választja, interpoláció nélkül: környezeti hőmérséklet → a következő nagyobb vagy egyenlő lépcső (T-KT), áramkörszám → a következő nagyobb vagy egyenlő oszlop (T-KCS). A számított értékeket (Ib, Iz, ΔU, Zs) nem kerekíti; a kijelzés 2, Zs-nél 3 tizedes. A megengedett hurokimpedancia (Zs,max) kijelzése lefelé kerekít (a számítási sorban 3, az összesítő táblában 2 tizedesre), így a kiírt határ soha nem nagyobb a valódinál; ha a kerekített kiírás a feltétellel ellentétes viszonyt mutatna, több tizedes jelenik meg.',
    'A nagyobb hőmérséklethez és áramkörszámhoz kisebb tényező tartozik, így a kerekítés a biztonság javára téved. A bemenet korlátai (10–60 °C, 1–20 áramkör) miatt a táblázat széle nem léphető túl.',
    `33 °C → ${kt33.step} °C → kθ = ${exact(kt33.value)}; 10 áramkör → ${kc10.step} → kcs = ${exact(kc10.value)}.`,
    src('ambient')+'; '+src('grouping'),
@@ -558,6 +566,8 @@ const floor1=(x:number)=>Math.floor(+(x*10).toPrecision(15))/10;
 /** A hossz kiírása a kalkulátor szerint: „39,9 m (lefelé kerekítve)”, ha a kerekítés látható. */
 const lenText=(x:number)=>{const f=floor1(x);return hu(f,1)+' m'+(hu(x,3)!==hu(f,1)?' (lefelé kerekítve)':'')};
 const listText=(xs:readonly number[],unit:string)=>xs.map(full).join('; ')+' '+unit;
+/** A megengedett hurokimpedancia kiírása a kalkulátor szerint: 3 tizedesre lefelé kerekítve, jelöléssel, ha a kerekítés látható. */
+const zsText=(x:number)=>{const f=Math.floor(+(x*1000).toPrecision(15))/1000;return hu(f,3)+' Ω'+(hu(x,6)!==hu(f,3)?' (lefelé kerekítve)':'')};
 
 /** A számmező bemeneti korlátai a tartomány szélein: a határ elfogadott, a határon túli és az üres (kötelező) érték elutasított. */
 function numberFieldChecks(def:CalcDef,f:NumberField):ProgramCheck[]{
@@ -608,28 +618,66 @@ function sharedSelects(def:CalcDef):Record<string,string>{
  }
  return out;
 }
-/** A kalkulátoroldalon a számítás mellett megjelenő feltételezések (a definíció példáinak futtatásából, első előfordulás szerint). */
-function assumptionsOf(def:CalcDef,extra:Raw[]=[]):string[]{
- const seen:string[]=[];
- for(const input of [...def.examples.map(e=>e.input),...extra]){const r=runCalc(def,input);if(r.ok)for(const a of r.out.assumptions??[])if(!seen.includes(a))seen.push(a)}
- return seen;
+/** A választómezők összes értékkombinációja (minden mező az alapértékével kezdve, így az első kombináció az alapállapot). */
+export function selectCombos(def:CalcDef):Raw[]{
+ let combos:Raw[]=[{}];
+ for(const f of def.fields){
+  if(f.kind!=='select')continue;
+  const values=[f.default,...f.options.map(o=>o.value).filter(v=>v!==f.default)];
+  combos=combos.flatMap(c=>values.map(v=>({...c,[f.id]:v})));
+  if(combos.length>5000)throw Error(def.slug+': túl sok választókombináció a feltételezések bejárásához');
+ }
+ return combos;
 }
+/** Egy feltételezés-sor és a megjelenés feltétele (null: mindig megjelenik). */
+export type Assumption={text:string;when:string|null};
+/**
+ * A kalkulátoroldalon a számítás mellett megjelenő feltételezések: a választómezők minden kombinációját (a számmezők alapértékével),
+ * valamint a definíció példáit lefuttatva. Ha egy sor nem mindig jelenik meg, a feltétele az a választómező és értékkészlet, amely
+ * pontosan meghatározza a megjelenését (pl. „Rendszer: „Egyenáram””); ha egyetlen mező sem, „egyes bemeneteknél”.
+ */
+export function assumptionsOf(def:CalcDef,extra:Raw[]=[]):Assumption[]{
+ const combos=selectCombos(def),order:string[]=[],seen=new Map<string,Set<number>>(),ok:number[]=[];
+ const note=(t:string)=>{if(!seen.has(t)){seen.set(t,new Set());order.push(t)}};
+ combos.forEach((raw,i)=>{const r=runCalc(def,raw);if(!r.ok)return;ok.push(i);for(const a of r.out.assumptions??[]){note(a);seen.get(a)!.add(i)}});
+ for(const raw of [...def.examples.map(e=>e.input),...extra]){const r=runCalc(def,raw);if(r.ok)for(const a of r.out.assumptions??[])note(a)}
+ const selects=def.fields.filter((f):f is Extract<FieldDef,{kind:'select'}>=>f.kind==='select');
+ return order.map(text=>{
+  const at=seen.get(text)!;
+  if(ok.length&&ok.every(i=>at.has(i)))return {text,when:null};
+  if(!at.size)return {text,when:'egyes bemeneteknél'};
+  for(const f of selects){
+   const values=new Set([...at].map(i=>combos[i][f.id]));
+   if(ok.every(i=>at.has(i)===values.has(combos[i][f.id])))return {text,when:f.label+': '+f.options.filter(o=>values.has(o.value)).map(o=>'„'+o.label+'”').join(' vagy ')};
+  }
+  return {text,when:'egyes bemeneteknél'};
+ });
+}
+/** A FELT tétel szövege: számozott sorok, a feltételes sorok elején a feltétellel. */
+export const assumptionsText=(list:readonly Assumption[])=>list.map((a,i)=>`${i+1}) ${a.when?`(csak ha ${a.when}) `:''}${a.text}`).join(' ');
+/** A KEPLET tétel szövege: számozott képletek (a „·” a képletekben a szorzás jele, ezért elválasztónak nem használható). */
+export const formulasText=(formulas:readonly string[])=>formulas.map((f,i)=>`${i+1}) ${f}`).join(' ');
 type KalBody={special?:Record<string,string>;extraInputs?:Raw[];consts?:ValueItem[];rules:RuleItem[]};
 
+/** A kalkulátor „Nem vizsgált” listájának leírása: ha nagyrészt a méretezésé (D-HATOKOR), az eltérésekkel; különben teljes egészében. */
+function notCoveredText(nc:readonly string[]):string{
+ const sizing=SIZING_NOT_COVERED,removed=sizing.filter(x=>!nc.includes(x)),added=nc.filter(x=>!sizing.includes(x)),q=(xs:string[])=>xs.map(x=>'„'+x+'”').join(', ');
+ if(removed.length*2>sizing.length)return nc.join('; ');
+ return (removed.length?'a méretezési segédszámítás listája (D-HATOKOR), ebből elhagyva: '+q(removed):'a méretezési segédszámítással azonos lista (D-HATOKOR)')+(added.length?(removed.length?'; ':', ')+'kiegészítve: '+q(added):'');
+}
 function kalBlock(slug:T1Slug,body:KalBody):Block{
- const def=defOf(slug),P=kalId(slug),gated=TABLE_GATED.has(slug),sizing=SIZING_NOT_COVERED;
- const nc=def.notCovered??[],sameNc=nc.length>=sizing.length&&sizing.every((x,i)=>nc[i]===x),extraNc=sameNc?nc.slice(sizing.length):nc;
+ const def=defOf(slug),P=kalId(slug),gated=TABLE_GATED.has(slug),nc=def.notCovered??[];
  const special={...sharedSelects(def),...body.special};
  const values:ValueItem[]=[
   value(P+'-HAT','Mire jó / mire nem (a kalkulátoroldalon)','Mire jó: '+def.notes.good.join(' ')+' Mire nem: '+def.notes.bad.join(' '),[]),
-  value(P+'-NV','Nem vizsgált (a kalkulátoroldalon)',sameNc?'a méretezési segédszámítással azonos lista (D-HATOKOR)'+(extraNc.length?', kiegészítve: '+extraNc.map(x=>'„'+x+'”').join(', '):''):nc.join('; '),[],sameNc?[{fn:'calcNotCovered',args:[slug],expect:[...sizing,...extraNc]}]:undefined),
-  value(P+'-KEPLET','Képletek (a kalkulátoroldal „Képletek” szakasza)',def.formulas.join(' · '),[]),
-  value(P+'-FELT','Feltételezések (a számítás mellett)',assumptionsOf(def,body.extraInputs).map((a,i)=>`${i+1}) ${a}`).join(' '),[]),
+  value(P+'-NV','Nem vizsgált (a kalkulátoroldalon)',notCoveredText(nc),[],[{fn:'calcNotCovered',args:[slug],expect:[...nc]}]),
+  value(P+'-KEPLET','Képletek (a kalkulátoroldal „Képletek” szakasza)',formulasText(def.formulas),[]),
+  value(P+'-FELT','Feltételezések (a számítás mellett; a feltételes sorok a feltétellel)',assumptionsText(assumptionsOf(def,body.extraInputs)),[]),
   ...def.fields.map(f=>fieldItem(def,f,special)),
   ...(body.consts??[]),
  ];
  const rules=body.rules;
- return {id:P,title:def.title,source:def.sources.join('; '),minutes:Math.ceil(values.length*0.75+rules.length*3+2),columns:['Tétel','Leírás / érték'],layout:{widths:[30,34,72,28],align:'left'},
+ return {id:P,title:def.title,source:def.sources.join('; '),minutes:Math.ceil(values.length*0.75+rules.length*3+2),columns:['Tétel','Leírás / érték'],layout:{widths:[38,38,60,28],align:'left'},
   intro:[
    'Cél: '+def.short,
    `Kiadás: ${def.tier} (csak szakmai lektori jóváhagyással), verzió v${def.version} (${dateHu(def.updated)}); táblázat-kapu: ${gated?'igen – a kalkulátor az 1. rész jóváhagyása nélkül akkor sem jelenik meg, ha ez a blokk jóvá van hagyva':'nem – a kiadáshoz a kalkulátor jóváhagyása elég'}. Tartalmi ujjlenyomat: ${calcFingerprint(def)}; forrás-ujjlenyomat: ${sourceFingerprint(slug)}. A program a kalkulátort csak ezzel az ujjlenyomat-párral rögzített lektori rekorddal teszi közzé.`,
@@ -644,7 +692,7 @@ function calculatorsPart():Part{
  // ---- KAL-KOZOS
  const fz=(L:number)=>drop(2,L,16,2.5,1),pEdge=fz(39.931),in1={rendszer:'1f',I:'16',L:'23,4',A:'2,5',cos:'1',hatar:'public-other'};
  const p1=fz(23.4),v1=p1/100*T.u0,l1=lim.public.other/100*T.u0/(2*16*T.rho1/2.5);
- const kozos:Block={id:'KAL-KOZOS',title:'Közös működés (minden T1 kalkulátor)',source:'A kalkulátorok közös számítómotorja (számbevitel, kiírás, szóhasználat, figyelmeztetések) és közös állandói',minutes:0,columns:['Tétel','Érték / szöveg'],layout:{widths:[30,34,72,28],align:'left'},
+ const kozos:Block={id:'KAL-KOZOS',title:'Közös működés (minden T1 kalkulátor)',source:'A kalkulátorok közös számítómotorja (számbevitel, kiírás, szóhasználat, figyelmeztetések) és közös állandói',minutes:0,columns:['Tétel','Érték / szöveg'],layout:{widths:[38,38,60,28],align:'left'},
   intro:['Az itt leírt viselkedés és szövegek minden T1 kalkulátorra érvényesek; a kalkulátoronkénti blokkok erre hivatkoznak. Ha ebben a blokkban eltérés van, egyik kalkulátor sem jelölhető jóváhagyottnak a javításig.'],
   items:[
    value('KAL-KOZOS-MCB','Kismegszakítók előnyös névleges áramai (a választható és a javasolt In)',listText(MCB_RATINGS.value,'A')+' – '+MCB_RATINGS.source,[]),
@@ -654,18 +702,20 @@ function calculatorsPart():Part{
    value('KAL-KOZOS-FIGY-ALAP','Alapfigyelmeztetés (minden oldal alján)',`„${SAFETY.alap.text}”`,[]),
    rule('KAL-KOZOS-BEVITEL','Számbevitel és bemeneti korlátok',
     'A számmezők tizedesvesszőt és tizedespontot is elfogadnak; ha csak pont vagy csak vessző szerepel, az a tizedesjel („1.500” = 1,5). Szóközös ezres csoport („1 000”), unicode mínuszjel és normálalak („1e3”) is megadható. Nem szám, hiányzó kötelező érték vagy tartományon kívüli érték esetén a mező alatt magyar hibaüzenet jelenik meg, és eredmény nem készül: a program a bevitelt nem igazítja a tartományba. A tartományokat kalkulátoronként a …-BEM- tételek sorolják fel; a tételek összevetése a tartomány szélein elfogadott és a határon túl elutasított értéket próbál.',
-    'A csendes korrekció (pl. a tartomány szélére állítás) félrevezető eredményt adna. A „1.500” = 1,5 értelmezés a tizedespontot használó bevitel (pl. másolt érték) miatt választott; ezres csoport csak szóközzel adható meg.',
+    'A csendes korrekció (pl. a tartomány szélére állítás) félrevezető eredményt adna. A „1.500” = 1,5 értelmezés a tizedespontot használó bevitel (pl. másolt érték) miatt választott; ezres csoport csak szóközzel adható meg. Kockázata: aki ponttal ír ezres csoportot („1.500” m-t 1500 m-re gondolva), 1,5 m-rel kap eredményt, ami hossznál a biztonság kárára téved (pl. a feszültségesés „határon belül” lesz) – a kalkulátor erre nem figyelmeztet.',
     `Feszültségesés, terhelőáram (megengedett: > 0 és ≤ 1000 A): „16,0” és „16.0” → 16 A; „1 000” → 1000 A; „1001” → „Legfeljebb 1000 A lehet.”; „0” → „Nullánál nagyobb számot adj meg.”; „abc” → „Csak számot írj; a mértékegységet mellette választhatod.”; vezetékhossz „23.4” → 23,4 m (ΔU% = ${pct(p1,4)}, mint „23,4”-nél).`,
     '– (programozott döntés: a kalkulátorok számbevitele)',
     [calc('feszultseges',{...in1,I:'16.0'},{pct:p1}),calc('feszultseges',{...in1,L:'23.4'},{pct:p1}),calc('feszultseges',{...in1,I:'1 000'},{ok:true,pct:drop(2,23.4,1000,2.5,1)}),
      calc('feszultseges',{...in1,I:'1001'},{ok:false,errorField:'I',error:'Legfeljebb 1000 A lehet.'}),calc('feszultseges',{...in1,I:'0'},{ok:false,errorField:'I',error:'Nullánál nagyobb számot adj meg.'}),
-     calc('feszultseges',{...in1,I:'abc'},{ok:false,errorField:'I',error:'Csak számot írj'}),calc('feszultseges',{...in1,L:'1.500'},{pct:fz(1.5)}),calc('feszultseges',{...in1,I:''},{ok:false,errorField:'I',error:'Add meg az értéket.'})]),
+     calc('feszultseges',{...in1,I:'abc'},{ok:false,errorField:'I',error:'Csak számot írj'}),calc('feszultseges',{...in1,L:'1.500'},{pct:fz(1.5)}),calc('feszultseges',{...in1,I:''},{ok:false,errorField:'I',error:'Add meg az értéket.'})],
+    'Elfogadható-e a T1 kalkulátoroknál, hogy a pontosan három számjegyet követő egyetlen pont („1.500”) tizedespontnak számít (1,5)? Ha nem, a programnak az ilyen kétértelmű bevitelt el kell utasítania vagy rá kell kérdeznie (a lektor döntése szerint; ez minden T1 kalkulátort érint).'),
    rule('KAL-KOZOS-KIIRAS','Kerekítés és kiírás',
-    'A számítás kerekítés nélkül fut, csak a kiírás kerekít: 1 alatt és 1–10 között 4 értékes jegy, 10 fölött legfeljebb 3 tizedes (10 000-ig 5 értékes jegy), afölött egész szám; 10⁻⁶ alatt normálalak. A hosszakat (Lmax) 0,1 m-re lefelé kerekítve írja ki, „(lefelé kerekítve)” jelöléssel, ha a kerekítés látható. Határérték-összevetésnél, ha a kerekített kiírás egyenlőséget mutatna, de a feltétel nem teljesül, a két oldal több tizedessel jelenik meg.',
-    'A lefelé kerekített hossz a biztonság javára téved; a több tizedes azt akadályozza meg, hogy a kiírás „5 % > 5 %” alakú, ellentmondásosnak látszó szöveget adjon.',
-    `Feszültségesés, 16 A, 23,4 m, 2,5 mm² (KAL-FESZULTSEGES-K1): ΔU% = ${hu(p1,6)} → „${hu(p1,2)} %”; ΔU = ${hu(v1,5)} V → „${hu(v1,3)} V”; Lmax = ${hu(l1,4)} m → „${lenText(l1)}”. 39,931 m-nél ΔU% = ${hu(pEdge,6)} → „Számítás szerint meghaladja a határt: ${hu(pEdge,4)} % > 5 %.”`,
+    'A számítás kerekítés nélkül fut, csak a kiírás kerekít: 1 alatt és 1–10 között 4 értékes jegy, 10 fölött legfeljebb 3 tizedes (10 000-ig 5 értékes jegy), afölött egész szám; 10⁻⁶ alatt normálalak. Rögzített tizedesek: az ohmban kiírt értékek (R, Zs, Zs,max) és a levezetésben a ΔU% 3 tizedessel. A felső határként használt megengedett hurokimpedanciát (Zs,max) 3 tizedesre, a hosszakat (Lmax) 0,1 m-re lefelé kerekítve írja ki, „(lefelé kerekítve)” jelöléssel, ha a kerekítés látható; a többi érték a szokásos módon kerekül. Határérték-összevetésnél, ha a kerekített kiírás egyenlőséget vagy a feltétellel ellentétes viszonyt mutatna (pl. „5 % > 5 %”, „1,437 ≤ 1,436”), a két oldal több tizedessel jelenik meg.',
+    'A lefelé kerekített határ és hossz a biztonság javára téved: a kiírt Zs,max-nál nagyobb mért érték biztosan nem teljesíti a feltételt (felfelé kerekítve egy a határt kissé meghaladó érték is megfelelőnek látszana). A több tizedes az ellentmondásosnak látszó kiírást akadályozza meg.',
+    `Feszültségesés, 16 A, 23,4 m, 2,5 mm² (KAL-FESZULTSEGES-K1): ΔU% = ${hu(p1,6)} → „${hu(p1,2)} %”; ΔU = ${hu(v1,5)} V → „${hu(v1,3)} V”; Lmax = ${hu(l1,4)} m → „${lenText(l1)}”. 39,931 m-nél ΔU% = ${hu(pEdge,6)} → „Számítás szerint meghaladja a határt: ${hu(pEdge,4)} % > 5 %.” Hurokimpedancia, C16: Zs,max = ${hu(zsMax('C',16),5)} Ω → „${zsText(zsMax('C',16))}”; B16: ${hu(zsMax('B',16),5)} Ω → „${zsText(zsMax('B',16))}”.`,
     '– (programozott döntés: a kalkulátorok kiírása)',
-    [calc('feszultseges',in1,{'text:pct':hu(p1,2)+' %','text:dU':hu(v1,3)+' V','text:Lmax':lenText(l1)}),calc('feszultseges',{...in1,L:'39,931'},{verdict:false,verdictText:`${hu(pEdge,4)} % > 5 %`})]),
+    [calc('feszultseges',in1,{'text:pct':hu(p1,2)+' %','text:dU':hu(v1,3)+' V','text:Lmax':lenText(l1)}),calc('feszultseges',{...in1,L:'39,931'},{verdict:false,verdictText:`${hu(pEdge,4)} % > 5 %`}),
+     calc('hurokimpedancia',{Ze:'0,35',L:'25',A:'2,5',gorbe:'C',In:'16'},{'text:ZsMax':zsText(zsMax('C',16))}),calc('kismegszakito',{Ib:'14',A:'2.5',gorbe:'C'},{'text:ZsMax':zsText(zsMax('C',16))}),calc('hurokimpedancia',{Ze:'0,35',L:'25',A:'2,5',gorbe:'B',In:'16'},{'text:ZsMax':zsText(zsMax('B',16))})]),
    rule('KAL-KOZOS-SZOVEG','Szóhasználat és figyelmeztetések',
     `Az eredmény „számítás szerinti”: ahol a kalkulátor feltételt értékel, a verdikt „Számítás szerint …” kezdetű; a „megfelel”, „szabványos”, „MSZ szerint” kifejezést a T1 kalkulátorok nem használják. Minden T1 kalkulátoroldalon nem zárható figyelmeztetés áll (KAL-KOZOS-FIGY-MERETEZES vagy KAL-KOZOS-FIGY-KALKULATOR), alatta a „Nem vizsgált” lista, a számítás mellett a feltételezések, a táblázatokat használóknál a táblázatok állapota (a jóváhagyásig „Ellenőrizendő: …”), a beavatkozással járó témáknál a KAL-KOZOS-FIGY-BEAVATKOZAS is. A kalkulátoroldal a levezetést (képlet → behelyettesítés → eredmény → forrás) és a kidolgozott példát is mutatja.`,
     'A szabványhoz kötött számítás eredménye nem minősülhet megfelelőségi nyilatkozatnak; a felhasználónak látnia kell a feltételezéseket és az el nem végzett vizsgálatokat.',
@@ -709,13 +759,13 @@ function calculatorsPart():Part{
     'T-DU-KOZ-EGY, T-DU-KOZ-VIL, T-DU-SAJ-EGY, T-DU-SAJ-VIL (1. rész); D-TURES, K-DUOSSZ (2. rész)',
     [calc('feszultseges',inV,{verdict:le(pv,lim.public.lighting),verdictText:'Számítás szerint meghaladja a határt',limit:lim.public.lighting}),calc('feszultseges',{...inV,hatar:'public-other'},{verdict:le(pv,lim.public.other),verdictText:'Számítás szerint a határon belül'}),
      calc('feszultseges',{...inV,hatar:'private-lighting'},{limit:lim.private.lighting}),calc('feszultseges',{...inV,hatar:'private-other'},{limit:lim.private.other}),calc('feszultseges',inD,{'text:limit':'5 % (megadott)'})]),
-   rule('KAL-FESZULTSEGES-D2','Szabad keresztmetszet, háromfázisú voltérték, kiadási feltétel',
-    'A keresztmetszet szabadon megadható (> 0 és ≤ 1000 mm²), nem csak a T-KM-SOR lépcsői; a kalkulátor sem a terhelhetőséget, sem a legkisebb keresztmetszetet nem vizsgálja. Háromfázisnál a voltban kiírt esés a 400 V-os vonali névleges feszültségre vonatkozik. A kalkulátor nem táblázat-kapus: lektori jóváhagyással az 1. rész jóváhagyása nélkül is kiadható; a felhasznált T-K-RHO1, T-K-LAMBDA, T-K-U0 és T-DU értékeket az oldal a táblázatok állapotával együtt mutatja.',
-    'A feszültségesés a keresztmetszettel fordítottan arányos, a táblázati lépcsőhöz nem kötött; a terhelhetőséget a Keresztmetszet-választás és a Terhelhetőségi táblázat kalkulátor vizsgálja. A 400 V a vonali névleges feszültség (MSZ EN 60038); √3 · 230 V = 398,4 V-tal a kiírt érték 0,4%-kal kisebb lenne.',
-    `3 mm², egyfázis, 16 A, 23,4 m: ΔU% = 2 · 23,4 · 16 · ${exact(T.rho1)} / 3 / ${exact(T.u0)} · 100 = ${pct(p3mm,4)} (a Méretezés fül a nem szabványos keresztmetszettel nem számol, D-BLOKK). Háromfázis (K1): ${pct(p3,4)} · 400 V = ${hu(v3,4)} V.`,
-    'MSZ EN 60038 (400 V); T-KM-SOR (1. rész); D-BLOKK (2. rész)',
-    [calc('feszultseges',{...in1,A:'3'},{ok:true,pct:p3mm}),calc('feszultseges',in3,{dU:v3})],
-    '1) Elfogadható-e, hogy a Feszültségesés kalkulátor a táblázatok (1. rész) jóváhagyása nélkül, a táblázatállapot kiírásával is kiadható? 2) Elfogadható-e háromfázisnál a 400 V-hoz viszonyított voltérték? 3) A „Nem vizsgált” lista (D-HATOKOR) a 35 mm² feletti keresztmetszetet is említi, a kalkulátor viszont 1000 mm²-ig enged bevitelt – elegendő-e a lista, vagy korlátozni kell a bevitelt?'),
+   rule('KAL-FESZULTSEGES-D2','Keresztmetszet, háromfázisú voltérték, táblázat-kapu',
+    'A keresztmetszet 35 mm²-ig szabadon megadható (> 0 és ≤ 35 mm², a méretezési segédszámítás tartománya), nem csak a T-KM-SOR lépcsői; a kalkulátor sem a terhelhetőséget, sem a legkisebb keresztmetszetet nem vizsgálja. Háromfázisnál a voltban kiírt esés a 400 V-os vonali névleges feszültségre vonatkozik. A kalkulátor táblázat-kapus: a felhasznált T-K-RHO1, T-K-LAMBDA, T-K-U0 és T-DU értékek miatt csak az 1. rész jóváhagyása után jelenik meg, akkor is, ha ez a blokk jóvá van hagyva.',
+    'A feszültségesés a keresztmetszettel fordítottan arányos, a táblázati lépcsőhöz nem kötött; a terhelhetőséget a Keresztmetszet-választás és a Terhelhetőségi táblázat kalkulátor vizsgálja. A 35 mm² feletti keresztmetszet a „Nem vizsgált” lista (D-HATOKOR) szerint kívül esik a segédszámítás hatókörén, ezért a bevitel sem engedi. A 400 V a vonali névleges feszültség (MSZ EN 60038); √3 · 230 V = 398,4 V-tal a kiírt érték 0,4%-kal kisebb lenne.',
+    `3 mm², egyfázis, 16 A, 23,4 m: ΔU% = 2 · 23,4 · 16 · ${exact(T.rho1)} / 3 / ${exact(T.u0)} · 100 = ${pct(p3mm,4)} (a Méretezés fül a nem szabványos keresztmetszettel nem számol, D-BLOKK); 35 mm² elfogadott, 36 mm² „Legfeljebb 35 mm² lehet.”. Háromfázis (K1): ${pct(p3,4)} · 400 V = ${hu(v3,4)} V.`,
+    'MSZ EN 60038 (400 V); T-KM-SOR, T-K-RHO1, T-K-LAMBDA, T-K-U0 (1. rész); D-BLOKK, D-HATOKOR (2. rész)',
+    [calc('feszultseges',{...in1,A:'3'},{ok:true,pct:p3mm}),calc('feszultseges',in3,{dU:v3}),calc('feszultseges',{...in1,A:'36'},{ok:false,errorField:'A',error:'Legfeljebb 35 mm² lehet.'})],
+    'Elfogadható-e háromfázisnál a 400 V-hoz viszonyított voltérték?'),
   ]});
 
  // ---- Motoráram
@@ -843,12 +893,14 @@ function calculatorsPart():Part{
     `In = 32 A, C, 3 terhelt ér: 4 mm²: Iz0 = ${exact(iz0(3,'C',4))} A (T-PVC3-C-4) → 32 ${rel(32,iz0(3,'C',4))} ${exact(iz0(3,'C',4))} → ${a32===null?'nincs':exact(a32)+' mm²'}. In = 25 A, B2, 33 °C → ${kt33.step} °C, kθ = ${exact(kt33.value)} (T-KT-35): 2,5 mm²: ${exact(iz0(2,'B2',2.5))} (T-PVC2-B2-2.5) · ${exact(kt33.value)} = ${hu(iz0(2,'B2',2.5)*kt33.value,3)} A < 25 A; 4 mm²: ${exact(iz0(2,'B2',4))} (T-PVC2-B2-4) · ${exact(kt33.value)} = ${hu(iz0(2,'B2',4)*kt33.value,3)} A → ${a25===null?'nincs':exact(a25)+' mm²'}.`,
     'T-PVC3-C-4, T-PVC2-B2-2.5, T-PVC2-B2-4, T-KT-35 (1. rész); D-TURES, D-KEREK (2. rész)',
     [calc('keresztmetszet',{In:'32',mod:'C',szig:'PVC',erek:'3',temp:'30',csop:'1'},{A:a32,Iz:iz0(3,'C',4)}),calc('keresztmetszet',{In:'25',mod:'B2',szig:'PVC',erek:'2',temp:'33',csop:'1'},{A:a25,kt:kt33.value,Iz:iz0(2,'B2',4)*kt33.value})]),
-   rule('KAL-KERESZTMETSZET-D1','Nincs elegendő keresztmetszet; csak In ≤ Iz',
-    `Ha a T-KM-SOR legnagyobb (${exact(T.sections[T.sections.length-1])} mm²) keresztmetszete sem elegendő, nincs eredmény, az In mező alatt: „A segédszámítás táblázatában (legfeljebb ${exact(T.sections[T.sections.length-1])} mm²) nincs olyan keresztmetszet, amely ezzel a szerelési móddal elegendő. …”. A kalkulátor csak az In ≤ Iz feltételt vizsgálja (az I2 feltétel kismegszakítónál ezzel együtt teljesül, K-I2); a feszültségesést, a hurokimpedanciát és az Ib ≤ In-t nem – ezt a feltételezés-sor kimondja. A legkisebb keresztmetszet a táblázat első sora (${exact(T.sections[0])} mm², T-K-AMIN).`,
-    'Nagyobb keresztmetszetre a táblázat nem tartalmaz értéket; a többi feltételt a Feszültségesés, a Hurokimpedancia és a Kismegszakító-választás kalkulátor vizsgálja.',
+   rule('KAL-KERESZTMETSZET-D1','Nincs elegendő keresztmetszet; csak In ≤ Iz, kismegszakítóra vagy RCBO-ra',
+    `Ha a T-KM-SOR legnagyobb (${exact(T.sections[T.sections.length-1])} mm²) keresztmetszete sem elegendő, nincs eredmény, az In mező alatt: „A segédszámítás táblázatában (legfeljebb ${exact(T.sections[T.sections.length-1])} mm²) nincs olyan keresztmetszet, amely ezzel a szerelési móddal elegendő. …”. A kalkulátor csak az In ≤ Iz feltételt vizsgálja. Kismegszakítót vagy RCBO-t feltételez (I2 = ${K2} · In, K-I2): így az I2 ≤ ${K2} · Iz feltétel az In ≤ Iz-vel együtt teljesül; olvadóbiztosítónál ezt külön kell ellenőrizni. Mindkettőt feltételezés-sor mondja ki, és a mező súgója is; az Ib ≤ In-t, a feszültségesést és a hurokimpedanciát a kalkulátor nem vizsgálja (feltételezés-sor). A legkisebb keresztmetszet a táblázat első sora (${exact(T.sections[0])} mm², T-K-AMIN).`,
+    'Nagyobb keresztmetszetre a táblázat nem tartalmaz értéket; a többi feltételt a Feszültségesés, a Hurokimpedancia és a Kismegszakító-választás kalkulátor vizsgálja. Olvadóbiztosítónál (gG, a megállapodás szerinti kioldóáram jellemzően I2 ≈ 1,6 · In) az In ≤ Iz önmagában nem elég az I2 ≤ 1,45 · Iz feltételhez, ezért a kalkulátor erre külön figyelmeztet.',
     `In = 125 A, A2, 3 terhelt ér, 30 °C: ${exact(T.sections[T.sections.length-1])} mm²: Iz0 = ${exact(iz0(3,'A2',T.sections[T.sections.length-1]))} A < 125 A → ${aBig===null?'nincs eredmény (hibaüzenet)':exact(aBig)+' mm²'}.`,
     `T-PVC3-A2-${exact(T.sections[T.sections.length-1])}, T-K-AMIN (1. rész); K-I2 (2. rész)`,
-    [calc('keresztmetszet',{In:'125',mod:'A2',szig:'PVC',erek:'3',temp:'30',csop:'1'},{ok:false,errorField:'In',error:'nincs olyan keresztmetszet'}),calc('keresztmetszet',kerIn,{assumption:'Csak a túlterhelés elleni védelem feltétele (In ≤ Iz)'})]),
+    [calc('keresztmetszet',{In:'125',mod:'A2',szig:'PVC',erek:'3',temp:'30',csop:'1'},{ok:false,errorField:'In',error:'nincs olyan keresztmetszet'}),calc('keresztmetszet',kerIn,{assumption:'az Ib ≤ In feltételt, a feszültségesést és a hurokimpedanciát külön kell ellenőrizni'}),
+     calc('keresztmetszet',kerIn,{assumption:'Olvadóbiztosítónál az I2 ≤ 1,45 · Iz feltételt külön kell ellenőrizni.'})],
+    'Elegendő-e, hogy a kalkulátor kismegszakítót vagy RCBO-t feltételez, és olvadóbiztosítóra (gG) csak a feltételezés-sor és a mező súgója figyelmeztet, vagy a védelem típusát is kérnie kell (gG esetén az I2 ≤ 1,45 · Iz feltétel külön vizsgálatával)?'),
    rule('KAL-KERESZTMETSZET-D2','XLPE-szigetelés',
     'XLPE választásakor a D-XLPE szerint számol: PVC Iz0, PVC kθ-sor, 30 °C alatt kθ = 1; erről feltételezés-sor jelenik meg.',
     'Amíg az XLPE-táblázat nincs rögzítve (T-XLPE-IZ0, T-XLPE-KT), a kedvezőtlenebb PVC-értékkel számol (D-XLPE).',
@@ -870,7 +922,7 @@ function calculatorsPart():Part{
     'KAL-KOZOS-MCB; T-PVC2-B2-2.5, T-PVC2-B2-1.5 (1. rész); K-IZ, K-TUL (2. rész)',
     [calc('kismegszakito',kisIn,{In:cand1[0],InMax:cand1[cand1.length-1],Iz:izK1,'text:In':'B'+cand1[0]+' ('+cand1[0]+' A)'}),calc('kismegszakito',{...kisIn,Ib:'10',A:'1.5',gorbe:'C'},{In:cand2[0],InMax:cand2[cand2.length-1],Iz:izK2})]),
    rule('KAL-KISMEGSZAKITO-K2','Kioldási áram és megengedett hurokimpedancia',
-    `I2 = k · In (T-K-I2, k = ${K2}); a feltétel I2 ≤ ${K2} · Iz kismegszakítónál az In ≤ Iz-vel együtt teljesül (K-I2), a levezetés ezt külön sorban írja ki. Zs,max = cmin · U0 / (m · In) a legkisebb választható In-re (K-ZS), m a jelleggörbe szerint (T-K-M-B, T-K-M-C, T-K-M-D).`,
+    `I2 = k · In (T-K-I2, k = ${K2}); a feltétel I2 ≤ ${K2} · Iz kismegszakítónál az In ≤ Iz-vel együtt teljesül (K-I2), a levezetés ezt külön sorban írja ki. Zs,max = cmin · U0 / (m · In) a legkisebb választható In-re (K-ZS), m a jelleggörbe szerint (T-K-M-B, T-K-M-C, T-K-M-D); kiírás 3 tizedesre lefelé kerekítve (KAL-KOZOS-KIIRAS).`,
     'A hurokimpedancia-határ a választott védelemhez tartozik; a tényleges Zs-t a kalkulátor nem ismeri, ezért a verdikt felhívja a mérésre vagy számításra (Hurokimpedancia kalkulátor).',
     `B16: I2 = ${K2} · 16 = ${hu(k*16,2)} A; Zs,max = ${exact(T.cmin)} · ${exact(T.u0)} / (${exact(T.instantaneous.B)} · 16) = ${hu(zsMax('B',16),4)} Ω. C10: I2 = ${hu(k*10,2)} A; Zs,max = ${exact(T.cmin)} · ${exact(T.u0)} / (${exact(T.instantaneous.C)} · 10) = ${hu(zsMax('C',10),4)} Ω.`,
     'T-K-I2, T-K-CMIN, T-K-U0, T-K-M-B, T-K-M-C (1. rész); K-I2, K-ZS (2. rész)',
@@ -886,7 +938,7 @@ function calculatorsPart():Part{
 
  // ---- Hurokimpedancia
  const hz=(Ze:number,L:number,A:number,Ape:number,curve:'B'|'C'|'D',In:number)=>{const R=loopR(L,A,Ape),Zs=Ze+R,max=zsMax(curve,In),per=T.rho1*(1/A+1/Ape);return {R,Zs,Ik:T.cmin*T.u0/Zs,max,per,Lmax:Math.max(0,(max-Ze)/per)}};
- const h1=hz(0.35,25,2.5,2.5,'B',16),h2=hz(0.5,40,1.5,1.5,'B',10),h3=hz(0.3,20,2.5,1.5,'B',16),h4=hz(0.35,100,1.5,1.5,'C',16),h5=hz(3,25,2.5,2.5,'B',16);
+ const h1=hz(0.35,25,2.5,2.5,'B',16),h2=hz(0.5,40,1.5,1.5,'B',10),h3=hz(0.3,20,2.5,1.5,'B',16),h4=hz(0.35,100,1.5,1.5,'C',16),h5=hz(3,25,2.5,2.5,'B',16),h6=hz(0.35,100,1.5,1.5,'B',16),h7=hz(1.5,25,2.5,2.5,'C',16);
  const hurIn={Ze:'0,35',L:'25',A:'2,5',gorbe:'B',In:'16'};
  const hurok=kalBlock('hurokimpedancia',{
   rules:[
@@ -897,25 +949,29 @@ function calculatorsPart():Part{
     'T-K-RHO1, T-K-CMIN, T-K-U0 (1. rész); K-ZS, D-PE (2. rész)',
     [calc('hurokimpedancia',hurIn,{Zs:h1.Zs,Ik:h1.Ik}),calc('hurokimpedancia',{Ze:'0,5',L:'40',A:'1,5',gorbe:'B',In:'10'},{Zs:h2.Zs,Ik:h2.Ik})]),
    rule('KAL-HUROKIMPEDANCIA-K2','Megengedett hurokimpedancia és legnagyobb hossz',
-    'Zs,max = cmin · U0 / (m · In) (K-ZS; m: T-K-M-B, T-K-M-C, T-K-M-D; In a KAL-KOZOS-MCB sorból). Feltétel: Zs ≤ Zs,max (relatív 10⁻⁹ tűréssel). Lmax = max(0; (Zs,max − Ze) / (ρ1 · (1/A + 1/A_PE))), kiírás 0,1 m-re lefelé kerekítve.',
+    'Zs,max = cmin · U0 / (m · In) (K-ZS; m: T-K-M-B, T-K-M-C, T-K-M-D; In a KAL-KOZOS-MCB sorból), kiírás 3 tizedesre lefelé kerekítve (KAL-KOZOS-KIIRAS). Feltétel: Zs ≤ Zs,max (relatív 10⁻⁹ tűréssel, a kerekítetlen értékekkel). Lmax = max(0; (Zs,max − Ze) / (ρ1 · (1/A + 1/A_PE))), kiírás 0,1 m-re lefelé kerekítve.',
     'A pillanatkioldás felső határán (m · In) a kismegszakító a kikapcsolási időn belül old; az Lmax a feltétel átrendezése a hosszra.',
     `B16: Zs,max = ${exact(T.cmin)} · ${exact(T.u0)} / (${exact(T.instantaneous.B)} · 16) = ${hu(h1.max,4)} Ω; ${hu(h1.Zs,4)} ${rel(h1.Zs,h1.max)} ${hu(h1.max,4)} → „Számítás szerint a pillanatkioldás feltétele teljesül”; Lmax = (${hu(h1.max,4)} − 0,35) / (${exact(T.rho1)} · 0,8) = ${hu(h1.Lmax,4)} m → ${lenText(h1.Lmax)}. B10, Ze = 0,5 Ω, 1,5 mm²: Zs,max = ${hu(h2.max,4)} Ω; Lmax = (${hu(h2.max,4)} − 0,5) / ${hu(h2.per,4)} = ${hu(h2.Lmax,4)} m → ${lenText(h2.Lmax)}.`,
     'T-K-CMIN, T-K-U0, T-K-M-B (1. rész); K-ZS (2. rész)',
     [calc('hurokimpedancia',hurIn,{ZsMax:h1.max,Lmax:h1.Lmax,'text:Lmax':lenText(h1.Lmax),verdict:le(h1.Zs,h1.max)}),calc('hurokimpedancia',{Ze:'0,5',L:'40',A:'1,5',gorbe:'B',In:'10'},{ZsMax:h2.max,Lmax:h2.Lmax,'text:Lmax':lenText(h2.Lmax)})],
     'A számítás a cmin tényezővel fut (T-K-CMIN = '+exact(T.cmin)+'); ha a T-K-CMIN kérdésre adott válasz 0,95, a Zs,max, az Ik és az Lmax is változik.'),
    rule('KAL-HUROKIMPEDANCIA-D1','Nem teljesülő feltétel',
-    'Ha Zs > Zs,max: „Számítás szerint a pillanatkioldás feltétele nem teljesül: … Lehetséges megoldás: nagyobb keresztmetszet, rövidebb vezeték, B jelleggörbe vagy ÁVK – a döntés a tervező feladata.” ÁVK-val védett áramkört és TT-rendszert a kalkulátor nem igazol (Mire nem).',
-    'A kalkulátor nem dönti el, melyik megoldás alkalmazható; csak a lehetőségeket sorolja fel.',
-    `Ze = 0,35 Ω, L = 100 m, A = 1,5 mm², C16: R = ${exact(T.rho1)} · 100 · (2/1,5) = ${hu(h4.R,4)} Ω; Zs = ${hu(h4.Zs,4)} Ω ${rel(h4.Zs,h4.max)} Zs,max = ${hu(h4.max,4)} Ω → nem teljesül; Lmax = (${hu(h4.max,4)} − 0,35) / ${hu(h4.per,4)} = ${hu(h4.Lmax,4)} m → ${lenText(h4.Lmax)}.`,
-    'T-K-M-C (1. rész); K-ZS, D-AVK (2. rész)',
-    [calc('hurokimpedancia',{Ze:'0,35',L:'100',A:'1,5',gorbe:'C',In:'16'},{Zs:h4.Zs,verdict:le(h4.Zs,h4.max),verdictText:'Lehetséges megoldás',Lmax:h4.Lmax})]),
+    'Ha Zs > Zs,max: „Számítás szerint a pillanatkioldás feltétele nem teljesül: … Lehetséges megoldás: … – a döntés a tervező feladata.” A felsorolt megoldások: nagyobb keresztmetszet és rövidebb vezeték (csak ha Ze < Zs,max, mert különben a vezeték nem segít), B jelleggörbe a bekapcsolási áram ellenőrzésével (csak C vagy D jelleggörbénél), kisebb névleges áram, ÁVK. A tervező Méretezés füle ugyanezt a felsorolást használja. ÁVK-val védett áramkört és TT-rendszert a kalkulátor nem igazol (Mire nem).',
+    'A kalkulátor nem dönti el, melyik megoldás alkalmazható; csak az adott esetben ténylegesen segítő lehetőségeket sorolja fel (a kisebb névleges áramnál az Ib ≤ In feltételt is ellenőrizni kell).',
+    `Ze = 0,35 Ω, L = 100 m, A = 1,5 mm², C16: R = ${exact(T.rho1)} · 100 · (2/1,5) = ${hu(h4.R,4)} Ω; Zs = ${hu(h4.Zs,4)} Ω ${rel(h4.Zs,h4.max)} Zs,max = ${hu(h4.max,4)} Ω → nem teljesül; Lmax = (${hu(h4.max,4)} − 0,35) / ${hu(h4.per,4)} = ${hu(h4.Lmax,4)} m → ${lenText(h4.Lmax)}; megoldás: „nagyobb keresztmetszet, rövidebb vezeték, B jelleggörbe (a bekapcsolási áram ellenőrzésével), kisebb névleges áram vagy ÁVK”. Ugyanez B16-tal: Zs,max = ${hu(h6.max,4)} Ω, ${hu(h6.Zs,4)} ${rel(h6.Zs,h6.max)} ${hu(h6.max,4)} → „nagyobb keresztmetszet, rövidebb vezeték, kisebb névleges áram vagy ÁVK”. Ze = 3 Ω, B16 (Ze ≥ Zs,max): „kisebb névleges áram vagy ÁVK”; Ze = 1,5 Ω, C16 (Ze ≥ ${hu(h7.max,4)} Ω): „B jelleggörbe (a bekapcsolási áram ellenőrzésével), kisebb névleges áram vagy ÁVK”.`,
+    'T-K-M-B, T-K-M-C (1. rész); K-ZS, D-AVK (2. rész)',
+    [calc('hurokimpedancia',{Ze:'0,35',L:'100',A:'1,5',gorbe:'C',In:'16'},{Zs:h4.Zs,verdict:le(h4.Zs,h4.max),verdictText:'Lehetséges megoldás: nagyobb keresztmetszet, rövidebb vezeték, B jelleggörbe (a bekapcsolási áram ellenőrzésével), kisebb névleges áram vagy ÁVK – a döntés a tervező feladata.',Lmax:h4.Lmax}),
+     calc('hurokimpedancia',{Ze:'0,35',L:'100',A:'1,5',gorbe:'B',In:'16'},{Zs:h6.Zs,verdict:le(h6.Zs,h6.max),verdictText:'Lehetséges megoldás: nagyobb keresztmetszet, rövidebb vezeték, kisebb névleges áram vagy ÁVK – a döntés'}),
+     calc('hurokimpedancia',{Ze:'3',L:'25',A:'2,5',gorbe:'B',In:'16'},{verdict:false,verdictText:'Lehetséges megoldás: kisebb névleges áram vagy ÁVK – a döntés'}),
+     calc('hurokimpedancia',{Ze:'1,5',L:'25',A:'2,5',gorbe:'C',In:'16'},{verdict:false,verdictText:'Lehetséges megoldás: B jelleggörbe (a bekapcsolási áram ellenőrzésével), kisebb névleges áram vagy ÁVK – a döntés'})]),
    rule('KAL-HUROKIMPEDANCIA-D2','Csökkentett védővezető és túl nagy Ze',
-    'A védővezető keresztmetszete külön megadható (A_PE); üresen a fázisvezetővel azonos. Ha már Ze ≥ Zs,max, figyelmeztetés: „Már az elosztónál mért hurokimpedancia is eléri a megengedett értéket: ezzel a védelemmel az áramkör nem rövidíthető le eléggé.”, és Lmax = 0. Ze = 0 is megadható.',
-    'A tervező Méretezés füle a csökkentett PE-erű kábelt nem számolja (D-BLOKK, D-PE), a kalkulátor viszont a megadott A_PE-vel számol – a „Nem vizsgált” lista (D-HATOKOR) ugyanakkor a csökkentett N- vagy PE-eret is felsorolja.',
+    'A védővezető keresztmetszete külön megadható (A_PE, legfeljebb 35 mm²); üresen a fázisvezetővel azonos. Ha már Ze ≥ Zs,max, figyelmeztetés: „Már az elosztónál mért hurokimpedancia is eléri a megengedett értéket: ezzel a védelemmel az áramkör nem rövidíthető le eléggé.”, és Lmax = 0. Ze = 0 is megadható. A „Nem vizsgált” lista a méretezésétől eltér: a kalkulátor számol a csökkentett védővezetővel, és 35 mm² felett nem enged bevitelt, ezért ezek nem szerepelnek benne; helyettük „a védővezető keresztmetszetének méretezése és zárlati szilárdsága (543.1)” (KAL-HUROKIMPEDANCIA-NV).',
+    'A tervező Méretezés füle a csökkentett PE-erű kábelt nem számolja (D-BLOKK, D-PE), mert ott a kábeljelölésből kellene kiolvasni; a kalkulátor a megadott A_PE-vel számol, de a PE méretezését (543.1) nem vizsgálja.',
     `A = 2,5 mm², A_PE = 1,5 mm², L = 20 m, Ze = 0,3 Ω, B16: R = ${exact(T.rho1)} · 20 · (1/2,5 + 1/1,5) = ${hu(h3.R,4)} Ω; Zs = ${hu(h3.Zs,4)} Ω; Lmax = (${hu(h3.max,4)} − 0,3) / (${exact(T.rho1)} · (1/2,5 + 1/1,5)) = ${hu(h3.Lmax,3)} m → ${lenText(h3.Lmax)}. Ze = 3 Ω, B16 (Zs,max = ${hu(h5.max,4)} Ω): figyelmeztetés, Lmax = 0 m.`,
     'D-BLOKK, D-PE, D-HATOKOR (2. rész)',
-    [calc('hurokimpedancia',{Ze:'0,3',L:'20',A:'2,5',Ape:'1,5',gorbe:'B',In:'16'},{Zs:h3.Zs,Ik:h3.Ik,Lmax:h3.Lmax,'text:Lmax':lenText(h3.Lmax)}),calc('hurokimpedancia',{...hurIn,Ze:'3'},{Lmax:0,'text:Lmax':'0 m',verdict:le(h5.Zs,h5.max),issue:'Már az elosztónál mért hurokimpedancia'}),calc('hurokimpedancia',{...hurIn,Ze:'0'},{Zs:h1.R})],
-    'A „Nem vizsgált” lista a csökkentett keresztmetszetű N- vagy PE-eret is felsorolja, a kalkulátor pedig A_PE megadását engedi. Elfogadható-e ez így (a lista a méretezési segédszámítással közös), vagy a kalkulátor listáját módosítani kell?'),
+    [calc('hurokimpedancia',{Ze:'0,3',L:'20',A:'2,5',Ape:'1,5',gorbe:'B',In:'16'},{Zs:h3.Zs,Ik:h3.Ik,Lmax:h3.Lmax,'text:Lmax':lenText(h3.Lmax)}),calc('hurokimpedancia',{...hurIn,Ze:'3'},{Lmax:0,'text:Lmax':'0 m',verdict:le(h5.Zs,h5.max),issue:'Már az elosztónál mért hurokimpedancia'}),calc('hurokimpedancia',{...hurIn,Ze:'0'},{Zs:h1.R}),
+     calc('hurokimpedancia',{...hurIn,Ape:'36'},{ok:false,errorField:'Ape',error:'Legfeljebb 35 mm² lehet.'})],
+    'Elegendő-e, hogy a kalkulátor a megadott (csökkentett) védővezetővel számol, de a védővezető keresztmetszetének méretezését (543.1) nem vizsgálja, csak a „Nem vizsgált” lista említi?'),
   ]});
 
  // ---- Terhelhetőségi táblázat
@@ -948,7 +1004,7 @@ function calculatorsPart():Part{
  if(blocks.length!==T1_ORDER.length+1)throw Error('A 3. rész blokkjai hiányosak');
  return {no:3,title:'Szabványhoz kötött kalkulátorok (T1)',blocks,intro:[
   'A Villanyszerelő Tudástár szabványhoz vagy biztonsághoz kötött (T1) kalkulátorai csak szakmai lektori jóváhagyás után jelennek meg. Kalkulátoronként egy blokk: cél és kiadási adatok, mire jó és mire nem, a „Nem vizsgált” lista, a képletek a kalkulátoroldalon megjelenő alakban, a feltételezések, a bemenetek érvényességi tartománya, a felhasznált állandók forrással, majd a képletek behelyettesíthető alakban és a programozott döntések, kézzel számolt példákkal. A közös működést (számbevitel, kiírás, szóhasználat, figyelmeztetések) a KAL-KOZOS blokk írja le.',
-  'A táblázatértékekre (ρ1, λ, U0, Iz0, kθ, kcs, G.52.1 határok, m, cmin, I2/In) csak az 1. rész azonosítójával hivatkozunk: ezek helyességét az 1. rész jóváhagyása fedi, itt nem kell újra összevetni. Ahol a kalkulátor a méretezési segédszámítás programfüggvényét használja, a blokk a 2. rész tételére is hivatkozik.',
+  `A táblázatértékekre (ρ1, λ, U0, Iz0, kθ, kcs, G.52.1 határok, m, cmin, I2/In) csak az 1. rész azonosítójával hivatkozunk: ezek helyességét az 1. rész jóváhagyása fedi, itt nem kell újra összevetni. Ezért minden ilyen értéket használó kalkulátor (${T1_ORDER.filter(s=>TABLE_GATED.has(s)).map(s=>defOf(s).title).join(', ')}) táblázat-kapus: csak az 1. rész jóváhagyása után jelenik meg, akkor is, ha a blokkja jóvá van hagyva. Ahol a kalkulátor a méretezési segédszámítás programfüggvényét használja, a blokk a 2. rész tételére is hivatkozik.`,
   'Minden példát és bemeneti korlátot automatikus teszt vet össze a kalkulátor tényleges futtatásával (ugyanazzal a számítómotorral, amely a kalkulátoroldalon fut). A blokk elején álló tartalmi és forrás-ujjlenyomat azonosítja a jóváhagyott kalkulátort: a program csak az ezzel az ujjlenyomat-párral rögzített lektori rekorddal teszi közzé, és ha a kalkulátor bármiben változik, új kiadás és új jóváhagyás kell. A jóváhagyás kalkulátoronként a Jóváhagyó lap „3. rész – kalkulátoronkénti döntés” táblázatában jelölhető.',
  ]};
 }
@@ -980,21 +1036,22 @@ export function verifiedText(checks:readonly ProgramCheck[]|undefined):string{
 }
 
 // ---------------------------------------------------------------- Közös szövegek (Markdown és PDF)
-type Para={kind:'p';text:string}|{kind:'ul'|'ol';items:string[]}|{kind:'table';headers:string[];widths:number[];rows:string[][];right?:number[];ids?:number[]};
+type Para={kind:'p';text:string}|{kind:'ul'|'ol';items:string[]}|{kind:'table';headers:string[];widths:number[];rows:string[][];right?:number[]};
 type Section={title:string;body:Para[]};
 const P=(text:string):Para=>({kind:'p',text});
 /** A jóváhagyás megjelenő szövege a programban, jóváhagyás után – a reviewText() pontos szövegével, helyőrzőkkel: a jóváhagyó
  * hozzájárulásával névvel (showName: true), anélkül név nélkül. */
 export const approvedTexts=()=>{
- const r:SizingReview={status:'jóváhagyott',reviewer:'[név]',registry:'[névjegyzéki szám]',date:'[dátum]',fingerprint:tablesFingerprint(),showName:true,note:''};
- return {named:reviewText(r),anonymous:reviewText({...r,showName:false})};
+ const r:SizingReview={status:'jóváhagyott',qualification:'[jogosultság]',date:'[dátum]',fingerprint:tablesFingerprint(),approvalRef:'[hivatkozás]',showName:true,reviewer:'[név]',registry:'[névjegyzéki szám]',note:''};
+ return {named:reviewText(r),anonymous:reviewText({...r,showName:false,reviewer:'',registry:''})};
 };
-/** A 3. rész jóváhagyott kalkulátorainak lektori jelölése a kalkulátoroldalon (jelvény; lábléc-sor) – a program pontos szövegével,
- * helyőrzőkkel: hozzájárulással névvel, anélkül a minősítéssel (lib/calc/registry.ts expertShown). */
+/** A 3. rész jóváhagyott kalkulátorainak lektori jelölése a kalkulátor saját oldalán (jelvény; lábléc-sor) – a program pontos
+ * szövegével, helyőrzőkkel: hozzájárulással névvel, anélkül a jogosultsággal (lib/calc/registry.ts expertShown); `list`: a
+ * kalkulátorlista és a kereső jelvénye, amely hozzájárulással is név nélküli (calcMeta). */
 export const calcBadgeTexts=()=>{
- const d=defOf(T1_ORDER[0]),r:ExpertReview={kind:'lektoralt',reviewer:'[név]',qualification:'[minősítés]',registry:'[névjegyzéki szám]',date:'[dátum]',fingerprint:calcFingerprint(d),source:'',showName:true};
+ const d=defOf(T1_ORDER[0]),r:ExpertReview={kind:'lektoralt',qualification:'[jogosultság]',date:'[dátum]',fingerprint:calcFingerprint(d),source:sourceFingerprint(d.slug),approvalRef:'[hivatkozás]',showName:true,reviewer:'[név]',registry:'[névjegyzéki szám]'};
  const text=(x:ExpertReview)=>releaseInfo(d,{[d.slug]:x},true).badge+'; '+expertMeta(x);
- return {named:text(r),anonymous:text({...r,showName:false})};
+ return {named:text(r),anonymous:text({...r,showName:false,reviewer:undefined,registry:undefined}),list:calcMeta(d,false,{[d.slug]:r},true).note};
 };
 /** Ahol a reviewText() megjelenik (a tests/lektori-csomag.ts a forráskódból ellenőrzi, hogy új hely nem került be e felsorolás nélkül). */
 export const NAME_PLACES=()=>`a tervező Méretezés fülén (Eszközök → Tervsegéd → Méretezés) minden felhasználónak; minden felhasználó exportált terv-PDF-jében, ha a méretezési táblákat bekapcsolja, az elosztóoldalak „méretezés indoklása” táblájának „Táblázatok – Állapot” sorában (ugyanennek a táblának az utolsó sora a terv tervezőjének „Tervezői ellenőrzés” aláírósora); a nyilvános, keresőkben is megtalálható kalkulátoroldalakon a táblázatokat használó kalkulátorok (${T1_ORDER.map(defOf).filter(d=>d.tables).map(d=>d.title).join(', ')}) „Táblázatok állapota” sorában és a Vezeték-ellenállás kalkulátor ρ1 szerinti tájékoztató sorában`;
@@ -1009,7 +1066,8 @@ function staticIntroSections():Section[]{
   ]},
   {title:'Mire használjuk a jóváhagyott tartalmat?',body:[{kind:'ul',items:[
    'Jóváhagyásig a program minden táblázatértéket „ellenőrizendő” állapotúként jelöl a felületen, a számítási sorokban és a PDF-ben.',
-   `Jóváhagyás után ${NAME_PLACES()} a következő szöveg jelenik meg – a jóváhagyó kifejezett hozzájárulásával: „${approvedTexts().named}”; hozzájárulás nélkül: „${approvedTexts().anonymous}” A szöveg a táblázatértékek lektorálását jelzi, nem az adott terv jóváhagyását. A 3. részből jóváhagyott kalkulátorok oldalán (jelvény; lábléc-sor) hozzájárulással „${calcBadgeTexts().named}”, anélkül „${calcBadgeTexts().anonymous}” áll. A név csak hozzájárulással jelenik meg (Jóváhagyó lap); a jóváhagyás érvénye ettől nem függ.`,
+   `Jóváhagyás után ${NAME_PLACES()} a következő szöveg jelenik meg – a jóváhagyó kifejezett hozzájárulásával: „${approvedTexts().named}”; hozzájárulás nélkül: „${approvedTexts().anonymous}” A szöveg a táblázatértékek lektorálását jelzi, nem az adott terv jóváhagyását. A 3. részből jóváhagyott kalkulátorok saját oldalán (jelvény; lábléc-sor) hozzájárulással „${calcBadgeTexts().named}”, anélkül „${calcBadgeTexts().anonymous}” áll; a kalkulátorlistán (/kalkulatorok) és a keresőben a jelvény mindig név nélküli: „${calcBadgeTexts().list}”. A [jogosultság] a Jóváhagyó lap „Jogosultság megnevezése” mezőjének szövege.`,
+   'A név és a névjegyzéki szám csak hozzájárulással jelenik meg (Jóváhagyó lap), és csak ekkor kerül a programba: a program kódja a nyilvános oldalakon olvasható, ezért hozzájárulás nélkül a programban sem rögzítjük. Ilyenkor a jóváhagyást a jogosultság megnevezése, a dátum és a hivatkozás (csomagkiadás, ujjlenyomatok, a Jóváhagyó lap iktatási helye) azonosítja; az aláírt lapot a megbízó a programon kívül őrzi. A jóváhagyás érvénye a név megjelenítésétől nem függ.',
    `A 3. rész T1 kalkulátorai kalkulátoronként, a jóváhagyott tartalmi és forrás-ujjlenyomattal rögzített lektori rekorddal jelennek meg a nyilvános kalkulátoroldalakon; a táblázat-kapus kalkulátorok (${T1_ORDER.filter(s=>TABLE_GATED.has(s)).map(s=>defOf(s).title).join(', ')}) ezen felül csak az 1. rész jóváhagyása után. Ha egy kalkulátor a jóváhagyás után bármiben változik, a program nem teszi közzé, illetve az automatikus teszt elbukik, amíg új jóváhagyás nem készül.`,
    'Az 1. rész jóváhagyása a programban ujjlenyomathoz kötött: ha később bármely táblázatérték, forrásmegjelölés, szabványpont vagy leírás megváltozik, a program automatikusan „ellenőrizendő” állapotra áll vissza.',
    'A 2. rész (képletek, döntések) jóváhagyását a program állapota nem követi. Ezt a fejlesztési folyamat biztosítja: jóváhagyott állapotban az automatikus teszt elbukik, ha a 2. rész a jóváhagyott ujjlenyomattól eltér; ilyenkor új kiadás és új jóváhagyás kell.',
@@ -1056,7 +1114,7 @@ function effortSection(pkg:Package):Section{
  const blocks=reviewable(pkg).flatMap(p=>p.blocks);
  return {title:'Becsült ráfordítás',body:[
   P('A becslés a szabványok kéznél lévő, hatályos kiadását és a csomag egyszeri átnézését feltételezi. Eltérések esetén a javított kiadás visszaellenőrzése (csak a változott tételek) külön kb. 15–30 perc.'),
-  {kind:'table',headers:['Blokk','Tartalom','Tételek','Becsült idő'],widths:[34,90,20,30],right:[2,3],ids:[0],rows:[
+  {kind:'table',headers:['Blokk','Tartalom','Tételek','Becsült idő'],widths:[34,90,20,30],right:[2,3],rows:[
    ...blocks.map(b=>[b.id,b.title,String(b.items.length),duration(b.minutes)]),
    ['–','Jóváhagyó lap kitöltése','–',duration(APPROVAL_MINUTES)],
    ['','Összesen',String(blocks.reduce((s,b)=>s+b.items.length,0)),'kb. '+duration(minutes(pkg))],
@@ -1075,9 +1133,9 @@ const CALC_DECISION_NOTE='A 3. rész kalkulátoronként hagyható jóvá. „Jó
 const DECLARATION_TEMPLATE='Alulírott kijelentem, hogy a Villanyrajz lektori csomag ezen a lapon megjelölt, {oldal} oldalas kiadásának 1. (méretezési táblázatok), 2. (képletek és programozott döntések) és 3. (szabványhoz kötött kalkulátorok) részét a hivatkozott szabványok hatályos kiadásával összevetettem, és a tételeket a fenti döntés, valamint a kalkulátoronkénti döntés szerint jelöltem. A 3. részből kizárólag a kalkulátoronkénti döntésben „Jóváhagyom” jelölésű kalkulátorokat hagyom jóvá. A jóváhagyás kizárólag a csomagban, a megjelölt ujjlenyomatokkal azonosított tartalomra vonatkozik; nem minősül a programmal készült egyes tervekért vagy a kalkulátorokkal végzett egyes számításokért vállalt tervezői felelősségnek, és nem terjed ki a csomag 4–6. részére.';
 export const declaration=(pages:number)=>DECLARATION_TEMPLATE.replace('{oldal}',String(pages));
 const BINDING='Az 1. rész ujjlenyomatát a program maga ellenőrzi: eltérésnél „ellenőrizendő” állapotra áll vissza. A 2. rész ujjlenyomatát a fejlesztési folyamat automatikus tesztje veti össze a jóváhagyottal. A 3. részben kalkulátoronként a tartalmi és a forrás-ujjlenyomat kerül a kiadási rekordba: tartalmi eltérésnél a program a kalkulátort nem teszi közzé, forráseltérésnél az automatikus teszt elbukik. Bármelyik eltérésénél új kiadás és új jóváhagyás kell.';
-const CONSENT=()=>`Hozzájárulok, hogy nevem, névjegyzéki számom és a jóváhagyás dátuma ${NAME_PLACES()} – ezzel a szöveggel megjelenjen: „${approvedTexts().named}”; továbbá hogy a 3. részből általam jóváhagyott kalkulátorok oldalán nevem és minősítésem így megjelenjen: „${calcBadgeTexts().named}”. Hozzájárulás hiányában a program a nevem nélkül jelzi a lektorálást: „${approvedTexts().anonymous}”, illetve „${calcBadgeTexts().anonymous}”. A jóváhagyás érvénye a hozzájárulástól nem függ.`;
+const CONSENT=()=>`Hozzájárulok, hogy nevem, névjegyzéki számom, jogosultságom és a jóváhagyás dátuma ${NAME_PLACES()} – ezzel a szöveggel megjelenjen: „${approvedTexts().named}”; továbbá hogy a 3. részből általam jóváhagyott kalkulátorok saját oldalán (jelvény; lábléc-sor) nevem és jogosultságom így megjelenjen: „${calcBadgeTexts().named}”. Tudomásul veszem, hogy ehhez nevem és névjegyzéki számom a program nyilvános oldalainak kódjába is bekerül. Hozzájárulás hiányában a program nevemet és névjegyzéki számomat nem rögzíti, és a lektorálást a jogosultságom megnevezésével jelzi: „${approvedTexts().anonymous}”, illetve „${calcBadgeTexts().anonymous}”. A kalkulátorlistán és a keresőben a jelvény név nélküli. A jóváhagyás érvénye a hozzájárulástól nem függ.`;
 const FIELDS=['Jóváhagyó neve','Kamarai / névjegyzéki szám','Jogosultság megnevezése','Hely','Dátum','Aláírás'];
-const FIELD_HINT='Jogosultság például: épületvillamossági tervező (MMK-névjegyzék) vagy érintésvédelmi szabványossági felülvizsgáló.';
+const FIELD_HINT='A „Jogosultság megnevezése” a programban a lektorálás jelzésében szó szerint megjelenik (név nélkül is); például: épületvillamossági tervező (MMK-névjegyzék) vagy érintésvédelmi szabványossági felülvizsgáló.';
 const DEVIATION_STEPS=[
  `A lektor az eltérő tételt ✗-szel jelöli, és a „${FORM.fix}” mezőbe beírja a helyes értéket; a forrást (szabvány, kiadás, pont vagy táblázat) a „${FORM.blockNote}” mezőben vagy a tételnél adja meg.`,
  'A Jóváhagyó lapon az 1–2. résznél a második lehetőséget („javítás után hagyom jóvá”), a 3. résznél az érintett kalkulátor sorában a „Javítás után / nem” négyzetet jelöli, és aláírja. Az eltéréssel érintett részre, illetve kalkulátorra ennél a kiadásnál jóváhagyás nem rögzíthető: a jóváhagyás mindig egy pontos ujjlenyomathoz tartozik.',
@@ -1137,7 +1195,7 @@ function metaRows(pkg:Package):[string,string][]{
   ['1. rész – táblázat-ujjlenyomat',pkg.fingerprints.tables+' (ehhez köti a program a jóváhagyást)'],
   ['2. rész – képlet-ujjlenyomat',pkg.fingerprints.formulas+' (a fejlesztési folyamat automatikus tesztje ellenőrzi)'],
   ['3. rész – kalkulátor-ujjlenyomat',pkg.fingerprints.calculators+' (a 3. rész egészéé; kalkulátoronként: a döntési táblázatban)'],
-  ['Jóváhagyási állapot (1. rész)',pkg.approved?`jóváhagyott – ${r.reviewer} (${r.registry}), ${r.date}; a név megjelenik a programban: ${r.showName?'igen':'nem'}`:'ellenőrizendő – jogosult tervező még nem hagyta jóvá'],
+  ['Jóváhagyási állapot (1. rész)',pkg.approved?`jóváhagyott – ${r.qualification}, ${r.date}; hivatkozás: ${r.approvalRef}; a név megjelenik a programban: ${reviewNameShown(r)?`igen (${r.reviewer}, ${r.registry})`:'nem'}`:'ellenőrizendő – jogosult tervező még nem hagyta jóvá'],
   ['Ellenőrizendő tételek',c.map(x=>`${x.no}. rész: ${x.n}`).join('; ')+` (összesen ${c.reduce((s,x)=>s+x.n,0)})`],
   ['Becsült ráfordítás','kb. '+duration(minutes(pkg))],
  ];
@@ -1201,18 +1259,27 @@ export const pdfText=(s:string)=>s.replace(/[\u0000-\u001f]/g,' ').replace(/[ �
 const INLINE={'≤':'в','≥':'л','≈':'е','√':'я','→':'ф','−':'б','✓':'ж','✗':'м','☐':'ы'} as const;
 export const PDF_PLACEHOLDERS:string[]=Object.values(INLINE);
 const PH_TEST=new RegExp('['+PDF_PLACEHOLDERS.join('')+']','u'),PH_SPLIT=new RegExp('(['+PDF_PLACEHOLDERS.join('')+'])','u');
-const pdfInline=(s:string)=>s.replace(/[\u0000-\u001f]/g,' ').replace(/[  ]/g,' ').replace(/[‐-‒]/g,'-').replace(/[≤≥≈√→−✓✗☐]/gu,c=>INLINE[c as keyof typeof INLINE]);
+const NBSP='\u00a0';
+/** Mértékegységek, amelyek az előttük álló számtól nem választhatók el sortöréssel. */
+const UNIT_GLUE=/(\d) (?=(?:Ω·mm²\/m|Ω\/m|mΩ\/m|mΩ|kΩ|Ω|kV|V|mA|A|kW|W\/m|W|kvar|var|kVA|VA|mm²|mm|km|m|%|°C|Hz|µF|F|1\/s|LE|hp|db|s)(?![\p{L}\d]))/gu;
+/**
+ * A PDF-be kerülő szöveg: vezérlőkarakter nélkül, a hiányzó jelek helyőrzőjével. A nem törő szóközök (az ezres csoport és a
+ * mértékegység előtti szóköz a hu-HU formázásból, valamint a szám és a mértékegység, illetve a szóközzel elválasztott ezres csoport
+ * közötti sima szóköz) NBSP-ként maradnak, így a tördelés nem vágja ketté a számot vagy a számot és a mértékegységét; kiíráskor
+ * (write) lesznek sima szóközzé.
+ */
+export const pdfInline=(s:string)=>s.replace(/[\u0000-\u001f]/g,' ').replace(/[\u00a0\u202f\u2007]/g,NBSP).replace(/(\d) (?=\d{3}(?![\d,]))/g,'$1'+NBSP).replace(UNIT_GLUE,'$1'+NBSP).replace(/[‐-‒]/g,'-').replace(/[≤≥≈√→−✓✗☐]/gu,c=>INLINE[c as keyof typeof INLINE]);
 const pdfDate=(iso:string)=>`D:${iso.replace(/-/g,'')}000000+00'00'`;
 const C={text:'#263b49',muted:'#5d7180',accent:'#1f5f6e',rule:'#d6e0e5',head:'#e3eeeb',zebra:'#f6f8fa',bar:'#eef3f5',note:'#fbf6ea',noteLine:'#e3cf9f'};
 type Toc=Record<string,number>;
 
-function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;toc:Toc;texts:string[]}{
+function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;toc:Toc;texts:string[];breaks:string[]}{
  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true,putOnlyUsedFonts:true});
  doc.addFileToVFS('NotoSans.ttf',font);doc.addFont('NotoSans.ttf','NotoSans','normal');doc.setFont('NotoSans');
  doc.setProperties({title:pdfText(TITLE+' '+editionLabel(pkg.edition)),subject:pdfText(SUBTITLE),creator:'Villanyrajz',author:'Villanyrajz'});
  doc.setCreationDate(pdfDate(pkg.edition.date));
  doc.setFileId((pkg.fingerprints.content+pkg.fingerprints.tables+pkg.fingerprints.formulas+pkg.edition.number.toString(16).padStart(8,'0')).toUpperCase());
- const W=210,H=297,M=16,CW=W-2*M,TOP=23,BOTTOM=H-19,toc:Toc={},texts:string[]=[];
+ const W=210,H=297,M=16,CW=W-2*M,TOP=23,BOTTOM=H-19,toc:Toc={},texts:string[]=[],breaks:string[]=[];
  let y=TOP,pages=0;
  const lh=(size:number)=>size*0.3528*1.3;
  /** Egy hiányzó jel kirajzolása a helyőrző dobozában (x: bal szél, yy: alapvonal, w: a helyőrző szélessége). */
@@ -1234,7 +1301,7 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
   doc.setLineCap('butt');doc.setLineJoin('miter');
  };
  const write=(s:string,x:number,yy:number,size:number,color=C.text,align:'left'|'right'|'center'='left')=>{
-  const t=pdfInline(s);doc.setFontSize(size);doc.setTextColor(color);
+  const t=pdfInline(s).replaceAll(NBSP,' ');doc.setFontSize(size);doc.setTextColor(color);
   if(!PH_TEST.test(t)){texts.push(t);doc.text(t,x,yy,{align});return}
   const total=doc.getTextWidth(t);let cx=align==='right'?x-total:align==='center'?x-total/2:x;
   for(const part of t.split(PH_SPLIT)){
@@ -1244,7 +1311,32 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
    cx+=w;
   }
  };
- const split=(s:string,width:number,size:number)=>{doc.setFontSize(size);return doc.splitTextToSize(pdfInline(s),width) as string[]};
+ /**
+  * Tördelés: szóköznél, és ha egy szó magában sem fér el (pl. hosszú azonosító: KAL-LED-SZALAG-TAPEGYSEG-BEM-PM, vagy
+  * „Kismegszakító-választás” egy keskeny oszlopban), a kötőjeleinél. A nem törő szóköz (pdfInline) nem töréspont. Ha egy
+  * kötőjelek közötti szakasz sem fér el, szó közben törik – ezt a `breaks` gyűjti, és a render() hibával megáll.
+  */
+ const split=(s:string,width:number,size:number):string[]=>{
+  doc.setFontSize(size);
+  const t=pdfInline(s),fits=(x:string)=>doc.getTextWidth(x.replaceAll(NBSP,' '))<=width,lines:string[]=[];
+  let cur='';
+  const push=()=>{if(cur)lines.push(cur);cur=''};
+  for(const word of t.split(' ')){
+   if(fits(cur?cur+' '+word:word)){cur=cur?cur+' '+word:word;continue}
+   push();
+   if(fits(word)){cur=word;continue}
+   for(const piece of word.split(/(?<=-)/)){
+    if(fits(cur+piece)){cur+=piece;continue}
+    push();
+    if(fits(piece)){cur=piece;continue}
+    const chunks=doc.splitTextToSize(piece,width) as string[];
+    breaks.push(chunks.join('|'));
+    lines.push(...chunks.slice(0,-1));cur=chunks[chunks.length-1]??'';
+   }
+  }
+  push();
+  return lines.length?lines:[''];
+ };
  const header=()=>{write(TITLE,M,12,10,C.accent);write(editionLabel(pkg.edition)+' · csomag-ujjlenyomat '+pkg.fingerprints.content,W-M,12,8,C.muted,'right');doc.setDrawColor(C.rule);doc.setLineWidth(.3);doc.line(M,15,W-M,15)};
  const newPage=()=>{if(pages++)doc.addPage('a4','portrait');header();y=TOP};
  const ensure=(h:number)=>{if(y+h>BOTTOM)newPage()};
@@ -1261,17 +1353,7 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
  const okIcon=(cx:number,cy:number)=>{doc.setDrawColor(C.text);doc.setLineWidth(.45);doc.line(cx-1.5,cy,cx-0.5,cy+1.1);doc.line(cx-0.5,cy+1.1,cx+1.5,cy-1.3)};
  const noIcon=(cx:number,cy:number)=>{doc.setDrawColor(C.text);doc.setLineWidth(.45);doc.line(cx-1.2,cy-1.2,cx+1.2,cy+1.2);doc.line(cx-1.2,cy+1.2,cx+1.2,cy-1.2)};
  const dashed=(x1:number,x2:number,yy:number)=>{doc.setDrawColor(C.muted);doc.setLineWidth(.2);doc.setLineDashPattern([0.6,0.9],0);doc.line(x1,yy,x2,yy);doc.setLineDashPattern([],0)};
- /** Azonosító tördelése kötőjelnél (a szóköz nélküli hosszú azonosító, pl. KAL-LED-SZALAG-TAPEGYSEG-BEM-PM, így nem törik szó közben); ami elfér, változatlan. */
- const splitId=(s:string,width:number,size:number):string[]=>{
-  doc.setFontSize(size);
-  const fits=(t:string)=>doc.getTextWidth(pdfInline(t))<=width;
-  if(!s||fits(s))return split(s,width,size);
-  const out:string[]=[];let cur='';
-  for(const t of s.split(/(?<=-)/)){if(cur&&!fits(cur+t)){out.push(cur);cur=t}else cur+=t}
-  if(cur)out.push(cur);
-  return out.flatMap(l=>fits(l)?[l]:split(l,width,size));
- };
- type Col={title:string;w:number;align?:'left'|'right'|'center';box?:boolean;icon?:'ok'|'no';id?:boolean};
+ type Col={title:string;w:number;align?:'left'|'right'|'center';box?:boolean;icon?:'ok'|'no'};
  /** `tail`: az utolsó sor csak az utána következő `tail` magasságú elemmel (pl. a blokk záró mezőjével) együtt kerül az oldalra. */
  const table=(cols:Col[],rows:string[][],o:{size?:number;minRow?:number;tail?:number}={})=>{
   const size=o.size??8.5,total=cols.reduce((s,c)=>s+c.w,0),ws=cols.map(c=>c.w/total*CW),line=lh(size),minRow=o.minRow??6;
@@ -1283,7 +1365,7 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
   };
   ensure(7+minRow*2);head();
   rows.forEach((row,n)=>{
-   const cells=row.map((s,i)=>cols[i].box?[]:cols[i].id?splitId(s,ws[i]-3,size):split(s,ws[i]-3,size)),h=Math.max(minRow,...cells.map(l=>l.length*line+2.4));
+   const cells=row.map((s,i)=>cols[i].box?[]:split(s,ws[i]-3,size)),h=Math.max(minRow,...cells.map(l=>l.length*line+2.4));
    if(y+h+(n===rows.length-1?o.tail??0:0)>BOTTOM){newPage();head()}
    if(n%2===1){doc.setFillColor(C.zebra);doc.rect(M,y,CW,h,'F')}
    let x=M;
@@ -1302,7 +1384,7 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
  };
  const noteH=(lines:string[],size=9.5)=>lines.flatMap(s=>split(s,CW-8,size)).length*lh(size)+8;
  const note=(lines:string[],size=9.5)=>{const ls=lines.flatMap(s=>split(s,CW-8,size)),h=ls.length*lh(size)+5;ensure(h);doc.setFillColor(C.note);doc.setDrawColor(C.noteLine);doc.setLineWidth(.3);doc.rect(M,y,CW,h,'FD');ls.forEach((l,k)=>write(l,M+4,y+2.5+lh(size)*(k+0.74),size));y+=h+3};
- const paraBlock=(x:Para)=>{if(x.kind==='p')para(x.text);else if(x.kind==='table')table(x.headers.map((t,i)=>({title:t,w:x.widths[i],align:x.right?.includes(i)?'right' as const:'left' as const,id:x.ids?.includes(i)})),x.rows);else list(x.items,x.kind==='ol')};
+ const paraBlock=(x:Para)=>{if(x.kind==='p')para(x.text);else if(x.kind==='table')table(x.headers.map((t,i)=>({title:t,w:x.widths[i],align:x.right?.includes(i)?'right' as const:'left' as const})),x.rows);else list(x.items,x.kind==='ol')};
  /** Kézírásos mező: címke, alatta `n` szaggatott sor. */
  const COMMENT_LINE=7;
  const commentH=(n:number)=>5+n*COMMENT_LINE+2;
@@ -1315,7 +1397,7 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
  table([{title:'Adat',w:55},{title:'Érték',w:123}],metaRows(pkg),{size:9});
  h2('Tartalom',30);
  const tocRows:[string,string][]=[['Bevezető','intro'],...pkg.parts.map(p=>[`${p.no}. rész – ${p.title}${p.placeholder?' (helyőrző)':''}`,'part'+p.no] as [string,string]),['Jóváhagyó lap','approval']];
- for(const [label,key] of tocRows){const h=lh(10);ensure(h);write(label,M+2,y+h*0.74,10);doc.setFontSize(10);doc.setDrawColor(C.rule);doc.setLineWidth(.2);doc.setLineDashPattern([0.4,1],0);doc.line(M+4+doc.getTextWidth(pdfInline(label)),y+h*0.7,W-M-10,y+h*0.7);doc.setLineDashPattern([],0);write(String(tocIn[key]??''),W-M,y+h*0.74,10,C.text,'right');y+=h+1}
+ for(const [label,key] of tocRows){const h=lh(10);ensure(h);write(label,M+2,y+h*0.74,10);doc.setFontSize(10);doc.setDrawColor(C.rule);doc.setLineWidth(.2);doc.setLineDashPattern([0.4,1],0);doc.line(M+4+doc.getTextWidth(pdfInline(label).replaceAll(NBSP,' ')),y+h*0.7,W-M-10,y+h*0.7);doc.setLineDashPattern([],0);write(String(tocIn[key]??''),W-M,y+h*0.74,10,C.text,'right');y+=h+1}
  y+=3;
  note([COVER_NOTE],9);
 
@@ -1325,7 +1407,7 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
 
  // Részek
  const LABEL_W=25,TEXT_W=CW-LABEL_W-2;
- const valueCols=(b:Block):Col[]=>{const [l,v]=b.columns??['Tétel','Érték'],{widths:[wi,wl,wv,wf],align}=b.layout??{widths:[30,40,22,72],align:'right'};return [{title:'Azonosító',w:wi,id:true},{title:l,w:wl},{title:v,w:wv,align},{title:'✓',w:7,box:true,icon:'ok'},{title:'✗',w:7,box:true,icon:'no'},{title:FORM.fix,w:wf}]};
+ const valueCols=(b:Block):Col[]=>{const [l,v]=b.columns??['Tétel','Érték'],{widths:[wi,wl,wv,wf],align}=b.layout??{widths:[30,40,22,72],align:'right'};return [{title:'Azonosító',w:wi},{title:l,w:wl},{title:v,w:wv,align},{title:'✓',w:7,box:true,icon:'ok'},{title:'✗',w:7,box:true,icon:'no'},{title:FORM.fix,w:wf}]};
  const ruleFields=(i:RuleItem)=>([['Szabály',i.rule],['Indoklás',i.rationale],['Példa',i.example],...(i.question?[['Kérdés',i.question]]:[]),['Forrás',i.source],[FORM.verified,verifiedText(i.checks)]] as [string,string][]).map(([k,v])=>({k,ls:split(v,TEXT_W,9)}));
  const FIX_LINES=2;
  const ruleItemH=(i:RuleItem)=>{const titleH=split(i.id+' – '+i.title,CW-34,10.5).length*lh(10.5)+3.4;return titleH+2+ruleFields(i).reduce((s,f)=>s+f.ls.length*lh(9)+1.3,0)+commentH(FIX_LINES)+2};
@@ -1385,22 +1467,26 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
  // a nyilatkozat, az adatok, az aláírás és a hozzájárulás.
  h1('Jóváhagyó lap','approval');
  para('Blokkonként: „Mind rendben”, ha a blokk minden tétele egyezik; különben az eltérő (✗) tételek száma.',{size:9.5,gap:2});
- table([{title:'Blokk',w:32,id:true},{title:'Megnevezés',w:72},{title:'Tételek',w:16,align:'right'},{title:'Mind rendben',w:22,box:true},{title:'Eltérő tételek (db)',w:36}],reviewable(pkg).flatMap(p=>p.blocks).map(b=>[b.id,b.title,String(b.items.length),'','']),{minRow:7.5});
+ table([{title:'Blokk',w:32},{title:'Megnevezés',w:72},{title:'Tételek',w:16,align:'right'},{title:'Mind rendben',w:22,box:true},{title:'Eltérő tételek (db)',w:36}],reviewable(pkg).flatMap(p=>p.blocks).map(b=>[b.id,b.title,String(b.items.length),'','']),{minRow:7.5});
  h2('3. rész – kalkulátoronkénti döntés',60);
  para(CALC_DECISION_NOTE,{size:9,gap:2});
- table([{title:'Kalkulátor',w:42},{title:'Blokk',w:34,id:true},{title:'Tartalom (ujjlenyomat)',w:23},{title:'Forrás (ujjlenyomat)',w:23},{title:'Táblázat-kapu',w:16},{title:'Jóváhagyom',w:20,box:true},{title:'Javítás után / nem',w:20,box:true}],pkg.calcs.map(c=>[c.title,c.id,c.fingerprint,c.source,c.gated?'igen':'nem','','']),{minRow:9});
+ table([{title:'Kalkulátor',w:42},{title:'Blokk',w:34},{title:'Tartalom (ujjlenyomat)',w:23},{title:'Forrás (ujjlenyomat)',w:23},{title:'Táblázat-kapu',w:16},{title:'Jóváhagyom',w:20,box:true},{title:'Javítás után / nem',w:20,box:true}],pkg.calcs.map(c=>[c.title,c.id,c.fingerprint,c.source,c.gated?'igen':'nem','','']),{minRow:9});
  h2('Teendő eltérés esetén',40);
  list(DEVIATION_STEPS,true);
+ h2('Az ujjlenyomatok kötése',20);
+ para(BINDING,{size:9,gap:2});
  newPage();
+ const signPage=pages;
  h2('Jóváhagyó lap – döntés és aláírás',0);
  table([{title:'A jóváhagyott csomag',w:55},{title:'Érték (előre kitöltve)',w:123}],metaRows(pkg).slice(0,6),{size:8.5});
  DECISIONS.forEach(d=>checkLine(d));
  y+=1;para(declaration(pagesIn),{size:9,gap:2});
- para(BINDING,{size:8.5,color:C.muted,gap:2});
  para(FIELD_HINT,{size:8.5,color:C.muted,gap:0});
  FIELDS.forEach(f=>fieldRow(f,{height:f==='Aláírás'?15:9}));
  fieldRow('Megjegyzések',{height:9});fieldRow('',{height:7.5});
  y+=2;checkLine(CONSENT(),8);
+ // A döntés, az aláírás és a hozzájárulás egy lapon marad: ha a szöveg túlnő, a hozzájárulás négyzete aláírás nélküli lapra csúszna.
+ if(doc.getNumberOfPages()!==signPage)throw Error('A jóváhagyó lap (döntés, aláírás, hozzájárulás) nem fér egy oldalra; rövidítsd a szöveget vagy a térközöket.');
 
  const n=doc.getNumberOfPages();
  for(let i=1;i<=n;i++){
@@ -1409,13 +1495,14 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
   write('Szignó:',122,H-9,7.5,C.muted);dashed(132,166,H-8.6);
   write(i+' / '+n+'. oldal',W-M,H-9,8,C.text,'right');
  }
- return {doc,toc,texts};
+ return {doc,toc,texts,breaks};
 }
 /** Több menetben rajzol, amíg a tartalomjegyzék oldalszámai és a nyilatkozat oldalszáma állandó. */
 export function renderPdf(pkg:Package,font:string):{doc:jsPDF;pages:number;texts:string[]}{
  let toc:Toc={},pages=99;
  for(let pass=0;pass<5;pass++){
   const r=drawPdf(pkg,font,toc,pages),n=r.doc.getNumberOfPages();
+  if(r.breaks.length)throw Error('A PDF-ben szó közben törik a szöveg (szélesebb oszlop vagy rövidebb szó kell): '+[...new Set(r.breaks)].join('; '));
   if(n===pages&&JSON.stringify(r.toc)===JSON.stringify(toc))return {doc:r.doc,pages:n,texts:r.texts};
   toc=r.toc;pages=n;
  }
@@ -1429,51 +1516,125 @@ export function render(pkg:Package,font:string){
 export const readFont=()=>readFileSync(PATHS.font).toString('base64');
 
 // ---------------------------------------------------------------- Ellenőrzés és futtatás
-/** A legutóbbi commitban lévő csomag kiadása és ujjlenyomata (git HEAD:docs/lektori-csomag.md); ha nem olvasható: null. */
-export function committedEdition():{number:number;content:string}|null{
- try{
-  const md=execFileSync('git',['show','HEAD:'+PATHS.md],{encoding:'utf8',stdio:['ignore','pipe','ignore']});
-  const n=md.match(/^\| Csomagverzió \| LK-(\d+) /m),c=md.match(/^\| Csomag-ujjlenyomat \| ([0-9a-f]{8}) /m);
-  return n&&c?{number:Number(n[1]),content:c[1]}:null;
- }catch{return null}
+/** A git HEAD-ben rögzített kiadás (a guard csak ezeket a mezőket hasonlítja). */
+export type CommittedEdition={number:number;date:string;content:string;sent?:string};
+/** A `start` indexen álló nyitó zárójel párja (karakterlánc-literálokat átlépve); -1, ha nincs. */
+function closing(s:string,start:number,open:string,close:string):number{
+ let depth=0;
+ for(let i=start;i<s.length;i++){
+  const c=s[i];
+  if(c==='"'||c==="'"||c==='`'){for(i++;i<s.length&&s[i]!==c;i++)if(s[i]==='\\')i++;continue}
+  if(c===open)depth++;else if(c===close&&--depth===0)return i;
+ }
+ return -1;
 }
-/** A kiadások (EDITIONS) és a tartalom összhangja; `committed`: a legutóbb commitolt kiadás (lásd committedEdition). */
-export function editionProblems(pkg:Package,committed:{number:number;content:string}|null=committedEdition(),editions:readonly Edition[]=EDITIONS):string[]{
+/** Az EDITIONS-tömb bejegyzései a generátor forrásszövegéből (number, date, content, sent); null, ha nem olvasható. */
+export function parseEditions(src:string):CommittedEdition[]|null{
+ const at=src.indexOf('export const EDITIONS');if(at<0)return null;
+ const open=src.indexOf('=[',at);if(open<0)return null;
+ const end=closing(src,open+1,'[',']');if(end<0)return null;
+ const body=src.slice(open+2,end),out:CommittedEdition[]=[];
+ for(let i=0;i<body.length;i++){
+  const c=body[i];
+  if(c==='"'||c==="'"||c==='`'){for(i++;i<body.length&&body[i]!==c;i++)if(body[i]==='\\')i++;continue}
+  if(c!=='{')continue;
+  const j=closing(body,i,'{','}');if(j<0)return null;
+  // A beágyazott objektumok (calcs) és a megjegyzés szövege nélkül: csak a legfelső szintű mezők számítanak.
+  let e=body.slice(i+1,j).replace(/\bnote:(['"`])(?:\\[\s\S]|(?!\1)[\s\S])*\1/g,''),k:number;
+  while((k=e.indexOf('{'))>=0){const m=closing(e,k,'{','}');if(m<0)return null;e=e.slice(0,k)+e.slice(m+1)}
+  const num=e.match(/\bnumber:(\d+)/),date=e.match(/\bdate:'([^']*)'/),content=e.match(/\bcontent:'([^']*)'/),sent=e.match(/\bsent:'([^']*)'/);
+  if(!num||!date||!content)return null;
+  out.push({number:Number(num[1]),date:date[1],content:content[1],...(sent?{sent:sent[1]}:{})});
+  i=j;
+ }
+ return out;
+}
+/** A legutóbbi commitban lévő kiadások (git HEAD:scripts/lektori-csomag.ts EDITIONS); ha nem olvasható (pl. git nélkül): null. */
+export function committedEditions():CommittedEdition[]|null{
+ try{return parseEditions(execFileSync('git',['show','HEAD:scripts/lektori-csomag.ts'],{encoding:'utf8',stdio:['ignore','pipe','ignore']}))}
+ catch{return null}
+}
+const HEX8=/^[0-9a-f]{8}$/,PAIR=/^[0-9a-f]{8}\/[0-9a-f]{8}$/;
+/** A csomag kalkulátoronkénti ujjlenyomat-párjai („tartalmi/forrás”) a T1_ORDER sorrendjében. */
+export const calcPairs=(pkg:Package):Record<string,string>=>Object.fromEntries(pkg.calcs.map(c=>[c.slug,c.fingerprint+'/'+c.source]));
+/** Az aktuális kiadás bejegyzése a megadott sorszámmal és dátummal (a generátor hibaüzenete ezt kéri bemásolni). */
+export function editionEntry(pkg:Package,number:number,date:string):string{
+ return `{number:${number},date:'${date}',content:'${pkg.fingerprints.content}',tables:'${pkg.fingerprints.tables}',formulas:'${pkg.fingerprints.formulas}',calcs:{${Object.entries(calcPairs(pkg)).map(([k,v])=>`'${k}':'${v}'`).join(',')}}}`;
+}
+/**
+ * A kiadások (EDITIONS) és a tartalom összhangja. `committed`: a git HEAD-ben rögzített kiadások (committedEditions); a korábbi és a
+ * kiküldött (sent) kiadás nem írható át, a kiadásszám nem mehet vissza; csak a még ki nem küldött utolsó kiadás tartalma változhat.
+ */
+export function editionProblems(pkg:Package,committed:CommittedEdition[]|null=committedEditions(),editions:readonly Edition[]=EDITIONS):string[]{
  const problems:string[]=[],last=editions[editions.length-1];
  editions.forEach((e,i)=>{
   if(e.number!==i+1)problems.push(`EDITIONS: a(z) ${i+1}. bejegyzés száma ${e.number}; a kiadások száma 1-től egyesével nő.`);
   if(!/^\d{4}-\d{2}-\d{2}$/.test(e.date)||(i>0&&e.date<editions[i-1].date))problems.push(`EDITIONS: LK-${e.number} dátuma (${e.date}) érvénytelen vagy korábbi az előzőénél.`);
-  if(!/^[0-9a-f]{8}$/.test(e.content))problems.push(`EDITIONS: LK-${e.number} ujjlenyomata érvénytelen: ${e.content}`);
+  if(!HEX8.test(e.content))problems.push(`EDITIONS: LK-${e.number} ujjlenyomata érvénytelen: ${e.content}`);
   if(editions.findIndex(x=>x.content===e.content)!==i)problems.push(`EDITIONS: LK-${e.number} ujjlenyomata egy korábbi kiadásé is.`);
+  if(e.sent!==undefined&&(!/^\d{4}-\d{2}-\d{2}$/.test(e.sent)||e.sent<e.date))problems.push(`EDITIONS: LK-${e.number} kiküldési dátuma (sent: ${e.sent}) érvénytelen vagy korábbi a kiadásénál.`);
+  if(e.draft&&e.sent!==undefined)problems.push(`EDITIONS: LK-${e.number} belső tervezet (draft), nem jelölhető kiküldöttnek.`);
+  if(!e.draft){
+   if(!HEX8.test(e.tables??'')||!HEX8.test(e.formulas??''))problems.push(`EDITIONS: LK-${e.number}: a nem tervezet kiadásnál kötelező az 1. és a 2. rész ujjlenyomata (tables, formulas).`);
+   const calcs=e.calcs??{};
+   if(Object.keys(calcs).join()!==T1_ORDER.join()||!Object.values(calcs).every(v=>PAIR.test(v)))problems.push(`EDITIONS: LK-${e.number}: a nem tervezet kiadásnál kötelező a kalkulátoronkénti ujjlenyomat-pár (calcs: {slug: 'tartalmi/forrás'}, a T1_ORDER sorrendjében).`);
+  }
  });
- if(last.content!==pkg.fingerprints.content){
-  const released=committed!==null&&committed.number>=last.number;
-  problems.push(`A csomag tartalma megváltozott az LK-${last.number} kiadáshoz képest (rögzített ujjlenyomat: ${last.content}, jelenlegi: ${pkg.fingerprints.content}). `+(released
-   ?`Az LK-${last.number} már commitolva van: vegyél fel új bejegyzést az EDITIONS végére: {number:${last.number+1},date:'<mai dátum>',content:'${pkg.fingerprints.content}'} (scripts/lektori-csomag.ts), majd futtasd újra a generátort.`
-   :`Ha az LK-${last.number} még nincs commitolva és nem ment ki a lektorhoz, írd át a content-jét erre; ha már kiment, vegyél fel új bejegyzést: {number:${last.number+1},date:'<mai dátum>',content:'${pkg.fingerprints.content}'} (scripts/lektori-csomag.ts). Utána futtasd újra a generátort.`));
- }
+ const now=editionEntry(pkg,last.number,last.date),fresh=editionEntry(pkg,last.number+1,'<mai dátum>');
+ const stale=last.content!==pkg.fingerprints.content||(!last.draft&&(last.tables!==pkg.fingerprints.tables||last.formulas!==pkg.fingerprints.formulas||JSON.stringify(last.calcs??{})!==JSON.stringify(calcPairs(pkg))));
+ if(stale)problems.push(`A csomag tartalma vagy ujjlenyomatai eltérnek az LK-${last.number} kiadás bejegyzésétől (rögzített csomag-ujjlenyomat: ${last.content}, jelenlegi: ${pkg.fingerprints.content}). `+(last.sent!==undefined
+  ?`Az LK-${last.number} már kiment a lektorhoz (sent: ${last.sent}): vegyél fel új bejegyzést az EDITIONS végére: ${fresh} (scripts/lektori-csomag.ts), majd futtasd újra a generátort.`
+  :`Ha az LK-${last.number} még nem ment ki a lektorhoz, írd át a bejegyzését erre: ${now}; ha már kiment, jelöld kiküldöttnek (sent) és vegyél fel új bejegyzést: ${fresh} (scripts/lektori-csomag.ts). Utána futtasd újra a generátort.`));
  if(committed){
-  const same=editions.find(e=>e.number===committed.number);
-  if(committed.number>last.number)problems.push(`A legutóbbi commitban már LK-${committed.number} kiadás szerepel; az EDITIONS nem mehet vissza (jelenleg LK-${last.number}).`);
-  else if(same&&same.content!==committed.content)problems.push(`Az LK-${committed.number} kiadás a legutóbbi commitban ${committed.content} ujjlenyomattal szerepel, az EDITIONS-ben ${same.content}-tal: kiadott kiadás tartalma nem írható át – vegyél fel új kiadást.`);
+  if(committed.length>editions.length)problems.push(`A legutóbbi commitban már LK-${committed[committed.length-1].number} kiadás szerepel; az EDITIONS nem mehet vissza (jelenleg LK-${last.number}).`);
+  committed.forEach((c,i)=>{
+   const e=editions.find(x=>x.number===c.number);
+   if(!e){if(committed.length<=editions.length)problems.push(`Az LK-${c.number} kiadás a legutóbbi commitban szerepel, az EDITIONS-ből hiányzik.`);return}
+   const mutable=i===committed.length-1&&c.sent===undefined&&e===last;
+   if(c.sent!==undefined&&e.sent!==c.sent)problems.push(`Az LK-${c.number} kiadás kiküldési dátuma (sent) a legutóbbi commitban ${c.sent}, most ${e.sent??'nincs'}: kiküldött kiadás bejegyzése nem írható át.`);
+   if(!mutable&&(e.date!==c.date||e.content!==c.content))problems.push(`Az LK-${c.number} kiadás a legutóbbi commitban ${c.content} ujjlenyomattal (${c.date}) szerepel, az EDITIONS-ben ${e.content}-tal (${e.date}): ${c.sent!==undefined?'kiküldött':'korábbi'} kiadás bejegyzése nem írható át – vegyél fel új kiadást.`);
+  });
  }
  return problems;
 }
+/** Az `approvalRef` pontosan egy csomagkiadást nevez-e meg (LK-n, önálló jelként), és az kiküldött, nem tervezet kiadás-e. */
+function refEdition(who:string,ref:string,editions:readonly Edition[]):{edition?:Edition;problems:string[]}{
+ const named=[...ref.matchAll(/(?<![\p{L}\d])LK-(\d+)(?![\p{L}\d])/gu)].map(m=>Number(m[1]));
+ if(named.length!==1)return {problems:[`${who}: az approvalRef pontosan egy csomagkiadást (LK-n) nevezzen meg (most: ${named.length})`]};
+ const e=editions.find(x=>x.number===named[0]);
+ if(!e)return {problems:[`${who}: az approvalRef-ben szereplő LK-${named[0]} nincs az EDITIONS-ben`]};
+ if(e.draft)return {problems:[`${who}: az LK-${e.number} belső tervezet (draft), jóváhagyás nem hivatkozhat rá`]};
+ if(e.sent===undefined)return {problems:[`${who}: az LK-${e.number} nincs kiküldöttként jelölve (EDITIONS sent): ki nem küldött kiadást a lektor nem hagyhatott jóvá`]};
+ return {edition:e,problems:ref.includes(e.content)?[]:[`${who}: az approvalRef-ben szerepeljen az LK-${e.number} csomag-ujjlenyomata (${e.content})`]};
+}
 /**
  * A T1 kalkulátorok lektori kiadási rekordjai (lib/calc/release.ts) és a csomagkiadások összhangja: az `approvalRef` pontosan egy
- * kiadást nevez meg (LK-n, önálló jelként), az szerepel az EDITIONS-ben, és a hivatkozás tartalmazza annak csomag-ujjlenyomatát.
- * (A rekord tartalmi és forrás-ujjlenyomatának egyezését a tests/calc.ts ellenőrzi.) Üres lista: rendben.
+ * kiküldött, nem tervezet kiadást nevez meg annak csomag-ujjlenyomatával, abban a kiadásban a kalkulátor ujjlenyomat-párja
+ * (calcs[slug]) azonos a rekordéval (a lektor ezt hagyta jóvá), és a hivatkozás ezt a párt („tartalmi/forrás”) is tartalmazza.
+ * (A rekord és a mostani definíció egyezését a tests/calc.ts ellenőrzi.) Üres lista: rendben.
  */
 export function releaseRefProblems(records:Readonly<Record<string,ReleaseRecord>>=RELEASES,editions:readonly Edition[]=EDITIONS):string[]{
  const problems:string[]=[];
  for(const [slug,rec] of Object.entries(records)){
   if(rec.kind!=='lektoralt'||!T1_SLUGS.has(slug))continue;
-  const ref=rec.approvalRef??'',named=[...ref.matchAll(/(?<![\p{L}\d])LK-(\d+)(?![\p{L}\d])/gu)].map(m=>Number(m[1]));
-  if(named.length!==1){problems.push(`${slug}: az approvalRef pontosan egy csomagkiadást (LK-n) nevezzen meg (most: ${named.length})`);continue}
-  const e=editions.find(x=>x.number===named[0]);
-  if(!e){problems.push(`${slug}: az approvalRef-ben szereplő LK-${named[0]} nincs az EDITIONS-ben`);continue}
-  if(!ref.includes(e.content))problems.push(`${slug}: az approvalRef-ben szerepeljen az LK-${e.number} csomag-ujjlenyomata (${e.content})`);
+  const {edition:e,problems:p}=refEdition(slug,rec.approvalRef??'',editions);problems.push(...p);if(!e)continue;
+  const pair=rec.fingerprint+'/'+rec.source;
+  if(e.calcs?.[slug]!==pair)problems.push(`${slug}: az LK-${e.number} kiadásban a kalkulátor ujjlenyomat-párja ${e.calcs?.[slug]??'nincs'}, a rekordé ${pair} – a lektor nem ezt a változatot hagyta jóvá`);
+  else if(!(rec.approvalRef??'').includes(pair))problems.push(`${slug}: az approvalRef-ben szerepeljen a kalkulátor ujjlenyomat-párja (kalkulátor: ${pair})`);
  }
+ return problems;
+}
+/**
+ * A táblázatjóváhagyás (SIZING_REVIEW) és a csomagkiadások összhangja jóváhagyott állapotban: az `approvalRef` pontosan egy
+ * kiküldött, nem tervezet kiadást nevez meg annak csomag-ujjlenyomatával; abban a kiadásban az 1. rész ujjlenyomata a jóváhagyotté,
+ * a 2. részé a mostani (`formulas`: a 2. rész a jóváhagyás óta nem változott), és a hivatkozás mindkettőt tartalmazza. Üres lista: rendben.
+ */
+export function reviewRefProblems(review:SizingReview,formulas:string,editions:readonly Edition[]=EDITIONS):string[]{
+ if(review.status!=='jóváhagyott')return [];
+ const {edition:e,problems}=refEdition('SIZING_REVIEW',review.approvalRef,editions);if(!e)return problems;
+ if(e.tables!==review.fingerprint)problems.push(`SIZING_REVIEW: az LK-${e.number} kiadás 1. részének ujjlenyomata ${e.tables??'nincs'}, a jóváhagyásé ${review.fingerprint}`);
+ if(e.formulas!==formulas)problems.push(`SIZING_REVIEW: a 2. rész (képletek) a jóváhagyás óta megváltozott (LK-${e.number}: ${e.formulas??'nincs'}, most: ${formulas}) – új jóváhagyás kell`);
+ if(![e.tables,e.formulas].every(fp=>!!fp&&review.approvalRef.includes(fp)))problems.push(`SIZING_REVIEW: az approvalRef-ben szerepeljen az LK-${e.number} 1. és 2. részének ujjlenyomata (1. rész: ${e.tables}, 2. rész: ${e.formulas})`);
  return problems;
 }
 /** Sorvégek egységesítése (Windows alatt core.autocrlf=true-val klónozott repóban a Markdown CRLF-fel jön le). */
@@ -1493,14 +1654,14 @@ function main(){
  if(check){
   const problems=checkOutputs(pkg,font);
   if(problems.length){console.error('A lektori csomag nem naprakész:\n- '+problems.join('\n- ')+'\nJavítás: node --import tsx scripts/lektori-csomag.ts');process.exit(1)}
-  console.log(`A lektori csomag naprakész: ${editionLabel()}, csomag-ujjlenyomat ${pkg.fingerprints.content}, táblázat-ujjlenyomat ${pkg.fingerprints.tables}, képlet-ujjlenyomat ${pkg.fingerprints.formulas}.`);
+  console.log(`A lektori csomag naprakész: ${editionLabel()}, csomag-ujjlenyomat ${pkg.fingerprints.content}, táblázat-ujjlenyomat ${pkg.fingerprints.tables}, képlet-ujjlenyomat ${pkg.fingerprints.formulas}, kalkulátor-ujjlenyomat (3. rész) ${pkg.fingerprints.calculators}.`);
   return;
  }
  const problems=[...editionProblems(pkg),...packageProblems(pkg,reviewedContent())];
  if(problems.length){console.error('A lektori csomag nem generálható:\n- '+problems.join('\n- '));process.exit(1)}
  const out=render(pkg,font);
  writeFileSync(PATHS.md,out.md);writeFileSync(PATHS.pdf,out.pdf);
- console.log(`Kész: ${PATHS.md}, ${PATHS.pdf} (${out.pages} oldal). ${editionLabel()}; csomag ${pkg.fingerprints.content}, 1. rész ${pkg.fingerprints.tables}, 2. rész ${pkg.fingerprints.formulas}.`);
+ console.log(`Kész: ${PATHS.md}, ${PATHS.pdf} (${out.pages} oldal). ${editionLabel()}; csomag ${pkg.fingerprints.content}, 1. rész ${pkg.fingerprints.tables}, 2. rész ${pkg.fingerprints.formulas}, 3. rész ${pkg.fingerprints.calculators}.`);
 }
 if((process.argv[1]??'').replace(/\\/g,'/').endsWith('scripts/lektori-csomag.ts')){
  if(!existsSync(PATHS.font)){console.error('Futtasd a repó gyökeréből: node --import tsx scripts/lektori-csomag.ts');process.exit(1)}

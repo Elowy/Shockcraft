@@ -46,10 +46,13 @@ export function calcFingerprint(def:CalcDef){
  return fingerprint({slug,title,short,category,tier,tables:!!tables,fields,formulas,notes,safety,examples,sources,notCovered:notCovered??[],version});
 }
 
-/** A lektor megjelenő megnevezése a kalkulátoroldalon: név csak kifejezett hozzájárulással (showName: true), különben a minősítés. */
-export const expertShown=(r:ExpertReview)=>r.showName===true?r.reviewer+', '+r.qualification:r.qualification;
+/** A lektor megjelenő megnevezése: név csak kifejezett hozzájárulással (showName: true, kitöltött név) és csak a kalkulátor saját
+ * oldalán (`withName`); különben – a kalkulátorlistán és a keresőben mindig – a jogosultság. */
+export const expertShown=(r:ExpertReview,withName=true)=>{const name=withName&&r.showName===true?r.reviewer?.trim():'';return name?name+', '+r.qualification:r.qualification};
 /** A kalkulátoroldal lábléc-sora lektorált kalkulátornál. */
 export const expertMeta=(r:ExpertReview)=>'Szakmai lektor: '+expertShown(r);
+/** A jelvény szövege; `withName: false` a kalkulátorlistához és a keresőhöz (ott a név hozzájárulással sem jelenik meg). */
+export const releaseBadge=(r:ReleaseRecord,withName=true)=>r.kind==='lektoralt'?'Szakmailag lektorálta: '+expertShown(r,withName)+' · '+r.date:'Belsőleg ellenőrizve';
 export type ReleaseState='kozzeteve'|'kiadatlan'|'ujraellenorzendo'|'tablazatra-var'|'tiltott';
 export type ReleaseInfo={state:ReleaseState;record?:ReleaseRecord;badge:string;reason:string};
 export function releaseInfo(def:CalcDef,records:Readonly<Record<string,ReleaseRecord>>=RELEASES,tablesOk=tablesApproved()):ReleaseInfo{
@@ -59,7 +62,7 @@ export function releaseInfo(def:CalcDef,records:Readonly<Record<string,ReleaseRe
  if(record.fingerprint!==calcFingerprint(def))return {state:'ujraellenorzendo',record,badge:'',reason:'A definíció a jóváhagyás óta megváltozott; újra ellenőrizni kell.'};
  if(def.tier==='T1'&&record.kind!=='lektoralt')return {state:'kiadatlan',record,badge:'',reason:'T1 kalkulátorhoz szakmai lektori jóváhagyás kell.'};
  if(TABLE_GATED.has(def.slug)&&!tablesOk)return {state:'tablazatra-var',record,badge:'',reason:'A táblázatértékek tervezői jóváhagyása folyamatban.'};
- return {state:'kozzeteve',record,reason:'',badge:record.kind==='lektoralt'?'Szakmailag lektorálta: '+expertShown(record)+' · '+record.date:'Belsőleg ellenőrizve'};
+ return {state:'kozzeteve',record,reason:'',badge:releaseBadge(record)};
 }
 export const isPublished=(def:CalcDef)=>releaseInfo(def).state==='kozzeteve';
 export const publishedCalcs=()=>CALCULATORS.filter(isPublished);
@@ -69,12 +72,13 @@ export const visibleCalcs=(preview:boolean)=>preview?CALCULATORS.filter(c=>c.tie
 /** A kliensnek átadható, szerializálható metaadat (kereső, hub, kedvencek). */
 export type CalcMeta={slug:string;title:string;short:string;category:string;keywords:readonly string[];synonyms:readonly string[];tier:string;href:string|null;status:'kozzeteve'|'hamarosan'|'tervezet';note:string;detail:string};
 export const SOON='Hamarosan – szakmai lektorálás alatt';
-export function calcMeta(def:CalcDef,preview=false):CalcMeta{
- const info=releaseInfo(def),pub=info.state==='kozzeteve';
+/** A kártya és a kereső jelvénye (`note`) név nélküli: a lektor neve hozzájárulással is csak a kalkulátor saját oldalán jelenik meg. */
+export function calcMeta(def:CalcDef,preview=false,records:Readonly<Record<string,ReleaseRecord>>=RELEASES,tablesOk=tablesApproved()):CalcMeta{
+ const info=releaseInfo(def,records,tablesOk),pub=info.state==='kozzeteve';
  const status=pub?'kozzeteve':preview?'tervezet':'hamarosan';
- const tablesPending=TABLE_GATED.has(def.slug)&&!tablesApproved();
+ const tablesPending=TABLE_GATED.has(def.slug)&&!tablesOk;
  return {slug:def.slug,title:def.title,short:def.short,category:def.category,keywords:def.keywords,synonyms:def.synonyms??[],tier:def.tier,href:pub||preview?'/kalkulatorok/'+def.slug:null,status,
-  note:pub?info.badge:status==='tervezet'?'Tervezet – nem lektorált (előnézet)':info.state==='tablazatra-var'?'Hamarosan – a táblázatértékek tervezői jóváhagyása folyamatban':SOON,
+  note:pub?releaseBadge(info.record!,false):status==='tervezet'?'Tervezet – nem lektorált (előnézet)':info.state==='tablazatra-var'?'Hamarosan – a táblázatértékek tervezői jóváhagyása folyamatban':SOON,
   detail:!pub&&tablesPending?'A táblázatértékek tervezői jóváhagyása is folyamatban.':''};
 }
 export const calcMetas=(preview=false)=>CALCULATORS.filter(c=>c.tier!=='T2').map(c=>calcMeta(c,preview));

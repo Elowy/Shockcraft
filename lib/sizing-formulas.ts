@@ -33,6 +33,24 @@ export function fmtPair(a:number,b:number,d=2):[string,string]{
  for(let k=d+1;x===y&&atMost(a,b)!==atMost(b,a)&&k<=6;k++){x=fmtNum(a,k);y=fmtNum(b,k)}
  return [x,y];
 }
+/** Felső határérték (pl. Zs,max) kiírása `d` tizedesre lefelé kerekítve: a kiírt határ soha nem nagyobb a valódinál. */
+const floorDec=(n:number,d:number)=>Math.floor(+(n*10**d).toPrecision(15))/10**d;
+export const fmtLimit=(limit:number,d=2)=>fmtNum(floorDec(limit,d),d);
+/** Érték és felső határ kiírása: a határ lefelé kerekítve (fmtLimit), az érték szokásosan; ha a kiírás ellentmondana az
+ * összehasonlításnak (pl. „1,437 ≤ 1,436”), több tizedessel. */
+export function fmtLimitPair(value:number,limit:number,d=2):[string,string]{
+ const ok=atMost(value,limit);
+ for(let k=d;;k++){
+  const v=Math.round(value*10**k)/10**k,l=floorDec(limit,k);
+  if(k>=6||(ok?v<=l:v>l))return [fmtNum(value,k),fmtLimit(limit,k)];
+ }
+}
+/** A hurok-feltétel nem teljesülésekor felsorolt lehetséges megoldások (a döntés a tervezőé): B jelleggörbe csak C vagy D mellett;
+ * ha már az elosztónál mért érték is eléri a határt (Zs,elosztó ≥ Zs,max), a keresztmetszet és a hossz nem segít. */
+export function loopRemedies(curve:Curve,boardTooHigh:boolean){
+ const r=[...(boardTooHigh?[]:['nagyobb keresztmetszet','rövidebb vezeték']),...(curve==='B'?[]:['B jelleggörbe (a bekapcsolási áram ellenőrzésével)']),'kisebb névleges áram','ÁVK'];
+ return r.slice(0,-1).join(', ')+' vagy '+r[r.length-1];
+}
 export type CableSpec={text:string;cores:number|null;section:number;insulation:'PVC'|'XLPE'|null};
 export type CableParse={ok:true;cable:CableSpec}|{ok:false;code:CableError;message:string};
 export const cableLabel=(c:CableSpec)=>(c.cores!==null?c.cores+' × ':'')+fmtNum(c.section)+' mm²';
@@ -43,9 +61,11 @@ const B='(?:^|[^\\p{L}\\d])',E='(?=$|[^\\p{L}\\d])';
 const AL=new RegExp(B+'(?:al|alu|alumínium|aluminium|nayy\\w*|na2x\\w*|ayky\\w*|amka)'+E,'iu');
 const XLPE=new RegExp(B+'(?:n2x\\w*|2xy|xlpe|epr)'+E,'iu');
 const PVC=new RegExp(B+'(?:nym\\w*|nyy\\w*|nycwy|mbcu|mcu|mkcu|mt|myy|yky\\w*|cyky\\w*|h0[357]v\\w*|pvc)'+E,'iu');
-/** Gumiszigetelés (60 °C-os vezetőhőmérséklet): H05RR-F, H07RN-F, GT, „gumi…”. A „gumi” után tetszőleges (ékezetes is) betű vagy
- * számjegy állhat („gumikábel”, „gumiszigetelésű”): a \w csak ASCII-betűt fogad el, ezért itt [\p{L}\d]. */
-const RUBBER=new RegExp(B+'(?:h0[357]r[nrt]\\w*|gumi[\\p{L}\\d]*|gt)'+E,'iu');
+/** Gumiszigetelés (60 °C-os vezetőhőmérséklet): H05RR-F, H07RN-F (szóközzel vagy kötőjellel is: „H07 RN-F”, „H07-RN-F”), RN-F, GT,
+ * „gumi…”. A „gumi” után tetszőleges (ékezetes is) betű vagy számjegy állhat („gumikábel”, „gumiszigetelésű”, „gumitömlő”): a \w csak
+ * ASCII-betűt fogad el, ezért itt [\p{L}\d]. A tartozékszavak („gumicső”, „gumitömítés”, „gumialátét”, „gumigyűrű”, „gumidugó”,
+ * „gumiszalag”) nem jelölnek vezetéket, ezért nem számítanak; más „gumi”-szó (pl. cégnév) a biztonság javára igen (D-JEL-GUMI). */
+const RUBBER=new RegExp(B+'(?:h0[357][\\s-]?r[nrt]\\w*|rn-?f|gumi(?!cs[oöő]|t[oöő]m[ií]t|al[aá]t[eé]t|gy[uüű]r[uüű]|dug[oó]|szalag)[\\p{L}\\d]*|gt)'+E,'iu');
 /** Egy ér × keresztmetszet pár után közvetlenül álló további ér („+16”, „/1.5”, „+1x6”); a feszültségjelölés („/1 kV”) nem az. */
 const EXTRA=/^\s*[+/]\s*(?:\d{1,2}\s*[xg]\s*)?(\d{1,3}(?:\.\d{1,2})?)(?![\d.]*\d)(?!\s*k?v(?!\p{L}))/iu;
 const PAIR=/(?<![\p{L}\d.])(\d{1,2})\s*[xg]\s*(\d{1,3}(?:\.\d{1,2})?)(?![\d.]*\d)/giu;

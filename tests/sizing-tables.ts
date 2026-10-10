@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {CLAUSES,INSTALL_METHODS,REVIEW_TEXTS,SECTIONS,SIZING_REVIEW,SIZING_TABLES,SOURCES,capacity,constantRef,conventionalRef,fingerprint,groupingFactor,instantaneousRef,reviewText,reviewedContent,tablesApproved,tablesFingerprint,temperatureFactor,validateSizingTables} from '../lib/sizing-tables';
+import {CLAUSES,INSTALL_METHODS,REVIEW_TEXTS,SECTIONS,SIZING_REVIEW,SIZING_TABLES,SOURCES,capacity,constantRef,conventionalRef,fingerprint,groupingFactor,instantaneousRef,reviewNameShown,reviewText,reviewedContent,tablesApproved,tablesFingerprint,temperatureFactor,validateSizingTables} from '../lib/sizing-tables';
 
 // A táblázatok állapota a jóváhagyástól függ: szabályos jóváhagyás után is zöldnek kell maradnia.
 const st=tablesApproved()?'jóváhagyott':'ellenőrizendő';
@@ -79,11 +79,15 @@ assert.equal(fingerprint({x:'ő'}),'cf000a74');
 
 // 8. Jóváhagyás: csak kitöltött, az aktuális ujjlenyomathoz kötött blokk érvényes. A program magától nem jóváhagyott.
 assert.equal(typeof SIZING_REVIEW.showName,'boolean','a név megjelenítéséről kifejezetten dönteni kell (alapértelmezés: false)');
+// Adatvédelem: a lib/sizing-tables.ts a kliensoldali kódba (tervező, nyilvános kalkulátoroldalak) is bekerül, ezért a jóváhagyó neve és
+// névjegyzéki száma csak a megjelenítéshez adott hozzájárulással (showName: true) szerepelhet benne; különben a név csak az aláírt lapon van.
+if(SIZING_REVIEW.showName)assert.ok(SIZING_REVIEW.reviewer.trim()&&SIZING_REVIEW.registry.trim(),'hozzájárulással a név és a névjegyzéki szám kitöltött');
+else assert.ok(!SIZING_REVIEW.reviewer.trim()&&!SIZING_REVIEW.registry.trim(),'hozzájárulás (showName: true) nélkül a jóváhagyó neve és névjegyzéki száma nem szerepelhet a lib/sizing-tables.ts-ben');
 if(SIZING_REVIEW.status==='jóváhagyott'){
- assert.ok(SIZING_REVIEW.reviewer.trim()&&SIZING_REVIEW.registry.trim()&&SIZING_REVIEW.date.trim(),'a jóváhagyó neve, névjegyzéki száma és a dátum kötelező (név nélküli megjelenítésnél is)');
+ assert.ok(SIZING_REVIEW.qualification.trim()&&SIZING_REVIEW.date.trim()&&SIZING_REVIEW.approvalRef.trim(),'a jogosultság, a dátum és a jóváhagyás hivatkozása kötelező');
  assert.equal(SIZING_REVIEW.fingerprint,tablesFingerprint(),'a jóváhagyás óta megváltozott egy táblázatérték, forrásmegjelölés vagy leírás: új jóváhagyás kell');
  assert.ok(tablesApproved());
- if(!SIZING_REVIEW.showName)assert.ok(!reviewText().includes(SIZING_REVIEW.reviewer.trim())&&!reviewText().includes(SIZING_REVIEW.registry.trim()),'hozzájárulás nélkül a név és a névjegyzéki szám nem jelenik meg');
+ assert.ok(reviewText().startsWith(reviewNameShown(SIZING_REVIEW)?REVIEW_TEXTS.named.split('{')[0]:REVIEW_TEXTS.anonymous.split('{')[0]));
 }else{
  assert.equal(SIZING_REVIEW.status,'ellenőrizendő');
  assert.equal(SIZING_REVIEW.showName,false,'jóváhagyás nélkül nincs megjeleníthető név');
@@ -91,25 +95,29 @@ if(SIZING_REVIEW.status==='jóváhagyott'){
  assert.ok(reviewText().startsWith('Ellenőrizendő: a táblázatértékeket jogosult villamos tervező még nem hagyta jóvá.'));
  assert.ok(reviewText().includes(SIZING_TABLES.version)&&reviewText().includes(fp));
 }
-// A jóváhagyás érvénye nem függ a név megjelenítésétől; a név csak kifejezett hozzájárulással (showName: true) jelenik meg.
-const approved={...SIZING_REVIEW,status:'jóváhagyott' as const,reviewer:'Minta Tervező',registry:'V-123',date:'2026-10-10',fingerprint:fp,showName:false};
-const named={...approved,showName:true};
+// A jóváhagyás érvénye nem függ a név megjelenítésétől; a név csak kifejezett hozzájárulással (showName: true) jelenik meg, a név
+// nélküli változat a jóváhagyó lapon megadott jogosultságot írja ki (tervező és érintésvédelmi szabványossági felülvizsgáló is lehet).
+const approved={...SIZING_REVIEW,status:'jóváhagyott' as const,qualification:'érintésvédelmi szabványossági felülvizsgáló',date:'2026-10-10',fingerprint:fp,approvalRef:'Lektori csomag LK-9',showName:false,reviewer:'',registry:''};
+const named={...approved,showName:true,reviewer:'Minta Tervező',registry:'V-123'};
 assert.equal(tablesApproved(approved),true);assert.equal(tablesApproved(named),true);
 const tail=' Táblázatváltozat: '+SIZING_TABLES.version+', ujjlenyomat: '+fp+'.';
-assert.equal(reviewText(named),'A táblázatértékeket szakmailag lektorálta: Minta Tervező (V-123), 2026-10-10.'+tail);
-assert.equal(reviewText(approved),'A táblázatértékeket jogosult villamos tervező szakmailag lektorálta, 2026-10-10.'+tail);
-assert.ok(!reviewText(approved).includes('Minta')&&!reviewText(approved).includes('V-123'),'név nélküli változat');
+assert.equal(reviewText(named),'A táblázatértékeket szakmailag lektorálta: Minta Tervező, érintésvédelmi szabványossági felülvizsgáló (V-123), 2026-10-10.'+tail);
+assert.equal(reviewText(approved),'A táblázatértékeket szakmailag lektorálta: érintésvédelmi szabványossági felülvizsgáló, 2026-10-10.'+tail);
+assert.ok(!/tervező/.test(reviewText(approved)),'a név nélküli változat nem állít a jóváhagyó lapon megadottól eltérő jogosultságot');
+assert.equal(reviewText({...approved,reviewer:'Minta Tervező',registry:'V-123'}),reviewText(approved),'hozzájárulás nélkül a (hibásan kitöltött) név sem jelenik meg');
+assert.equal(reviewText({...named,registry:''}),reviewText(approved),'hiányos név-adattal a név nélküli változat');
 assert.ok(reviewText({...named,fingerprint:'00000000'}).startsWith('Ellenőrizendő:')&&!reviewText({...named,fingerprint:'00000000'}).includes('Minta'),'érvénytelen jóváhagyásnál a név akkor sem jelenik meg');
 assert.ok(!/Jóváhagyta/.test(reviewText(named)+reviewText(approved)),'a szöveg a lektorálást jelzi, nem a terv jóváhagyását');
 assert.equal(tablesApproved({...approved,fingerprint:'00000000'}),false,'más ujjlenyomatra adott jóváhagyás érvénytelen');
-assert.equal(tablesApproved({...approved,reviewer:' '}),false);
+assert.equal(tablesApproved({...approved,qualification:' '}),false);
+assert.equal(tablesApproved({...approved,approvalRef:''}),false,'hivatkozás (csomagkiadás, iktatás) nélkül érvénytelen');
 assert.equal(tablesApproved({...approved,date:''}),false);
 // A felirat-sablonok nem részei a táblázat-ujjlenyomatnak (reviewedContent), de a lektor ezekhez járul hozzá (lektori csomag):
 // változásuk után a név csak új hozzájárulással jelenhet meg (docs/lektoralas.md). A rögzített szöveg ezt tudatos lépéssé teszi.
 assert.deepEqual(REVIEW_TEXTS,{
  pending:'Ellenőrizendő: a táblázatértékeket jogosult villamos tervező még nem hagyta jóvá.',
- named:'A táblázatértékeket szakmailag lektorálta: {reviewer} ({registry}), {date}.',
- anonymous:'A táblázatértékeket jogosult villamos tervező szakmailag lektorálta, {date}.',
+ named:'A táblázatértékeket szakmailag lektorálta: {reviewer}, {qualification} ({registry}), {date}.',
+ anonymous:'A táblázatértékeket szakmailag lektorálta: {qualification}, {date}.',
  tail:'Táblázatváltozat: {version}, ujjlenyomat: {fingerprint}.',
 },'a jóváhagyás megjelenő szövege megváltozott: a lektori csomag új kiadása és – név megjelenítésénél – a lektor új hozzájárulása kell');
 assert.ok(!JSON.stringify(reviewedContent()).includes('lektorálta'),'a sablonok nem részei a jóváhagyandó tartalomnak');

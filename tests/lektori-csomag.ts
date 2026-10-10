@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {readFileSync,readdirSync} from 'node:fs';
-import {CLAUSES,INSTALL_METHODS,INSULATIONS,SIZING_REVIEW,SIZING_TABLES,SOURCES,fingerprint,groupingFactor,insulationLabels,methodLabels,reviewText,reviewedContent,tablesApproved,tablesFingerprint,temperatureFactor} from '../lib/sizing-tables';
+import {CLAUSES,INSTALL_METHODS,INSULATIONS,SIZING_REVIEW,SIZING_TABLES,SOURCES,fingerprint,groupingFactor,insulationLabels,methodLabels,reviewText,reviewedContent,tablesApproved,tablesFingerprint,temperatureFactor,type SizingReview} from '../lib/sizing-tables';
 import {SIZING_NOT_COVERED,atMost,checkStatusLabels,circuitSizing,correctedIz,designCurrent,loopResistance,maxLengthForDrop,maxLoopImpedance,minSectionFor,parseCable,statusLabels,voltageDropPercent,type CircuitSizingResult} from '../lib/sizing';
 import {circuitSizingSchema,planSizingSchema} from '../lib/sizing-schema';
 import {seed,validatePlan} from '../lib/plan';
@@ -12,7 +12,7 @@ import {mainResults,parseInputs,runCalc,type Raw} from '../lib/calc/core';
 import {CALCULATORS,bySlug,calcFingerprint} from '../lib/calc/registry';
 import {T1_SLUGS,TABLE_GATED,type ExpertReview} from '../lib/calc/release';
 import {sourceFingerprint} from '../scripts/calc-source';
-import {EDITION,EDITIONS,ID_PREFIXES,calcBadgeTexts,ID_REF,NAME_PLACES,PARTS,PATHS,PDF_PLACEHOLDERS,T1_ORDER,allIds,allItems,approvedFingerprints,approvedTexts,buildPackage,checkOutputs,contentFingerprint,declaration,editionLabel,editionProblems,eol,exact,kalId,leafPaths,notCoveredFrom,packageProblems,packageTexts,partFingerprint,pdfText,readFont,releaseRefProblems,render,verifiedText,type CalcExpect,type Expect,type Package,type ProgramCheck,type RuleItem,type Scenario} from '../scripts/lektori-csomag';
+import {EDITION,EDITIONS,ID_PREFIXES,calcBadgeTexts,ID_REF,NAME_PLACES,PARTS,PATHS,PDF_PLACEHOLDERS,T1_ORDER,allIds,allItems,approvedFingerprints,approvedTexts,assumptionsText,buildPackage,pdfInline,calcPairs,checkOutputs,committedEditions,contentFingerprint,declaration,editionLabel,editionProblems,eol,exact,formulasText,kalId,leafPaths,notCoveredFrom,packageProblems,packageTexts,parseEditions,partFingerprint,pdfText,readFont,releaseRefProblems,render,reviewRefProblems,selectCombos,verifiedText,type CalcExpect,type CommittedEdition,type Edition,type Expect,type Package,type ProgramCheck,type RuleItem,type Scenario} from '../scripts/lektori-csomag';
 
 const pkg=buildPackage(),font=readFont(),out=render(pkg,font),md=out.md;
 const T=SIZING_TABLES;
@@ -22,12 +22,30 @@ assert.deepEqual(checkOutputs(pkg,font),[],'A lektori csomag elavult – futtasd
 assert.equal(EDITION,EDITIONS[EDITIONS.length-1]);
 assert.equal(EDITION.content,pkg.fingerprints.content,'tartalmi változásnál új kiadás kell (EDITIONS)');
 assert.deepEqual(editionProblems(pkg,null),[],'az EDITIONS előzménylista érvényes');
-// A kiadott (commitolt) kiadás tartalma nem írható át, és a kiadásszám nem mehet vissza.
-assert.ok(editionProblems(pkg,{number:EDITION.number,content:'deadbeef'}).some(p=>p.includes('nem írható át')));
-assert.ok(editionProblems(pkg,{number:EDITION.number+1,content:'deadbeef'}).some(p=>p.includes('nem mehet vissza')));
-assert.deepEqual(editionProblems(pkg,{number:EDITION.number,content:EDITION.content}),[]);
+// A nem tervezet kiadás bejegyzése részenként rögzíti a jóváhagyható ujjlenyomatokat (a jóváhagyások ehhez kötődnek).
+assert.ok(!EDITION.draft,'az aktuális kiadás kiküldhető (nem tervezet)');
+assert.deepEqual([EDITION.tables,EDITION.formulas,EDITION.calcs],[pkg.fingerprints.tables,pkg.fingerprints.formulas,calcPairs(pkg)]);
+assert.ok(EDITIONS.filter(e=>e.number<=2).every(e=>e.draft&&e.sent===undefined),'az LK-1 és az LK-2 belső tervezet');
+// A git HEAD-ben lévő EDITIONS: a korábbi és a kiküldött (sent) kiadás nem írható át, a kiadásszám nem mehet vissza; csak a még ki
+// nem küldött utolsó kiadás tartalma változhat (pl. a commitolt, de lektornak még nem küldött LK-3).
+const asCommitted=(es:readonly Edition[]):CommittedEdition[]=>es.map(e=>({number:e.number,date:e.date,content:e.content,...(e.sent!==undefined?{sent:e.sent}:{})}));
+const committed=asCommitted(EDITIONS),lastC=committed.length-1;
+assert.deepEqual(editionProblems(pkg,committed),[]);
+assert.deepEqual(editionProblems(pkg,committed.map((c,i)=>i===lastC?{...c,content:'deadbeef'}:c)),[],'ki nem küldött utolsó kiadás átírható');
+assert.ok(editionProblems(pkg,committed.map((c,i)=>i===lastC?{...c,content:'deadbeef',sent:'2026-10-11'}:c)).some(p=>p.includes('kiküldött kiadás bejegyzése nem írható át')),'kiküldött kiadás nem írható át');
+assert.ok(editionProblems(pkg,committed.map((c,i)=>i===1?{...c,content:'deadbeef'}:c)).some(p=>p.includes('LK-2')&&p.includes('nem írható át')),'korábbi kiadás (nem a legutóbbi commitolt) sem írható át');
+assert.ok(editionProblems(pkg,committed.map((c,i)=>i===0?{...c,date:'2026-10-09'}:c)).some(p=>p.includes('LK-1')&&p.includes('nem írható át')));
+assert.ok(editionProblems(pkg,[...committed,{number:EDITION.number+1,date:EDITION.date,content:'deadbeef'}]).some(p=>p.includes('nem mehet vissza')));
 assert.ok(editionProblems(pkg,null,[...EDITIONS.slice(0,-1),{...EDITION,number:EDITION.number+1}]).some(p=>p.includes('egyesével')));
 assert.ok(editionProblems(pkg,null,[...EDITIONS,{...EDITION,number:EDITION.number+1}]).some(p=>p.includes('korábbi kiadásé')));
+assert.ok(editionProblems(pkg,null,[{...EDITIONS[0],sent:'2026-10-11'},...EDITIONS.slice(1)]).some(p=>p.includes('belső tervezet')),'tervezet nem küldhető ki');
+assert.ok(editionProblems(pkg,null,[...EDITIONS.slice(0,-1),{...EDITION,tables:undefined}]).some(p=>p.includes('tables, formulas')));
+assert.ok(editionProblems(pkg,null,[...EDITIONS.slice(0,-1),{...EDITION,calcs:{...EDITION.calcs,feszultseges:'00000000/00000000'}}]).some(p=>p.includes('eltérnek az LK-')),'a kalkulátor ujjlenyomat-párja is a bejegyzés része');
+// A HEAD-beli EDITIONS a generátor forrásszövegéből olvasható (beágyazott calcs-objektum és megjegyzés mellett is).
+assert.deepEqual(parseEditions(readFileSync('scripts/lektori-csomag.ts','utf8')),committed);
+assert.deepEqual(parseEditions(`export const EDITIONS:readonly Edition[]=[\n {number:1,date:'2026-01-01',content:'0000000a',draft:true,note:'a {zárójel}, content:\\'ffffffff\\''},\n {number:2,date:'2026-01-02',content:'0000000b',sent:'2026-01-03',calcs:{'x':'1/2'}},\n];`),[{number:1,date:'2026-01-01',content:'0000000a'},{number:2,date:'2026-01-02',content:'0000000b',sent:'2026-01-03'}]);
+assert.equal(parseEditions('nincs ilyen'),null);
+const head=committedEditions();assert.ok(head===null||head.length>=3,'a HEAD EDITIONS-e olvasható');
 // A --check mód a parancssorból is zöld, és nem ír.
 const cli=execFileSync(process.execPath,['--import','tsx','scripts/lektori-csomag.ts','--check'],{encoding:'utf8'});
 assert.ok(cli.includes('naprakész')&&cli.includes(pkg.fingerprints.tables),cli);
@@ -36,7 +54,7 @@ const changed=structuredClone(pkg) as Package;
 const firstValue=allItems(changed).find(i=>i.kind==='value')!;if(firstValue.kind==='value')firstValue.value+=' (módosítva)';
 assert.ok(checkOutputs(changed,font).some(p=>p.includes('lektori-csomag.md elavult')));
 assert.notEqual(contentFingerprint(changed.parts),pkg.fingerprints.content,'tartalmi változás → új csomag-ujjlenyomat');
-assert.ok(editionProblems({...changed,fingerprints:{...changed.fingerprints,content:contentFingerprint(changed.parts)}},null).some(p=>p.includes('megváltozott')));
+assert.ok(editionProblems({...changed,fingerprints:{...changed.fingerprints,content:contentFingerprint(changed.parts)}},null).some(p=>p.includes('eltérnek az LK-')));
 assert.equal(contentFingerprint(pkg.parts),pkg.fingerprints.content);
 // A csomag-ujjlenyomat a tételeken kívül a mátrixokat, a bevezetőt és a jóváhagyó lap szövegét is fedi.
 const matrixChanged=structuredClone(pkg) as Package;
@@ -128,6 +146,13 @@ for(const ph of PDF_PLACEHOLDERS)assert.ok(glyphs.has(ph.codePointAt(0)!),'a hel
 assert.ok(!/[Ѐ-ӿ]/u.test(md),'a csomag szövege nem tartalmaz cirill betűt (a PDF helyőrzői)');
 assert.ok(!out.texts.some(t=>/<=|>=|gyök/.test(t)),'a ≤ ≥ √ jeleket a PDF kirajzolja, nem helyettesíti');
 assert.equal(pdfText('Ib ≤ In ≈ √3 → ✓'),'Ib <= In ~ gyök 3 -> pipa');
+// A PDF-ben nincs szó közbeni sortörés (a render() különben hibával megáll); a túl keskeny oszlopot a generátor jelzi.
+const narrow=structuredClone(pkg) as Package;narrow.parts[2].blocks[1].layout={widths:[8,8,120,28],align:'left'};
+assert.throws(()=>render(narrow,font),/szó közben törik/);
+// A szám és a mértékegysége, illetve az ezres csoportok nem válnak el sortöréssel: a tördelés csak sima szóköznél tör, és köztük
+// nem törő szóköz marad (kiíráskor lesz sima szóközzé).
+assert.equal(pdfInline('Ze = 0,5 Ω, I2 = 10 000 / (√3 · 400 V); 23\u202f°C, 1\u00a0000 m'),'Ze = 0,5\u00a0Ω, I2 = 10\u00a0000 / (я3 · 400\u00a0V); 23\u00a0°C, 1\u00a0000\u00a0m');
+assert.equal(pdfInline('2 · 10 · 10 és 16 A, B16'),'2 · 10 · 10 és 16\u00a0A, B16');
 
 // (f) A 2. rész példái és döntései a program függvényeivel és a mintaterv számításával ugyanazt adják.
 const near=(a:number,b:number)=>Math.abs(a-b)<=1e-9*Math.max(1,Math.abs(b));
@@ -236,32 +261,45 @@ assert.ok(!/30 mA-es ÁVK/.test(md)&&!/hagyományos kioldó/.test(md)&&!/kombin�
 assert.ok(rules.find(r=>r.id==='K-ZS')!.rationale.includes('Zs · Ia ≤ U0,')&&!md.includes('Zs · Ia ≤ U0 · cmin'));
 assert.ok(rules.find(r=>r.id==='K-ZS')!.question?.includes('Cmin = 0,95')&&md.includes('Kérdés a lektorhoz (T-K-CMIN)'));
 
-// (g) Jóváhagyás: a SIZING_REVIEW csak aláírt lektori jóváhagyás után „jóváhagyott”; ekkor a megjegyzés pontosan egy, létező
-// csomagkiadást (LK-n) nevez meg annak csomag-ujjlenyomatával, és a 2. rész jelenlegi ujjlenyomatát rögzíti.
-const approvedEditions=(note:string)=>[...note.matchAll(/(?<![\p{L}\d])LK-(\d+)(?![\p{L}\d])/gu)].map(m=>Number(m[1]));
-assert.deepEqual(approvedEditions('Lektori csomag LK-12 (2026. 10. 10.)'),[12]);assert.deepEqual(approvedEditions('LK-1, LK-1x'),[1]);assert.deepEqual(approvedEditions('XLK-1 LK-10'),[10]);
+// (g) Jóváhagyás: a SIZING_REVIEW csak aláírt lektori jóváhagyás után „jóváhagyott”; ekkor az approvalRef pontosan egy kiküldött,
+// nem tervezet csomagkiadást (LK-n) nevez meg annak csomag-ujjlenyomatával, és abban a kiadásban az 1. rész a jóváhagyott, a 2. rész a
+// mostani ujjlenyomatú (reviewRefProblems). A kalkulátorok lektori rekordja ugyanígy, a kalkulátor ujjlenyomat-párjával (releaseRefProblems).
 if(SIZING_REVIEW.status==='jóváhagyott'){
  assert.equal(SIZING_REVIEW.fingerprint,pkg.fingerprints.tables);
- const named=approvedEditions(SIZING_REVIEW.note);
- assert.equal(named.length,1,'a SIZING_REVIEW.note pontosan egy csomagkiadást (LK-n) nevezzen meg');
- const approved=EDITIONS.find(e=>e.number===named[0]);
- assert.ok(approved,`a SIZING_REVIEW.note-ban szereplő LK-${named[0]} nincs az EDITIONS-ben`);
- assert.ok(SIZING_REVIEW.note.includes(approved.content),`a SIZING_REVIEW.note-ban szerepeljen az LK-${approved.number} csomag-ujjlenyomata (${approved.content})`);
- assert.ok(SIZING_REVIEW.note.includes(pkg.fingerprints.formulas),'a 2. rész (képletek) a jóváhagyás óta megváltozott, vagy az ujjlenyomata hiányzik a SIZING_REVIEW.note-ból: új jóváhagyás kell');
+ assert.deepEqual(reviewRefProblems(SIZING_REVIEW,pkg.fingerprints.formulas),[],'a táblázatjóváhagyás hivatkozása (approvalRef) hibás, vagy a 2. rész a jóváhagyás óta megváltozott: új jóváhagyás kell');
  assert.ok(tablesApproved()&&md.includes('| Jóváhagyási állapot (1. rész) | jóváhagyott – '));
 }else{
  assert.equal(tablesApproved(),false);
  assert.ok(md.includes('| Jóváhagyási állapot (1. rész) | ellenőrizendő – jogosult tervező még nem hagyta jóvá |'));
 }
-// A T1 kalkulátorok lektori rekordja (lib/calc/release.ts) pontosan egy létező kiadásra hivatkozik, annak csomag-ujjlenyomatával.
 assert.deepEqual(releaseRefProblems(),[]);
-const rec=(approvalRef?:string):ExpertReview=>({kind:'lektoralt',reviewer:'Teszt Elek',qualification:'villamos tervező',registry:'00-0000',date:'2026-11-01',fingerprint:'0',source:'0',approvalRef});
-assert.deepEqual(releaseRefProblems({feszultseges:rec(`Lektori csomag LK-${EDITION.number}, csomag: ${EDITION.content}`)}),[]);
-assert.ok(releaseRefProblems({feszultseges:rec()})[0].includes('pontosan egy'));
-assert.ok(releaseRefProblems({feszultseges:rec(`LK-${EDITION.number} és LK-1`)})[0].includes('pontosan egy'));
-assert.ok(releaseRefProblems({feszultseges:rec(`LK-${EDITION.number+1}`)})[0].includes('nincs az EDITIONS-ben'));
-assert.ok(releaseRefProblems({feszultseges:rec(`LK-${EDITION.number}`)})[0].includes('csomag-ujjlenyomata'));
-assert.deepEqual(releaseRefProblems({'ohm-torveny':rec()}),[],'T0 rekordot a csomag nem köt');
+// Szimulált kiküldött kiadás (az LK-n bejegyzés sent mezővel) a hivatkozás-ellenőrzések próbájához.
+const sentEditions:Edition[]=[...EDITIONS.slice(0,-1),{...EDITION,sent:'2026-10-11'}];
+const tablesRef=`Lektori csomag ${editionLabel()}, csomag: ${EDITION.content}, 1. rész: ${EDITION.tables}, 2. rész: ${EDITION.formulas}; jóváhagyó lap: iktatás 1`;
+const review=(approvalRef:string,over:Partial<SizingReview>={}):SizingReview=>({...SIZING_REVIEW,status:'jóváhagyott',qualification:'villamos tervező',date:'2026-11-01',fingerprint:pkg.fingerprints.tables,approvalRef,showName:false,reviewer:'',registry:'',...over});
+assert.deepEqual(reviewRefProblems(review(tablesRef),pkg.fingerprints.formulas,sentEditions),[]);
+assert.deepEqual(reviewRefProblems({...review(tablesRef),status:'ellenőrizendő'},pkg.fingerprints.formulas,EDITIONS),[],'jóváhagyás nélkül nincs mit ellenőrizni');
+assert.ok(reviewRefProblems(review(tablesRef),pkg.fingerprints.formulas,EDITIONS)[0].includes('nincs kiküldöttként jelölve'),'ki nem küldött kiadásra nem hivatkozhat');
+assert.ok(reviewRefProblems(review('Lektori csomag LK-2, csomag: 4f9723b6'),pkg.fingerprints.formulas,sentEditions)[0].includes('belső tervezet'),'tervezet kiadásra nem hivatkozhat');
+assert.ok(reviewRefProblems(review(tablesRef),'00000000',sentEditions).some(p=>p.includes('2. rész (képletek) a jóváhagyás óta megváltozott')));
+assert.ok(reviewRefProblems(review(tablesRef,{fingerprint:'00000000'}),pkg.fingerprints.formulas,sentEditions).some(p=>p.includes('1. részének ujjlenyomata')));
+assert.ok(reviewRefProblems(review(`Lektori csomag LK-${EDITION.number}, csomag: ${EDITION.content}`),pkg.fingerprints.formulas,sentEditions).some(p=>p.includes('1. és 2. részének ujjlenyomata')));
+const approvedEditions=(note:string)=>[...note.matchAll(/(?<![\p{L}\d])LK-(\d+)(?![\p{L}\d])/gu)].map(m=>Number(m[1]));
+assert.deepEqual(approvedEditions('Lektori csomag LK-12 (2026. 10. 10.)'),[12]);assert.deepEqual(approvedEditions('LK-1, LK-1x'),[1]);assert.deepEqual(approvedEditions('XLK-1 LK-10'),[10]);
+const pair=EDITION.calcs!.feszultseges,[pfp,psrc]=pair.split('/');
+const rec=(approvalRef:string,over:Partial<ExpertReview>={}):ExpertReview=>({kind:'lektoralt',qualification:'villamos tervező',date:'2026-11-01',fingerprint:pfp,source:psrc,approvalRef,...over});
+const calcRef=`Lektori csomag ${editionLabel()}, csomag: ${EDITION.content}, kalkulátor: ${pair}; jóváhagyó lap: iktatás 1`;
+assert.deepEqual(releaseRefProblems({feszultseges:rec(calcRef)},sentEditions),[]);
+assert.ok(releaseRefProblems({feszultseges:rec(calcRef)},EDITIONS)[0].includes('nincs kiküldöttként jelölve'));
+assert.ok(releaseRefProblems({feszultseges:rec('LK-1, csomag: 48479e60')},sentEditions)[0].includes('belső tervezet'),'az LK-1/LK-2 belső tervezetre hivatkozó rekord hibás');
+assert.ok(releaseRefProblems({feszultseges:rec('LK-2, csomag: 4f9723b6')},sentEditions)[0].includes('belső tervezet'));
+assert.ok(releaseRefProblems({feszultseges:rec(calcRef,{fingerprint:'deadbeef'})},sentEditions)[0].includes('nem ezt a változatot'),'a jóváhagyás után megváltozott kalkulátor régi hivatkozással nem rögzíthető');
+assert.ok(releaseRefProblems({feszultseges:rec(`Lektori csomag LK-${EDITION.number}, csomag: ${EDITION.content}`)},sentEditions)[0].includes('ujjlenyomat-párja'));
+assert.ok(releaseRefProblems({feszultseges:rec('')},sentEditions)[0].includes('pontosan egy'));
+assert.ok(releaseRefProblems({feszultseges:rec(`LK-${EDITION.number} és LK-1`)},sentEditions)[0].includes('pontosan egy'));
+assert.ok(releaseRefProblems({feszultseges:rec(`LK-${EDITION.number+1}`)},sentEditions)[0].includes('nincs az EDITIONS-ben'));
+assert.ok(releaseRefProblems({feszultseges:rec(`LK-${EDITION.number}, kalkulátor: ${pair}`)},sentEditions)[0].includes('csomag-ujjlenyomata'));
+assert.deepEqual(releaseRefProblems({'ohm-torveny':rec('')}),[],'T0 rekordot a csomag nem köt');
 
 // (h) Szerkezet: helyőrzők, jóváhagyó lap, szóhasználat, a név megjelenésének leírása.
 assert.deepEqual(pkg.parts.map(p=>p.no),[1,2,3,4,5,6]);assert.equal(PARTS.length,6);
@@ -270,21 +308,29 @@ for(const p of pkg.parts.filter(p=>p.no>=4))assert.ok(p.placeholder&&!p.blocks.l
 assert.ok(md.includes('A Sémák ábráinak elkészülte után kerül be'));
 for(const t of ['## Jóváhagyó lap','### 3. rész – kalkulátoronkénti döntés','### Döntés és aláírás','Jóváhagyó neve','Kamarai / névjegyzéki szám','Jogosultság megnevezése','| Hely |','| Dátum |','| Aláírás |','### Teendő eltérés esetén','Mit jelent a jóváhagyás – és mit nem?','### Becsült ráfordítás','### Hogyan kell kitölteni?','a többi, pipálatlanul hagyott tétel egyezőnek számít','Megjegyzés a blokkhoz (forrás, kiadás)','külön mellékletben'])assert.ok(md.includes(t),'hiányzik: '+t);
 assert.ok(!/szakmailag ellenőrzött|MSZ szerint megfelel|megfelel a szabványnak|szabványos méretezés/i.test(md),'tiltott kifejezés');
-// A név megjelenése a program pontos szövegével és helyeivel van leírva: névvel (hozzájárulással) és név nélkül.
-const base={status:'jóváhagyott' as const,reviewer:'[név]',registry:'[névjegyzéki szám]',date:'[dátum]',fingerprint:tablesFingerprint(),note:''};
-const shown={named:reviewText({...base,showName:true}),anonymous:reviewText({...base,showName:false})};
-assert.deepEqual(approvedTexts(),shown);assert.ok(shown.named.includes('[név]')&&!shown.anonymous.includes('[név]')&&!shown.anonymous.includes('[névjegyzéki szám]'));
+// A név megjelenése a program pontos szövegével és helyeivel van leírva: névvel (hozzájárulással) és név nélkül, a jogosultsággal.
+const base:SizingReview={status:'jóváhagyott',qualification:'[jogosultság]',date:'[dátum]',fingerprint:tablesFingerprint(),approvalRef:'[hivatkozás]',showName:true,reviewer:'[név]',registry:'[névjegyzéki szám]',note:''};
+const shown={named:reviewText(base),anonymous:reviewText({...base,showName:false,reviewer:'',registry:''})};
+assert.deepEqual(approvedTexts(),shown);assert.ok(shown.named.includes('[név]')&&!shown.anonymous.includes('[név]')&&!shown.anonymous.includes('[névjegyzéki szám]')&&shown.anonymous.includes('[jogosultság]'));
 for(const t of [shown.named,shown.anonymous])assert.ok(md.split(t).length>=3,'a jóváhagyási szöveg a bevezetőben és a hozzájárulásban is szerepel: '+t);
-// A kalkulátoroldal lektori jelölése (lib/calc/registry.ts): név csak hozzájárulással, különben a minősítés.
+// A kalkulátor saját oldalának lektori jelölése (lib/calc/registry.ts): név csak hozzájárulással, különben a jogosultság; a
+// kalkulátorlistán és a keresőben (calcMeta.note) mindig név nélkül.
 const badges=calcBadgeTexts();
-assert.equal(badges.named,'Szakmailag lektorálta: [név], [minősítés] · [dátum]; Szakmai lektor: [név], [minősítés]');
-assert.equal(badges.anonymous,'Szakmailag lektorálta: [minősítés] · [dátum]; Szakmai lektor: [minősítés]');
+assert.equal(badges.named,'Szakmailag lektorálta: [név], [jogosultság] · [dátum]; Szakmai lektor: [név], [jogosultság]');
+assert.equal(badges.anonymous,'Szakmailag lektorálta: [jogosultság] · [dátum]; Szakmai lektor: [jogosultság]');
+assert.equal(badges.list,'Szakmailag lektorálta: [jogosultság] · [dátum]','a kalkulátorlista jelvénye hozzájárulással is név nélküli');
 for(const t of [badges.named,badges.anonymous])assert.ok(md.split(t).length>=3,'a kalkulátorjelvény szövege a bevezetőben és a hozzájárulásban: '+t);
+assert.ok(md.includes('a kalkulátorlistán (/kalkulatorok) és a keresőben a jelvény mindig név nélküli: „'+badges.list+'”')&&md.includes('A kalkulátorlistán és a keresőben a jelvény név nélküli.'));
+assert.ok(md.includes('hozzájárulás nélkül a programban sem rögzítjük')&&md.includes('a program nevemet és névjegyzéki számomat nem rögzíti'),'a csomag kimondja, hogy hozzájárulás nélkül a név a programba sem kerül');
+// A lektor neve (jelvény, lábléc-sor) csak a kalkulátor saját oldalán jelenhet meg: a jelvényt vagy a lektor megnevezését használó fájlok
+// listája rögzített (új hely csak a hozzájárulás szövegének bővítésével és a lektor új hozzájárulásával kerülhet be).
+const walk=(dir:string):string[]=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(dir+'/'+e.name):/\.tsx?$/.test(e.name)?[dir+'/'+e.name]:[]);
+const badgeUsers=['app','components','lib'].flatMap(walk).filter(f=>f!=='lib/calc/registry.ts'&&/\b(?:expertMeta|expertShown|releaseBadge)\(|\.badge\b/.test(readFileSync(f,'utf8'))).sort();
+assert.deepEqual(badgeUsers,['app/(kezikonyv)/kalkulatorok/[slug]/page.tsx'],'a lektor neve új helyen jelenne meg (pl. a kalkulátorlista kártyáján): bővítsd a hozzájárulás szövegét (CONSENT), és kérd a lektor hozzájárulását');
 assert.ok(md.includes('„Táblázatok – Állapot” sorában')&&md.includes('Tervezői ellenőrzés'));
 assert.ok(md.includes('A jóváhagyás érvénye a hozzájárulástól nem függ.'));
 // A reviewText() minden megjelenési helye a hozzájárulás szövegében (NAME_PLACES) szerepel: új hely csak a felsorolással és a lektor
 // hozzájárulásával kerülhet be. A forráskódban a reviewText()-et hívó fájlok:
-const walk=(dir:string):string[]=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(dir+'/'+e.name):/\.tsx?$/.test(e.name)?[dir+'/'+e.name]:[]);
 const callers=['app','components','lib'].flatMap(walk).filter(f=>/\breviewText\(/.test(readFileSync(f,'utf8'))&&f!=='lib/sizing-tables.ts').sort();
 assert.deepEqual(callers,['app/(kezikonyv)/kalkulatorok/[slug]/page.tsx','components/sizing-report.tsx','lib/calc/defs/vezetek-ellenallas.ts','lib/sizing.ts'],'a jóváhagyó neve új helyen jelenne meg: bővítsd a NAME_PLACES-t (és kérd a lektor hozzájárulását)');
 for(const d of CALCULATORS.filter(c=>c.tables))assert.ok(NAME_PLACES().includes(d.title),'NAME_PLACES: '+d.title);
@@ -313,19 +359,41 @@ for(const slug of T1_ORDER){
  assert.ok(b.title===d.title&&b.source===d.sources.join('; '));
  for(const f of d.fields){const it=b.items.find(i=>i.id===kalId(slug)+'-BEM-'+f.id.toUpperCase());assert.ok(it&&it.kind==='value',slug+'.'+f.id+': bemenet tétele');if(f.kind==='number')assert.ok((it.checks??[]).filter(c=>c.fn==='calcField').length>=3,slug+'.'+f.id+': korlátok összevetve')}
  for(const id of ['HAT','NV','KEPLET','FELT'])assert.ok(b.items.some(i=>i.id===kalId(slug)+'-'+id),slug+': '+id);
- assert.ok(b.items.find(i=>i.id===kalId(slug)+'-KEPLET')!.kind==='value'&&md.includes(d.formulas.join(' · ')),slug+': a képletek szó szerint');
+ const kep=b.items.find(i=>i.id===kalId(slug)+'-KEPLET')!;assert.ok(kep.kind==='value'&&kep.value===formulasText(d.formulas)&&md.includes(formulasText(d.formulas)),slug+': a képletek szó szerint, számozva');
+ assert.ok(d.formulas.every((f,n)=>kep.kind==='value'&&kep.value.includes(`${n+1}) ${f}`)),slug+': minden képlet külön számozott sor');
+ // A FELT tétel minden feltételezés-sort tartalmaz, amelyet a kalkulátor bármely választómező-kombinációban vagy példában kiír;
+ // a nem mindig megjelenő sorok a feltételükkel („csak ha …”).
+ const felt=b.items.find(i=>i.id===kalId(slug)+'-FELT')!;assert.ok(felt.kind==='value');
+ const always=new Set<string>(),shownAll=new Set<string>(),combos=selectCombos(d);let okRuns=0;
+ for(const raw of [...combos,...d.examples.map(e=>e.input)]){const r=runCalc(d,raw);if(!r.ok)continue;okRuns++;const a=r.out.assumptions??[];a.forEach(x=>shownAll.add(x));if(okRuns===1)a.forEach(x=>always.add(x));else for(const x of [...always])if(!a.includes(x))always.delete(x)}
+ assert.ok(shownAll.size&&okRuns>=combos.length,slug+': a kombinációk lefutnak');
+ const entries=felt.value.split(/ (?=\d+\) )/);
+ for(const a of shownAll){
+  const e=entries.find(x=>x.endsWith(' '+a));assert.ok(e,slug+': a FELT tételből hiányzik egy kiírt feltételezés: '+a);
+  assert.equal(e.includes('(csak ha '),!always.has(a),slug+': '+(always.has(a)?'mindig megjelenő sor feltétellel':'feltételes sor feltétel nélkül')+': '+a);
+ }
+ assert.equal(entries.length,shownAll.size,slug+': a FELT tétel csak kiírt feltételezést tartalmaz');
+ assert.ok(!felt.value.includes(') (csak ha egyes bemeneteknél)'),slug+': minden feltételes sor feltétele választómezőhöz köthető');
  const calcs=b.items.flatMap(i=>i.kind==='rule'?i.checks:[]).filter((c):c is Extract<ProgramCheck,{fn:'calc'}>=>c.fn==='calc'&&c.args[0]===slug);
  const worked=calcs.filter(c=>Object.entries(c.expect).filter(([k,v])=>!k.includes(':')&&typeof v==='number').length>=2);
  assert.ok(worked.length>=2,slug+': legalább 2 kézzel számolt példa a runCalc-kal összevetve');
  const ids=runCalc(d,{}).ok?(runCalc(d,{}) as {out:{results:{id:string}[]}}).out.results.map(r=>r.id):[];
  const all=new Set([...d.examples.flatMap(ex=>{const r=runCalc(d,ex.input);return r.ok?r.out.results.map(x=>x.id):[]}),...ids]);
  for(const id of all)assert.ok(calcs.some(c=>typeof c.expect[id]==='number'),slug+': a(z) „'+id+'” eredmény egy példában sincs összevetve');
- if(d.notCovered?.slice(0,SIZING_NOT_COVERED.length).join('|')===SIZING_NOT_COVERED.join('|'))assert.ok(b.items.find(i=>i.id===kalId(slug)+'-NV')!.checks?.some(c=>c.fn==='calcNotCovered'),slug+': a Nem vizsgált lista összevetve');
+ assert.ok(b.items.find(i=>i.id===kalId(slug)+'-NV')!.checks?.some(c=>c.fn==='calcNotCovered'),slug+': a Nem vizsgált lista összevetve');
 }
 // A táblázatértékeket a 3. rész nem ismétli: a szövegek az 1. rész azonosítóira hivatkoznak (pl. ρ1 = T-K-RHO1).
 const p3text=JSON.stringify(part3.blocks.slice(1).map(b=>b.items.map(i=>i.kind==='rule'?[i.rule,i.rationale,i.source]:[i.value])));
 for(const id of ['T-K-RHO1','T-K-LAMBDA','T-K-U0','T-K-CMIN','T-K-I2','T-KM-SOR','T-KCS-3','T-KT-35','T-DU-KOZ-EGY'])assert.ok(p3text.includes(id),'3. rész hivatkozik: '+id);
 assert.ok(!/\bA2 – többeres kábel/.test(p3text),'a szerelésimód-leírásokat (L-MOD-…) nem ismétli');
+// Konkrét feltételes sorok: a hurokimpedancia mindhárom jelleggörbéje, az XLPE-tartalék, az egyenáramú ρ1 (λ nélkül).
+const feltOf=(slug:string)=>{const i=part3.blocks.flatMap(b=>b.items).find(i=>i.id===kalId(slug)+'-FELT')!;return i.kind==='value'?i.value:''};
+for(const [c,m] of [['B',5],['C',10],['D',20]] as const)assert.ok(feltOf('hurokimpedancia').includes(`(csak ha Kioldási jelleggörbe: „${c}”) Kismegszakító (MSZ EN 60898-1) pillanatkioldási tartományának felső határa: ${c} → ${m} · In.`));
+for(const slug of ['keresztmetszet','kismegszakito','terhelhetoseg-tablazat'])assert.ok(/\(csak ha Szigetelés: „XLPE[^”]*”\) XLPE-szigetelés: a programban nincs jóváhagyott XLPE-táblázat/.test(feltOf(slug)),slug+': XLPE-tartalék feltétellel');
+assert.ok(/\(csak ha Rendszer: „Egyenáram”\) Rézvezető; ρ1 = [^λ]*\(üzemi hőmérséklet, G\.52\.2\)\./.test(feltOf('feszultseges'))&&/\(csak ha Rendszer: „Egyfázisú \(230 V\)” vagy „Háromfázisú \(400 V\)”\) Rézvezető; ρ1 = .*λ =/.test(feltOf('feszultseges')),'DC-nél λ nélkül');
+assert.equal(assumptionsText([{text:'a.',when:null},{text:'b.',when:'X: „y”'}]),'1) a. 2) (csak ha X: „y”) b.');
+// A „Nem vizsgált” lista nem mond ellent a bevitelnek (Hurokimpedancia: saját A_PE, legfeljebb 35 mm²).
+const hurNc=bySlug('hurokimpedancia')!.notCovered!;assert.ok(!hurNc.some(x=>/csökkentett keresztmetszetű N- vagy PE-ér|35 mm² feletti/.test(x))&&hurNc.some(x=>x.includes('543.1')));
 // A kalkulátorok példái a tervező méretezésével is egyeznek (pl. ΔU 23,4 m-en = a mintaterv c1 áramkörének esése, K-DU1).
 assert.ok(near(scenario({circuit:'c1',set:{load:3680}}).drop!,voltageDropPercent({b:2,length:23.4,current:16,section:2.5,cosPhi:1})));
 

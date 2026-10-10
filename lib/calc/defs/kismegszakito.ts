@@ -2,7 +2,7 @@ import type {CalcDef,ResultItem} from '../core';
 import {MCB_RATINGS} from '../constants';
 import {SIZING_NOT_COVERED,maxLoopImpedance} from '../../sizing-formulas';
 import {step,u} from '../fields';
-import {atMost,fmtNum} from '../../sizing-formulas';
+import {atMost,fmtLimit,fmtNum} from '../../sizing-formulas';
 import {SIZING_TABLES as T,instantaneousRef} from '../../sizing-tables';
 import {ambientField,curveField,groupField,insulationField,izFor,izStep,loadedField,methodField,sectionField,tag} from '../sizing-fields';
 
@@ -20,18 +20,18 @@ const def:CalcDef={
   const ok=MCB_RATINGS.value.filter(r=>atMost(Ib,r)&&atMost(r,x.iz));
   const results:ResultItem[]=[{id:'Iz',label:'A vezeték javított terhelhetősége',value:x.iz,unit:'A',text:u(x.iz,'A')}];
   const steps=[izStep(x,A)];
+  const assumptions=[...x.assumptions,'MSZ EN 60898-1 szerinti kismegszakító (I2 = 1,45 · In).','A jelleggörbét a fogyasztó bekapcsolási árama határozza meg (B: általános, C: motoros, induktív terhelés).'];
   if(!ok.length){
    steps.push(step('Feltétel','Ib ≤ In ≤ Iz',`${u(Ib,'A')} ≤ In ≤ ${u(x.iz,'A')}`,'nincs ilyen előnyös In','MSZ HD 60364-4-43 433.1'));
-   return {results,steps,verdict:{ok:false,text:`Számítás szerint nincs olyan előnyös névleges áram (MSZ EN 60898-1), amelyre ${u(Ib,'A')} ≤ In ≤ ${u(x.iz,'A')} teljesül: nagyobb keresztmetszet, kedvezőbb szerelési mód vagy kisebb terhelés szükséges.`},assumptions:x.assumptions};
+   return {results,steps,verdict:{ok:false,text:`Számítás szerint nincs olyan előnyös névleges áram (MSZ EN 60898-1), amelyre ${u(Ib,'A')} ≤ In ≤ ${u(x.iz,'A')} teljesül: nagyobb keresztmetszet, kedvezőbb szerelési mód vagy kisebb terhelés szükséges.`},assumptions};
   }
-  const In=ok[0],max=ok[ok.length-1],zs=maxLoopImpedance(curve,In),m=instantaneousRef(curve);
+  const In=ok[0],max=ok[ok.length-1],zs=maxLoopImpedance(curve,In),zsT=fmtLimit(zs,3)+'\u00a0Ω'+(fmtNum(zs,6)!==fmtLimit(zs,3)?' (lefelé kerekítve)':''),m=instantaneousRef(curve);
   results.unshift({id:'In',label:'Legkisebb választható névleges áram',value:In,unit:'A',text:curve+In+' ('+In+'\u00a0A)',primary:true},{id:'InMax',label:'Legnagyobb megengedett névleges áram',value:max,unit:'A',text:max+'\u00a0A'});
-  results.push({id:'I2',label:'Kioldási áram I2 = 1,45 · In',value:T.conventionalFactor*In,unit:'A',text:u(T.conventionalFactor*In,'A')},{id:'ZsMax',label:`Megengedett hurokimpedancia (${curve}${In})`,value:zs,unit:'Ω',text:u(zs,'Ω',3)});
+  results.push({id:'I2',label:'Kioldási áram I2 = 1,45 · In',value:T.conventionalFactor*In,unit:'A',text:u(T.conventionalFactor*In,'A')},{id:'ZsMax',label:`Megengedett hurokimpedancia (${curve}${In})`,value:zs,unit:'Ω',text:zsT});
   steps.push(step('Feltétel','Ib ≤ In ≤ Iz',`${u(Ib,'A')} ≤ ${In} A ≤ ${u(x.iz,'A')}`,'In = '+In+' A (legfeljebb '+max+' A)','MSZ HD 60364-4-43 433.1; '+MCB_RATINGS.source),
    step('I2 feltétel','I2 = 1,45 · In ≤ 1,45 · Iz',`${fmtNum(T.conventionalFactor)} · ${In} A ≤ ${fmtNum(T.conventionalFactor)} · ${u(x.iz,'A')}`,'teljesül (kismegszakítónál In ≤ Iz-vel együtt)','MSZ EN 60898-1'),
-   step('Megengedett hurokimpedancia','Zs,max = cmin · U0 / (m · In)',`Zs,max = ${fmtNum(T.cmin)} · ${u(T.u0,'V')} / (${m.value} ${tag(m)} · ${In} A)`,u(zs,'Ω',3),'MSZ HD 60364-4-41 411.4.4'));
-  return {results,steps,verdict:{ok:true,text:`Számítás szerint ${curve}${In} kismegszakítóval teljesül az Ib ≤ In ≤ Iz feltétel (${u(Ib,'A')} ≤ ${In} A ≤ ${u(x.iz,'A')}). A hurokimpedanciát (Zs ≤ ${u(zs,'Ω',3)}) méréssel vagy számítással ellenőrizni kell.`},
-   assumptions:[...x.assumptions,'MSZ EN 60898-1 szerinti kismegszakító (I2 = 1,45 · In).','A jelleggörbét a fogyasztó bekapcsolási árama határozza meg (B: általános, C: motoros, induktív terhelés).']};
+   step('Megengedett hurokimpedancia','Zs,max = cmin · U0 / (m · In)',`Zs,max = ${fmtNum(T.cmin)} · ${u(T.u0,'V')} / (${m.value} ${tag(m)} · ${In} A)`,zsT,'MSZ HD 60364-4-41 411.4.4'));
+  return {results,steps,verdict:{ok:true,text:`Számítás szerint ${curve}${In} kismegszakítóval teljesül az Ib ≤ In ≤ Iz feltétel (${u(Ib,'A')} ≤ ${In} A ≤ ${u(x.iz,'A')}). A hurokimpedanciát (Zs ≤ ${fmtLimit(zs,3)}\u00a0Ω) méréssel vagy számítással ellenőrizni kell.`},assumptions};
  },
  formulas:['Ib ≤ In ≤ Iz','I2 = 1,45 · In ≤ 1,45 · Iz','Zs,max = cmin · U0 / (m · In); m = 5 (B), 10 (C), 20 (D)'],
  notes:{good:['A kismegszakító névleges áramának előzetes kiválasztása adott vezetékhez és terheléshez.','Annak ellenőrzése, hogy egy meglévő védelem nem nagyobb-e a vezetéknél.'],bad:['Szelektivitás és zárlati megszakítóképesség (Icn) ellenőrzésére.','ÁVK (FI-relé) kiválasztására.']},

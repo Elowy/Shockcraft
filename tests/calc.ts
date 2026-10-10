@@ -12,7 +12,7 @@ import {REVIEW_DECL,REVIEW_FILE,calcSourceFiles,sourceFingerprint,sourceText} fr
 import {calcHref,calcLinkable,calcQuery} from '../lib/kb/links';
 import {calcSeoTitle} from '../lib/kb/categories';
 import {SIZING_NOT_COVERED,voltageDropPercent,maxLengthForDrop,minSectionFor,loopResistance,maxLoopImpedance} from '../lib/sizing-formulas';
-import {tablesApproved,temperatureFactor,groupingFactor} from '../lib/sizing-tables';
+import {SIZING_REVIEW,tablesApproved,tablesFingerprint,temperatureFactor,groupingFactor} from '../lib/sizing-tables';
 import {phaseLoad} from '../lib/phase-load';
 import {seed,validatePlan} from '../lib/plan';
 
@@ -83,7 +83,18 @@ for(const d of CALCULATORS){
   assert.ok(d.safety.includes('meretezes')||d.safety.includes('kalkulator'),tag+': T1 figyelmeztetés');
   for(const ex of d.examples){const r=runCalc(d,ex.input);if(r.ok&&r.out.verdict)assert.match(r.out.verdict.text,/^Számítás szerint/,tag+': verdikt')}
  }
- if(d.tables){assert.ok(SIZING_NOT_COVERED.every(x=>d.notCovered?.includes(x)),tag+': a méretezés teljes „nem vizsgált” listája');assert.ok(d.safety.includes('meretezes'))}
+ if(d.tables){
+  // A méretezés teljes „nem vizsgált” listája; eltérni csak a kábeltételtől lehet, ha a kalkulátor maga kezeli a csökkentett
+  // védővezetőt és 35 mm² felett nem enged bevitelt (Hurokimpedancia) – ekkor a saját változata szerepel.
+  const missing=SIZING_NOT_COVERED.filter(x=>!d.notCovered?.includes(x));
+  assert.ok(missing.every(x=>x.startsWith('alumínium vezető'))&&(!missing.length||d.notCovered!.some(x=>x.startsWith('alumínium vezető'))),tag+': a méretezés teljes „nem vizsgált” listája');
+  assert.ok(d.safety.includes('meretezes'));
+ }
+ // A „Nem vizsgált” lista nem mondhat ellent a bevitelnek: ha 35 mm² feletti keresztmetszetet nem vizsgál, a keresztmetszet-mező
+ // legfeljebb 35 mm²; ha a csökkentett PE-eret nem vizsgálja, nincs külön PE-keresztmetszet mező.
+ const nc=(d.notCovered??[]).join(' | '),mm2=d.fields.filter(f=>f.kind==='number'&&f.unit==='mm²');
+ if(/35 mm² feletti keresztmetszet/.test(nc))for(const f of mm2)assert.ok(f.kind==='number'&&f.max!==undefined&&f.max<=35,tag+'.'+f.id+': a „Nem vizsgált” lista szerint 35 mm² felett nem számol, a mező mégis enged');
+ if(/csökkentett keresztmetszetű N- vagy PE-ér/.test(nc))assert.ok(!d.fields.some(f=>f.id==='Ape'),tag+': a csökkentett PE-eret nem vizsgálja, mégis külön A_PE mezője van');
 }
 // A kalkulátoronkénti kliensszigetek térképe minden definíciót lefed.
 const islands=readFileSync('components/calc/islands/index.ts','utf8');
@@ -95,7 +106,8 @@ assert.equal(readdirSync('lib/calc/defs').filter(f=>f.endsWith('.ts')).length,sl
 const T0=CALCULATORS.filter(c=>c.tier==='T0'),T1=CALCULATORS.filter(c=>c.tier==='T1');
 assert.deepEqual([...T1_SLUGS].sort(),T1.map(c=>c.slug).sort(),'a release.ts T1_SLUGS listája a definíciók T1 szintjével egyezik');
 for(const s of TABLE_GATED)assert.ok(bySlug(s)?.tables,s+': táblázatalapú');
-assert.deepEqual([...TABLE_GATED].sort(),CALCULATORS.filter(c=>c.tables&&!['feszultseges'].includes(c.slug)).map(c=>c.slug).sort());
+// Minden táblázatértéket használó kalkulátor (tables: true) táblázat-kapus: a felhasznált értékeket a lektori csomag 1. része fedi.
+assert.deepEqual([...TABLE_GATED].sort(),CALCULATORS.filter(c=>c.tables&&c.tier!=='T0').map(c=>c.slug).sort());
 // Minden rekord: ismert kalkulátor, egyező tartalmi és forrás-ujjlenyomat (különben: újra kell ellenőrizni / lektoráltatni –
 // node_modules/.bin/tsx scripts/calc-release.ts list), T1-hez csak lektori rekord.
 for(const [slug,rec] of Object.entries(RELEASES)){
@@ -103,7 +115,12 @@ for(const [slug,rec] of Object.entries(RELEASES)){
  assert.equal(rec.fingerprint,calcFingerprint(d!),slug+': az ujjlenyomat eltér – a tartalom a jóváhagyás óta változott');
  assert.equal(rec.source,sourceFingerprint(slug),slug+': a forrás-ujjlenyomat eltér – a számítás kódja (definíció vagy importált modul) a jóváhagyás óta változott ('+calcSourceFiles(slug).join(', ')+')');
  if(d!.tier!=='T0')assert.equal(rec.kind,'lektoralt',slug+': T1-hez lektori rekord kell');
- if(rec.kind==='lektoralt')assert.ok(rec.reviewer.trim()&&rec.qualification.trim()&&rec.registry.trim()&&/^\d{4}-\d{2}-\d{2}$/.test(rec.date)&&!/[<>]/.test(rec.reviewer+rec.qualification+rec.registry),slug+': a lektori rekord kitöltött');
+ if(rec.kind==='lektoralt'){
+  assert.ok(rec.qualification.trim()&&rec.approvalRef.trim()&&/^\d{4}-\d{2}-\d{2}$/.test(rec.date)&&!/[<>]/.test(rec.qualification+rec.approvalRef+(rec.reviewer??'')+(rec.registry??'')),slug+': a lektori rekord kitöltött (jogosultság, dátum, hivatkozás)');
+  // Adatvédelem: a release.ts a kliensoldali kódba is bekerül – név és névjegyzéki szám csak a megjelenítéshez adott hozzájárulással.
+  if(rec.showName===true)assert.ok(rec.reviewer?.trim()&&rec.registry?.trim(),slug+': hozzájárulással a név és a névjegyzéki szám kitöltött');
+  else assert.ok(!rec.reviewer?.trim()&&!rec.registry?.trim(),slug+': hozzájárulás (showName: true) nélkül a lektor neve és névjegyzéki száma nem szerepelhet a release.ts-ben');
+ }
 }
 // A forrás-ujjlenyomatból csak a SIZING_REVIEW-blokk (a táblázatjóváhagyás adatai) marad ki: a jóváhagyás rögzítése nem
 // érvényteleníti a táblázatokat használó kalkulátorok lektori rekordját; minden más változás (a sablonszövegek is) igen.
@@ -111,8 +128,8 @@ for(const [slug,rec] of Object.entries(RELEASES)){
  const src=readFileSync(REVIEW_FILE,'utf8'),at=src.indexOf(REVIEW_DECL);assert.ok(at>0,'a SIZING_REVIEW deklarációja megtalálható');
  const end=src.indexOf('};',at)+2,approvedDecl=REVIEW_DECL+`{
  status:'jóváhagyott',
- reviewer:'Minta Tervező',registry:'00-0000',date:'2026-11-01',fingerprint:'0123abcd',showName:true,
- note:'Lektori csomag LK-3 {kapcsos} zárójellel; "idézet" és \\'aposztróf\\''
+ qualification:'épületvillamossági tervező (MMK)',date:'2026-11-01',fingerprint:'0123abcd',showName:true,reviewer:'Minta Tervező',registry:'00-0000',
+ approvalRef:'Lektori csomag LK-3 {kapcsos} zárójellel; "idézet" és \\'aposztróf\\'',note:'megjegyzés'
 };`;
  const approvedSrc=src.slice(0,at)+approvedDecl+src.slice(end);
  assert.notEqual(approvedSrc,src);assert.equal(sourceText(REVIEW_FILE,approvedSrc),sourceText(REVIEW_FILE,src),'a jóváhagyás rögzítése nem változtatja a forrás-ujjlenyomatot');
@@ -136,20 +153,26 @@ const expectedPublished=CALCULATORS.filter(d=>expectedState(d)==='kozzeteve');
 assert.deepEqual(publishedCalcs().map(c=>c.slug),expectedPublished.map(c=>c.slug));
 // A kapu viselkedése szintetikus rekordokkal.
 const fesz=bySlug('feszultseges')!,ker=bySlug('keresztmetszet')!,ohm=bySlug('ohm-torveny')!,motor=bySlug('motor-aram')!;
-const expert=(d:CalcDef,fp=calcFingerprint(d)):ReleaseRecord=>({kind:'lektoralt',reviewer:'Teszt Elek',qualification:'villamos tervező',registry:'00-0000',date:'2026-11-01',fingerprint:fp,source:sourceFingerprint(d.slug)});
+const expert=(d:CalcDef,fp=calcFingerprint(d)):ReleaseRecord=>({kind:'lektoralt',qualification:'villamos tervező',date:'2026-11-01',fingerprint:fp,source:sourceFingerprint(d.slug),approvalRef:'Lektori csomag LK-9'});
+const named=(d:CalcDef):ExpertReview=>({...(expert(d) as ExpertReview),showName:true,reviewer:'Teszt Elek',registry:'00-0000'});
 const inner=(d:CalcDef):ReleaseRecord=>({kind:'belso',by:'teszt',date:'2026-11-01',fingerprint:calcFingerprint(d),source:sourceFingerprint(d.slug),note:''});
 assert.equal(releaseInfo(fesz,{feszultseges:inner(fesz)}).state,'kiadatlan','T1 belső ellenőrzéssel nem adható ki');
-assert.equal(releaseInfo(fesz,{feszultseges:expert(fesz)}).state,'kozzeteve','T1 lektori jóváhagyással kiadható');
-assert.equal(releaseInfo(fesz,{feszultseges:{...(expert(fesz) as ExpertReview),showName:true}}).badge,'Szakmailag lektorálta: Teszt Elek, villamos tervező · 2026-11-01','név csak hozzájárulással');
-assert.equal(releaseInfo(fesz,{feszultseges:expert(fesz)}).badge,'Szakmailag lektorálta: villamos tervező · 2026-11-01','hozzájárulás nélkül a minősítés');
-assert.equal(expertMeta({...(expert(fesz) as ExpertReview),showName:true}),'Szakmai lektor: Teszt Elek, villamos tervező');assert.equal(expertMeta(expert(fesz) as ExpertReview),'Szakmai lektor: villamos tervező');
+assert.equal(releaseInfo(fesz,{feszultseges:expert(fesz)},true).state,'kozzeteve','T1 lektori jóváhagyással kiadható');
+assert.equal(releaseInfo(fesz,{feszultseges:expert(fesz)},false).state,'tablazatra-var','a Feszültségesés is táblázat-kapus (ρ1, λ, U0, G.52.1)');
+assert.equal(releaseInfo(fesz,{feszultseges:named(fesz)},true).badge,'Szakmailag lektorálta: Teszt Elek, villamos tervező · 2026-11-01','név csak hozzájárulással');
+assert.equal(releaseInfo(fesz,{feszultseges:expert(fesz)},true).badge,'Szakmailag lektorálta: villamos tervező · 2026-11-01','hozzájárulás nélkül a jogosultság');
+assert.equal(releaseInfo(fesz,{feszultseges:{...named(fesz),reviewer:''}},true).badge,'Szakmailag lektorálta: villamos tervező · 2026-11-01','név nélkül a hozzájárulás sem jelenít meg nevet');
+assert.equal(expertMeta(named(fesz)),'Szakmai lektor: Teszt Elek, villamos tervező');assert.equal(expertMeta(expert(fesz) as ExpertReview),'Szakmai lektor: villamos tervező');
+// A kalkulátorlista (hub) és a kereső jelvénye hozzájárulással is név nélküli: a név csak a kalkulátor saját oldalán jelenik meg.
+assert.equal(calcMeta(fesz,false,{feszultseges:named(fesz)},true).note,'Szakmailag lektorálta: villamos tervező · 2026-11-01');
+assert.equal(calcMeta(fesz,false,{feszultseges:named(fesz)},true).status,'kozzeteve');
 assert.equal(releaseInfo(fesz,{feszultseges:expert(fesz,'deadbeef')}).state,'ujraellenorzendo','módosult tartalom → újra kell lektorálni');
 assert.equal(releaseInfo(ker,{keresztmetszet:expert(ker)},false).state,'tablazatra-var','táblázatalapú T1: tablesApproved() is kell');
 assert.equal(releaseInfo(ker,{keresztmetszet:expert(ker)},true).state,'kozzeteve');
 assert.equal(releaseInfo(ohm,{}).state,'kiadatlan');
 assert.equal(releaseInfo({...ohm,version:2}).state,'ujraellenorzendo','verzióemelés → új ellenőrzés');
 assert.equal(releaseInfo({...ohm,tier:'T2'}).state,'tiltott');
-assert.equal(tablesApproved(),false,'a méretezési táblázatok jóváhagyása függőben (SIZING_REVIEW)');
+assert.equal(tablesApproved(),SIZING_REVIEW.status==='jóváhagyott'&&SIZING_REVIEW.fingerprint===tablesFingerprint(),'a táblázatkapu állapota a SIZING_REVIEW szerint');
 // A tervezői link (links.ts) ugyanezt a szabályt követi a definíciók nélkül: T1-hez lektori rekord kell, a táblázatalapúhoz tablesApproved().
 assert.equal(calcLinkable('motor-aram',{'motor-aram':inner(motor)}),false,'T1 belső rekorddal nem kap tervezői linket');
 assert.equal(calcLinkable('motor-aram',{'motor-aram':expert(motor)}),true);
@@ -158,7 +181,7 @@ assert.equal(calcLinkable('ohm-torveny',{'ohm-torveny':inner(ohm)}),true);assert
 // Hub-metaadat: a kiadatlan kalkulátor link nélküli „Hamarosan” kártya; előnézetben tervezet.
 for(const d of CALCULATORS.filter(d=>expectedState(d)!=='kozzeteve')){const m=calcMeta(d);assert.equal(m.href,null,d.slug);assert.equal(m.status,'hamarosan');assert.match(m.note,/^Hamarosan – /);assert.equal(!!m.detail,TABLE_GATED.has(d.slug)&&!tablesApproved())}
 for(const d of expectedPublished){const m=calcMeta(d);assert.equal(m.href,'/kalkulatorok/'+d.slug);assert.equal(m.status,'kozzeteve')}
-if(expectedState(fesz)!=='kozzeteve'){assert.equal(calcMeta(fesz).note,'Hamarosan – szakmai lektorálás alatt');assert.equal(calcMeta(fesz,true).status,'tervezet');assert.equal(calcMeta(fesz,true).href,'/kalkulatorok/feszultseges')}
+if(expectedState(fesz)==='kiadatlan'){assert.equal(calcMeta(fesz).note,'Hamarosan – szakmai lektorálás alatt');assert.equal(calcMeta(fesz,true).status,'tervezet');assert.equal(calcMeta(fesz,true).href,'/kalkulatorok/feszultseges')}
 assert.equal(visibleCalcs(false).length,expectedPublished.length);assert.equal(visibleCalcs(true).length,27);assert.equal(calcMetas().length,27);
 // Statikus oldalak és sitemap: csak a közzétettek (az oldal és a sitemap ugyanazt a publishedCalcs/visibleCalcs-t használja).
 const page=readFileSync('app/(kezikonyv)/kalkulatorok/[slug]/page.tsx','utf8'),sitemap=readFileSync('app/sitemap.ts','utf8');

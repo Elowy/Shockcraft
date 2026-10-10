@@ -6,8 +6,8 @@ import {circuitReport} from '../lib/circuit-report';
 import {checkPlan} from '../lib/plan-checks';
 import {createPlanPdf} from '../lib/pdf-export';
 import {sharedPlan} from '../lib/share';
-import {SIZING_TABLES,tablesApproved,temperatureFactor} from '../lib/sizing-tables';
-import {atMost,boardSizing,checkStatusLabels,circuitSizing,designCurrent,fmtPair,hasSizingTarget,loopResistance,maxLengthForDrop,maxLoopImpedance,minSectionFor,parseCable,parseDecimalInput,projectSizing,removeOverride,resultLabel,setBoardSizing,setCircuitLoad,setCircuitSizing,setPlanSizing,sizingContext,sizingPdfRows,sizingReasonRows,sizingTarget,statusLabels,upsertOverride,voltageDropPercent,SIZING_DISCLAIMER,SIZING_PDF_LEGEND,type CircuitSizingResult} from '../lib/sizing';
+import {SIZING_TABLES,reviewText,tablesApproved,temperatureFactor} from '../lib/sizing-tables';
+import {atMost,boardSizing,checkStatusLabels,circuitSizing,designCurrent,fmtLimit,fmtLimitPair,fmtPair,loopRemedies,hasSizingTarget,loopResistance,maxLengthForDrop,maxLoopImpedance,minSectionFor,parseCable,parseDecimalInput,projectSizing,removeOverride,resultLabel,setBoardSizing,setCircuitLoad,setCircuitSizing,setPlanSizing,sizingContext,sizingPdfRows,sizingReasonRows,sizingTarget,statusLabels,upsertOverride,voltageDropPercent,SIZING_DISCLAIMER,SIZING_PDF_LEGEND,type CircuitSizingResult} from '../lib/sizing';
 
 const fresh=()=>validatePlan(structuredClone(seed));
 const near=(a:number|null|undefined,b:number,e=1e-6)=>assert.ok(a!==null&&a!==undefined&&Math.abs(a-b)<e,`${a} != ${b}`);
@@ -241,10 +241,10 @@ const rows=sizingPdfRows(boardSizing(fresh(),'house'));
 assert.deepEqual(rows[0],['Nappali dugaljak (L1)','B16 A · 3 × 2,5 mm², PVC* · B2*','≈2,61 / 16 / 23 A','23,4 m','2,93% / 5%','–','Számítás szerint megfelel – feltételezésekkel; nem vizsgált: hurokimpedancia']);
 assert.ok(rows[0].join(' ').includes('23,4 m')&&rows[0].join(' ').includes('2,93% / 5%')&&rows[0][2].startsWith('≈'));
 const reasons=sizingReasonRows(boardSizing(fresh(),'house'));
-assert.deepEqual(reasons[0],['Felelősségi nyilatkozat','–',SIZING_DISCLAIMER]);assert.equal(reasons[1][0],'Táblázatok');assert.ok(reasons[1][2].startsWith(tablesApproved()?'Jóváhagyta: ':'Ellenőrizendő: '));
+assert.deepEqual(reasons[0],['Felelősségi nyilatkozat','–',SIZING_DISCLAIMER]);assert.equal(reasons[1][0],'Táblázatok');assert.equal(reasons[1][2],reviewText());assert.ok(reasons[1][2].startsWith(tablesApproved()?'A táblázatértékeket szakmailag lektorálta: ':'Ellenőrizendő: '));
 assert.equal(reasons.at(-1)![0],'Tervezői ellenőrzés');assert.equal(reasons.at(-2)![0],'Nem vizsgált');
 assert.ok(reasons.some(r=>r[0]==='Hálószoba dugaljak'&&r[1]===checkStatusLabels.na+': Mértékadó hossz'));
-p=fresh();p.sizing={boards:[{building:'house',board:'',zs:0.35}]};assert.equal(sizingPdfRows(boardSizing(p,'house'))[0][5],'0,77 / 2,88 Ω');assert.equal(sizingPdfRows(boardSizing(p,'house'))[1][5],'n. sz.');
+p=fresh();p.sizing={boards:[{building:'house',board:'',zs:0.35}]};assert.equal(sizingPdfRows(boardSizing(p,'house'))[0][5],'0,77 / 2,87 Ω','Zs,max (2,875 Ω) lefelé kerekítve');assert.equal(sizingPdfRows(boardSizing(p,'house'))[1][5],'n. sz.');
 circuit(p,'c1').sizing={length:12.5};assert.equal(sizingPdfRows(boardSizing(p,'house'))[0][3],'12,5 m (megadott)');
 
 // 20. Szóhasználat és megosztás.
@@ -292,6 +292,10 @@ for(const t of ['gumikábel 3x2,5','gumiszigetelésű 3x2,5','Gumi kábel 3x2,5'
 // Csak szókezdő „gumi” számít; a többi besorolás nem változott.
 assert.equal(ok('ragumi 3x2,5').insulation,null,'szó belsejében nem gumi');assert.equal(ok('NYM-J 3x2,5').insulation,'PVC');assert.equal(ok('N2XH 3x2,5').insulation,'XLPE');
 bad('Al gumikábel 4x16','aluminium');
+// Szóközzel vagy kötőjellel írt típusjel és RN-F is gumi (korábban PVC-alapértéket kapott, a biztonság kárára); a tartozékszavak
+// (gumicső, gumitömítés, gumialátét, gumigyűrű, gumidugó, gumiszalag) nem kábeljelölés; más „gumi…” szó (pl. cégnév) a biztonság javára igen.
+for(const t of ['H07 RN-F 3G2,5','H07-RN-F 3G2,5','h07 rn-f 3g1,5','H05 RR-F 3G1,5','RN-F 3G2,5','RNF 3G2,5','gumitömlő 3x2,5','NYM-J 3x2,5 (Gumi Kft.)'])bad(t,'rubber');
+for(const [t,ins] of [['NYM-J 3x2,5 gumicsőben','PVC'],['NYM-J 3x2,5 gumitömítéssel','PVC'],['Gumicső 3x2,5',null],['gumialátét 3x2,5',null],['GUMIGYŰRŰ 3x2,5',null],['gumidugó 3x2,5',null],['Gumiszalag 3x2,5',null],['turn-F 3x2,5',null]] as const)assert.equal(ok(t).insulation,ins,t);
 p=fresh();p.circuits.push({id:'g',name:'Gumi',building:'house',phase:'L1',rating:16,curve:'B',cable:'H07RN-F 3G1,5',rcd:'',load:2000,sizing:{length:10}});
 assert.equal(size(p,'g').status,'na');
 for(const cable of ['gumikábel 3x2,5','gumiszigetelésű 3x2,5']){
@@ -322,10 +326,19 @@ bad('3x4 + 2x4','ambiguous');assert.ok(cableMsg('3x4 + 2x4').includes('ér- vagy
 p=fresh();p.circuits.push({id:'d',name:'Esés',building:'house',phase:'L1',rating:16,curve:'B',cable:'3x2,5',rcd:'',load:3680,sizing:{length:39.96}});
 r=size(p,'d');assert.equal(check(r,'voltage-drop').status,'fail');assert.ok(check(r,'voltage-drop').calculation.includes('összesen 5,004% > 5%'));assert.equal(sizingPdfRows([r])[0][4],'5,004% / 5%');
 circuit(p,'d').load=3681;circuit(p,'d').sizing={length:5};assert.ok(check(size(p,'d'),'design-current').calculation.endsWith('= 16,004 A > In = 16 A'));
-// Zs = 0,54 + 0,0225 · 10 · 0,8 = 0,72 Ω > Zs,max = 230 / (20 · 16) = 0,71875 Ω → a cella „0,72 / 0,719 Ω”.
+// Zs = 0,54 + 0,0225 · 10 · 0,8 = 0,72 Ω > Zs,max = 230 / (20 · 16) = 0,71875 Ω → a cella „0,72 / 0,71 Ω” (a határ lefelé kerekítve),
+// a számítási sor 3 tizedessel: „0,72 Ω > Zs,max = … = 0,718 Ω”.
 p=fresh();p.sizing={boards:[{building:'house',board:'',zs:0.54}]};circuit(p,'c1').curve='D';circuit(p,'c1').sizing={length:10};
-r=size(p,'c1');near(r.zs,0.72);assert.notEqual(check(r,'loop').status,'ok');assert.equal(sizingPdfRows([r])[0][5],'0,72 / 0,719 Ω');
+r=size(p,'c1');near(r.zs,0.72);assert.notEqual(check(r,'loop').status,'ok');assert.equal(sizingPdfRows([r])[0][5],'0,72 / 0,71 Ω');assert.ok(check(r,'loop').calculation.endsWith('= 0,718 Ω'),check(r,'loop').calculation);
 assert.deepEqual(fmtPair(2.875,0.7712),['2,88','0,77']);assert.deepEqual(fmtPair(63,90*0.7),['63','63']);
+// A felső határ (Zs,max) kiírása lefelé kerekít; ellentmondó kiírásnál több tizedes.
+assert.equal(fmtLimit(1.4375,3),'1,437');assert.equal(fmtLimit(0.71875,3),'0,718');assert.equal(fmtLimit(2.875,3),'2,875');assert.equal(fmtLimit(2.875,2),'2,87');
+assert.deepEqual(fmtLimitPair(0.8,2.875,3),['0,8','2,875']);assert.deepEqual(fmtLimitPair(1.4376,1.4375,3),['1,438','1,437']);
+assert.deepEqual(fmtLimitPair(1.4369,1.4369,3),['1,4369','1,4369'],'„1,437 ≤ 1,436” helyett több tizedes');assert.deepEqual(fmtLimitPair(1.43,1.4375,2),['1,43','1,43']);
+// Lehetséges megoldások a hurok-túllépésnél: B jelleggörbe csak C/D mellett; ha már az elosztónál túllépés van, a vezeték nem segít.
+assert.equal(loopRemedies('C',false),'nagyobb keresztmetszet, rövidebb vezeték, B jelleggörbe (a bekapcsolási áram ellenőrzésével), kisebb névleges áram vagy ÁVK');
+assert.equal(loopRemedies('B',false),'nagyobb keresztmetszet, rövidebb vezeték, kisebb névleges áram vagy ÁVK');assert.equal(loopRemedies('B',true),'kisebb névleges áram vagy ÁVK');
+p=fresh();p.sizing={boards:[{building:'house',board:'',zs:3}]};circuit(p,'c1').rcd='';r=size(p,'c1');assert.equal(check(r,'loop').status,'fail');assert.ok(check(r,'loop').detail.endsWith('Lehetséges megoldás: kisebb névleges áram vagy ÁVK.'),check(r,'loop').detail);
 // 21.10 Beviteli mező: tizedesvessző, ezres tagolás, kerekítés nélkül.
 assert.equal(parseDecimalInput('40,5'),40.5);assert.equal(parseDecimalInput('0,355'),0.355);assert.equal(parseDecimalInput('1 000'),1000);assert.equal(parseDecimalInput('2 500,5'),2500.5);assert.equal(parseDecimalInput(',5'),0.5);assert.equal(parseDecimalInput('35'),35);
 assert.equal(parseDecimalInput('  '),null);for(const t of ['40,5,1','-1','1.000,5','abc','4 05'])assert.ok(Number.isNaN(parseDecimalInput(t)),t);

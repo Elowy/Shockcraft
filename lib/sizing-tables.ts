@@ -65,13 +65,17 @@ export const methodLabels:Record<InstallMethod,string>={
 export const insulationLabels:Record<Insulation,string>={PVC:'PVC (70 °C)',XLPE:'XLPE (90 °C) – jóváhagyásig PVC-értékkel'};
 
 /**
- * Tervezői jóváhagyás. A program soha nem állítja magáról, hogy jóváhagyott: ezt csak a jogosult tervező írhatja át.
- * `showName`: a jóváhagyó neve és névjegyzéki száma csak akkor jelenik meg (reviewText), ha a jóváhagyó lapon kifejezetten
- * hozzájárult; különben (false) a szöveg név nélkül jelzi a lektorálást. A jóváhagyás érvényessége (tablesApproved) ettől
- * független: a név és a névjegyzéki szám a SIZING_REVIEW-ban és az aláírt lapon akkor is rögzített, csak nem jelenik meg.
+ * Tervezői jóváhagyás. A program soha nem állítja magáról, hogy jóváhagyott: ezt csak a jogosult szakember aláírt jóváhagyó lapja
+ * alapján szabad kitölteni (docs/lektoralas.md 4.1). Az érvényesség (tablesApproved) a jogosultság megnevezésén, a dátumon, a
+ * jóváhagyás hivatkozásán (`approvalRef`: csomagkiadás, ujjlenyomatok, a jóváhagyó lap iktatási helye) és a táblázat-ujjlenyomaton
+ * múlik – a néven nem.
+ * Adatvédelem: ez a modul a nyilvános kalkulátoroldalak és a tervező kliensoldali kódjába is bekerül, ezért a jóváhagyó neve és
+ * névjegyzéki száma (`reviewer`, `registry`) CSAK akkor szerepelhet itt, ha a jóváhagyó lapon kifejezetten hozzájárult a
+ * megjelenítésükhöz (`showName: true`); különben mindkettő üres, és a név csak az aláírt lapon, a repón kívül marad
+ * (tests/sizing-tables.ts ellenőrzi). Az `approvalRef` és a `note` sem tartalmazhat személyes adatot.
  */
-export type SizingReview={status:'ellenőrizendő'|'jóváhagyott';reviewer:string;registry:string;date:string;fingerprint:string;showName:boolean;note:string};
-export const SIZING_REVIEW:SizingReview={status:'ellenőrizendő',reviewer:'',registry:'',date:'',fingerprint:'',showName:false,note:'Az értékek az IEC 60364-5-52:2009 B mellékletével azonos számozás feltételezésével, nem a hiteles MSZ HD szövegből kerültek rögzítésre. A táblázatszámokat, kiadásokat, szerelésimód-leírásokat és minden számértéket a hatályos szabvánnyal össze kell vetni.'};
+export type SizingReview={status:'ellenőrizendő'|'jóváhagyott';qualification:string;date:string;fingerprint:string;approvalRef:string;showName:boolean;reviewer:string;registry:string;note:string};
+export const SIZING_REVIEW:SizingReview={status:'ellenőrizendő',qualification:'',date:'',fingerprint:'',approvalRef:'',showName:false,reviewer:'',registry:'',note:'Az értékek az IEC 60364-5-52:2009 B mellékletével azonos számozás feltételezésével, nem a hiteles MSZ HD szövegből kerültek rögzítésre. A táblázatszámokat, kiadásokat, szerelésimód-leírásokat és minden számértéket a hatályos szabvánnyal össze kell vetni.'};
 
 const hu=(n:number)=>n.toLocaleString('hu-HU',{maximumFractionDigits:5});
 /** A forrás táblázatszáma („B.52.2 táblázat – …” → „B.52.2”). */
@@ -92,28 +96,30 @@ export function fingerprint(value:unknown):string{
  */
 export const reviewedContent=()=>({tables:SIZING_TABLES,sources:SOURCES,clauses:CLAUSES,methodLabels,insulationLabels});
 export const tablesFingerprint=()=>fingerprint(reviewedContent());
-export function tablesApproved(review:SizingReview=SIZING_REVIEW){return review.status==='jóváhagyott'&&!!review.reviewer.trim()&&!!review.date.trim()&&review.fingerprint===tablesFingerprint()}
+/** Érvényes jóváhagyás: kitöltött jogosultság, dátum és hivatkozás, az aktuális táblázat-ujjlenyomattal. A név nem feltétel (adatvédelem, lásd SizingReview). */
+export function tablesApproved(review:SizingReview=SIZING_REVIEW){return review.status==='jóváhagyott'&&!!review.qualification.trim()&&!!review.date.trim()&&!!review.approvalRef.trim()&&review.fingerprint===tablesFingerprint()}
+/** A név és a névjegyzéki szám csak hozzájárulással (showName) és kitöltve jelenik meg. */
+export const reviewNameShown=(review:SizingReview)=>review.showName===true&&!!review.reviewer.trim()&&!!review.registry.trim();
 const tableStatus=():TableStatus=>tablesApproved()?'jóváhagyott':'ellenőrizendő';
-/** A táblázatállapot megjelenő szövegének sablonjai ({reviewer}, {registry}, {date} helyőrzővel); a végükre a tail kerül. */
+/** A táblázatállapot megjelenő szövegének sablonjai ({reviewer}, {registry}, {qualification}, {date} helyőrzővel); a végükre a tail kerül.
+ * A név nélküli változat a jóváhagyó lapon megadott jogosultságot írja ki (tervező és érintésvédelmi szabványossági felülvizsgáló is lehet). */
 export const REVIEW_TEXTS={
  pending:'Ellenőrizendő: a táblázatértékeket jogosult villamos tervező még nem hagyta jóvá.',
- named:'A táblázatértékeket szakmailag lektorálta: {reviewer} ({registry}), {date}.',
- anonymous:'A táblázatértékeket jogosult villamos tervező szakmailag lektorálta, {date}.',
+ named:'A táblázatértékeket szakmailag lektorálta: {reviewer}, {qualification} ({registry}), {date}.',
+ anonymous:'A táblázatértékeket szakmailag lektorálta: {qualification}, {date}.',
  tail:'Táblázatváltozat: {version}, ujjlenyomat: {fingerprint}.',
 } as const;
 const fill=(template:string,values:Record<string,string>)=>template.replace(/\{(\w+)\}/g,(m,k:string)=>values[k]??m);
 /**
  * A táblázatok állapota a felületen, a kalkulátoroldalakon és a terv-PDF-ben. Jóváhagyott állapotban a jóváhagyó neve és
- * névjegyzéki száma csak `showName: true` mellett jelenik meg; különben a név nélküli változat. A szöveg a táblázatértékek
- * lektorálását jelzi, nem az adott terv jóváhagyását.
+ * névjegyzéki száma csak `showName: true` mellett (és kitöltve) jelenik meg; különben a név nélküli változat a jogosultsággal.
+ * A szöveg a táblázatértékek lektorálását jelzi, nem az adott terv jóváhagyását.
  */
 export function reviewText(review:SizingReview=SIZING_REVIEW){
  const tail=fill(REVIEW_TEXTS.tail,{version:SIZING_TABLES.version,fingerprint:tablesFingerprint()});
  if(!tablesApproved(review))return REVIEW_TEXTS.pending+' '+tail;
- const head=review.showName===true
-  ?fill(REVIEW_TEXTS.named,{reviewer:review.reviewer.trim(),registry:review.registry.trim(),date:review.date.trim()})
-  :fill(REVIEW_TEXTS.anonymous,{date:review.date.trim()});
- return head+' '+tail;
+ const values={reviewer:review.reviewer.trim(),registry:review.registry.trim(),qualification:review.qualification.trim(),date:review.date.trim()};
+ return fill(reviewNameShown(review)?REVIEW_TEXTS.named:REVIEW_TEXTS.anonymous,values)+' '+tail;
 }
 
 /** A táblázatok belső összefüggéseinek ellenőrzése. Üres lista: minden reláció teljesül. */

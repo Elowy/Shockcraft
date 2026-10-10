@@ -7,11 +7,11 @@ import {boards,boardName,inBoard} from './board-size';
 import {planSchema,type Plan,type Floor} from './plan';
 import type {SearchResult} from './plan-tools';
 import {SIZING_TABLES as T,SECTIONS,capacity,temperatureFactor,groupingFactor,dropLimitRef,constantRef,conventionalRef,deviceSource,instantaneousRef,reviewText,type InstallMethod,type Insulation,type TableRef} from './sizing-tables';
-import {SIZING_DISCLAIMER,SIZING_NOT_COVERED,fmtNum,atMost,fmtPair,cableLabel,parseCable,designCurrent,correctedIz,voltageDropPercent,loopResistance,maxLoopImpedance,maxLengthForDrop,minSectionFor,type CableSpec,type CableParse,type CableError} from './sizing-formulas';
+import {SIZING_DISCLAIMER,SIZING_NOT_COVERED,fmtNum,atMost,fmtPair,fmtLimitPair,loopRemedies,cableLabel,parseCable,designCurrent,correctedIz,voltageDropPercent,loopResistance,maxLoopImpedance,maxLengthForDrop,minSectionFor,type CableSpec,type CableParse,type CableError} from './sizing-formulas';
 import {circuitSizingSchema,overrideKey,planSizingSchema,type CircuitSizing,type PlanSizing,type IzOverrideEntry} from './sizing-schema';
 
 // A képletek, a kábeljelölés-értelmezés és a felelősségi szövegek a lib/sizing-formulas.ts-ben vannak (zod nélkül, a kalkulátorok is használják); itt változatlan néven re-exportáljuk.
-export {SIZING_DISCLAIMER,SIZING_DISCLAIMER_SHORT,SIZING_NOT_COVERED,fmtNum,atMost,fmtPair,cableMessages,cableLabel,parseCable,designCurrent,correctedIz,voltageDropPercent,loopResistance,maxLoopImpedance,maxLengthForDrop,minSectionFor,type CableSpec,type CableParse,type CableError} from './sizing-formulas';
+export {SIZING_DISCLAIMER,SIZING_DISCLAIMER_SHORT,SIZING_NOT_COVERED,fmtNum,atMost,fmtPair,fmtLimit,fmtLimitPair,loopRemedies,cableMessages,cableLabel,parseCable,designCurrent,correctedIz,voltageDropPercent,loopResistance,maxLoopImpedance,maxLengthForDrop,minSectionFor,type CableSpec,type CableParse,type CableError} from './sizing-formulas';
 const LARGEST=SECTIONS[SECTIONS.length-1];
 
 // ---------------------------------------------------------------- 3.1 Szövegek
@@ -242,9 +242,9 @@ export function circuitSizing(plan:Plan,circuitId:string,ctx:SizingContext=sizin
   if(earthing==='TT')add('loop','skipped','Hurokimpedancia',clause,formula,'','TT-rendszerben a hurokimpedancia-ellenőrzés nem része a számításnak.');
   else if(zsBoard===null)add('loop','skipped','Hurokimpedancia',clause,formula,'','Az elosztó Zs-értéke nincs megadva – a hurokellenőrzés nem készült.');
   else if(zs===null)add('loop','na','Hurokimpedancia',clause,formula,'',length===null?'A hurokimpedancia a mértékadó hossz nélkül nem számítható.':'A hurokimpedancia nem számítható: hiányzik egy szakasz keresztmetszete.');
-  else{const ok=atMost(zs,zsMax),m=T.instantaneous[c.curve],[zsT,maxT]=fmtPair(zs,zsMax,3);
+  else{const ok=atMost(zs,zsMax),m=T.instantaneous[c.curve],[zsT,maxT]=fmtLimitPair(zs,zsMax,3);
    const calc='Zs = '+fmtNum(zsBoard,3)+' Ω + '+terms!.map(t=>fmtNum(T.rho1,4)+' Ω·mm²/m · '+fmtNum(t.L)+' m · (1/'+fmtNum(t.A)+' + 1/'+fmtNum(t.A)+') 1/mm²').join(' + ')+' = '+zsT+' Ω '+(ok?'≤':'>')+' Zs,max = '+fmtNum(T.cmin)+' · '+fmtNum(T.u0)+' V / ('+m+' · '+c.rating+' A) = '+maxT+' Ω';
-   add('loop',ok?'ok':rcd?'warn':'fail','Hurokimpedancia',clause,formula,calc,ok?'':rcd?'A hurokimpedancia nagyobb '+deviceName+' pillanatkioldásához tartozó értéknél, de az áramkör ÁVK-val védett; a 411.4.4 / 411.3 szerinti igazolás a tervező feladata.':'A hurokimpedancia nagyobb '+deviceName+' pillanatkioldásához tartozó értéknél. Lehetséges megoldás: nagyobb keresztmetszet, B jelleggörbe (indítási áram ellenőrzésével) vagy ÁVK.')}
+   add('loop',ok?'ok':rcd?'warn':'fail','Hurokimpedancia',clause,formula,calc,ok?'':rcd?'A hurokimpedancia nagyobb '+deviceName+' pillanatkioldásához tartozó értéknél, de az áramkör ÁVK-val védett; a 411.4.4 / 411.3 szerinti igazolás a tervező feladata.':'A hurokimpedancia nagyobb '+deviceName+' pillanatkioldásához tartozó értéknél. Lehetséges megoldás: '+loopRemedies(c.curve,zsBoard>=zsMax)+'.')}
  }
  // 13. Állapot
  const status=worst(checks.filter(x=>x.status!=='skipped').map(x=>x.status));
@@ -328,7 +328,7 @@ const star=(v:Valued<unknown>)=>v.source==='alapérték'?'*':'';
 export function sizingCells(r:CircuitSizingResult){
  const dc=r.checks.find(c=>c.code==='design-current'),loop=r.checks.find(c=>c.code==='loop');
  const ib=dc?.status==='skipped'?'–':(r.ibSource==='becsült'?'≈':'')+fmtPair(r.ib,r.rating)[0];
- const drop=r.dropTotal===null?null:fmtPair(r.dropTotal,r.dropLimit),zs=r.zs===null?null:fmtPair(r.zs,r.zsMax);
+ const drop=r.dropTotal===null?null:fmtPair(r.dropTotal,r.dropLimit),zs=r.zs===null?null:fmtLimitPair(r.zs,r.zsMax);
  return {
   current:ib+' / '+r.rating+' / '+(r.iz===null?'n. sz.':fmtPair(r.iz,r.rating)[0])+' A',
   drop:drop?drop[0]+'% / '+drop[1]+'%':'–',

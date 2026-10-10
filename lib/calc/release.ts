@@ -9,7 +9,8 @@
 //    nélkül, hogy a táblázatjóváhagyás rögzítése ne érvénytelenítse a rekordot) – ezt a CI (tests/calc.ts) ellenőrzi,
 //    mert a lefordított kód buildenként eltér,
 //  - T0 esetén a rekord „belso” (belső kettős ellenőrzés) vagy „lektoralt”,
-//  - T1 esetén (T1_SLUGS) a rekord „lektoralt” (szakmai lektor neve, minősítése, névjegyzéki száma, dátuma),
+//  - T1 esetén (T1_SLUGS) a rekord „lektoralt” (a lektor jogosultsága, a dátum és a jóváhagyás hivatkozása; név és névjegyzéki
+//    szám csak a megjelenítéshez adott hozzájárulással – lásd ExpertReview),
 //  - a TABLE_GATED kalkulátoroknál ezen felül tablesApproved() igaz (lib/sizing-tables.ts SIZING_REVIEW),
 //  - T2 soha (ilyen kalkulátor nem is épül: tests/calc.ts kényszeríti).
 // Ha a definíció vagy a számítás kódja bármiben megváltozik, valamelyik ujjlenyomat eltér, és a tests/calc.ts megbukik
@@ -20,9 +21,14 @@
 
 /** `fingerprint`: tartalmi ujjlenyomat (calcFingerprint); `source`: a számítás forrásának ujjlenyomata (scripts/calc-source.ts). */
 export type InternalCheck={kind:'belso';by:string;date:string;fingerprint:string;source:string;note:string};
-/** `showName`: a lektor neve csak kifejezett hozzájárulással (a jóváhagyó lapon jelölve) jelenik meg a kalkulátoroldalon; különben
- * (alapértelmezés) a minősítése. A kiadás érvénye ettől nem függ (lib/calc/registry.ts expertShown). */
-export type ExpertReview={kind:'lektoralt';reviewer:string;qualification:string;registry:string;date:string;fingerprint:string;source:string;approvalRef?:string;showName?:boolean};
+/**
+ * Szakmai lektori rekord. `qualification`: a jóváhagyó lapon megadott jogosultság; `approvalRef`: a jóváhagyás hivatkozása (csomagkiadás,
+ * csomag- és kalkulátor-ujjlenyomat, a jóváhagyó lap iktatási helye – a tests/lektori-csomag.ts ellenőrzi).
+ * Adatvédelem: ez a modul a kliensoldali kódba is bekerül (lib/kb/links.ts), ezért a lektor neve és névjegyzéki száma (`reviewer`,
+ * `registry`) CSAK a jóváhagyó lapon jelölt hozzájárulással (`showName: true`) szerepelhet itt; különben el kell hagyni (tests/calc.ts).
+ * A név a hozzájárulással is csak a kalkulátor saját oldalán jelenik meg (lib/calc/registry.ts expertShown); a kiadás érvénye ettől nem függ.
+ */
+export type ExpertReview={kind:'lektoralt';qualification:string;date:string;fingerprint:string;source:string;approvalRef:string;showName?:boolean;reviewer?:string;registry?:string};
 export type ReleaseRecord=InternalCheck|ExpertReview;
 
 const internal=(fingerprint:string,source:string):InternalCheck=>({kind:'belso',by:'Villanyrajz fejlesztés',date:'2026-10-10',fingerprint,source,note:'Két független számítás egyezése: a példák elvárt értékeit a TypeScript-motortól független Python-újraszámolás adta (scripts/calc-golden-indep.py), a motor eredményét relatív tűrésű golden teszt veti össze (tests/calc-golden.ts). Második személy általi kézi újraszámolás még nem történt (docs/kalkulatorok.md).'});
@@ -33,7 +39,7 @@ export const RELEASES:Readonly<Record<string,ReleaseRecord>>={
  'teljesitmeny':internal('ebd0fc6c','1f711e4b'),
  'aram-teljesitmenybol':internal('3a41fde4','76524b79'),
  'latszolagos-meddo-teljesitmeny':internal('6cbe82be','d2d2e986'),
- 'vezetek-ellenallas':internal('d9071472','e4132d78'),
+ 'vezetek-ellenallas':internal('d9071472','bf4f1309'),
  'eredo-ellenallas':internal('ad526130','e61119a4'),
  'fogyasztas-koltseg':internal('287866bc','c220950e'),
  'fazisterheles':internal('6bbaec42','554c9453'),
@@ -55,5 +61,6 @@ export const RELEASES:Readonly<Record<string,ReleaseRecord>>={
 /** A T1 kalkulátorok: csak „lektoralt” rekorddal adhatók ki (a tests/calc.ts egyezteti a definíciók szintjével).
  * A lib/kb/links.ts (tervezői linkek) a definíciók nélkül ebből tudja, hogy belső rekord nem elég. */
 export const T1_SLUGS:ReadonlySet<string>=new Set(['feszultseges','motor-aram','led-szalag-tapegyseg','fazisjavitas','keresztmetszet','kismegszakito','hurokimpedancia','terhelhetoseg-tablazat']);
-/** A lib/sizing-tables.ts táblázataira épülő kalkulátorok: csak tablesApproved() mellett adhatók ki. */
-export const TABLE_GATED:ReadonlySet<string>=new Set(['keresztmetszet','kismegszakito','hurokimpedancia','terhelhetoseg-tablazat']);
+/** A lib/sizing-tables.ts értékeire épülő kalkulátorok (a definíció `tables: true`): csak tablesApproved() mellett adhatók ki, mert a
+ * felhasznált táblázatértékeket (Iz0, kθ, kcs, ρ1, λ, U0, G.52.1 határok, m, cmin) a lektori csomag 1. részének jóváhagyása fedi. */
+export const TABLE_GATED:ReadonlySet<string>=new Set(['feszultseges','keresztmetszet','kismegszakito','hurokimpedancia','terhelhetoseg-tablazat']);

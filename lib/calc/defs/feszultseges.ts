@@ -17,7 +17,7 @@ const def:CalcDef={
   {id:'rendszer',kind:'select',label:'Rendszer',style:'segmented',default:'1f',options:[{value:'1f',label:'Egyfázisú (230 V)',short:'1f'},{value:'3f',label:'Háromfázisú (400 V)',short:'3f'},{value:'dc',label:'Egyenáram',short:'DC'}]},
   {id:'I',kind:'number',label:'Terhelőáram',symbol:'I',unit:'A',default:'16',positive:true,max:1000},
   {id:'L',kind:'number',label:'Vezetékhossz (egy irányban)',symbol:'L',units:'length',default:'23,4',positive:true,max:1e4},
-  {id:'A',kind:'number',label:'Keresztmetszet',symbol:'A',unit:'mm²',default:'2,5',positive:true,max:1000},
+  {id:'A',kind:'number',label:'Keresztmetszet',symbol:'A',unit:'mm²',default:'2,5',positive:true,max:35,help:'Rézvezető, legfeljebb 35 mm² (a segédszámítás tartománya); a táblázati lépcsőn kívüli érték is megadható.'},
   {id:'cos',kind:'number',label:'Teljesítménytényező',symbol:'cos φ',default:'1',positive:true,max:1,showIf:{field:'rendszer',is:['1f','3f']}},
   {id:'Udc',kind:'number',label:'Névleges feszültség',symbol:'U',unit:'V',default:'24',positive:true,max:1500,showIf:{field:'rendszer',is:['dc']}},
   {id:'hatar',kind:'select',label:'Határérték (G.52.1, tájékoztató)',style:'select',default:'public-other',showIf:{field:'rendszer',is:['1f','3f']},options:limits.map(([s,w])=>({value:s+'-'+w,label:limitLabel(s,w)}))},
@@ -42,7 +42,7 @@ const def:CalcDef={
   return {
    results:[{id:'dU',label:'Feszültségesés',value:volts,unit:'V',text:u(volts,'V')},{id:'pct',label:'Feszültségesés',value:p,unit:'%',text:a+nb+'%',primary:true},{id:'Lmax',label:'Legnagyobb hossz a határig',value:Lmax,unit:'m',text:floorLength(Lmax).text},{id:'limit',label:'Határérték',value:limit,unit:'%',text:limitText}],
    steps,figure:{kind:'drop-bar',value:p,limit,label:'ΔU'},verdict:{ok,text:ok?`Számítás szerint a határon belül: ${a} % ≤ ${bT} %.`:`Számítás szerint meghaladja a határt: ${a} % > ${bT} %.`},
-   assumptions:['Rézvezető; ρ1 = '+u(T.rho1,'Ω·mm²/m',4)+' (üzemi hőmérséklet), λ = '+u(T.lambda,'Ω/m',5)+' (G.52.2).','A teljes terhelés a vezeték végén; az elosztó előtti (fővezeték) esés nincs benne.',...(sys==='3f'?['Szimmetrikus háromfázisú terhelés.']:[]),...(sys==='dc'?['Egyenáram: λ = 0, oda-vissza vezeték.']:[])],
+   assumptions:[sys==='dc'?'Rézvezető; ρ1 = '+u(T.rho1,'Ω·mm²/m',4)+' (üzemi hőmérséklet, G.52.2).':'Rézvezető; ρ1 = '+u(T.rho1,'Ω·mm²/m',4)+' (üzemi hőmérséklet), λ = '+u(T.lambda,'Ω/m',5)+' (G.52.2).','A teljes terhelés a vezeték végén; az elosztó előtti (fővezeték) esés nincs benne.',...(sys==='3f'?['Szimmetrikus háromfázisú terhelés.']:[]),...(sys==='dc'?['Egyenáram: oda-vissza vezeték, reaktancia nélkül.']:[])],
   };
  },
  formulas:['ΔU% = b · L · I · (ρ1 · cos φ / A + λ · sin φ) / U0 · 100 (b = 2 egyfázisú, 1 háromfázisú)','DC: ΔU = 2 · L · I · ρ1 / A','Lmax = ΔU%határ · U0 / (100 · b · I · (ρ1 · cos φ / A + λ · sin φ))'],

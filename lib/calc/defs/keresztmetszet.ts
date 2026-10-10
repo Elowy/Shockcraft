@@ -11,7 +11,7 @@ const def:CalcDef={
  keywords:['keresztmetszet','kábel vastagság','vezeték vastagság','mm2','terhelhetőség','Iz','kábelválasztás','hány négyzetes'],
  synonyms:['kabel vastagsag','vezetek vastagsag','keresztmetszet valasztas','hany negyzetes','kabel meretezes'],
  fields:[
-  {id:'In',kind:'number',label:'A védelem névleges árama',symbol:'In',unit:'A',default:'20',positive:true,max:500},
+  {id:'In',kind:'number',label:'A védelem névleges árama',symbol:'In',unit:'A',default:'20',positive:true,max:500,help:'Kismegszakító vagy RCBO névleges árama. Olvadóbiztosítónál az I2 ≤ 1,45 · Iz feltételt külön kell ellenőrizni.'},
   methodField,insulationField,loadedField,ambientField,groupField,
  ],
  compute(v){
@@ -24,11 +24,11 @@ const def:CalcDef={
    steps:[izStep(z,A),step('Feltétel','In ≤ Iz (433.1)',`${u(In,'A')} ≤ ${u(z.iz,'A')}`,'teljesül '+fmtNum(A)+' mm²-nél','MSZ HD 60364-4-43 433.1')],
    verdict:{ok:true,text:`Számítás szerint ${fmtNum(A)} mm² a legkisebb keresztmetszet, amelyre In ≤ Iz teljesül (${u(In,'A')} ≤ ${u(z.iz,'A')}).`},
    table:{caption:'Javított terhelhetőség keresztmetszetenként',head:['Keresztmetszet','Iz0','Iz = Iz0 · kθ · kcs','In ≤ Iz?'],rows:SECTIONS.map(s=>{const y=izFor(v,s)!;return [fmtNum(s)+nb+'mm²',u(y.iz0,'A'),u(y.iz,'A'),In<=y.iz+1e-9*y.iz?'igen':'nem']})},
-   assumptions:[...z.assumptions,'A legkisebb keresztmetszet (1,5 mm² réz) a táblázat első sora.','Csak a túlterhelés elleni védelem feltétele (In ≤ Iz); a feszültségesést és a hurokimpedanciát külön kell ellenőrizni.'],
+   assumptions:[...z.assumptions,'A legkisebb keresztmetszet (1,5 mm² réz) a táblázat első sora.','Kismegszakító vagy RCBO (I2 = 1,45 · In, MSZ EN 60898-1, MSZ EN 61009-1): az I2 ≤ 1,45 · Iz feltétel az In ≤ Iz-vel együtt teljesül. Olvadóbiztosítónál az I2 ≤ 1,45 · Iz feltételt külön kell ellenőrizni.','Csak a túlterhelés elleni védelem In ≤ Iz feltétele; az Ib ≤ In feltételt, a feszültségesést és a hurokimpedanciát külön kell ellenőrizni.'],
   };
  },
- formulas:['Iz = Iz0 · kθ · kcs','feltétel: Ib ≤ In ≤ Iz (MSZ HD 60364-4-43 433.1)'],
- notes:{good:['Egy áramkör vezeték-keresztmetszetének előzetes ellenőrzése a védelem névleges áramához.','A tervező Méretezés fülén kapott javaslat gyors ellenőrzése.'],bad:['Tervezői méretezés kiváltására (feszültségesés, zárlati szilárdság, hurokimpedancia is kell).','Földben vagy szabad levegőn vezetett kábelre, alumíniumvezetőre.']},
+ formulas:['Iz = Iz0 · kθ · kcs','feltétel: In ≤ Iz (MSZ HD 60364-4-43 433.1)'],
+ notes:{good:['Egy áramkör vezeték-keresztmetszetének előzetes ellenőrzése a védelem névleges áramához.','A tervező Méretezés fülén kapott javaslat gyors ellenőrzése.'],bad:['Tervezői méretezés kiváltására (feszültségesés, zárlati szilárdság, hurokimpedancia is kell).','Földben vagy szabad levegőn vezetett kábelre, alumíniumvezetőre.','Olvadóbiztosítóval védett áramkör önálló ellenőrzésére (az I2 feltételt külön kell vizsgálni).']},
  safety:['alap','meretezes'],notCovered:SIZING_NOT_COVERED,
  examples:[
   {title:'In = 20 A, B2, PVC, 2 ér, 30 °C',input:{In:'20',mod:'B2',szig:'PVC',erek:'2',temp:'30',csop:'1'},expect:{A:2.5,Iz:23}},
