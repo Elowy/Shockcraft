@@ -62,3 +62,11 @@ Gyakorló tesztfelület kb. 1000 kérdéses kérdésbankkal, véletlenszerűen �
 - **Minőség:** „Hibás kérdés jelzése” gomb; a kérdésbank a repóban verziózott adatfájl (vagy admin felület), tesztekkel ellenőrzött séma (egyedi azonosító, pontosan jelölt helyes válasz, létező Tudástár-hivatkozás).
 - **Megjelölés:** a felület nem állítja, hogy hivatalos vizsgakérdéseket tartalmaz; „gyakorló teszt” jelöléssel fut.
 - Nyitott kérdések: ingyenes vagy előfizetéses (pl. mintateszt ingyen, teljes bank előfizetéssel); melyik vizsgára készít (villanyszerelő szakmai vizsga, érintésvédelmi szabványossági felülvizsgáló stb.); ki lektorálja a kérdésbankot.
+
+### 3. ötlet: villanyszerelő-kézikönyv jellegű, mobilbarát felépítés
+
+Minta: egy Android villanyszerelő-kézikönyv alkalmazás szerkezete (csak a felépítés és a témakörök listája szolgál mintául; szöveget, ikont, ábrát nem veszünk át). Öt fő rész alsó navigációval: **Elmélet**, **Sémák**, **Kalkulátorok**, **Konstruktor**, **Tesztek**; könyvjelzők és menü a fejlécben.
+
+- **Elmélet témakörei:** alapfogalmak (feszültség, áram, ellenállás, teljesítmény, Ohm, Kirchhoff, soros/párhuzamos kapcsolás, rövidzárlat, biztonsági intézkedések, szakkifejezések), elektromechanikus átalakítók (transzformátor, generátor, villanymotor, háromfázisú motor kondenzátoros bekötése), védelmi és automatizálási eszközök (kismegszakító, FI-relé, áramvédős kismegszakító, feszültségfigyelő relé, mágneskapcsoló, biztosítékok, túlfeszültség-védelem), kábelek és vezetékek (összekötési módszerek, keresztmetszet-választás, színkódolás, kapcsolószekrény), erőművek és alállomások, mérőműszerek (volt-/amper-/ohmmérő, multiméter és lakatfogó, fogyasztásmérő), földelés (földelési rendszerek, potenciálkiegyenlítés), világítás (fényforrások, foglalatok, lumen és lux, színhőmérséklet, LED-szalag), munkavégzés (csatlakozó, dugalj és kapcsoló szerelése), további információk (ellátási kategóriák, túlfeszültség, IP-védettség, szerszámok, dugaljtípusok országonként, Joule–Lenz, Coulomb, jobbkéz-szabály).
+- **Követelmény:** mindenki számára ingyenes, bejelentkezés és előfizetés nélkül használható; a bekötéseket grafikák szemléltetik.
+- A három ötlet egységes terve és ütemezése: lásd a „Tudástár – egységes terv” szakaszt (kidolgozás alatt).
