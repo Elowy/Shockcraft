@@ -5,7 +5,7 @@
 **Villanyrajz** (korábbi nevén ShockCraft) egy magyar nyelvű, böngészőalapú villamos tervszerkesztő SaaS.
 Villanyszerelőknek és lakóépületek villamos tervein dolgozóknak készül.
 
-> **Névváltás:** a felhasználó felé mindenhol „Villanyrajz” szerepel (felület, PDF, e-mail, Stripe-terméknév, számlatétel, letöltött fájlnevek, jogi szövegek). A technikai azonosítók **szándékosan változatlanok**, mert átnevezésük kijelentkeztetné a felhasználókat vagy elveszítené a böngészőben tárolt adatokat: `shockcraft_session` süti, `shockcraft-*` localStorage/sessionStorage kulcsok, `SHOCKCRAFT_*` env változók, `X-ShockCraft-User` fejléc, Stripe idempotencia-kulcsok (a `shockcraft-monthly-portal-vN` kulcs verzióját emeld, ha a portálkonfiguráció tartalma változik), `SC-` számlázási rendelésazonosító-előtag (duplikációvédelem!), `shockcraft.service`, `/srv/shockcraft` útvonalak, `shockcraft` MySQL-adatbázisnév a példákban. Új kódban is ezeket a meglévő kulcsokat használd.
+> **Névváltás:** a felhasználó felé mindenhol „Villanyrajz” szerepel (felület, PDF, e-mail, Stripe-terméknév, számlatétel, letöltött fájlnevek, jogi szövegek). A technikai azonosítók **szándékosan változatlanok**, mert átnevezésük kijelentkeztetné a felhasználókat vagy elveszítené a böngészőben tárolt adatokat: `shockcraft_session` süti, `shockcraft-*` localStorage/sessionStorage kulcsok, `SHOCKCRAFT_*` env változók, `X-ShockCraft-User` fejléc, Stripe idempotencia-kulcsok (a `shockcraft-monthly-portal-vN` kulcs verzióját emeld, ha a portálkonfiguráció tartalma változik), `SC-` számlázási rendelésazonosító-előtag (duplikációvédelem!), `shockcraft.service`, `/srv/shockcraft` útvonalak, `shockcraft` MySQL-adatbázisnév a példákban. Új kódban is ezeket a meglévő kulcsokat használd. A kézikönyv (Tudástár/Kalkulátorok) új böngészőkulcsai `shockcraft-kb-*` előtagúak (a téma közös: `shockcraft-theme`).
 
 **Fő funkciók:**
 - Alaprajz-szerkesztő: szobák, falak, ajtók/ablakok, szerelvények (kapcsolók, dugaljak, RJ45, lámpakiállás, kötődoboz, lakáselosztó-jelölés)
@@ -25,6 +25,7 @@ Villanyszerelőknek és lakóépületek villamos tervein dolgozóknak készül.
 - Méretezési segédszámítás (Eszközök → Méretezés): áramkörönkénti, tervezői ellenőrzést segítő számítás (Ib ≤ In ≤ Iz, I2, legkisebb keresztmetszet, feszültségesés, opcionális hurokimpedancia), feltételezésekkel és forrásokkal; opcionális PDF-táblák; „nem felel meg”/„nem számítható” a tervellenőrzésben. Nem tervezői méretezés; a táblázatértékek tervezői jóváhagyása függőben
 - Termékkatalógus (fiókszintű): saját termék- és árlista (kézzel, CSV-ből, mintakészletből), típusonkénti és soronkénti termékválasztás az ajánlatban, fiók-alapértelmezések, árfrissítés; termék az anyagkimutatásban, a CSV-ben és az ajánlat-PDF-ben
 - Sötét/világos mód
+- Kalkulátorok (`/kalkulatorok`, a Villanyszerelő Tudástár első szekciója): ingyenes, belépés és süti nélkül; 19 közzétett T0 kalkulátor („Belsőleg ellenőrizve”), 8 T1 kalkulátor elkészült, de lektori jóváhagyásig a kiadási kapu (`lib/calc/release.ts`) mögött rejtve; kereső, kedvencek, legutóbbiak, megosztható URL, levezetés, saját SVG-ábrák
 
 **Élő oldal:** https://shockcraft-villanytervezo.lollipopp23.chatgpt.site/ (a `villanyrajz.hu` domain lefoglalva, még nincs élesítve)
 
@@ -58,6 +59,9 @@ app/                    Next.js App Router oldalak
   page.tsx              Főoldal (marketing landing)
   tervezo/page.tsx      A tervező szerkesztő (fő UI)
   megosztas/page.tsx    Megosztott terv, csak olvasható nyilvános nézet (#t=<token>, force-dynamic)
+  (kezikonyv)/          Kézikönyv-útvonalcsoport (ThemeBoot, metadataBase, kezikonyv.css; nincs getAccount/db/auth/next/headers)
+    kalkulatorok/       layout (Shell), page (hub), [slug]/page (force-static, revalidate 3600, dynamicParams=false), not-found
+  sitemap.ts, robots.ts Metaadat-útvonalak (APP_ORIGIN-ból; a sitemap csak közzétett kalkulátort tartalmaz)
   admin/page.tsx        Admin panel (Stripe, email beállítások)
   api/                  API route-ok
     auth/               Belépés, regisztráció, kijelentkezés, jelszócsere
@@ -95,6 +99,8 @@ components/             43 UI komponens
   floor-drawing.tsx     Közös alaprajzi rajz (FloorShapes, RoomLabels, ScaleBar, PlanLegend) – szerkesztő és megtekintő
   catalog-manager.tsx   Termékkatalógus fül (Eszközök → Termékkatalógus): CRUD, CSV-import/-export, mintakészlet, fiók-alapértelmezések
   product-picker.tsx    Termékválasztó dialógus (típushoz vagy ajánlati sorhoz)
+  kezikonyv/            Kézikönyv-keret: shell (AppBar, Shell, alsó nav/fülek), kb-chrome (kereső, menü, kedvencek, téma, értesítés), theme-boot, json-ld, safety-notice, planner-cta, report-link
+  calc/                 Kalkulátor-felület: calculator (kliens), calc-index (hub), calc-example (SSR példa), calc-figures (SVG), islands/<slug> (kalkulátoronként egy kliensszigete)
   sizing-report.tsx     Méretezési segédszámítás fül (Eszközök → Méretezés): felelősségi doboz, áramkörönkénti ellenőrzések, áramköri/projekt/elosztó beállítások, Iz0-felülírások
   quote-products.tsx    Ajánlat „Termékek és katalógusárak” része (típusválasztás, alapértelmezések, árfrissítés)
   use-catalog.ts        useCatalog hook: /api/catalog betöltés és mentés (revision-CAS)
@@ -124,6 +130,7 @@ lib/                    43 üzleti logika / utility modul
   phase-load.ts         Fázisterhelés-összesítés (elosztónként L1/L2/L3, aszimmetria)
   sizing-tables.ts      Méretezési segédszámítás: MINDEN számérték és forrás egy helyen (PVC Iz0, B.52.14, B.52.17, G.52.1, ρ1, λ, U0, cmin, m), lookupok, ujjlenyomat, SIZING_REVIEW (kezdetben „ellenőrizendő” – soha ne állítsd jóváhagyottra)
   sizing-schema.ts      circuit.sizing / plan.sizing opcionális Zod-séma, pruneSizing (validatePlan végén)
+  sizing-formulas.ts    Méretezési képletek, kábeljelölés, felelősségi szövegek – kiemelve a sizing.ts-ből (csak a sizing-tables-t importálja; a sizing.ts változatlan néven re-exportál)
   sizing.ts             Kábeljelölés-értelmezés, képletek, circuitSizing/boardSizing/projectSizing, sizingTarget, PDF-sorok, mutáló segédek (tiszta modul)
   route-points.ts       Nyomvonal töréspontok
   architecture.ts       Ajtók/ablakok Zod schema, validateArchitecture
@@ -148,6 +155,9 @@ lib/                    43 üzleti logika / utility modul
   device-copy.ts        Szerelvény másolás
   panel-link.ts         Telki elosztó ↔ alaprajzi jelölés összekötés
   utils.ts              cn() class merge
+  site-origin.ts        siteOrigin() (APP_ORIGIN validálva, nem dob), kbPreview() (SHOCKCRAFT_KB_PREVIEW) – a cloudflare:workers env-ből
+  calc/                 Kalkulátormotor (tiszta, zod és lib/plan nélkül): number (parseNum/formatNum/formatSI), units, constants (forrással), core (CalcDef, runCalc), url, formulas, fields, sizing-fields, categories, release (KIADÁSI KAPU – egyetlen konfigurációs pont), registry (szerver), defs/<slug>.ts (27 kalkulátor)
+  kb/                   Kézikönyv-keret: categories (KB_NAME, KB_TITLE, szekciók, CALC_HUB), safety, search (ékezetfüggetlen, szinonimák, elírás), storage (shockcraft-kb-* tárolók), theme, links (a tervező csak ezt importálja)
 
 db/
   schema.ts             Drizzle ORM séma (D1/SQLite)
@@ -166,6 +176,8 @@ scripts/
   sites-env.mjs         D1/R2 binding injektálás
   install-ci.mjs        CI npm install
   mysql-setup.mjs       MySQL séma inicializálás
+  calc-release.ts       Kalkulátorok kiadási állapota és ujjlenyomata (list | record <slug>)
+  calc-golden-indep.py  Független Python-újraszámolás a kalkulátorpéldákhoz (belső kettős ellenőrzés)
 
 deploy/
   nginx.conf            Nginx reverse proxy konfig
@@ -427,6 +439,12 @@ Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja e
 - `tests/quote-products.ts` – ajánlat ↔ termék (típusválasztás, árfrissítés, anyagkimutatás-CSV, megosztás, PDF-füst): `node_modules/.bin/tsx tests/quote-products.ts`
 - `tests/sizing-tables.ts` – méretezési táblázatok (relációk, források, lookupok, ujjlenyomat, jóváhagyási kapu): `node --no-warnings --import tsx tests/sizing-tables.ts`
 - `tests/sizing.ts` – méretezési segédszámítás kézzel számolt példákkal (kábeljelölés, képletek, seed, ellenőrzések, séma, tervellenőrzés, PDF, szóhasználat, megosztás): `node --no-warnings --import tsx tests/sizing.ts`
+- `tests/calc.ts` – kalkulátormotor: parseNum/formázás, definíciók (szóhasználat, metaadat, szigetek), kiadási kapu (T0 közzétéve, T1 kiadatlan, ujjlenyomat, táblázat-kapu, T2 tiltva), tervezői linkek, URL oda-vissza, fuzz, 10 000 seedes tulajdonságteszt, egyezés a Méretezés/Fázisterhelés számításával: `node_modules/.bin/tsx tests/calc.ts`
+- `tests/calc-golden.ts` – 211 golden eset (definíciós példák, független kiegészítő esetek, a terv 5.3 értékei): `node_modules/.bin/tsx tests/calc-golden.ts`
+- `tests/kb-search.ts`, `tests/kb-storage.ts` – kereső és vendégtárolás: `node_modules/.bin/tsx tests/kb-search.ts`
+- `tests/kb-guards.ts` – statikus őrök (importgráf: nincs db/auth/billing/pdf/lib/plan/zod/next/headers; nincs getAccount/cookies/headers/fetch; dangerouslySetInnerHTML csak JSON-LD/téma; a tervező csak lib/kb/links.ts-t importál; fejlécek; kulcsok): `node_modules/.bin/tsx tests/kb-guards.ts`
+- `tests/sizing-formulas.ts` – a lib/sizing-formulas.ts kiemelésének regressziója: `node_modules/.bin/tsx tests/sizing-formulas.ts`
+- `tests/kb-routes.mjs` – build utáni füstteszt mindkét targeten: `BASE=http://127.0.0.1:8787 node tests/kb-routes.mjs`
 - `tests/catalog-api.ts` – `/api/catalog` route-teszt memóriabeli SQLite-on: `node_modules/.bin/esbuild tests/catalog-api.ts --bundle --platform=node --format=esm --external:mysql2 --alias:cloudflare:workers=./db/node-env.ts --outfile=.sites-runtime/catalog-api.mjs && env -u MYSQL_URL node --no-warnings .sites-runtime/catalog-api.mjs`
 - Unit tesztek nincsenek; a `validatePlan()` (`lib/plan.ts`) az elsődleges validációs pont
 
@@ -448,4 +466,6 @@ Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja e
 
 7. **Méretezési segédszámítás** (kész, jóváhagyás függőben) – tervezői ellenőrzést segítő számítás áramkörönként: legkisebb keresztmetszet, Ib ≤ In ≤ Iz, I2 ≤ 1,45 · Iz, feszültségesés (G.52.1), Zs megadása esetén hurokimpedancia (TN). Minden szám a `lib/sizing-tables.ts`-ben, forrással; `SIZING_REVIEW` ujjlenyomathoz kötött, kezdetben „ellenőrizendő”; XLPE-tábla `null` (PVC-tartalék, feltételezésként). Bemenetek opcionális tervmezőkben (`circuits[].sizing`, `sizing`), nincs új tábla/migráció/API; a megosztott tervből törlődnek. Tervsegéd „Méretezés” fül, `PdfOptions.sizing` (alapból ki), `checkPlan(plan,{sizing:true})` (csak fail/na). Kód: `lib/sizing*.ts`, `components/sizing-report.tsx`, doksi: `docs/meretezes.md`.
 
-8. **Tervezett:** megosztás 2. lépés (megjegyzések, háttér a megosztott nézetben, link meghosszabbítása), közös szerkesztés más fiókból, termékkatalógus 2. ütem (szerelvényenkénti termék, összeállítás/kit, rendelési lista), méretezés 2. lépés (nyomvonalankénti szerelési mód, topológiai hossz, XLPE/E-táblázat jóváhagyás után, megosztott nézet).
+8. **Kalkulátorok** (kész, 1–2. fázis) – `/kalkulatorok`, ingyen, belépés és süti nélkül, statikus (ISR) oldalak, CSP. 19 T0 kalkulátor közzétéve („Belsőleg ellenőrizve”, független újraszámolással), 8 T1 (feszültségesés, motoráram, LED-szalag tápegység, fázisjavítás, keresztmetszet, kismegszakító, hurokimpedancia, terhelhetőség-táblázat) elkészült, de csak szakmai lektori rekorddal (és a táblázatalapúak `tablesApproved()`-dal) adhatók ki – az egyetlen konfigurációs pont a `lib/calc/release.ts`. T2 nem épül. Elérés: nyilvános fejléc, főoldal, tervező felső sávja, Tervsegéd, Fázisterhelés-mélylink (a Méretezés-mélylink a T1 kiadásakor jelenik meg). Új böngészőkulcsok: `shockcraft-kb-bookmarks-v1`, `shockcraft-kb-recent-v1`. Kód: `lib/calc/*`, `lib/kb/*`, `lib/sizing-formulas.ts`, `components/calc`, `components/kezikonyv`, `app/(kezikonyv)`, doksi: `docs/kalkulatorok.md`.
+
+9. **Tervezett:** megosztás 2. lépés (megjegyzések, háttér a megosztott nézetben, link meghosszabbítása), közös szerkesztés más fiókból, termékkatalógus 2. ütem (szerelvényenkénti termék, összeállítás/kit, rendelési lista), méretezés 2. lépés (nyomvonalankénti szerelési mód, topológiai hossz, XLPE/E-táblázat jóváhagyás után, megosztott nézet).

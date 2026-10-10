@@ -5,11 +5,17 @@ import {toast} from 'sonner';
 import {Choice} from '@/components/plan-controls';
 import type {Plan} from '@/lib/plan';
 import type {SearchResult} from '@/lib/plan-tools';
+import {calcHref} from '@/lib/kb/links';
 import {INSTALL_METHODS,INSULATIONS,SECTIONS,SIZING_TABLES,insulationLabels,methodLabels,reviewText,tablesApproved,type InstallMethod,type Insulation} from '@/lib/sizing-tables';
 import {overrideKey,type CircuitSizing} from '@/lib/sizing-schema';
 import {SIZING_DISCLAIMER,SIZING_NOT_COVERED,cableLabel,checkStatusLabels,fmtNum,hasSizingTarget,parseDecimalInput,projectSizing,refText,removeOverride,setBoardSizing,setCircuitLoad,setCircuitSizing,setPlanSizing,sizingCells,sizingContext,sizingTarget,statusLabels,upsertOverride,type CircuitSizingResult,type SizingContext,type SizingStatus,type Valued} from '@/lib/sizing';
 
 type Change=(fn:(p:Plan)=>void)=>void;
+/** Mélylink a Feszültségesés kalkulátorra az áramkör adataival (csak közzétett kalkulátorra; a T1 kiadásáig null, így nem jelenik meg). */
+const dropCalcHref=(r:CircuitSizingResult,supply:'public'|'private')=>{
+ const A=r.segments.every(s=>s.cable)?Math.min(...r.segments.map(s=>s.cable!.section)):null;
+ return r.length===null||A===null?null:calcHref('feszultseges',{rendszer:r.phase==='3P'?'3f':'1f',I:+r.dropCurrent.toFixed(2),L:+r.length.toFixed(2),A,cos:r.cosPhi.value,hatar:supply+'-'+r.usage.value});
+};
 const filters:[string,string][]=[['all','Minden áramkör'],['fail',statusLabels.fail],['na',statusLabels.na],['warn',statusLabels.warn],['ok',statusLabels.ok]];
 const methodItems:[string,string][]=INSTALL_METHODS.map(m=>[m,methodLabels[m]]);
 const star=(v:Valued<unknown>)=>v.source==='alapérték'?'*':'';
@@ -71,7 +77,7 @@ function CircuitDetails({plan,r,onChange,onLocate,ctx}:{plan:Plan;r:CircuitSizin
    <h4>Szakaszok</h4>
    <ul className="sizing-segments">{r.segments.map((s,i)=><li key={s.routeId??'virtual'+i}><span>{s.name} · {s.routeId===null?'hossz nélkül':fmtNum(s.length)+' m'} · {s.cable?cableLabel(s.cable):'nincs kábel'}{s.cableSource?' ('+s.cableSource+')':''} · {s.method.value} ({sourceText(s.method)}) · {s.insulation.value} ({sourceText(s.insulation)}) · Iz {s.iz===null?'–':fmtNum(s.iz)} A</span>{s.target&&<button type="button" onClick={()=>onLocate(s.target!)}><ArrowUpRight aria-hidden="true"/> Megnyitás</button>}</li>)}</ul>
    {onChange&&<><h4>Az áramkör méretezési adatai</h4><p className="report-note">Minden mező üresen hagyható: ekkor a projekt alapértéke vagy az automatikus érték érvényes (a mezőben halványan látszik). Tizedesvessző és -pont is használható. A módosítás az ablak bezárása után a szerkesztő Visszavonás gombjával (Ctrl+Z) vonható vissza.</p><CircuitForm plan={plan} r={r} onChange={onChange}/></>}
-   <div><button type="button" disabled={!hasSizingTarget(plan,r.circuitId,ctx)} onClick={locate}><ArrowUpRight aria-hidden="true"/> Ugrás az áramkörhöz</button></div>
+   <div className="sizing-links"><button type="button" disabled={!hasSizingTarget(plan,r.circuitId,ctx)} onClick={locate}><ArrowUpRight aria-hidden="true"/> Ugrás az áramkörhöz</button>{(()=>{const href=dropCalcHref(r,plan.sizing?.supply??'public');return href&&<a className="guide-link" href={href} target="_blank" rel="noopener">Feszültségesés a kalkulátorban ↗<span className="sr-only"> (új lapon)</span></a>})()}</div>
   </div>
  </details>;
 }

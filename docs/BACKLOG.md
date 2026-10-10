@@ -17,6 +17,7 @@ Elfogadási feltételek:
 
 ## Kész
 
+- Kalkulátorok (a Tudástár 1. lépése): `/kalkulatorok`, ingyen, belépés és süti nélkül; 19 T0 kalkulátor közzétéve „Belsőleg ellenőrizve” jelvénnyel, 8 T1 kalkulátor elkészült, de szakmai lektori jóváhagyásig rejtve. Közös kézikönyv-keret (mobil-első fejléc és alsó navigáció, asztali elrendezés, kereső, kedvencek, téma, CSP, sitemap/robots). Lásd `docs/kalkulatorok.md`.
 - Méretezési segédszámítás (tervezői ellenőrzést segítő): Iz/In/Ib, I2, legkisebb keresztmetszet, feszültségesés, opcionális hurokimpedancia, Tervsegéd-fül, PDF-táblák, tervellenőrzés. A táblázatértékek tervezői jóváhagyása függőben. Lásd `docs/meretezes.md`.
 - Gyártói termékkatalógus: saját, fiókszintű termék- és árlista (kézzel, CSV-ből vagy mintakészletből), típusonkénti és soronkénti termékválasztás az ajánlatban, fiók-alapértelmezések, árfrissítés a katalógusból, termék az anyagkimutatásban, a CSV-ben és az ajánlat-PDF-ben. Lásd `docs/termekkatalogus.md`.
 - Tervmegosztás: csak olvasható, lejáró, visszavonható link, PDF a megosztó engedélyével és exportjogával. Lásd `docs/tervmegosztas.md`.
@@ -73,6 +74,8 @@ Minta: egy Android villanyszerelő-kézikönyv alkalmazás szerkezete (csak a fe
 - A három ötlet egységes terve és ütemezése: lásd a „Tudástár – egységes terv” szakaszt (kidolgozás alatt).
 
 ### 4. kiegészítés: Kalkulátorok önálló, gyors elérésű menüpontként
+
+Állapot (2026-10-10): **kész a 2. fázis végéig, a T1-ek lektori jóváhagyásra várnak.** Élesben a 19 T0 kalkulátor („Belsőleg ellenőrizve”): Ohm-törvény, teljesítmény, áram teljesítményből, látszólagos és meddő teljesítmény, vezeték-ellenállás, eredő ellenállás, eredő kapacitás, feszültségosztó, fogyasztás és költség, fázisterhelés, mértékegység-átváltó (kW–LE–hp, AWG–mm², átmérő, kWh–MJ), ellenállás-színkód, lumen–lux, csillag–delta, transzformátor, akkumulátor-üzemidő, LED-előtét, reaktancia–rezonancia, hőmérséklet. Elkészült, de a kiadási kapu (`lib/calc/release.ts`) mögött rejtve: feszültségesés, motoráram, LED-szalag tápegység, fázisjavítás, valamint – a `tablesApproved()`-hoz is kötve – keresztmetszet-, kismegszakító-választás, hurokimpedancia/zárlati áram és terhelhetőségi táblázat; a hubon „Hamarosan – szakmai lektorálás alatt” kártyaként látszanak. Nem épül (T2, lektor nélkül tilos): kondenzátor háromfázisú motor egyfázisú üzeméhez, teljesítményigény. Teendő: a lektor kijelölése után a T1-ek jóváhagyása (`docs/kalkulatorok.md`, „T1 kalkulátor kiadása”), majd a tervező Méretezés fülének mélylinkje automatikusan megjelenik.
 
 A **Kalkulátorok** a Tudástáron kívül is első szintű menüpont: a nyilvános fejlécben és a főoldalon, a tervező felső sávjában és a Tudástár alsó navigációjában is, saját rövid URL-lel (pl. `/kalkulatorok`, `/kalkulatorok/ohm-torveny`), bejelentkezés nélkül.
 

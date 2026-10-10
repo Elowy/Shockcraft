@@ -20,20 +20,28 @@ export function circuitLoad(plan:Plan,circuit:Circuit):CircuitLoad{
  return {circuit,watts,estimated,devices:devices.length,current,overload:current>circuit.rating};
 }
 
+export type PhaseTotals={phases:Record<Phase,{watts:number;current:number}>;total:number;imbalance:number};
+/** Tiszta fázisösszesítés (terv nélkül; a kalkulátor is ezt használja): fázisonkénti W és A (PHASE_VOLTAGE), összeg és aszimmetria (%, a legnagyobb eltérés az átlagtól).
+ * A háromfázisú (3P) tétel egyenlően oszlik a három fázis között; cos φ = 1, egyidejűségi tényező nélkül. */
+export function phaseTotals(items:readonly {watts:number;phase:Phase|'3P'}[]):PhaseTotals{
+ const watts:Record<Phase,number>={L1:0,L2:0,L3:0};
+ for(const c of items){if(c.phase==='3P')for(const p of phases)watts[p]+=c.watts/3;else watts[c.phase]+=c.watts}
+ const total=phases.reduce((s,p)=>s+watts[p],0),avg=total/3;
+ const imbalance=avg>0?Math.max(...phases.map(p=>Math.abs(watts[p]-avg)))/avg*100:0;
+ return {phases:Object.fromEntries(phases.map(p=>[p,{watts:watts[p],current:watts[p]/PHASE_VOLTAGE}])) as PhaseTotals['phases'],total,imbalance};
+}
+
 /** Egy elosztó áramköreinek fázisonkénti összesítése (cos φ = 1, egyidejűségi tényező nélkül). */
 export function phaseLoad(plan:Plan,buildingId:string,boardId=''):PhaseLoad{
  const circuits=plan.circuits.filter(c=>c.building===buildingId&&inBoard(c,boardId)).map(c=>circuitLoad(plan,c));
- const watts:Record<Phase,number>={L1:0,L2:0,L3:0};
- for(const c of circuits){if(c.circuit.phase==='3P')for(const p of phases)watts[p]+=c.watts/3;else watts[c.circuit.phase]+=c.watts}
- const total=phases.reduce((s,p)=>s+watts[p],0),avg=total/3;
- const imbalance=avg>0?Math.max(...phases.map(p=>Math.abs(watts[p]-avg)))/avg*100:0;
+ const {phases:perPhase,total,imbalance}=phaseTotals(circuits.map(c=>({watts:c.watts,phase:c.circuit.phase})));
  const issues:PhaseLoadIssue[]=[];
  for(const c of circuits){
   if(c.overload)issues.push({code:'overload',circuitId:c.circuit.id,title:c.circuit.name+': a terhelés meghaladja a védelmet',detail:fmt(c.current)+' A számított áram > '+c.circuit.curve+c.circuit.rating+' A kismegszakító. Ellenőrizd a terhelést vagy a védelmet.'});
   else if(!c.watts)issues.push({code:'noload',circuitId:c.circuit.id,title:c.circuit.name+': nincs terhelés',detail:c.estimated?'Nincs becsülhető szerelvény hozzárendelve. Add meg a terhelést az áramkörjegyzékben.':'A megadott terhelés 0 W.'});
  }
  if(total>0&&imbalance>IMBALANCE_LIMIT)issues.push({code:'imbalance',title:'Kiegyenlítetlen fázisterhelés',detail:'A legnagyobb eltérés az átlagtól '+fmt(imbalance,0)+'% (határ: '+IMBALANCE_LIMIT+'%). Érdemes egyes áramköröket másik fázisra tenni.'});
- return {buildingId,boardId,circuits,phases:Object.fromEntries(phases.map(p=>[p,{watts:watts[p],current:watts[p]/PHASE_VOLTAGE}])) as PhaseLoad['phases'],total,imbalance,issues};
+ return {buildingId,boardId,circuits,phases:perPhase,total,imbalance,issues};
 }
 
 /** Az összes épület összes elosztójának összesítése, csak ahol van áramkör. */

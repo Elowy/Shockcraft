@@ -15,6 +15,10 @@ Magyar nyelvű villamos alaprajz- és lakáselosztó-tervező webalkalmazás (ko
 
 A bal oldali struktúrában a szobák, szintek és épületek/lakrészek mellett törlésgomb található. A szoba törlése csak a körvonalat és nevet távolítja el; a szint törlése annak teljes rajzát, az épület törlése annak szintjeit és villamos elosztását is eltávolítja. A telki hálózat önálló jelölései megmaradnak. Minden ilyen törlés egy lépésben visszavonható; az utolsó szint vagy épület is törölhető.
 
+## Kalkulátorok
+
+A `/kalkulatorok` oldalon ingyenes, belépés és süti nélkül használható villamos kalkulátorok érhetők el (Ohm-törvény, teljesítmény, áram, látszólagos és meddő teljesítmény, vezeték-ellenállás, eredő ellenállás és kapacitás, fogyasztás és költség, fázisterhelés, átváltók, színkód, feszültségosztó, lumen–lux, csillag–delta, transzformátor, akkumulátor, LED-előtét, reaktancia, hőmérséklet). Minden eredmény mértékegységgel, levezetéssel és forrással jelenik meg; a bemenetek megosztható URL-ben maradnak, a kedvenceket és a legutóbbiakat csak a böngésző tárolja. A szabványhoz kötött számítások (feszültségesés, keresztmetszet, kismegszakító, hurokimpedancia, terhelhetőség, motoráram, LED-tápegység, fázisjavítás) elkészültek, de csak szakmai lektor jóváhagyása után jelennek meg. Elérés: nyilvános fejléc, főoldal, a tervező felső sávja és Tervsegédje, valamint a Fázisterhelés fül mélylinkje. Részletek, kiadási folyamat: `docs/kalkulatorok.md`.
+
 ## Nyomtatás, hálózat és magasságok
 
 - A fejléc **PDF / nyomtatás** gombja A4 vagy A3 fekvő PDF-et készít az aktuális szintről, telekről, épületelosztóról, illetve az összes épület minden szintjéről és elosztójáról egy fájlban. A rajzokat szerelvény-, nyomvonal- és áramkörjegyzék egészíti ki. A dokumentum vektoros, beágyazott magyar betűkészlettel. A feltüntetett méretarányhoz 100%-os nyomtatást használj.

@@ -3,6 +3,7 @@ import {QuoteEditor} from './quote-editor';
 import type {Quote} from '@/lib/quote-schema';
 import {useMemo,useState} from 'react';
 import {Route,CircuitBoard,Gauge,ClipboardCheck,ClipboardList,Download,Search,ArrowUpRight,BookOpen,Package,Calculator} from 'lucide-react';
+import {CALC_HUB} from '@/lib/kb/links';
 import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from '@/components/ui/dialog';
 import type {RouteTarget} from '@/lib/route-register';
 import {RouteRegister} from '@/components/route-register';
@@ -30,5 +31,6 @@ export function PlanTools({plan,onLocate,requireAccess,onQuote,busy,userId,proje
  <p className="report-note">A termékeket az Árazás / árajánlat fül „Termékek és katalógusárak” részében választhatod ki. A CSV a gyártót, a termékcsaládot, a cikkszámot és a termék nevét is tartalmazza.</p>
  <div className="report-table"><table><thead><tr><th>Tétel / hely</th><th>Részletek</th><th>Terv szerint</th><th>Ráhagyással</th></tr></thead><tbody>{rows.map((r,i)=>{const p=productOf(r);return <tr key={i}><td><b>{r.item}</b><small>{r.category} · {r.location}</small>{p&&<small className="material-product">Termék: {productLabel(p)}</small>}</td><td>{r.detail||'–'}</td><td>{fmt(r.quantity)} {r.unit}</td><td>{fmt(withAllowance(r,allowance))} {r.unit}</td></tr>})}</tbody></table>{!rows.length&&<p>Még nincs kimutatható szerelvény vagy nyomvonal.</p>}</div><button className="primary" onClick={download} disabled={!rows.length}><Download/> Anyagkimutatás letöltése (CSV)</button><p className="report-note">A CSV-export az ingyenes és a megvásárolt projektben előfizetés nélkül, az előfizetéses projektekben aktív előfizetéssel érhető el.</p></>:<><label className="field"><span>Keresés az egész projektben</span><input autoFocus aria-label="Keresés a tervben" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Pl. hálószoba, dugalj, D-01, világítás…"/></label><p className="report-note">{query.trim()?results.length+' találat. Válassz egy elemet a megnyitásához.':'A nevek, típusok, szintek és áramkörök között is kereshetsz.'}</p><div className="search-results">{results.slice(0,100).map(r=><button key={r.type+r.id} onClick={()=>{onLocate(r);setOpen(false)}}><span><b>{r.title}</b><small>{r.subtitle}</small></span><ArrowUpRight/></button>)}{query.trim()&&!results.length&&<p>Nincs találat. Próbálj rövidebb nevet vagy másik típust.</p>}{results.length>100&&<p>Az első 100 találat látható. Pontosítsd a keresést.</p>}</div></>}
  <a className="guide-link" href="/docs/Villanyrajz-telepitesi-utmutato.pdf" target="_blank" rel="noreferrer"><BookOpen/> Telepítési útmutató (PDF)</a>
+ <a className="guide-link" href={CALC_HUB} target="_blank" rel="noopener"><Calculator/> Kalkulátorok ↗<span className="sr-only"> (új lapon)</span></a>
  </DialogContent></Dialog></>
 }
