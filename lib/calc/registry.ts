@@ -2,7 +2,7 @@
 // A kliensoldali kalkulátor-szigetek csak a saját definíciójukat importálják (components/calc/islands), ezt a modult nem.
 import {fingerprint,tablesApproved} from '../sizing-tables';
 import type {CalcDef} from './core';
-import {RELEASES,TABLE_GATED,type ReleaseRecord} from './release';
+import {RELEASES,TABLE_GATED,type ExpertReview,type ReleaseRecord} from './release';
 import {CALC_CATEGORIES} from './categories';
 import ohm from './defs/ohm-torveny';
 import teljesitmeny from './defs/teljesitmeny';
@@ -46,6 +46,10 @@ export function calcFingerprint(def:CalcDef){
  return fingerprint({slug,title,short,category,tier,tables:!!tables,fields,formulas,notes,safety,examples,sources,notCovered:notCovered??[],version});
 }
 
+/** A lektor megjelenő megnevezése a kalkulátoroldalon: név csak kifejezett hozzájárulással (showName: true), különben a minősítés. */
+export const expertShown=(r:ExpertReview)=>r.showName===true?r.reviewer+', '+r.qualification:r.qualification;
+/** A kalkulátoroldal lábléc-sora lektorált kalkulátornál. */
+export const expertMeta=(r:ExpertReview)=>'Szakmai lektor: '+expertShown(r);
 export type ReleaseState='kozzeteve'|'kiadatlan'|'ujraellenorzendo'|'tablazatra-var'|'tiltott';
 export type ReleaseInfo={state:ReleaseState;record?:ReleaseRecord;badge:string;reason:string};
 export function releaseInfo(def:CalcDef,records:Readonly<Record<string,ReleaseRecord>>=RELEASES,tablesOk=tablesApproved()):ReleaseInfo{
@@ -55,7 +59,7 @@ export function releaseInfo(def:CalcDef,records:Readonly<Record<string,ReleaseRe
  if(record.fingerprint!==calcFingerprint(def))return {state:'ujraellenorzendo',record,badge:'',reason:'A definíció a jóváhagyás óta megváltozott; újra ellenőrizni kell.'};
  if(def.tier==='T1'&&record.kind!=='lektoralt')return {state:'kiadatlan',record,badge:'',reason:'T1 kalkulátorhoz szakmai lektori jóváhagyás kell.'};
  if(TABLE_GATED.has(def.slug)&&!tablesOk)return {state:'tablazatra-var',record,badge:'',reason:'A táblázatértékek tervezői jóváhagyása folyamatban.'};
- return {state:'kozzeteve',record,reason:'',badge:record.kind==='lektoralt'?'Szakmailag lektorálta: '+record.reviewer+', '+record.qualification+' · '+record.date:'Belsőleg ellenőrizve'};
+ return {state:'kozzeteve',record,reason:'',badge:record.kind==='lektoralt'?'Szakmailag lektorálta: '+expertShown(record)+' · '+record.date:'Belsőleg ellenőrizve'};
 }
 export const isPublished=(def:CalcDef)=>releaseInfo(def).state==='kozzeteve';
 export const publishedCalcs=()=>CALCULATORS.filter(isPublished);

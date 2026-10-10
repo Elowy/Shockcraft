@@ -6,9 +6,9 @@ import {parseNum,formatNum,formatSI,formatCompare,formatFixed,floorTo,decimalsFo
 import {runCalc,defaultRaw,visibleFields,type CalcDef,type Raw} from '../lib/calc/core';
 import {decodeState,encodeState} from '../lib/calc/url';
 import {UNITS} from '../lib/calc/units';
-import {CALCULATORS,CALC_CATEGORIES,bySlug,calcFingerprint,calcMeta,calcMetas,isPublished,publishedCalcs,releaseInfo,visibleCalcs} from '../lib/calc/registry';
-import {RELEASES,T1_SLUGS,TABLE_GATED,type ReleaseRecord} from '../lib/calc/release';
-import {calcSourceFiles,sourceFingerprint} from '../scripts/calc-source';
+import {CALCULATORS,CALC_CATEGORIES,bySlug,calcFingerprint,calcMeta,calcMetas,expertMeta,isPublished,publishedCalcs,releaseInfo,visibleCalcs} from '../lib/calc/registry';
+import {RELEASES,T1_SLUGS,TABLE_GATED,type ExpertReview,type ReleaseRecord} from '../lib/calc/release';
+import {REVIEW_DECL,REVIEW_FILE,calcSourceFiles,sourceFingerprint,sourceText} from '../scripts/calc-source';
 import {calcHref,calcLinkable,calcQuery} from '../lib/kb/links';
 import {calcSeoTitle} from '../lib/kb/categories';
 import {SIZING_NOT_COVERED,voltageDropPercent,maxLengthForDrop,minSectionFor,loopResistance,maxLoopImpedance} from '../lib/sizing-formulas';
@@ -105,6 +105,23 @@ for(const [slug,rec] of Object.entries(RELEASES)){
  if(d!.tier!=='T0')assert.equal(rec.kind,'lektoralt',slug+': T1-hez lektori rekord kell');
  if(rec.kind==='lektoralt')assert.ok(rec.reviewer.trim()&&rec.qualification.trim()&&rec.registry.trim()&&/^\d{4}-\d{2}-\d{2}$/.test(rec.date)&&!/[<>]/.test(rec.reviewer+rec.qualification+rec.registry),slug+': a lektori rekord kitöltött');
 }
+// A forrás-ujjlenyomatból csak a SIZING_REVIEW-blokk (a táblázatjóváhagyás adatai) marad ki: a jóváhagyás rögzítése nem
+// érvényteleníti a táblázatokat használó kalkulátorok lektori rekordját; minden más változás (a sablonszövegek is) igen.
+{
+ const src=readFileSync(REVIEW_FILE,'utf8'),at=src.indexOf(REVIEW_DECL);assert.ok(at>0,'a SIZING_REVIEW deklarációja megtalálható');
+ const end=src.indexOf('};',at)+2,approvedDecl=REVIEW_DECL+`{
+ status:'jóváhagyott',
+ reviewer:'Minta Tervező',registry:'00-0000',date:'2026-11-01',fingerprint:'0123abcd',showName:true,
+ note:'Lektori csomag LK-3 {kapcsos} zárójellel; "idézet" és \\'aposztróf\\''
+};`;
+ const approvedSrc=src.slice(0,at)+approvedDecl+src.slice(end);
+ assert.notEqual(approvedSrc,src);assert.equal(sourceText(REVIEW_FILE,approvedSrc),sourceText(REVIEW_FILE,src),'a jóváhagyás rögzítése nem változtatja a forrás-ujjlenyomatot');
+ assert.notEqual(sourceText(REVIEW_FILE,src.replace('A táblázatértékeket szakmailag lektorálta','A táblázatértékeket lektorálta')),sourceText(REVIEW_FILE,src),'a megjelenő szöveg sablonja része a lenyomatnak');
+ assert.notEqual(sourceText(REVIEW_FILE,src.replace('cmin:1,','cmin:0.95,')),sourceText(REVIEW_FILE,src),'a táblázatértékek részei a lenyomatnak');
+ assert.equal(sourceText('lib/calc/core.ts','a\r\nb'),'a\nb','más fájl: csak a sorvég egységesül');
+ assert.equal(sourceText(REVIEW_FILE,src+'\n'+REVIEW_DECL+'{};'),src+'\n'+REVIEW_DECL+'{};','kétszeres deklarációnál a teljes szöveg marad');
+ assert.ok(calcSourceFiles('keresztmetszet').includes(REVIEW_FILE)&&!calcSourceFiles('motor-aram').includes(REVIEW_FILE));
+}
 const expectedState=(d:CalcDef)=>{
  const rec=RELEASES[d.slug];
  if(!rec)return 'kiadatlan';
@@ -123,7 +140,9 @@ const expert=(d:CalcDef,fp=calcFingerprint(d)):ReleaseRecord=>({kind:'lektoralt'
 const inner=(d:CalcDef):ReleaseRecord=>({kind:'belso',by:'teszt',date:'2026-11-01',fingerprint:calcFingerprint(d),source:sourceFingerprint(d.slug),note:''});
 assert.equal(releaseInfo(fesz,{feszultseges:inner(fesz)}).state,'kiadatlan','T1 belső ellenőrzéssel nem adható ki');
 assert.equal(releaseInfo(fesz,{feszultseges:expert(fesz)}).state,'kozzeteve','T1 lektori jóváhagyással kiadható');
-assert.match(releaseInfo(fesz,{feszultseges:expert(fesz)}).badge,/^Szakmailag lektorálta: Teszt Elek/);
+assert.equal(releaseInfo(fesz,{feszultseges:{...(expert(fesz) as ExpertReview),showName:true}}).badge,'Szakmailag lektorálta: Teszt Elek, villamos tervező · 2026-11-01','név csak hozzájárulással');
+assert.equal(releaseInfo(fesz,{feszultseges:expert(fesz)}).badge,'Szakmailag lektorálta: villamos tervező · 2026-11-01','hozzájárulás nélkül a minősítés');
+assert.equal(expertMeta({...(expert(fesz) as ExpertReview),showName:true}),'Szakmai lektor: Teszt Elek, villamos tervező');assert.equal(expertMeta(expert(fesz) as ExpertReview),'Szakmai lektor: villamos tervező');
 assert.equal(releaseInfo(fesz,{feszultseges:expert(fesz,'deadbeef')}).state,'ujraellenorzendo','módosult tartalom → újra kell lektorálni');
 assert.equal(releaseInfo(ker,{keresztmetszet:expert(ker)},false).state,'tablazatra-var','táblázatalapú T1: tablesApproved() is kell');
 assert.equal(releaseInfo(ker,{keresztmetszet:expert(ker)},true).state,'kozzeteve');

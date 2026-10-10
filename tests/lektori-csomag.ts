@@ -3,12 +3,16 @@
 // Ha elbukik, mert a docs/ fájlok elavultak: node --import tsx scripts/lektori-csomag.ts (folyamat: docs/lektoralas.md).
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
-import {readFileSync} from 'node:fs';
+import {readFileSync,readdirSync} from 'node:fs';
 import {CLAUSES,INSTALL_METHODS,INSULATIONS,SIZING_REVIEW,SIZING_TABLES,SOURCES,fingerprint,groupingFactor,insulationLabels,methodLabels,reviewText,reviewedContent,tablesApproved,tablesFingerprint,temperatureFactor} from '../lib/sizing-tables';
 import {SIZING_NOT_COVERED,atMost,checkStatusLabels,circuitSizing,correctedIz,designCurrent,loopResistance,maxLengthForDrop,maxLoopImpedance,minSectionFor,parseCable,statusLabels,voltageDropPercent,type CircuitSizingResult} from '../lib/sizing';
 import {circuitSizingSchema,planSizingSchema} from '../lib/sizing-schema';
 import {seed,validatePlan} from '../lib/plan';
-import {EDITION,EDITIONS,ID_PREFIXES,ID_REF,PARTS,PATHS,PDF_PLACEHOLDERS,allIds,allItems,buildPackage,checkOutputs,contentFingerprint,declaration,editionLabel,editionProblems,eol,exact,leafPaths,notCoveredFrom,packageProblems,packageTexts,pdfText,readFont,render,verifiedText,type Expect,type Package,type ProgramCheck,type RuleItem,type Scenario} from '../scripts/lektori-csomag';
+import {mainResults,parseInputs,runCalc,type Raw} from '../lib/calc/core';
+import {CALCULATORS,bySlug,calcFingerprint} from '../lib/calc/registry';
+import {T1_SLUGS,TABLE_GATED,type ExpertReview} from '../lib/calc/release';
+import {sourceFingerprint} from '../scripts/calc-source';
+import {EDITION,EDITIONS,ID_PREFIXES,calcBadgeTexts,ID_REF,NAME_PLACES,PARTS,PATHS,PDF_PLACEHOLDERS,T1_ORDER,allIds,allItems,approvedFingerprints,approvedTexts,buildPackage,checkOutputs,contentFingerprint,declaration,editionLabel,editionProblems,eol,exact,kalId,leafPaths,notCoveredFrom,packageProblems,packageTexts,partFingerprint,pdfText,readFont,releaseRefProblems,render,verifiedText,type CalcExpect,type Expect,type Package,type ProgramCheck,type RuleItem,type Scenario} from '../scripts/lektori-csomag';
 
 const pkg=buildPackage(),font=readFont(),out=render(pkg,font),md=out.md;
 const T=SIZING_TABLES;
@@ -39,7 +43,8 @@ const matrixChanged=structuredClone(pkg) as Package;
 matrixChanged.parts[0].blocks.find(b=>b.matrix)!.matrix!.rows[0].cells[0]='999';
 assert.notEqual(contentFingerprint(matrixChanged.parts),pkg.fingerprints.content,'mátrix → csomag-ujjlenyomat');
 const texts=packageTexts();
-assert.notEqual(contentFingerprint(pkg.parts,{...texts,approval:{...texts.approval,declaration:texts.approval.declaration.replace('nem terjed ki a csomag 3–6. részére','kiterjed a csomag 3–6. részére is')}}),pkg.fingerprints.content,'nyilatkozat → csomag-ujjlenyomat');
+assert.notEqual(contentFingerprint(pkg.parts,{...texts,approval:{...texts.approval,declaration:texts.approval.declaration.replace('nem terjed ki a csomag 4–6. részére','kiterjed a csomag 4–6. részére is')}}),pkg.fingerprints.content,'nyilatkozat → csomag-ujjlenyomat');
+assert.notEqual(contentFingerprint(pkg.parts,{...texts,approval:{...texts.approval,calcNote:texts.approval.calcNote+' '}}),pkg.fingerprints.content,'kalkulátoronkénti döntés szövege → csomag-ujjlenyomat');
 assert.notEqual(contentFingerprint(pkg.parts,{...texts,intro:texts.intro.slice(1)}),pkg.fingerprints.content,'bevezető → csomag-ujjlenyomat');
 // CRLF-es klónban sem jelez hamisan elavultat.
 assert.equal(eol(md.replace(/\n/g,'\r\n')),md);
@@ -86,13 +91,14 @@ assert.ok(packageProblems({...pkg,parts:[...pkg.parts,{no:9,title:'próba',intro
 assert.equal(pkg.fingerprints.tables,tablesFingerprint());
 assert.equal(pkg.fingerprints.tables,fingerprint(reviewedContent()));
 assert.ok(md.includes(`| 1. rész – táblázat-ujjlenyomat | ${tablesFingerprint()} `),'a fejléc a táblázat-ujjlenyomatot mutatja');
-assert.ok(md.includes(`1. rész: ${tablesFingerprint()}; 2. rész: ${pkg.fingerprints.formulas}`),'a jóváhagyó lap az ujjlenyomatokat mutatja');
+assert.ok(md.includes(`1. rész: ${tablesFingerprint()}; 2. rész: ${pkg.fingerprints.formulas}; 3. rész: ${pkg.fingerprints.calculators}`),'a jóváhagyó lap az ujjlenyomatokat mutatja');
+assert.equal(pkg.fingerprints.calculators,partFingerprint(pkg.parts[2]));assert.ok(md.includes(`| Jóváhagyott csomagverzió és ujjlenyomatok | ${approvedFingerprints(pkg)} |`));
 assert.ok(md.includes(`| Táblázatváltozat | ${T.version} |`));
 assert.ok(md.includes(`| Csomagverzió | ${editionLabel()} |`));
 
 // (e) A PDF legenerálható, determinisztikus, ésszerű terjedelmű, és minden kiírt karakter szerepel a betűkészletben.
 assert.ok(out.pdf.length>20000,'PDF mérete: '+out.pdf.length);
-assert.ok(out.pages>=12&&out.pages<=45,'PDF oldalszáma: '+out.pages);
+assert.ok(out.pages>=40&&out.pages<=110,'PDF oldalszáma: '+out.pages);
 assert.ok(out.pdf.equals(render(pkg,font).pdf),'a PDF determinisztikus');
 assert.ok(out.pdf.subarray(0,5).toString()==='%PDF-');
 assert.ok(md.includes(declaration(out.pages))&&declaration(out.pages).includes(`${out.pages} oldalas`),'a nyilatkozat a PDF oldalszámát rögzíti');
@@ -153,6 +159,29 @@ function scenarioErrors(s:Scenario,expect:Expect):string[]{
  }
  return errors;
 }
+const sp=(s:string)=>s.replace(/[\u00a0\u202f]/g,' ');
+/** Kalkulátorfuttatás (lib/calc runCalc, a kalkulátoroldal motorja) és az elvárások összevetése (lásd CalcExpect). */
+function calcErrors(slug:string,input:Raw,expect:CalcExpect):string[]{
+ const d=bySlug(slug);if(!d)return ['nincs ilyen kalkulátor: '+slug];
+ const r=runCalc(d,input),errors:string[]=[];
+ for(const [key,want] of Object.entries(expect)){
+  const colon=key.indexOf(':'),kind=colon<0?key:key.slice(0,colon),arg=colon<0?'':key.slice(colon+1);
+  let got:unknown,ok:boolean;
+  if(kind==='ok'){got=r.ok;ok=got===want}
+  else if(kind==='error'||kind==='errorField'){const i=r.ok?undefined:r.issues.find(x=>x.level==='error');got=kind==='error'?(i?sp(i.text):undefined):i?.field;ok=kind==='error'?typeof got==='string'&&got.includes(String(want)):got===want}
+  else if(!r.ok){got='nincs eredmény: '+r.issues.map(i=>i.text).join('; ');ok=false}
+  else if(kind==='text'){got=sp(r.out.results.find(x=>x.id===arg)?.text??'');ok=got===want}
+  else if(kind==='verdict'){got=r.out.verdict?.ok;ok=got===want}
+  else if(kind==='verdictText'){got=sp(r.out.verdict?.text??'');ok=(got as string).includes(String(want))}
+  else if(kind==='issue'||kind==='noIssue'){const t=r.issues.map(i=>sp(i.text));got=t;ok=t.some(x=>x.includes(String(want)))===(kind==='issue')}
+  else if(kind==='issues'){got=r.issues.length;ok=got===want}
+  else if(kind==='assumption'){const t=(r.out.assumptions??[]).map(sp);got=t;ok=t.some(x=>x.includes(String(want)))}
+  else if(kind==='primary'){got=mainResults(r.out).map(x=>x.id).join(',');ok=got===want}
+  else{const x=r.out.results.find(x=>x.id===key);got=x?x.value:null;ok=want===null?x===undefined:typeof want==='number'&&typeof got==='number'&&near(got,want)}
+  if(!ok)errors.push(`${key}: várt ${JSON.stringify(want)}, kapott ${JSON.stringify(got)}`);
+ }
+ return errors;
+}
 function schemaOk(scope:'circuit'|'plan'|'board'|'override',field:string,value:unknown):boolean{
  switch(scope){
   case 'circuit':return circuitSizingSchema.safeParse({[field]:value}).success;
@@ -179,11 +208,18 @@ function run(c:ProgramCheck):string[]{
   case 'schema':return bool(schemaOk(...c.args)===c.expect);
   case 'notCovered':return bool(JSON.stringify(SIZING_NOT_COVERED)===JSON.stringify(c.expect));
   case 'labels':{const e=c.expect;return bool(statusLabels.ok===e.ok&&statusLabels.warn===e.warn&&statusLabels.fail===e.fail&&statusLabels.na===e.na&&checkStatusLabels.ok===e.checkOk&&checkStatusLabels.skipped===e.skipped)}
+  case 'calc':return calcErrors(c.args[0],c.args[1],c.expect);
+  case 'calcField':{const d=bySlug(c.args[0]);if(!d)return ['nincs ilyen kalkulátor'];return bool(!parseInputs(d,c.args[1]).issues.some(i=>i.field===c.args[2])===c.expect)}
+  case 'calcNotCovered':return bool(JSON.stringify(bySlug(c.args[0])?.notCovered)===JSON.stringify(c.expect));
  }
 }
 const items=allItems(pkg),checks=items.flatMap(i=>(i.kind==='rule'?i.checks:i.checks??[]).map(c=>({id:i.id,c})));
 for(const {id,c} of checks){const e=run(c);assert.deepEqual(e,[],`${id}: a példa nem egyezik a programmal (${c.fn} ${JSON.stringify(c.args)} → várt ${JSON.stringify(c.expect)}): ${e.join('; ')}`)}
 assert.ok(checks.length>=150,'programmal összevetett esetek száma: '+checks.length);
+// A kalkulátor-összevetés is tényleg jelez.
+assert.equal(calcErrors('feszultseges',{},{pct:3,'text:Lmax':'x',verdict:false,issue:'nincs ilyen',primary:'dU'}).length,5);
+assert.equal(calcErrors('feszultseges',{I:'0'},{ok:true}).length,1);assert.equal(calcErrors('feszultseges',{I:'0'},{pct:1}).length,1);
+assert.equal(run({fn:'calcField',args:['feszultseges',{I:'1000'},'I'],expect:false}).length,1);
 // A forgatókönyv-ellenőrzés tényleg jelez (rossz elvárásra hibát ad).
 assert.ok(scenarioErrors({circuit:'c1'},{status:'fail'}).length===1&&scenarioErrors({circuit:'c1',routeCable:'3 × 3 mm²'},{status:'na'}).length===1);
 const rules=items.filter((i):i is RuleItem=>i.kind==='rule');
@@ -212,30 +248,86 @@ if(SIZING_REVIEW.status==='jóváhagyott'){
  assert.ok(approved,`a SIZING_REVIEW.note-ban szereplő LK-${named[0]} nincs az EDITIONS-ben`);
  assert.ok(SIZING_REVIEW.note.includes(approved.content),`a SIZING_REVIEW.note-ban szerepeljen az LK-${approved.number} csomag-ujjlenyomata (${approved.content})`);
  assert.ok(SIZING_REVIEW.note.includes(pkg.fingerprints.formulas),'a 2. rész (képletek) a jóváhagyás óta megváltozott, vagy az ujjlenyomata hiányzik a SIZING_REVIEW.note-ból: új jóváhagyás kell');
- assert.ok(tablesApproved()&&md.includes('| Jóváhagyási állapot | jóváhagyott – '));
+ assert.ok(tablesApproved()&&md.includes('| Jóváhagyási állapot (1. rész) | jóváhagyott – '));
 }else{
  assert.equal(tablesApproved(),false);
- assert.ok(md.includes('| Jóváhagyási állapot | ellenőrizendő – jogosult tervező még nem hagyta jóvá |'));
+ assert.ok(md.includes('| Jóváhagyási állapot (1. rész) | ellenőrizendő – jogosult tervező még nem hagyta jóvá |'));
 }
+// A T1 kalkulátorok lektori rekordja (lib/calc/release.ts) pontosan egy létező kiadásra hivatkozik, annak csomag-ujjlenyomatával.
+assert.deepEqual(releaseRefProblems(),[]);
+const rec=(approvalRef?:string):ExpertReview=>({kind:'lektoralt',reviewer:'Teszt Elek',qualification:'villamos tervező',registry:'00-0000',date:'2026-11-01',fingerprint:'0',source:'0',approvalRef});
+assert.deepEqual(releaseRefProblems({feszultseges:rec(`Lektori csomag LK-${EDITION.number}, csomag: ${EDITION.content}`)}),[]);
+assert.ok(releaseRefProblems({feszultseges:rec()})[0].includes('pontosan egy'));
+assert.ok(releaseRefProblems({feszultseges:rec(`LK-${EDITION.number} és LK-1`)})[0].includes('pontosan egy'));
+assert.ok(releaseRefProblems({feszultseges:rec(`LK-${EDITION.number+1}`)})[0].includes('nincs az EDITIONS-ben'));
+assert.ok(releaseRefProblems({feszultseges:rec(`LK-${EDITION.number}`)})[0].includes('csomag-ujjlenyomata'));
+assert.deepEqual(releaseRefProblems({'ohm-torveny':rec()}),[],'T0 rekordot a csomag nem köt');
 
 // (h) Szerkezet: helyőrzők, jóváhagyó lap, szóhasználat, a név megjelenésének leírása.
 assert.deepEqual(pkg.parts.map(p=>p.no),[1,2,3,4,5,6]);assert.equal(PARTS.length,6);
-for(const p of pkg.parts.filter(p=>p.no>=3))assert.ok(p.placeholder&&!p.blocks.length,p.no+'. rész helyőrző');
-assert.ok(md.toLowerCase().includes('a kalkulátorok elkészülte után kerül be'));
-for(const t of ['## Jóváhagyó lap','### Döntés és aláírás','Jóváhagyó neve','Kamarai / névjegyzéki szám','Jogosultság megnevezése','| Hely |','| Dátum |','| Aláírás |','### Teendő eltérés esetén','Mit jelent a jóváhagyás – és mit nem?','### Becsült ráfordítás','### Hogyan kell kitölteni?','a többi, pipálatlanul hagyott tétel egyezőnek számít','Megjegyzés a blokkhoz (forrás, kiadás)','külön mellékletben'])assert.ok(md.includes(t),'hiányzik: '+t);
+for(const p of pkg.parts.filter(p=>p.no<=3))assert.ok(!p.placeholder&&p.blocks.length,p.no+'. rész kész');
+for(const p of pkg.parts.filter(p=>p.no>=4))assert.ok(p.placeholder&&!p.blocks.length,p.no+'. rész helyőrző');
+assert.ok(md.includes('A Sémák ábráinak elkészülte után kerül be'));
+for(const t of ['## Jóváhagyó lap','### 3. rész – kalkulátoronkénti döntés','### Döntés és aláírás','Jóváhagyó neve','Kamarai / névjegyzéki szám','Jogosultság megnevezése','| Hely |','| Dátum |','| Aláírás |','### Teendő eltérés esetén','Mit jelent a jóváhagyás – és mit nem?','### Becsült ráfordítás','### Hogyan kell kitölteni?','a többi, pipálatlanul hagyott tétel egyezőnek számít','Megjegyzés a blokkhoz (forrás, kiadás)','külön mellékletben'])assert.ok(md.includes(t),'hiányzik: '+t);
 assert.ok(!/szakmailag ellenőrzött|MSZ szerint megfelel|megfelel a szabványnak|szabványos méretezés/i.test(md),'tiltott kifejezés');
-// A név megjelenése a program pontos szövegével és helyeivel van leírva.
-const shown=reviewText({status:'jóváhagyott',reviewer:'[név]',registry:'[névjegyzéki szám]',date:'[dátum]',fingerprint:tablesFingerprint(),note:''});
-assert.ok(md.split(shown).length>=3,'a jóváhagyási szöveg a bevezetőben és a hozzájárulásban is szerepel');
+// A név megjelenése a program pontos szövegével és helyeivel van leírva: névvel (hozzájárulással) és név nélkül.
+const base={status:'jóváhagyott' as const,reviewer:'[név]',registry:'[névjegyzéki szám]',date:'[dátum]',fingerprint:tablesFingerprint(),note:''};
+const shown={named:reviewText({...base,showName:true}),anonymous:reviewText({...base,showName:false})};
+assert.deepEqual(approvedTexts(),shown);assert.ok(shown.named.includes('[név]')&&!shown.anonymous.includes('[név]')&&!shown.anonymous.includes('[névjegyzéki szám]'));
+for(const t of [shown.named,shown.anonymous])assert.ok(md.split(t).length>=3,'a jóváhagyási szöveg a bevezetőben és a hozzájárulásban is szerepel: '+t);
+// A kalkulátoroldal lektori jelölése (lib/calc/registry.ts): név csak hozzájárulással, különben a minősítés.
+const badges=calcBadgeTexts();
+assert.equal(badges.named,'Szakmailag lektorálta: [név], [minősítés] · [dátum]; Szakmai lektor: [név], [minősítés]');
+assert.equal(badges.anonymous,'Szakmailag lektorálta: [minősítés] · [dátum]; Szakmai lektor: [minősítés]');
+for(const t of [badges.named,badges.anonymous])assert.ok(md.split(t).length>=3,'a kalkulátorjelvény szövege a bevezetőben és a hozzájárulásban: '+t);
 assert.ok(md.includes('„Táblázatok – Állapot” sorában')&&md.includes('Tervezői ellenőrzés'));
+assert.ok(md.includes('A jóváhagyás érvénye a hozzájárulástól nem függ.'));
+// A reviewText() minden megjelenési helye a hozzájárulás szövegében (NAME_PLACES) szerepel: új hely csak a felsorolással és a lektor
+// hozzájárulásával kerülhet be. A forráskódban a reviewText()-et hívó fájlok:
+const walk=(dir:string):string[]=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(dir+'/'+e.name):/\.tsx?$/.test(e.name)?[dir+'/'+e.name]:[]);
+const callers=['app','components','lib'].flatMap(walk).filter(f=>/\breviewText\(/.test(readFileSync(f,'utf8'))&&f!=='lib/sizing-tables.ts').sort();
+assert.deepEqual(callers,['app/(kezikonyv)/kalkulatorok/[slug]/page.tsx','components/sizing-report.tsx','lib/calc/defs/vezetek-ellenallas.ts','lib/sizing.ts'],'a jóváhagyó neve új helyen jelenne meg: bővítsd a NAME_PLACES-t (és kérd a lektor hozzájárulását)');
+for(const d of CALCULATORS.filter(c=>c.tables))assert.ok(NAME_PLACES().includes(d.title),'NAME_PLACES: '+d.title);
+assert.ok(NAME_PLACES().includes('Méretezés fülén')&&NAME_PLACES().includes('terv-PDF')&&NAME_PLACES().includes('Vezeték-ellenállás'));
 // A 2. rész kötése pontosan van leírva (a program csak az 1. részt köti ujjlenyomathoz).
 assert.ok(md.includes('A 2. rész (képletek, döntések) jóváhagyását a program állapota nem követi.'));
 // A „Mit nem vizsgál” lista a program listája (SIZING_NOT_COVERED), szó szerint.
 assert.deepEqual(pkg.notCovered,SIZING_NOT_COVERED);
 assert.ok(rules.find(r=>r.id==='D-HATOKOR')!.rule.includes(SIZING_NOT_COVERED.join('; ')));
+// A docs/meretezes.md „Mit nem vizsgál” listája szó szerint a programé (eltérésnél a dokumentációt kell igazítani).
 const docList=notCoveredFrom(readFileSync(PATHS.sizingDoc,'utf8'));
-if(JSON.stringify(docList)!==JSON.stringify(SIZING_NOT_COVERED))console.warn(`Figyelem: a ${PATHS.sizingDoc} „Mit nem vizsgál” listája eltér a program SIZING_NOT_COVERED listájától (a csomag a programét mutatja). Eltérő tételek: ${[...SIZING_NOT_COVERED.filter(x=>!docList.includes(x)),...docList.filter(x=>!SIZING_NOT_COVERED.includes(x))].map(x=>'„'+x+'”').join(', ')}.`);
+assert.deepEqual(docList,SIZING_NOT_COVERED,`a ${PATHS.sizingDoc} „Mit nem vizsgál” listája eltér a program SIZING_NOT_COVERED listájától. Eltérő tételek: ${[...SIZING_NOT_COVERED.filter(x=>!docList.includes(x)),...docList.filter(x=>!SIZING_NOT_COVERED.includes(x))].map(x=>'„'+x+'”').join(', ')}`);
 assert.throws(()=>notCoveredFrom('# Üres'),/Mit nem vizsgál/);
 
+// (i) 3. rész: minden T1 kalkulátor (a release.ts T1_SLUGS listája) saját blokkot kap, a mostani ujjlenyomat-párral; minden mezője
+// tételként, a számmezők korlátai a tartomány szélein, minden eredménye legalább egy kézzel számolt példában a runCalc-kal összevetve.
+assert.deepEqual([...T1_ORDER].sort(),[...T1_SLUGS].sort(),'a 3. rész a release.ts összes T1 kalkulátorát tartalmazza');
+const part3=pkg.parts[2];
+assert.deepEqual(part3.blocks.map(b=>b.id),['KAL-KOZOS',...T1_ORDER.map(kalId)]);
+assert.equal(kalId('led-szalag-tapegyseg'),'KAL-LED-SZALAG-TAPEGYSEG');
+for(const slug of T1_ORDER){
+ const d=bySlug(slug)!,b=part3.blocks.find(x=>x.id===kalId(slug))!,fp=calcFingerprint(d),src=sourceFingerprint(slug);
+ assert.ok(b.intro.join(' ').includes(`Tartalmi ujjlenyomat: ${fp}; forrás-ujjlenyomat: ${src}`),slug+': az ujjlenyomat-pár a blokk elején');
+ const row=pkg.calcs.find(c=>c.slug===slug)!;assert.deepEqual([row.fingerprint,row.source,row.gated],[fp,src,TABLE_GATED.has(slug)]);
+ assert.ok(md.includes(`| ${d.title} | ${kalId(slug)} | ${fp} | ${src} | ${TABLE_GATED.has(slug)?'igen':'nem'} | ☐ Jóváhagyom · ☐ Javítás után / nem |`),slug+': kalkulátoronkénti döntés sora');
+ assert.ok(b.title===d.title&&b.source===d.sources.join('; '));
+ for(const f of d.fields){const it=b.items.find(i=>i.id===kalId(slug)+'-BEM-'+f.id.toUpperCase());assert.ok(it&&it.kind==='value',slug+'.'+f.id+': bemenet tétele');if(f.kind==='number')assert.ok((it.checks??[]).filter(c=>c.fn==='calcField').length>=3,slug+'.'+f.id+': korlátok összevetve')}
+ for(const id of ['HAT','NV','KEPLET','FELT'])assert.ok(b.items.some(i=>i.id===kalId(slug)+'-'+id),slug+': '+id);
+ assert.ok(b.items.find(i=>i.id===kalId(slug)+'-KEPLET')!.kind==='value'&&md.includes(d.formulas.join(' · ')),slug+': a képletek szó szerint');
+ const calcs=b.items.flatMap(i=>i.kind==='rule'?i.checks:[]).filter((c):c is Extract<ProgramCheck,{fn:'calc'}>=>c.fn==='calc'&&c.args[0]===slug);
+ const worked=calcs.filter(c=>Object.entries(c.expect).filter(([k,v])=>!k.includes(':')&&typeof v==='number').length>=2);
+ assert.ok(worked.length>=2,slug+': legalább 2 kézzel számolt példa a runCalc-kal összevetve');
+ const ids=runCalc(d,{}).ok?(runCalc(d,{}) as {out:{results:{id:string}[]}}).out.results.map(r=>r.id):[];
+ const all=new Set([...d.examples.flatMap(ex=>{const r=runCalc(d,ex.input);return r.ok?r.out.results.map(x=>x.id):[]}),...ids]);
+ for(const id of all)assert.ok(calcs.some(c=>typeof c.expect[id]==='number'),slug+': a(z) „'+id+'” eredmény egy példában sincs összevetve');
+ if(d.notCovered?.slice(0,SIZING_NOT_COVERED.length).join('|')===SIZING_NOT_COVERED.join('|'))assert.ok(b.items.find(i=>i.id===kalId(slug)+'-NV')!.checks?.some(c=>c.fn==='calcNotCovered'),slug+': a Nem vizsgált lista összevetve');
+}
+// A táblázatértékeket a 3. rész nem ismétli: a szövegek az 1. rész azonosítóira hivatkoznak (pl. ρ1 = T-K-RHO1).
+const p3text=JSON.stringify(part3.blocks.slice(1).map(b=>b.items.map(i=>i.kind==='rule'?[i.rule,i.rationale,i.source]:[i.value])));
+for(const id of ['T-K-RHO1','T-K-LAMBDA','T-K-U0','T-K-CMIN','T-K-I2','T-KM-SOR','T-KCS-3','T-KT-35','T-DU-KOZ-EGY'])assert.ok(p3text.includes(id),'3. rész hivatkozik: '+id);
+assert.ok(!/\bA2 – többeres kábel/.test(p3text),'a szerelésimód-leírásokat (L-MOD-…) nem ismétli');
+// A kalkulátorok példái a tervező méretezésével is egyeznek (pl. ΔU 23,4 m-en = a mintaterv c1 áramkörének esése, K-DU1).
+assert.ok(near(scenario({circuit:'c1',set:{load:3680}}).drop!,voltageDropPercent({b:2,length:23.4,current:16,section:2.5,cosPhi:1})));
+
 const counts=pkg.parts.map(p=>p.blocks.reduce((s,b)=>s+b.items.length,0));
-console.log(`PASS: lektori csomag – ${editionLabel()}, ${counts[0]+counts[1]} tétel (1. rész ${counts[0]}, 2. rész ${counts[1]}), ${checks.length} programmal összevetett eset, ${out.pages} PDF-oldal; naprakész, ujjlenyomat ${pkg.fingerprints.tables}.`);
+console.log(`PASS: lektori csomag – ${editionLabel()}, ${counts[0]+counts[1]+counts[2]} tétel (1. rész ${counts[0]}, 2. rész ${counts[1]}, 3. rész ${counts[2]}), ${checks.length} programmal összevetett eset, ${out.pages} PDF-oldal; naprakész, ujjlenyomatok: 1. rész ${pkg.fingerprints.tables}, 2. rész ${pkg.fingerprints.formulas}, 3. rész ${pkg.fingerprints.calculators}.`);

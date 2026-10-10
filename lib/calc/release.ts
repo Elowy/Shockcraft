@@ -5,7 +5,8 @@
 //  - a rekord `fingerprint`-je egyezik a definíció mostani tartalmi ujjlenyomatával (calcFingerprint, lib/calc/registry.ts:
 //    mezők, képletek, példák, szövegek, források, verzió) – ezt futásidőben is ellenőrizzük,
 //  - a rekord `source`-a egyezik a számítás forrásának ujjlenyomatával (scripts/calc-source.ts: a definíció ÉS a futásidőben
-//    importált helyi modulok szövege, így a compute, a levezetés és a kiírás kódja is) – ezt a CI (tests/calc.ts) ellenőrzi,
+//    importált helyi modulok szövege, így a compute, a levezetés és a kiírás kódja is; a lib/sizing-tables.ts SIZING_REVIEW-blokkja
+//    nélkül, hogy a táblázatjóváhagyás rögzítése ne érvénytelenítse a rekordot) – ezt a CI (tests/calc.ts) ellenőrzi,
 //    mert a lefordított kód buildenként eltér,
 //  - T0 esetén a rekord „belso” (belső kettős ellenőrzés) vagy „lektoralt”,
 //  - T1 esetén (T1_SLUGS) a rekord „lektoralt” (szakmai lektor neve, minősítése, névjegyzéki száma, dátuma),
@@ -19,7 +20,9 @@
 
 /** `fingerprint`: tartalmi ujjlenyomat (calcFingerprint); `source`: a számítás forrásának ujjlenyomata (scripts/calc-source.ts). */
 export type InternalCheck={kind:'belso';by:string;date:string;fingerprint:string;source:string;note:string};
-export type ExpertReview={kind:'lektoralt';reviewer:string;qualification:string;registry:string;date:string;fingerprint:string;source:string;approvalRef?:string};
+/** `showName`: a lektor neve csak kifejezett hozzájárulással (a jóváhagyó lapon jelölve) jelenik meg a kalkulátoroldalon; különben
+ * (alapértelmezés) a minősítése. A kiadás érvénye ettől nem függ (lib/calc/registry.ts expertShown). */
+export type ExpertReview={kind:'lektoralt';reviewer:string;qualification:string;registry:string;date:string;fingerprint:string;source:string;approvalRef?:string;showName?:boolean};
 export type ReleaseRecord=InternalCheck|ExpertReview;
 
 const internal=(fingerprint:string,source:string):InternalCheck=>({kind:'belso',by:'Villanyrajz fejlesztés',date:'2026-10-10',fingerprint,source,note:'Két független számítás egyezése: a példák elvárt értékeit a TypeScript-motortól független Python-újraszámolás adta (scripts/calc-golden-indep.py), a motor eredményét relatív tűrésű golden teszt veti össze (tests/calc-golden.ts). Második személy általi kézi újraszámolás még nem történt (docs/kalkulatorok.md).'});
@@ -30,7 +33,7 @@ export const RELEASES:Readonly<Record<string,ReleaseRecord>>={
  'teljesitmeny':internal('ebd0fc6c','1f711e4b'),
  'aram-teljesitmenybol':internal('3a41fde4','76524b79'),
  'latszolagos-meddo-teljesitmeny':internal('6cbe82be','d2d2e986'),
- 'vezetek-ellenallas':internal('d9071472','03bb79b2'),
+ 'vezetek-ellenallas':internal('d9071472','e4132d78'),
  'eredo-ellenallas':internal('ad526130','e61119a4'),
  'fogyasztas-koltseg':internal('287866bc','c220950e'),
  'fazisterheles':internal('6bbaec42','554c9453'),

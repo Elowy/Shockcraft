@@ -43,8 +43,9 @@ const B='(?:^|[^\\p{L}\\d])',E='(?=$|[^\\p{L}\\d])';
 const AL=new RegExp(B+'(?:al|alu|alumínium|aluminium|nayy\\w*|na2x\\w*|ayky\\w*|amka)'+E,'iu');
 const XLPE=new RegExp(B+'(?:n2x\\w*|2xy|xlpe|epr)'+E,'iu');
 const PVC=new RegExp(B+'(?:nym\\w*|nyy\\w*|nycwy|mbcu|mcu|mkcu|mt|myy|yky\\w*|cyky\\w*|h0[357]v\\w*|pvc)'+E,'iu');
-/** Gumiszigetelés (60 °C-os vezetőhőmérséklet): H05RR-F, H07RN-F, GT, „gumi…”. */
-const RUBBER=new RegExp(B+'(?:h0[357]r[nrt]\\w*|gumi\\w*|gt)'+E,'iu');
+/** Gumiszigetelés (60 °C-os vezetőhőmérséklet): H05RR-F, H07RN-F, GT, „gumi…”. A „gumi” után tetszőleges (ékezetes is) betű vagy
+ * számjegy állhat („gumikábel”, „gumiszigetelésű”): a \w csak ASCII-betűt fogad el, ezért itt [\p{L}\d]. */
+const RUBBER=new RegExp(B+'(?:h0[357]r[nrt]\\w*|gumi[\\p{L}\\d]*|gt)'+E,'iu');
 /** Egy ér × keresztmetszet pár után közvetlenül álló további ér („+16”, „/1.5”, „+1x6”); a feszültségjelölés („/1 kV”) nem az. */
 const EXTRA=/^\s*[+/]\s*(?:\d{1,2}\s*[xg]\s*)?(\d{1,3}(?:\.\d{1,2})?)(?![\d.]*\d)(?!\s*k?v(?!\p{L}))/iu;
 const PAIR=/(?<![\p{L}\d.])(\d{1,2})\s*[xg]\s*(\d{1,3}(?:\.\d{1,2})?)(?![\d.]*\d)/giu;

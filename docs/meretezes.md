@@ -12,7 +12,7 @@ A teljes szöveg (`SIZING_DISCLAIMER`, `lib/sizing.ts`) a fül tetején (nem zá
 
 | Ellenőrzés | Szabály | Szabványpont |
 |---|---|---|
-| Kábeljelölés | a kábelszövegből (`3 × 2,5 mm²`, `NYM-J 3x1,5`, `5G6`, `H07V-U 2,5 mm²`, `MCu 2,5`) kiolvasható keresztmetszet és érszám; alumínium, gumiszigetelésű (pl. `H07RN-F`), csökkentett N/PE-erű (pl. `3x25+16`, `3x2,5/1,5`) vagy a táblázatnál nagyobb keresztmetszetű kábel „Nem számítható” | – |
+| Kábeljelölés | a kábelszövegből (`3 × 2,5 mm²`, `NYM-J 3x1,5`, `5G6`, `H07V-U 2,5 mm²`, `MCu 2,5`) kiolvasható keresztmetszet és érszám; alumínium, gumiszigetelésű (pl. `H07RN-F`, `GT`, „gumikábel”, „gumiszigetelésű” – a szó eleji „gumi…” ékezetes folytatással is), csökkentett N/PE-erű (pl. `3x25+16`, `3x2,5/1,5`) vagy a táblázatnál nagyobb keresztmetszetű kábel „Nem számítható” | – |
 | Legkisebb keresztmetszet | réz: A ≥ a `lib/sizing-tables.ts`-ben rögzített legkisebb keresztmetszet | MSZ HD 60364-5-52 524.1, 52.2 táblázat |
 | Erek száma | egyfázisnál ≥ 3 (L, N, PE), háromfázisnál 5 (4 N nélkül) – figyelmeztetés | – |
 | Mértékadó hossz | megadott hossz, vagy a nyomvonalak soros összege | – |
@@ -98,13 +98,15 @@ A lábléc ilyenkor: „Tervdokumentáció. Ráhagyás nélkül; a méretezési 
 
 ## Mit nem vizsgál
 
+A lista szó szerint a program `SIZING_NOT_COVERED` listája (felület és PDF); eltérésnél a `tests/lektori-csomag.ts` elbukik.
+
 - zárlati szilárdság (k²S² ≥ I²t, 434.5.2)
 - szelektivitás és egyidejűség
 - felharmonikusok és a nullavezető terhelése
 - motorok, indítási áramok
 - aszimmetrikus háromfázisú terhelés
 - földben (D), szabad levegőn (E, F, G) vezetett kábel; hőszigetelésben futó hosszú szakasz (523.9)
-- alumínium vezető, 35 mm² feletti keresztmetszet
+- alumínium vezető, 35 mm² feletti keresztmetszet, gumiszigetelésű (60 °C-os) vezeték, csökkentett keresztmetszetű N- vagy PE-ér
 - TT-rendszer hurokellenőrzése, földelési ellenállás, EPH
 - ÁVK kiválasztása (típus, érzékenység), túlfeszültség-védelem
 - különleges helyiségek (pl. fürdőszoba, MSZ HD 60364-7-701)
@@ -125,10 +127,12 @@ A jóváhagyás tárgya (`reviewedContent()`): a számértékek (`SIZING_TABLES`
 3. A `tests/sizing.ts` kidolgozott (kézzel számolt) példáinak átnézése.
 4. Az ujjlenyomat kiírása:
    `node --no-warnings --import tsx -e "import('./lib/sizing-tables.ts').then(m=>console.log(m.tablesFingerprint()))"`
-5. A `SIZING_REVIEW` kitöltése (`status: 'jóváhagyott'`, `reviewer`, `registry` = névjegyzéki szám, `date`, `fingerprint`).
+5. A `SIZING_REVIEW` kitöltése (`status: 'jóváhagyott'`, `reviewer`, `registry` = névjegyzéki szám, `date`, `fingerprint`, `showName`) – a lektori csomag aláírt jóváhagyó lapja alapján (`docs/lektoralas.md`).
 6. A `tests/sizing-tables.ts` és a `tests/sizing.ts` lefuttatása (mindkettő a jóváhagyott állapotra is zöld), majd PR.
 
 A jóváhagyás az ujjlenyomathoz kötött: ha utána bármely táblázatérték, forrásmegjelölés, hivatkozott szabványpont vagy mód-/szigetelésleírás megváltozik, a `tablesApproved()` hamis lesz, és a `tests/sizing-tables.ts` elbukik, amíg új jóváhagyás nem készül.
+
+**A jóváhagyás megjelenő szövege** (`reviewText()`, a Méretezés fülön, a terv-PDF „méretezés indoklása” táblájában és a táblázatokat használó kalkulátoroldalakon): jóváhagyásig „Ellenőrizendő: …”; jóváhagyás után a jóváhagyó kifejezett hozzájárulásával (`showName: true`) „A táblázatértékeket szakmailag lektorálta: <név> (<névjegyzéki szám>), <dátum>. …”, hozzájárulás nélkül (alapértelmezés) „A táblázatértékeket jogosult villamos tervező szakmailag lektorálta, <dátum>. …”. A jóváhagyás érvénye (`tablesApproved()`) a `showName`-től nem függ: a név és a névjegyzéki szám a `SIZING_REVIEW`-ban akkor is rögzített. A szövegsablonok (`REVIEW_TEXTS`) szándékosan nem részei a táblázat-ujjlenyomatnak (`reviewedContent()`): nem szakmai tartalom, és a megjelenítés nem érintheti a jóváhagyás érvényét; a lektori csomag ujjlenyomata viszont fedi őket, és a `tests/sizing-tables.ts` szó szerint rögzíti (változásuk új csomagkiadást, névvel megjelenítésnél új hozzájárulást igényel).
 
 ### Jóváhagyó tervezőnek
 

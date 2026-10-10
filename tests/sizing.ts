@@ -287,8 +287,17 @@ assert.equal(check(size(p,'k20'),'design-current').status,'ok');
 // 21.4 Gumiszigetelés (60 °C): nem számítható; az ismeretlen szigetelés PVC-feltételezése kiemelt.
 for(const t of ['H07RN-F 3G1,5','H05RR-F 3x1,5','GT 3x2,5'])bad(t,'rubber');
 assert.equal(ok('H07V-U 2,5 mm²').section,2.5,'a H07V nem gumi');
+// A „gumi” szó ékezetes folytatással is (korábban a \w miatt „gumikábel”, „gumiszigetelésű” PVC-alapértéket kapott).
+for(const t of ['gumikábel 3x2,5','gumiszigetelésű 3x2,5','Gumi kábel 3x2,5','Gumi kábel','GUMI 3x2,5','GUMIKÁBEL 3x2,5','Gumikábel 3G1,5','gumis 3x2,5','gumi','Gumi-kábel 3x2,5','gumikabel 3x2,5','gumiszigetelésű, 3 × 2,5 mm²','PVC/gumikábel 3x2,5','H07RN-F 3G2,5','h07rn-f 3g2,5','H05RR-F 3G1,5','H07RT 3x2,5'])bad(t,'rubber');
+// Csak szókezdő „gumi” számít; a többi besorolás nem változott.
+assert.equal(ok('ragumi 3x2,5').insulation,null,'szó belsejében nem gumi');assert.equal(ok('NYM-J 3x2,5').insulation,'PVC');assert.equal(ok('N2XH 3x2,5').insulation,'XLPE');
+bad('Al gumikábel 4x16','aluminium');
 p=fresh();p.circuits.push({id:'g',name:'Gumi',building:'house',phase:'L1',rating:16,curve:'B',cable:'H07RN-F 3G1,5',rcd:'',load:2000,sizing:{length:10}});
 assert.equal(size(p,'g').status,'na');
+for(const cable of ['gumikábel 3x2,5','gumiszigetelésű 3x2,5']){
+ p=fresh();p.circuits.push({id:'g',name:'Gumi',building:'house',phase:'L1',rating:16,curve:'B',cable,rcd:'',load:2000,sizing:{length:10}});
+ r=size(p,'g');assert.equal(r.status,'na',cable);assert.equal(r.iz,null,cable);
+}
 assert.ok(size(fresh(),'c1').assumptions.some(a=>a.strong&&a.text.startsWith('Szigetelés: PVC, 70 °C')&&a.text.includes('60 °C')));
 // 21.5 U0 egyetlen forrásból: U0 = 220 V mellett Ib = 2200 / 220 = 10 A.
 p=fresh();circuit(p,'c1').load=2200;(SIZING_TABLES as {u0:number}).u0=220;

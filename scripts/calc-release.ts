@@ -23,5 +23,5 @@ if(cmd==='list'){
  const fp=calcFingerprint(d),src=sourceFingerprint(d.slug);
  console.log(d.tier==='T0'
   ?`'${d.slug}':internal('${fp}','${src}'),`
-  :`'${d.slug}':{kind:'lektoralt',reviewer:'<név>',qualification:'<minősítés, pl. MMK villamos tervező>',registry:'<névjegyzéki szám>',date:'<ÉÉÉÉ-HH-NN>',fingerprint:'${fp}',source:'${src}',approvalRef:'<jóváhagyó e-mail / jegyzőkönyv azonosítója>'},`);
+  :`'${d.slug}':{kind:'lektoralt',reviewer:'<név>',qualification:'<minősítés, pl. MMK villamos tervező>',registry:'<névjegyzéki szám>',date:'<ÉÉÉÉ-HH-NN>',fingerprint:'${fp}',source:'${src}',approvalRef:'Lektori csomag LK-<n> (<kiadás dátuma>), csomag: <csomag-ujjlenyomat>, 3. rész: <kalkulátor-ujjlenyomat>; jóváhagyó lap: <iktatási hely>',showName:false},  // showName: true csak a jóváhagyó lapon jelölt hozzájárulással`);
 }else{console.error('Használat: scripts/calc-release.ts list | record <slug>');process.exit(1)}

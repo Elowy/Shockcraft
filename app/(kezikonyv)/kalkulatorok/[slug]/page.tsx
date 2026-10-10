@@ -8,7 +8,7 @@ import {JsonLd,breadcrumbLd} from '@/components/kezikonyv/json-ld';
 import {PlannerCta} from '@/components/kezikonyv/planner-cta';
 import {ReportLink} from '@/components/kezikonyv/report-link';
 import {SafetyNotice} from '@/components/kezikonyv/safety-notice';
-import {CALCULATORS,bySlug,calcFingerprint,isPublished,releaseInfo,visibleCalcs} from '@/lib/calc/registry';
+import {CALCULATORS,bySlug,calcFingerprint,expertMeta,isPublished,releaseInfo,visibleCalcs} from '@/lib/calc/registry';
 import {categoryLabel} from '@/lib/calc/categories';
 import {CALC_HUB,OG_BASE,calcPath,calcSeoTitle} from '@/lib/kb/categories';
 import {Sub} from '@/components/calc/sub';
@@ -71,7 +71,7 @@ export default async function CalculatorPage({params}:{params:Promise<{slug:stri
     <CalcExample def={def}/>
     {!!related.length&&<section id="kapcsolodo" className="kk-related" aria-labelledby="kapcsolodo-cim"><h2 id="kapcsolodo-cim">Kapcsolódó kalkulátorok</h2><ul>{related.map(c=><li key={c.slug}><a href={calcPath(c.slug)}><b>{c.title}</b><small>{c.short}</small></a></li>)}</ul></section>}
     <section id="forrasok" className="kk-sources" aria-labelledby="forrasok-cim"><h2 id="forrasok-cim">Források</h2><ul>{def.sources.map(s=><li key={s}><Sub text={s}/></li>)}</ul></section>
-    <p className="kk-meta">Verzió: v{def.version} · ujjlenyomat: {fp} · frissítve: {date(def.updated)} · {info.record?.kind==='lektoralt'?'Szakmai lektor: '+info.record.reviewer:'Ellenőrzés: '+(draft?'folyamatban':'két független számítás egyezése (automatikus teszt)')} · <ReportLink id={def.slug} version={def.version} fingerprint={fp} url={(origin??'')+url}/></p>
+    <p className="kk-meta">Verzió: v{def.version} · ujjlenyomat: {fp} · frissítve: {date(def.updated)} · {info.record?.kind==='lektoralt'?expertMeta(info.record):'Ellenőrzés: '+(draft?'folyamatban':'két független számítás egyezése (automatikus teszt)')} · <ReportLink id={def.slug} version={def.version} fingerprint={fp} url={(origin??'')+url}/></p>
     <PlannerCta/>
    </main>
    <nav className="kk-toc" aria-label="Tartalom"><p className="kk-side-title">Tartalom</p><ul>{toc.map(([id,l])=><li key={id}><a href={'#'+id}>{l}</a></li>)}</ul></nav>

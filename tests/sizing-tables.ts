@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {CLAUSES,INSTALL_METHODS,SECTIONS,SIZING_REVIEW,SIZING_TABLES,SOURCES,capacity,constantRef,conventionalRef,fingerprint,groupingFactor,instantaneousRef,reviewText,reviewedContent,tablesApproved,tablesFingerprint,temperatureFactor,validateSizingTables} from '../lib/sizing-tables';
+import {CLAUSES,INSTALL_METHODS,REVIEW_TEXTS,SECTIONS,SIZING_REVIEW,SIZING_TABLES,SOURCES,capacity,constantRef,conventionalRef,fingerprint,groupingFactor,instantaneousRef,reviewText,reviewedContent,tablesApproved,tablesFingerprint,temperatureFactor,validateSizingTables} from '../lib/sizing-tables';
 
 // A táblázatok állapota a jóváhagyástól függ: szabályos jóváhagyás után is zöldnek kell maradnia.
 const st=tablesApproved()?'jóváhagyott':'ellenőrizendő';
@@ -78,21 +78,40 @@ assert.equal(fingerprint('a'),'61a1cfea');
 assert.equal(fingerprint({x:'ő'}),'cf000a74');
 
 // 8. Jóváhagyás: csak kitöltött, az aktuális ujjlenyomathoz kötött blokk érvényes. A program magától nem jóváhagyott.
+assert.equal(typeof SIZING_REVIEW.showName,'boolean','a név megjelenítéséről kifejezetten dönteni kell (alapértelmezés: false)');
 if(SIZING_REVIEW.status==='jóváhagyott'){
- assert.ok(SIZING_REVIEW.reviewer.trim()&&SIZING_REVIEW.registry.trim()&&SIZING_REVIEW.date.trim(),'a jóváhagyó neve, névjegyzéki száma és a dátum kötelező');
+ assert.ok(SIZING_REVIEW.reviewer.trim()&&SIZING_REVIEW.registry.trim()&&SIZING_REVIEW.date.trim(),'a jóváhagyó neve, névjegyzéki száma és a dátum kötelező (név nélküli megjelenítésnél is)');
  assert.equal(SIZING_REVIEW.fingerprint,tablesFingerprint(),'a jóváhagyás óta megváltozott egy táblázatérték, forrásmegjelölés vagy leírás: új jóváhagyás kell');
  assert.ok(tablesApproved());
+ if(!SIZING_REVIEW.showName)assert.ok(!reviewText().includes(SIZING_REVIEW.reviewer.trim())&&!reviewText().includes(SIZING_REVIEW.registry.trim()),'hozzájárulás nélkül a név és a névjegyzéki szám nem jelenik meg');
 }else{
  assert.equal(SIZING_REVIEW.status,'ellenőrizendő');
+ assert.equal(SIZING_REVIEW.showName,false,'jóváhagyás nélkül nincs megjeleníthető név');
  assert.equal(tablesApproved(),false);
  assert.ok(reviewText().startsWith('Ellenőrizendő: a táblázatértékeket jogosult villamos tervező még nem hagyta jóvá.'));
  assert.ok(reviewText().includes(SIZING_TABLES.version)&&reviewText().includes(fp));
 }
-const approved={...SIZING_REVIEW,status:'jóváhagyott' as const,reviewer:'Minta Tervező',registry:'V-123',date:'2026-10-10',fingerprint:fp};
-assert.equal(tablesApproved(approved),true);
-assert.ok(reviewText(approved).startsWith('Jóváhagyta: Minta Tervező (V-123), 2026-10-10.'));
+// A jóváhagyás érvénye nem függ a név megjelenítésétől; a név csak kifejezett hozzájárulással (showName: true) jelenik meg.
+const approved={...SIZING_REVIEW,status:'jóváhagyott' as const,reviewer:'Minta Tervező',registry:'V-123',date:'2026-10-10',fingerprint:fp,showName:false};
+const named={...approved,showName:true};
+assert.equal(tablesApproved(approved),true);assert.equal(tablesApproved(named),true);
+const tail=' Táblázatváltozat: '+SIZING_TABLES.version+', ujjlenyomat: '+fp+'.';
+assert.equal(reviewText(named),'A táblázatértékeket szakmailag lektorálta: Minta Tervező (V-123), 2026-10-10.'+tail);
+assert.equal(reviewText(approved),'A táblázatértékeket jogosult villamos tervező szakmailag lektorálta, 2026-10-10.'+tail);
+assert.ok(!reviewText(approved).includes('Minta')&&!reviewText(approved).includes('V-123'),'név nélküli változat');
+assert.ok(reviewText({...named,fingerprint:'00000000'}).startsWith('Ellenőrizendő:')&&!reviewText({...named,fingerprint:'00000000'}).includes('Minta'),'érvénytelen jóváhagyásnál a név akkor sem jelenik meg');
+assert.ok(!/Jóváhagyta/.test(reviewText(named)+reviewText(approved)),'a szöveg a lektorálást jelzi, nem a terv jóváhagyását');
 assert.equal(tablesApproved({...approved,fingerprint:'00000000'}),false,'más ujjlenyomatra adott jóváhagyás érvénytelen');
 assert.equal(tablesApproved({...approved,reviewer:' '}),false);
 assert.equal(tablesApproved({...approved,date:''}),false);
+// A felirat-sablonok nem részei a táblázat-ujjlenyomatnak (reviewedContent), de a lektor ezekhez járul hozzá (lektori csomag):
+// változásuk után a név csak új hozzájárulással jelenhet meg (docs/lektoralas.md). A rögzített szöveg ezt tudatos lépéssé teszi.
+assert.deepEqual(REVIEW_TEXTS,{
+ pending:'Ellenőrizendő: a táblázatértékeket jogosult villamos tervező még nem hagyta jóvá.',
+ named:'A táblázatértékeket szakmailag lektorálta: {reviewer} ({registry}), {date}.',
+ anonymous:'A táblázatértékeket jogosult villamos tervező szakmailag lektorálta, {date}.',
+ tail:'Táblázatváltozat: {version}, ujjlenyomat: {fingerprint}.',
+},'a jóváhagyás megjelenő szövege megváltozott: a lektori csomag új kiadása és – név megjelenítésénél – a lektor új hozzájárulása kell');
+assert.ok(!JSON.stringify(reviewedContent()).includes('lektorálta'),'a sablonok nem részei a jóváhagyandó tartalomnak');
 
 console.log('PASS: sizing tables – relations, temperature formula, grouping, sources, lookups with XLPE fallback and overrides, fingerprint and review gate.');
