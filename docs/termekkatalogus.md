@@ -2,7 +2,7 @@
 
 ## Mit tud
 
-- **Saját, fiókszintű termék- és árlista:** gyártó, termékcsalád, cikkszám, megnevezés (kötelező), egység (`db` vagy `m`), nettó ajánlati anyagár és munkadíj-javaslat Ft/egységben. A termék archiválható (visszaállítható) és véglegesen törölhető. Minden projektben használható.
+- **Saját, fiókszintű termék- és árlista:** gyártó, termékcsalád, cikkszám, megnevezés (kötelező), egység (`db` vagy `m`), nettó ajánlati anyagár és munkadíj-javaslat Ft/egységben. A termék archiválható (visszaállítható; az űrlapon közben végzett módosítás ilyenkor is mentődik) és véglegesen törölhető. Minden projektben használható.
 - **Kézi felvétel és CSV-import:** UTF-8 (BOM-mal vagy anélkül), UTF-16LE („Unicode szöveg”) és Windows-1250 (magyar Excel „CSV (pontosvesszővel tagolt)” mentése) kódolás; pontosvessző, vessző vagy tabulátor elválasztó; magyar számformátum; árrés és bruttó → nettó átszámítás az importkor; előnézet új / módosított / változatlan / hibás sorokkal.
 - **CSV-export:** a katalógus Excelben szerkeszthető, majd visszaimportálható (oda-vissza változatlan).
 - **Mintakészlet:** 25 általános, ár, gyártó és cikkszám nélküli tétel „(minta)” jelöléssel (dugaljak, kapcsolók, kismegszakítók, áram-védőkapcsolók, kábelek…), egyúttal fiók-alapértelmezésnek állítva ott, ahol még nincs.
@@ -28,11 +28,12 @@ Oszlopok (a sorrend tetszőleges, a fejléc kötelező, a fejléc fölött legfe
 - Felismert fejlécváltozatok (kis- és nagybetű, ékezet és a záró „(Ft)” nem számít): például `Márka`, `Sorozat`, `Termékkód`, `Rendelési szám`, `Név`, `Termék`, `ME`, `Mértékegység`, `Ár`, `Nettó ár`, `Egységár`, `Listaár`, `Nettó listaár`, `Anyagár`. Az ismeretlen oszlopokat az előnézet felsorolja és figyelmen kívül hagyja.
 - **Párosítás:** ugyanazzal az azonosítóval, vagy azonos gyártóval és cikkszámmal érkező sor a meglévő terméket frissíti (kis- és nagybetűtől függetlenül). Gyártóoszlop nélkül a cikkszám akkor párosít, ha pontosan egy ilyen termék van. A többi sor új termék lesz.
 - **Hiányzó oszlop vagy üres cella a meglévő értéket nem változtatja** (az üres ár sem töröl). A megnevezés és az egység mindig íródik. A módosított mintatermék saját termékké válik.
-- **Számformátum:** `1 234,50 Ft`, `1.234,5`, `1,234.50`, `12,5`, `1234.56` egyaránt működik; ha vessző és pont is van, az utolsó elválasztó a tizedesjel. A `12.500` alak 12 500 Ft-nak számít.
+- **Számformátum:** `1 234,50 Ft`, `1.234,5`, `1,234.50`, `12,5`, `1234.56` egyaránt működik; ha vessző és pont is van, az utolsó elválasztó a tizedesjel. A `12.500` alak 12 500 Ft-nak számít, a `0.500` viszont 0,5 Ft (ezres tagolás nem kezdődhet 0-val). Minden ár két tizedesre kerekedik (az importban, a termékűrlapon és a tárolt adatban is), így az export → import oda-vissza változatlan. A termékűrlap ármezői ugyanezzel a szabállyal értelmeződnek; érvénytelen bevitelnél mezőhibát adnak, nem mentenek csendben más értéket.
 - **Egység:** `db`, `darab`, `pcs` → db; `m`, `fm`, `méter`, `folyóméter`, `mtr` → m. **Dobos vagy csomagos árnál előbb számold át egységárra** (Ft/m, Ft/db): a 100 m-es dob ára / 100.
 - **Excel-mentés:** a „CSV (pontosvesszővel tagolt)” (ANSI, Windows-1250), a „CSV UTF-8” és a „Unicode szöveg” mentés is működik. Az ANSI mentés a `²` jelet nem tudja tárolni (Excel kicseréli), ezért ilyen nevekhez a „CSV UTF-8” mentést használd.
 - **Importopciók:** „Árrés az importált anyagárakra (%)” (0–300) és „Az árlista bruttó (27% áfát tartalmaz)”. Csak az anyagárra hatnak: `ár / 1,27 × (1 + árrés/100)`, két tizedesre kerekítve; a munkadíjat nem érintik.
-- **Hibás sor** (hiányzó név, rossz egység vagy ár, túl hosszú mező, a fájlon belül ismétlődő termék) kimarad; az előnézet az első 20 hibát sorszámmal mutatja. A cellán belüli sortörés szóközzé válik. Az exportban a `=`, `+`, `-`, `@` kezdetű cellák elé `'` kerül (képletvédelem); az import ezt visszaalakítja.
+- **Hibás sor** (hiányzó név, rossz egység vagy ár, túl hosszú mező, a fájlon belül ismétlődő termék) kimarad; az előnézet az első 20 hibát sorszámmal mutatja. A cellán belüli sortörés szóközzé válik; a láthatatlan és irányváltó karakterek (nulla szélességű jel, bidi-vezérlő, C1 vezérlő) kimaradnak. Az exportban a `=`, `+`, `-`, `@` kezdetű cellák elé `'` kerül (képletvédelem; a már `'`-vel kezdődő ilyen szöveg még egyet kap); az import pontosan egyet vesz le, így az oda-vissza változatlan.
+- **Fájlszintű hiba** (hiányzó fejléc vagy „Egység” oszlop, 5000 sor fölött, a fájl végéig le nem zárt idézőjel, a 2000-es termékkorlát túllépése) esetén az előnézet csak a hibaüzenetet mutatja, és nincs importálás. A lezáratlan idézőjelnél az üzenet megadja a nyitó sor számát. Az „Árrés” 0 és 300 közötti szám lehet; más értéknél hibaüzenet jelenik meg, és az Importálás gomb tiltott.
 - **Tipp:** az összeállítást (például betét + keret + doboz) egy termékként vedd fel az összesített árral.
 
 ## Árak és ajánlat
@@ -49,13 +50,15 @@ A választott termék adatai – az árakkal együtt – **pillanatképként a t
 
 - Ár nélküli (üres árú) termék soha nem töröl meglévő árat.
 - A kézzel módosított anyagár mellett „Katalógusár: …” jelzés látszik; az árfrissítés ezt is felülírja (megerősítés után).
+- A termék egysége mindig a tételsoréval egyezik: ha a tétel egységét átírod (például „tétel” vagy „óra”), a termékkötés és az egyedi jelölés lekerül a sorról (az árak maradnak), és az árfrissítés csak egyező egységű sort ír.
+- A visszajelzés külön mondja, hány tételhez rendelődött a termék, és hány tétel ára változott ténylegesen (ár nélküli, például mintatermék nem „frissít árat”).
 - Minden tervmódosító művelet a tervező **Visszavonás** gombjával visszavonható, és a tervvel együtt mentődik. **A katalógus módosításai nem vonhatók vissza** (a sablonkönyvtárhoz hasonlóan).
 - A törölt katalógustermék pillanatképe és ára a már elkészült ajánlatokban megmarad. Az árfrissítés ilyenkor azonosító, majd gyártó + cikkszám alapján keres; amit nem talál, annak ára nem változik (a gomb jelzi, hány ilyen termék volt).
 - Típuskulcs: szerelvényfajta (pl. dugalj), elosztókészülék fajta + modulszélesség (+ kioldási jelleggörbe és névleges áram, pl. B16), telki pont fajtája, illetve a nyomvonal „Kábel jelölése” mezője normalizálva (a `3 × 2,5 mm²`, `3x2,5` és `3X2.5 mm2` ugyanaz). Jelölés nélküli kábelhez típusonként nem választható termék; erre figyelmeztetés jelenik meg, és a tételsorban egyedileg választható.
 
 ## Minta
 
-A mintakészlet általános megnevezéseket ad ár, gyártó és cikkszám nélkül, „Minta” jelvénnyel. A mintatermék adata **nem kerül az ajánlat PDF-jébe**, és az ajánlat figyelmeztet, ha mintatermék van kiválasztva. Ha a mintaterméket szerkeszted (vagy CSV-ből árat kap), saját termékké válik, és onnantól a PDF-ben is megjelenik: a „(minta)” jelölés helyett add meg a valós termék nevét. A mintakészlet újratöltése nem duplikálja a meglévő mintatételeket.
+A mintakészlet általános megnevezéseket ad ár, gyártó és cikkszám nélkül, „Minta” jelvénnyel. A mintatermék adata **nem kerül az ajánlat PDF-jébe** (a saját tételsor neve sem veszi át a minta nevét), és az ajánlat figyelmeztet, ha mintatermék van kiválasztva (típusonként és tételenként külön számolva). Ha a mintaterméket szerkeszted (vagy CSV-ből árat kap), saját termékké válik, és onnantól a PDF-ben is megjelenik: a „(minta)” jelölés helyett add meg a valós termék nevét. A mintakészlet újratöltése nem duplikálja a meglévő mintatételeket.
 
 ## Vendég mód
 
@@ -67,7 +70,7 @@ A megosztott (csak olvasható) nézet az ajánlatot nem kapja meg, így a termé
 
 ## Korlátok
 
-- legfeljebb 2000 termék (az archiváltakkal együtt) és 1,5 MB katalógus; egy CSV legfeljebb 2 MB és 5000 sor. A nagykereskedő teljes árlistája ebbe nem fér bele: csak a ténylegesen használt termékeket importáld.
+- legfeljebb 2000 termék (az archiváltakkal együtt) és 1,5 MB tárolt katalógus (szintén az archiváltakkal együtt, a szerver a ténylegesen tárolandó adatot méri); egy CSV legfeljebb 2 MB és 5000 sor. Az archiválás egyik korláton sem segít: a nem használt terméket töröld. A nagykereskedő teljes árlistája ebbe nem fér bele: csak a ténylegesen használt termékeket importáld.
 - legfeljebb 300 fiók-alapértelmezés; projektenként legfeljebb 300 típusválasztás.
 - egyetlen verziószám tartozik a teljes katalógushoz: ha két ablakban párhuzamosan szerkeszted, a második mentés „Lista frissítése” üzenetet kap.
 - a katalógus módosítása nem vonható vissza.

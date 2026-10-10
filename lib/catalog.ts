@@ -1,24 +1,30 @@
 import {z} from 'zod';
-import type {ProductDisplay,ProductSnapshot} from './quote-schema';
+import {stripInvisible,type ProductDisplay,type ProductSnapshot} from './quote-schema';
 import {validRef} from './product-refs';
 
 // Fiókszintű termékkatalógus: egy JSON-blob felhasználónként, egyetlen revisionnel (product_catalogs tábla).
 // Tiszta modul: a kliens (katalóguskezelő, ajánlat) és a szerver (/api/catalog) is ezt validálja.
 export const CATALOG_LIMIT=2000,CATALOG_DEFAULT_LIMIT=300,CATALOG_BYTES=1_500_000,CSV_BYTES=2_000_000,CSV_ROWS=5000;
 const FALLBACK='Érvénytelen termékadatok.',UNIT='Az egység db vagy m lehet.',PRICE_TYPE='Az ár szám legyen.';
+// Az archivált termék is a katalógusban marad, ezért mindkét korlátba beleszámít.
+export const LIMIT_ERROR='Legfeljebb 2000 termék tárolható (az archiváltak is beleszámítanak). Töröld a nem használt termékeket.';
+export const BYTES_ERROR='A termékkatalógus legfeljebb 1,5 MB lehet (az archivált termékek is beleszámítanak). Töröld a nem használt termékeket.';
 // A parse-hoz adott hibatérkép felülírja a sémaszintűt (Zod 3), ezért a típus- és egységhiba szövege itt dől el;
 // a nem testreszabott Zod-hibák is magyarul jelennek meg.
 export const catalogErrorMap:z.ZodErrorMap=iss=>({message:iss.code==='invalid_type'&&iss.expected==='number'?PRICE_TYPE:iss.code==='invalid_enum_value'&&iss.options.includes('db')?UNIT:FALLBACK});
 const ctrl=/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/;
 const max=(n:number)=>`Legfeljebb ${n} karakter adható meg.`;
-const line=(n:number,required?:string)=>(required?z.string().trim().min(1,required):z.string().trim()).max(n,max(n)).refine(v=>!ctrl.test(v)&&!/[\r\n]/.test(v),'Érvénytelen karakter vagy sortörés.');
-// Határai azonosak az ajánlati egységárral (quote-schema price).
-const money=z.number({invalid_type_error:PRICE_TYPE}).finite('Érvénytelen ár.').min(0,'Az ár nem lehet negatív.').max(1_000_000,'Az egységár legfeljebb 1 000 000 Ft lehet.').nullable();
+// A láthatatlan és irányváltó karakterek (stripInvisible) csendben kimaradnak; a C0 vezérlő és a sortörés hiba.
+const line=(n:number,required?:string)=>z.string().transform(stripInvisible).pipe((required?z.string().trim().min(1,required):z.string().trim()).max(n,max(n)).refine(v=>!ctrl.test(v)&&!/[\r\n]/.test(v),'Érvénytelen karakter vagy sortörés.'));
+// Határai azonosak az ajánlati egységárral (quote-schema price). Két tizedesre kerekít, mint az ajánlat és a CSV-import,
+// így az export → import oda-vissza változatlan, és fillérnél pontosabb ár nem kerül az ajánlatba.
+export const round2=(n:number)=>Math.round(n*100)/100;
+const money=z.number({invalid_type_error:PRICE_TYPE}).finite('Érvénytelen ár.').min(0,'Az ár nem lehet negatív.').max(1_000_000,'Az egységár legfeljebb 1 000 000 Ft lehet.').transform(round2).nullable();
 const uuid=z.string().uuid('Érvénytelen azonosító.');
 
 export const productSchema=z.object({id:uuid,manufacturer:line(80).default(''),family:line(120).default(''),sku:line(60).default(''),name:line(240,'Add meg a termék megnevezését.'),unit:z.enum(['db','m'],{errorMap:()=>({message:UNIT})}),price:money.default(null),labor:money.default(null),archived:z.boolean().default(false),sample:z.boolean().default(false),updatedAt:z.string().max(40)});
 export const defaultSchema=z.object({ref:z.string().refine(validRef,'Érvénytelen hozzárendelés.'),productId:uuid,label:line(160).default('')});
-export const catalogSchema=z.object({version:z.literal(1),products:z.array(productSchema).max(CATALOG_LIMIT,'Legfeljebb 2000 termék tárolható. Archiváld vagy töröld a nem használt termékeket.'),defaults:z.array(defaultSchema).max(CATALOG_DEFAULT_LIMIT,'Túl sok fiók-alapértelmezés.').default([])}).superRefine((c,ctx)=>{
+export const catalogSchema=z.object({version:z.literal(1),products:z.array(productSchema).max(CATALOG_LIMIT,LIMIT_ERROR),defaults:z.array(defaultSchema).max(CATALOG_DEFAULT_LIMIT,'Túl sok fiók-alapértelmezés.').default([])}).superRefine((c,ctx)=>{
  const fail=(message:string)=>ctx.addIssue({code:'custom',message});
  const ids=new Set(c.products.map(p=>p.id));
  if(ids.size!==c.products.length)fail('Ismétlődő termékazonosító.');

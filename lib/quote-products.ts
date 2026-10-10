@@ -35,18 +35,19 @@ export function productSlots(plan:Plan):ProductSlot[]{
 export function untypedCableMeters(plan:Plan){return materialList(plan).filter(r=>r.category==='Kábel'&&!r.ref).reduce((s,r)=>s+r.quantity,0)}
 export function projectProduct(q:Quote,ref:string):ProductSnapshot|undefined{return q.productDefaults?.find(d=>d.ref===ref)?.product}
 
-export function setProjectProduct(plan:Plan,q:Quote,ref:string,product:ProductSnapshot|null):{quote:Quote;changed:number}{
+// changed: a ténylegesen módosult (termékhez rendelt vagy attól elvált) sorok; priced: ezek közül, amelyeknek az ára is változott.
+export function setProjectProduct(plan:Plan,q:Quote,ref:string,product:ProductSnapshot|null):{quote:Quote;changed:number;priced:number}{
  if(product&&product.unit!==refUnit(ref))throw Error(UNIT_MISMATCH);
  const refs=refIndex(plan),rest=(q.productDefaults||[]).filter(d=>d.ref!==ref),found=rest.length!==(q.productDefaults||[]).length;
  const defaults=product?(found?(q.productDefaults||[]).map(d=>d.ref===ref?{ref,product}:d):[...rest,{ref,product}]):rest;
- let changed=0;
+ let changed=0,repriced=0;
  const lines=q.lines.map(l=>{
   if(!l.sourceKey||l.productPinned||refs.get(l.sourceKey)!==ref)return l;
   const next=product?(l.unit===product.unit?priced(l,product):l):l.product?without(l,'product'):l;
-  if(!same(next,l))changed++;return next;
+  if(!same(next,l))changed++;if(next.material!==l.material||next.labor!==l.labor)repriced++;return next;
  });
  const base=without(q,'productDefaults');
- return {quote:quoteSchema.parse(defaults.length?{...base,productDefaults:defaults,lines}:{...base,lines}),changed};
+ return {quote:quoteSchema.parse(defaults.length?{...base,productDefaults:defaults,lines}:{...base,lines}),changed,priced:repriced};
 }
 
 // Soronkénti, egyedi választás: a projekt-alapértelmezés nem írja felül. null = kifejezetten „Nincs termék”.
@@ -56,7 +57,8 @@ export function pinLineProduct(q:Quote,lineId:string,product:ProductSnapshot|nul
  if(product){
   if(product.unit!==l.unit)throw Error(UNIT_MISMATCH);
   next={...priced(l,product),productPinned:true};
-  if(!l.sourceKey&&(l.name.trim()===''||l.name==='Egyéb munka'))next.name=product.name;
+  // A mintatermék neve nem kerül a tételsorba (és így az ajánlat-PDF-be sem).
+  if(!l.sourceKey&&!product.sample&&(l.name.trim()===''||l.name==='Egyéb munka'))next.name=product.name;
  }else next={...without(l,'product'),productPinned:true};
  return quoteSchema.parse({...q,lines:q.lines.map(x=>x.id===lineId?next:x)});
 }
@@ -65,6 +67,12 @@ export function followProjectProduct(plan:Plan,q:Quote,lineId:string):Quote{
  const ref=l.sourceKey?refIndex(plan).get(l.sourceKey):undefined,p=ref?projectProduct(q,ref):undefined,free=without(l,'productPinned');
  const next=p&&p.unit===l.unit?priced(free,p):without(free,'product');
  return quoteSchema.parse({...q,lines:q.lines.map(x=>x.id===lineId?next:x)});
+}
+
+// Egységváltás a tételsoron: a termékkötés és az egyedi jelölés megszűnik (a termék egysége a soréval egyezik, és csak db vagy m
+// lehet), az árak maradnak. Különben a „tétel” vagy „óra” sor rejtett termékkel kerülne az árfrissítésbe és a PDF-be.
+export function setLineUnit(q:Quote,lineId:string,unit:QuoteLine['unit']):Quote{
+ return quoteSchema.parse({...q,lines:q.lines.map(l=>l.id!==lineId||l.unit===unit?l:{...without(l,'product','productPinned'),unit})});
 }
 
 // A syncQuote burka: csak az újonnan létrejött tervsorok kapják meg a projekt termékválasztását és árát.
@@ -83,14 +91,15 @@ export function syncQuoteWithProducts(plan:Plan,q:Quote):{quote:Quote;priced:num
 function accountSlots(plan:Plan,q:Quote,c:Catalog){return productSlots(plan).flatMap(s=>{if(projectProduct(q,s.ref))return [];const p=accountDefault(c,s.ref);return p&&p.unit===s.unit?[{slot:s,product:p}]:[]})}
 export function availableAccountDefaults(plan:Plan,q:Quote,c:Catalog){return accountSlots(plan,q,c).length}
 // A fiók-alapértelmezések csak a még választás nélküli típusokra kerülnek; meglévő projektválasztást nem írnak felül.
-export function applyAccountDefaults(plan:Plan,q:Quote,c:Catalog):{quote:Quote;applied:number;lines:number}{
- let quote=quoteSchema.parse(q),applied=0,lines=0;
- for(const {slot,product} of accountSlots(plan,q,c)){const r=setProjectProduct(plan,quote,slot.ref,toSnapshot(product));quote=r.quote;applied++;lines+=r.changed}
- return {quote,applied,lines};
+export function applyAccountDefaults(plan:Plan,q:Quote,c:Catalog):{quote:Quote;applied:number;lines:number;priced:number}{
+ let quote=quoteSchema.parse(q),applied=0,lines=0,repriced=0;
+ for(const {slot,product} of accountSlots(plan,q,c)){const r=setProjectProduct(plan,quote,slot.ref,toSnapshot(product));quote=r.quote;applied++;lines+=r.changed;repriced+=r.priced}
+ return {quote,applied,lines,priced:repriced};
 }
 
 // Árak frissítése a katalógusból: azonosító, ennek hiányában gyártó+cikkszám alapján (archivált termék is).
 // Az anyagár a friss árra változik (null ár nem töröl), a munkadíj csak ott töltődik, ahol üres.
+// Csak egyező egységű sor frissül: Ft/db ár nem kerülhet tétel- vagy óraegységű sorra (a sor ilyenkor változatlan marad).
 export function refreshProductPrices(q:Quote,c:Catalog):{quote:Quote;updated:number;missing:number}{
  const byId=new Map(c.products.map(p=>[p.id,p])),bySku=new Map<string,Product>();
  for(const p of c.products)if(p.sku&&!bySku.has(skuKey(p)))bySku.set(skuKey(p),p);
@@ -99,7 +108,7 @@ export function refreshProductPrices(q:Quote,c:Catalog):{quote:Quote;updated:num
  const productDefaults=q.productDefaults?.map(d=>{const p=fresh(d.product);return p?{...d,product:p}:d});
  let updated=0;
  const lines=q.lines.map(l=>{
-  if(!l.product)return l;const p=fresh(l.product);if(!p)return l;
+  if(!l.product)return l;const p=fresh(l.product);if(!p||p.unit!==l.unit)return l;
   const next=refreshed(l,p);if(next.material!==l.material||next.labor!==l.labor)updated++;return next;
  });
  return {quote:quoteSchema.parse({...q,...(productDefaults?{productDefaults}:{}),lines}),updated,missing:missing.size};
@@ -111,4 +120,5 @@ export function productResolver(plan:Plan):(row:MaterialRow)=>ProductSnapshot|un
  const lines=new Map(q.lines.flatMap(l=>l.sourceKey?[[l.sourceKey,l] as const]:[])),defaults=new Map((q.productDefaults||[]).map(d=>[d.ref,d.product]));
  return row=>{const l=lines.get(materialKey(row));if(l?.productPinned)return l.product;return l?.product??(row.ref?defaults.get(row.ref):undefined)};
 }
-export function sampleInUse(q:Quote){return (q.productDefaults||[]).filter(d=>d.product.sample).length+q.lines.filter(l=>l.product?.sample).length}
+// Külön a típusválasztások és a tételsorok: egy típus és a hozzá tartozó sor nem számít kétszer ugyanabba a számba.
+export function sampleInUse(q:Quote):{types:number;lines:number}{return {types:(q.productDefaults||[]).filter(d=>d.product.sample).length,lines:q.lines.filter(l=>l.product?.sample).length}}

@@ -6,7 +6,8 @@ import {addQuoteLine,materialKey,newQuote,quoteSource,quoteTotals,syncQuote} fro
 import {quoteSchema,type ProductSnapshot,type Quote} from '../lib/quote-schema';
 import {createQuotePdf} from '../lib/quote-pdf';
 import {productLine,validateCatalog,type Product} from '../lib/catalog';
-import {applyAccountDefaults,availableAccountDefaults,followProjectProduct,pinLineProduct,productResolver,productSlots,projectProduct,refreshProductPrices,sampleInUse,setProjectProduct,syncQuoteWithProducts,untypedCableMeters} from '../lib/quote-products';
+import {applyAccountDefaults,availableAccountDefaults,followProjectProduct,pinLineProduct,productResolver,productSlots,projectProduct,refreshProductPrices,sampleInUse,setLineUnit,setProjectProduct,syncQuoteWithProducts,untypedCableMeters} from '../lib/quote-products';
+import {addSampleProducts} from '../lib/catalog-sample';
 import {sharedPlan} from '../lib/share';
 
 // Fixture: az Emeleten két dugalj (30 és 110 cm), egy „3x2,5” jelölésű falon kívüli és egy jelölés nélküli nyomvonal, a telken villanyóra.
@@ -126,7 +127,7 @@ assert.throws(()=>quoteSchema.parse({...qp,lines:[{...qp.lines[0],product:{...P1
 assert.throws(()=>quoteSchema.parse({...qp,lines:[{...qp.lines[0],productPinned:false}]}));
 assert.throws(()=>quoteSchema.parse({...qp,lines:[{...qp.lines[0],product:{...P1,name:''}}]}));
 assert.throws(()=>quoteSchema.parse({...qp,productDisplay:'all'}));
-assert.equal(sampleInUse(qp),0);assert.equal(sampleInUse(setProjectProduct(fixture,qp,'device:double',{...P1,sample:true}).quote),2,'1 típusválasztás + 1 kettősdugalj-sor');
+assert.deepEqual(sampleInUse(qp),{types:0,lines:0});assert.deepEqual(sampleInUse(setProjectProduct(fixture,qp,'device:double',{...P1,sample:true}).quote),{types:1,lines:1},'1 típusválasztás + 1 kettősdugalj-sor');
 
 // 11. Megosztás: a termék- és árinformáció az ajánlattal együtt kimarad
 const shared=sharedPlan(JSON.parse(JSON.stringify(rich)));assert.equal(shared.plan.quote,undefined);
@@ -140,4 +141,34 @@ for(const mode of ['brand','sku','none'] as const)assert.ok(createQuotePdf({...r
 assert.equal(productLine({...P1,sample:true},'x'),'');
 assert.ok(createQuotePdf(ready,'Teszt',font).getNumberOfPages()>=1);
 
-console.log('PASS: refs with unchanged materialKey/quoteSource, product slots, project defaults and pinned overrides, null-price rule, removal/follow/none, sync of new rows, account defaults, price refresh (labor only where empty), materials CSV columns, schema round-trips, share minimisation, quote PDF in all display modes.');
+// 13. Felülvizsgálati javítások
+// 13a. Egységeltérés: az árfrissítés csak egyező egységű sort ír; az egységváltás leveszi a termékkötést és az egyedi jelölést.
+const own={...addQuoteLine(),unit:'db' as const};let qu=pinLineProduct(quoteSchema.parse({...qp,lines:[...qp.lines,own]}),own.id,P1);
+const mismatch=quoteSchema.parse({...qu,lines:qu.lines.map(l=>l.id===own.id?{...l,unit:'tétel',name:'Komplett szerelés',material:20000}:l)});
+const freshP1=validateCatalog({version:1,products:[asProduct(P1,{price:1700})],defaults:[]});
+let rf=refreshProductPrices(mismatch,freshP1);assert.deepEqual(rf.quote.lines.find(l=>l.id===own.id),mismatch.lines.find(l=>l.id===own.id),'a tétel egységű sor nem kap Ft/db árat');assert.equal(rf.updated,0);
+qu=setLineUnit(qu,own.id,'tétel');const unbound=qu.lines.find(l=>l.id===own.id)!;
+assert.equal(unbound.unit,'tétel');assert.equal('product' in unbound,false);assert.equal('productPinned' in unbound,false);assert.equal(unbound.material,1500,'az ár marad');
+assert.deepEqual(setLineUnit(qu,own.id,'tétel'),qu,'azonos egység: nincs változás');
+const noneLine=pinLineProduct(qp,pinnedId,null);assert.equal('productPinned' in setLineUnit(noneLine,pinnedId,'óra').lines.find(l=>l.id===pinnedId)!,false);
+assert.deepEqual(setLineUnit(qp,pinnedId,'db'),qp);
+rf=refreshProductPrices(qu,freshP1);assert.equal(rf.quote.lines.find(l=>l.id===own.id)?.material,1500);
+// 13b. A mintatermék neve nem kerül a saját tételsorba (és így a PDF-be sem); valós terméknél a név átmásolódik.
+const sampleSnap={...P2,id:'99999999-9999-4999-8999-999999999999',manufacturer:'',family:'',sku:'',name:'Dugalj 2P+F, süllyesztett (minta)',price:null,labor:null,sample:true as const};
+for(const name of ['','Egyéb munka']){const blank={...addQuoteLine(),name,unit:'db' as const};const pinnedSample=pinLineProduct({...qp,lines:[...qp.lines,blank]},blank.id,sampleSnap).lines.at(-1)!;assert.equal(pinnedSample.name,name);assert.equal(pinnedSample.product?.sample,true)}
+// 13c. Számlálók: a hozzárendelt és az árában is változott sorok külön (az ár nélküli termék nem „frissít árat”).
+const qPriced=setProjectProduct(fixture,q,'device:socket',P1);assert.deepEqual([qPriced.changed,qPriced.priced],[3,3]);
+const qNoPrice=setProjectProduct(fixture,q,'device:socket',P4);assert.deepEqual([qNoPrice.changed,qNoPrice.priced],[3,0]);
+const appliedPriced=applyAccountDefaults(fixture,q,catalog);assert.deepEqual([appliedPriced.applied,appliedPriced.lines,appliedPriced.priced],[2,4,4]);
+const samples=addSampleProducts(validateCatalog({version:1,products:[],defaults:[]}),T,(()=>{let i=0;return()=>`dddddddd-dddd-4ddd-8ddd-${String(++i).padStart(12,'0')}`})()).catalog;
+const appliedSamples=applyAccountDefaults(fixture,q,samples);assert.ok(appliedSamples.applied>0&&appliedSamples.lines>0);assert.equal(appliedSamples.priced,0);
+// 13d. Mintajelzés: a típusválasztás és a sor külön számít (nem duplán).
+assert.deepEqual(sampleInUse(appliedSamples.quote),{types:appliedSamples.applied,lines:appliedSamples.lines});
+// 13e. A pillanatkép szövegmezőiből (idegen JSON) a vezérlő-, láthatatlan és irányváltó karakter kimarad; a régi terv betölthető marad.
+const dirty={...P1,manufacturer:'Leg‮rand',family:'Valena\tLife',sku:'75​3120\u0007',name:'⁦Dugalj⁩'};
+const cleaned=quoteSchema.parse({...qp,lines:[{...qp.lines[0],product:dirty}]});assert.deepEqual(cleaned.lines[0].product,{...P1,manufacturer:'Legrand',family:'Valena Life',sku:'753120',name:'Dugalj'});
+assert.deepEqual(quoteSchema.parse(cleaned),cleaned,'idempotens');
+const invisibleName=quoteSchema.parse({...qp,productDefaults:[{ref:'device:socket',product:{...P1,name:'‮'}}]});assert.equal(invisibleName.productDefaults?.[0].product.name,'Névtelen termék');assert.deepEqual(quoteSchema.parse(invisibleName),invisibleName);
+assert.ok(validatePlan(JSON.parse(JSON.stringify({...fixture,quote:{...qp,lines:[{...qp.lines[0],product:dirty}]}}))).quote);
+
+console.log('PASS: unit-safe price refresh and unit change, sample name not copied, assigned vs repriced counters, sample counts by type/line, snapshot text sanitising, refs with unchanged materialKey/quoteSource, product slots, project defaults and pinned overrides, null-price rule, removal/follow/none, sync of new rows, account defaults, price refresh (labor only where empty), materials CSV columns, schema round-trips, share minimisation, quote PDF in all display modes.');

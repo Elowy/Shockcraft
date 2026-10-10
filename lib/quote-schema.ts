@@ -5,7 +5,14 @@ export const isoDay=date;
 // Termékpillanatkép a katalógusból: a választáskor a tervbe másolódik, a katalógus későbbi változása nem hat rá.
 export const unitPrice=price;
 export const productDisplays=['none','brand','sku'] as const;
-export const productSnapshotSchema=z.object({id:z.string().min(1).max(80),manufacturer:z.string().max(80),family:z.string().max(120),sku:z.string().max(60),name:z.string().min(1).max(240),unit:z.enum(['db','m']),price,labor:price,sample:z.literal(true).optional()});
+// Láthatatlan és irányváltó karakterek (C1 vezérlők, nulla szélességű jelek, bidi-felülírók és -izolálók, BOM): a katalógus és a
+// pillanatkép csendben elhagyja őket, így a megjelenítés nem hamisítható, és a már tárolt adat is betölthető marad.
+const INVISIBLE=/[\u0080-\u009f\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff]/g;
+export const stripInvisible=(s:string)=>s.replace(INVISIBLE,'');
+// A pillanatkép idegen JSON-ból (importált terv) is érkezhet: a vezérlőkarakter kimarad, a sortörés és a tabulátor szóköz lesz.
+// A kimenet újra érvényes bemenet (a név nem válhat üressé), ezért a többszöri parse sem hibázik.
+const snapText=(s:string)=>stripInvisible(s).replace(/[\t\r\n]+/g,' ').replace(/[\x00-\x1f\x7f]/g,'');
+export const productSnapshotSchema=z.object({id:z.string().min(1).max(80),manufacturer:z.string().max(80).transform(snapText),family:z.string().max(120).transform(snapText),sku:z.string().max(60).transform(snapText),name:z.string().min(1).max(240).transform(s=>snapText(s)||'Névtelen termék'),unit:z.enum(['db','m']),price,labor:price,sample:z.literal(true).optional()});
 export type ProductSnapshot=z.infer<typeof productSnapshotSchema>;
 export type ProductDisplay=typeof productDisplays[number];
 export const quoteLineSchema=z.object({id:z.string().min(1).max(80),sourceKey:z.string().max(1500).optional(),name:z.string().max(240),detail:z.string().max(500),unit:z.enum(['db','m','óra','tétel']),quantity:z.number().finite().min(0).max(10000),material:price,labor:price,included:z.boolean(),allowance:z.boolean(),product:productSnapshotSchema.optional(),productPinned:z.literal(true).optional()});

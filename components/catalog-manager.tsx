@@ -1,11 +1,11 @@
 "use client";
-import {useMemo,useRef,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {Archive,Download,FileUp,Plus,RotateCcw,Save,Sparkles,Trash2} from 'lucide-react';
 import {toast} from 'sonner';
 import {Field} from './plan-controls';
 import {useCatalog} from './use-catalog';
 import {CATALOG_LIMIT,CSV_BYTES,catalogError,catalogErrorMap,productLabel,productSchema,removeProduct,searchProducts,setAccountDefault,setProductArchived,upsertProduct,type Catalog,type Product} from '@/lib/catalog';
-import {catalogCsv,decodeCsv,mergeCatalogCsv,parseCatalogCsv,type CsvEncoding,type CsvMerge,type CsvParse} from '@/lib/catalog-csv';
+import {catalogCsv,decodeCsv,mergeCatalogCsv,parseCatalogCsv,parseHuf,type CsvEncoding,type CsvMerge,type CsvParse} from '@/lib/catalog-csv';
 import {addSampleProducts} from '@/lib/catalog-sample';
 import {refLabel} from '@/lib/product-refs';
 import {money} from '@/lib/quote';
@@ -23,8 +23,10 @@ export function CatalogManager({userId}:{userId:string}){
 type Source={file:string;encoding:CsvEncoding;text:string};
 type Analysis={parse:CsvParse;merge:CsvMerge|null;error:string};
 // Eseménykezelőből hívjuk (fájlválasztás, opcióváltás, importálás): itt keletkezik az időbélyeg és az új azonosító.
+// Fájlszintű hibánál (fejléc, sorkorlát, lezáratlan idézőjel) és érvényes sor nélkül nincs mit összefésülni.
 function analyze(text:string,c:Catalog,markupPercent:number,gross:boolean):Analysis{
  const parse=parseCatalogCsv(text,{markupPercent,gross});
+ if(parse.errors.some(e=>e.line===0)||!parse.drafts.length)return {parse,merge:null,error:''};
  try{return {parse,merge:mergeCatalogCsv(c,parse.drafts,new Date().toISOString(),()=>crypto.randomUUID()),error:''}}catch(e){return {parse,merge:null,error:catalogError(e)}}
 }
 
@@ -67,7 +69,7 @@ function CatalogPanel({userId}:{userId:string}){
    {editing&&<ProductForm key={editing.id} draft={editing} catalog={catalog} save={save} onClose={()=>setEditing(null)}/>}
    <div className="catalog-search"><Field label="Keresés (gyártó, család, cikkszám, megnevezés)" value={query} onChange={setQuery}/><label className="copy-option"><input type="checkbox" checked={archived} onChange={e=>setArchived(e.target.checked)}/>Archivált termékek is</label></div>
    {!catalog.products.length?<p className="report-note">A katalógus üres. Vegyél fel terméket, importálj CSV-t, vagy tölts be mintakészletet.</p>:<>
-    <div className="catalog-table"><table><thead><tr><th>Megnevezés</th><th>Gyártó / család</th><th>Cikkszám</th><th>Egység</th><th>Anyagár</th><th>Munkadíj</th><th><span className="sr-only">Művelet</span></th></tr></thead><tbody>{found.slice(0,SHOWN).map(p=><tr key={p.id}><td><b>{p.name}</b>{p.sample&&<span className="catalog-badge">Minta</span>}{p.archived&&<span className="catalog-badge">Archivált</span>}</td><td>{[p.manufacturer,p.family].filter(Boolean).join(' ')||'–'}</td><td>{p.sku||'–'}</td><td>{p.unit}</td><td>{priceText(p.price)}</td><td>{priceText(p.labor)}</td><td><button type="button" onClick={()=>{setSource(null);setConfirmSample(false);setEditing(p)}}>Szerkesztés</button></td></tr>)}</tbody></table>{!found.length&&<p className="report-note">Nincs találat.</p>}</div>
+    <div className="catalog-table"><table><thead><tr><th>Megnevezés</th><th>Gyártó / család</th><th>Cikkszám</th><th>Egység</th><th>Anyagár</th><th>Munkadíj</th><th><span className="sr-only">Művelet</span></th></tr></thead><tbody>{found.slice(0,SHOWN).map(p=><tr key={p.id}><td><b>{p.name}</b>{p.sample&&<span className="catalog-badge">Minta</span>}{p.archived&&<span className="catalog-badge">Archivált</span>}</td><td data-label="Gyártó / család">{[p.manufacturer,p.family].filter(Boolean).join(' ')||'–'}</td><td data-label="Cikkszám">{p.sku||'–'}</td><td data-label="Egység">{p.unit}</td><td data-label="Anyagár">{priceText(p.price)}</td><td data-label="Munkadíj">{priceText(p.labor)}</td><td><button type="button" onClick={()=>{setSource(null);setConfirmSample(false);setEditing(p)}}>Szerkesztés</button></td></tr>)}</tbody></table>{!found.length&&<p className="report-note">Nincs találat.</p>}</div>
     {found.length>SHOWN&&<p className="report-note">Az első 200 találat látható. Pontosítsd a keresést.</p>}</>}
    <div className="catalog-defaults"><h4>Fiók-alapértelmezések (új projektekhez)</h4><p className="report-note">Ezt a terméket ajánlja a Villanyrajz típusonként új projektekben. Beállítani az Árazás / árajánlat fül termékválasztójában lehet.</p>
     {defaults.length?<div className="catalog-table"><table><tbody>{defaults.map(({d,p})=><tr key={d.ref}><td><b>{refLabel(d.ref,d.label)}</b></td><td>{p?productLabel(p):'–'}{p?.archived&&<span className="catalog-badge">Archivált</span>}</td><td><button type="button" onClick={()=>void save(setAccountDefault(catalog,d.ref,null,''),'Fiók-alapértelmezés törölve.')}>Eltávolítás</button></td></tr>)}</tbody></table></div>:<p className="report-note">Még nincs fiók-alapértelmezés.</p>}
@@ -78,51 +80,74 @@ function CatalogPanel({userId}:{userId:string}){
 
 const encodings:Record<CsvEncoding,string>={'utf-8':'UTF-8','utf-16le':'UTF-16 (Unicode szöveg)','windows-1250':'Windows-1250'};
 const delimiters={';':'pontosvessző',',':'vessző','\t':'tabulátor'};
+const MARKUP_ERROR='Az árrés 0 és 300 közötti szám lehet.';
+// Árrés: üres = 0; 0 és 300 közötti szám (tizedesvesszővel is), különben hiba és nincs importálás.
+function markupValue(s:string):number|null{const t=s.trim().replace(',','.');if(!t)return 0;const n=/^\d+(\.\d+)?$/.test(t)?Number(t):NaN;return n>=0&&n<=300?n:null}
 function ImportPanel({source,first,catalog,save,onClose}:{source:Source;first:Analysis;catalog:Catalog;save:Save;onClose:()=>void}){
  const [markup,setMarkup]=useState('0'),[gross,setGross]=useState(false),[result,setResult]=useState(first);
- const options=(m:string,g:boolean)=>{setMarkup(m);setGross(g);const n=Number(m);setResult(analyze(source.text,catalog,Number.isFinite(n)?Math.max(0,Math.min(300,n)):0,g))};
+ const timer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined),markupN=markupValue(markup);
+ useEffect(()=>{const t=timer;return()=>clearTimeout(t.current)},[]);
+ // Gépelés közben késleltetve számol újra, hogy nagy fájlnál se akadjon el minden billentyűleütésre.
+ function changeMarkup(v:string){setMarkup(v);clearTimeout(timer.current);const n=markupValue(v);if(n!==null)timer.current=setTimeout(()=>setResult(analyze(source.text,catalog,n,gross)),300)}
+ function changeGross(g:boolean){setGross(g);clearTimeout(timer.current);if(markupN!==null)setResult(analyze(source.text,catalog,markupN,g))}
  async function run(){
+  if(markupN===null){toast.error(MARKUP_ERROR);return}
   // Az importálás a pillanatnyi katalógusra fut újra, hogy a közben betöltött változások ne vesszenek el.
-  const n=Number(markup),r=analyze(source.text,catalog,Number.isFinite(n)?Math.max(0,Math.min(300,n)):0,gross);setResult(r);
-  if(!r.merge){toast.error(r.error||'A CSV nem importálható.');return}
+  clearTimeout(timer.current);const r=analyze(source.text,catalog,markupN,gross);setResult(r);
+  if(!r.merge){toast.error(r.error||r.parse.errors.find(e=>e.line===0)?.message||'A CSV nem importálható.');return}
   if(await save(r.merge.catalog,`CSV importálva: ${r.merge.added} új, ${r.merge.updated} módosított termék.`))onClose();
  }
- const {parse,merge,error}=result,errors=parse.errors;
+ const {parse,merge,error}=result,fatal=parse.errors.find(e=>e.line===0),errors=parse.errors.filter(e=>e.line>0);
  return <div className="catalog-import"><b>CSV importálása: {source.file}</b>
   <p className="report-note">Kódolás: {encodings[source.encoding]} · Elválasztó: {delimiters[parse.delimiter]}{parse.headerLine?` · Fejléc: ${parse.headerLine}. sor`:''}</p>
-  <div className="catalog-import-options"><Field label="Árrés az importált anyagárakra (%)" type="number" min={0} max={300} step={1} value={markup} onChange={v=>options(v,gross)}/><label className="copy-option"><input type="checkbox" checked={gross} onChange={e=>options(markup,e.target.checked)}/>Az árlista bruttó (27% áfát tartalmaz)</label></div>
-  {merge&&<p role="status">{merge.added} új, {merge.updated} módosított, {merge.unchanged} változatlan termék; {errors.length} hibás sor kimarad.</p>}
-  {!merge&&!errors.length&&<p role="status">A CSV-ben nincs importálható sor.</p>}
-  {error&&<p className="auth-error" role="alert">{error}</p>}
-  {!!errors.length&&<ul>{errors.slice(0,20).map((e,i)=><li key={i}>{e.line?`${e.line}. sor: `:''}{e.message}</li>)}{errors.length>20&&<li>…és további {errors.length-20} hiba.</li>}</ul>}
+  <div className="catalog-import-options"><label className="field"><span>Árrés az importált anyagárakra (%)</span><input aria-label="Árrés az importált anyagárakra (%)" type="text" inputMode="decimal" autoComplete="off" value={markup} aria-invalid={markupN===null} onChange={e=>changeMarkup(e.target.value)}/>{markupN===null&&<small className="auth-error" role="alert">{MARKUP_ERROR}</small>}</label><label className="copy-option"><input type="checkbox" checked={gross} onChange={e=>changeGross(e.target.checked)}/>Az árlista bruttó (27% áfát tartalmaz)</label></div>
+  {fatal?<p className="auth-error" role="alert">{fatal.message}</p>:error?<p className="auth-error" role="alert">{error}</p>:merge?<p role="status">{merge.added} új, {merge.updated} módosított, {merge.unchanged} változatlan termék; {errors.length} hibás sor kimarad.</p>:<p role="status">A CSV-ben nincs importálható sor{errors.length?` (${errors.length} hibás sor)`:''}.</p>}
+  {!!errors.length&&<ul>{errors.slice(0,20).map((e,i)=><li key={i}>{e.line}. sor: {e.message}</li>)}{errors.length>20&&<li>…és további {errors.length-20} hiba.</li>}</ul>}
   {!!parse.ignored.length&&<p className="report-note">Figyelmen kívül hagyott oszlopok: {parse.ignored.join(', ')}</p>}
-  <div className="project-actions"><button type="button" onClick={onClose}>Mégse</button><button type="button" className="primary" disabled={!merge||merge.added+merge.updated===0} onClick={()=>void run()}><FileUp/> Importálás</button></div>
+  <div className="project-actions"><button type="button" onClick={onClose}>Mégse</button><button type="button" className="primary" disabled={!merge||merge.added+merge.updated===0||markupN===null} onClick={()=>void run()}><FileUp/> Importálás</button></div>
   <details><summary>CSV-formátum</summary><p className="report-note">Oszlopok (a sorrend tetszőleges, a fejléc kötelező, a fejléc fölött legfeljebb 9 címsor lehet): Azonosító; Gyártó; Termékcsalád; Cikkszám; Megnevezés*; Egység* (db vagy m); Nettó anyagár (Ft); Munkadíj (Ft). Ugyanazzal az azonosítóval, vagy azonos gyártóval és cikkszámmal érkező sor a meglévő terméket frissíti, a többi új termék lesz. Hiányzó oszlop vagy üres cella a meglévő értéket nem változtatja. Magyar Excelből a „CSV (pontosvesszővel tagolt)”, a „CSV UTF-8” és a „Unicode szöveg” mentés is működik. A „12.500” alak 12 500 Ft-nak számít. Dobos vagy csomagos árnál előbb számold át egységárra (Ft/m, Ft/db).</p></details>
  </div>;
 }
 
 type Text='name'|'manufacturer'|'family'|'sku';
 type Draft=Omit<Product,'price'|'labor'>&{price:string;labor:string};
+const EDITED=['manufacturer','family','sku','name','unit','price','labor'] as const;
+// Az űrlap ára a CSV-vel azonos szabállyal értelmeződik (parseHuf): „1 234,50”, „1234.5”, „12.500” (= 12 500); két tizedesre kerekít.
+const priceInput=(n:number|null)=>n===null?'':String(n).replace('.',',');
+function readPrice(s:string):{value:number|null}|{error:string}{try{return {value:parseHuf(s)}}catch{return {error:'Érvénytelen ár. Számot adj meg 0 és 1 000 000 Ft között, például 1 234,50.'}}}
 function ProductForm({draft:initial,catalog,save,onClose}:{draft:Product;catalog:Catalog;save:Save;onClose:()=>void}){
- const [draft,setDraft]=useState<Draft>(()=>({...initial,price:initial.price===null?'':String(initial.price),labor:initial.labor===null?'':String(initial.labor)})),[errors,setErrors]=useState<Record<string,string>>({}),[confirm,setConfirm]=useState(false);
+ const [draft,setDraft]=useState<Draft>(()=>({...initial,price:priceInput(initial.price),labor:priceInput(initial.labor)})),[errors,setErrors]=useState<Record<string,string>>({}),[confirm,setConfirm]=useState(false);
  const stored=catalog.products.find(p=>p.id===initial.id);
- const num=(s:string)=>s.trim()===''?null:Number(s);
+ // Validált termék az űrlapból (mezőhibánál null); a mentés a mintát saját termékké teszi.
+ function build(archived:boolean):Product|null{
+  const found:Record<string,string>={},price=readPrice(draft.price),labor=readPrice(draft.labor);
+  if('error' in price)found.price=price.error;if('error' in labor)found.labor=labor.error;
+  const r=productSchema.safeParse({...draft,price:'value' in price?price.value:null,labor:'value' in labor?labor.value:null,archived,sample:false,updatedAt:new Date().toISOString()},{errorMap:catalogErrorMap});
+  if(!r.success)for(const i of r.error.issues){const k=String(i.path[0]);found[k]??=i.message}
+  if(!r.success||Object.keys(found).length){setErrors(found);return null}
+  return r.data;
+ }
  async function submit(){
-  const now=new Date().toISOString(),r=productSchema.safeParse({...draft,price:num(draft.price),labor:num(draft.labor),sample:false,updatedAt:now},{errorMap:catalogErrorMap});
-  if(!r.success){const next:Record<string,string>={};for(const i of r.error.issues){const k=String(i.path[0]);next[k]??=i.message}setErrors(next);return}
-  let next:Catalog;try{next=upsertProduct(catalog,r.data,now)}catch(e){setErrors({form:catalogError(e)});return}
+  const p=build(draft.archived);if(!p)return;
+  let next:Catalog;try{next=upsertProduct(catalog,p,p.updatedAt)}catch(e){setErrors({form:catalogError(e)});return}
   setErrors({});if(await save(next,'A termék mentve.'))onClose();
  }
- async function archive(v:boolean){if(!stored)return;if(await save(setProductArchived(catalog,stored.id,v,new Date().toISOString()),v?'A termék archiválva.':'A termék visszaállítva.'))onClose()}
+ // Az archiválás (visszaállítás) az űrlap módosításait is menti, hogy azok ne vesszenek el csendben; módosítás nélkül csak a jelölés változik.
+ async function archive(v:boolean){
+  if(!stored)return;const p=build(v);if(!p)return;
+  const edited=EDITED.some(k=>p[k]!==stored[k]);
+  let next:Catalog;try{next=edited?upsertProduct(catalog,p,p.updatedAt):setProductArchived(catalog,stored.id,v,p.updatedAt)}catch(e){setErrors({form:catalogError(e)});return}
+  setErrors({});if(await save(next,(edited?'A módosítások mentve, a termék ':'A termék ')+(v?'archiválva.':'visszaállítva.')))onClose();
+ }
  async function remove(){if(!stored)return;if(await save(removeProduct(catalog,stored.id),'A termék törölve.'))onClose()}
  const text=(label:string,key:Text,wide=false)=><label className={'field'+(wide?' wide':'')}><span>{label}</span><input aria-label={label} value={draft[key]} maxLength={key==='name'?240:key==='family'?120:key==='sku'?60:80} onChange={e=>setDraft(d=>({...d,[key]:e.target.value}))}/>{errors[key]&&<small className="auth-error">{errors[key]}</small>}</label>;
- const price=(label:string,key:'price'|'labor')=><label className="field"><span>{label}</span><input aria-label={label} type="number" min={0} max={1000000} step={0.01} value={draft[key]} onChange={e=>setDraft(d=>({...d,[key]:e.target.value}))}/>{errors[key]&&<small className="auth-error">{errors[key]}</small>}</label>;
+ const price=(label:string,key:'price'|'labor')=><label className="field"><span>{label}</span><input aria-label={label} type="text" inputMode="decimal" autoComplete="off" placeholder="nincs ár" value={draft[key]} aria-invalid={!!errors[key]} onChange={e=>setDraft(d=>({...d,[key]:e.target.value}))}/>{errors[key]&&<small className="auth-error">{errors[key]}</small>}</label>;
  return <form className="catalog-form" noValidate onSubmit={e=>{e.preventDefault();void submit()}}>
   <b className="wide">{stored?'Termék szerkesztése':'Új termék'}{stored?.sample&&<span className="catalog-badge">Minta</span>}</b>
   {text('Megnevezés*','name',true)}{text('Gyártó','manufacturer')}{text('Termékcsalád','family')}{text('Cikkszám','sku')}
   <label className="field"><span>Egység</span><select aria-label="Egység" value={draft.unit} onChange={e=>setDraft(d=>({...d,unit:e.target.value as Product['unit']}))}><option value="db">db</option><option value="m">m</option></select>{errors.unit&&<small className="auth-error">{errors.unit}</small>}</label>
   {price('Nettó anyagár (Ft/egység)','price')}{price('Munkadíj-javaslat (Ft/egység)','labor')}
-  <p className="report-note wide">Üresen hagyott ár = nincs ár; ingyenes tételnél 0-t adj meg.{stored?.sample?' Mentéskor a minta saját termékké válik, és az adatai az ajánlat PDF-jébe is bekerülnek: a „(minta)” jelölés helyett add meg a valós termék nevét.':''}</p>
+  <p className="report-note wide">Üresen hagyott ár = nincs ár; ingyenes tételnél 0-t adj meg. Tizedesvesszővel írd (1 234,50); a „12.500” alak 12 500 Ft, mint a CSV-importban.{stored?.sample?' Mentéskor (és módosítás utáni archiváláskor) a minta saját termékké válik, és az adatai az ajánlat PDF-jébe is bekerülnek: a „(minta)” jelölés helyett add meg a valós termék nevét.':''}</p>
   {errors.form&&<small className="auth-error wide" role="alert">{errors.form}</small>}
   {confirm&&stored?<div className="project-state-confirm wide"><p>Törlöd: {stored.name}? A már elkészült ajánlatokban a termék pillanatképe és ára megmarad; a fiók-alapértelmezésekből kikerül.</p><div className="project-actions"><button type="button" onClick={()=>setConfirm(false)}>Mégse</button><button type="button" className="danger" onClick={()=>void remove()}><Trash2/> Törlés</button></div></div>
   :<div className="project-actions wide"><button type="submit" className="primary"><Save/> Mentés</button><button type="button" onClick={onClose}>Mégse</button>{stored&&<button type="button" onClick={()=>void archive(!stored.archived)}>{stored.archived?<><RotateCcw/> Visszaállítás</>:<><Archive/> Archiválás</>}</button>}{stored&&<button type="button" className="danger" onClick={()=>setConfirm(true)}><Trash2/> Törlés</button>}</div>}

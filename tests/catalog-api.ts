@@ -47,6 +47,11 @@ r=await put(owner,{catalog:{...first,products:[product(A,'Egy',{sku:'X'}),produc
 r=await put(owner,{catalog:{version:1,products:Array.from({length:2001},(_,i)=>product(`aaaaaaaa-aaaa-4aaa-8aaa-${String(i).padStart(12,'0')}`,'T'+i,{family:'',manufacturer:''})),defaults:[]},revision:0,userId:'owner'});assert.equal(r.status,400);assert.match(r.body.error||'',/2000/);
 for(const revision of [-1,'1',1.5])assert.equal((await put(owner,{catalog:first,revision,userId:'owner'})).status,400);
 r=await put(owner,'x'.repeat(1_500_001));assert.equal(r.status,413);assert.equal(r.body.code,'TOO_LARGE');
+// A korlát a tárolt (alapértékekkel kiegészített) blobra is vonatkozik: a minimális mezős törzs 1,5 MB alatt van, a tárolandó adat fölötte.
+const lean={catalog:{version:1,products:Array.from({length:2000},(_,i)=>({id:`bbbbbbbb-bbbb-4bbb-8bbb-${String(i).padStart(12,'0')}`,name:'ő'.repeat(240),family:'ő'.repeat(70),unit:'db',updatedAt:''})),defaults:[]},revision:0,userId:'owner'};
+const leanBytes=new TextEncoder().encode(JSON.stringify(lean)).byteLength,fullBytes=new TextEncoder().encode(JSON.stringify(validateCatalog(lean.catalog))).byteLength;
+assert.ok(leanBytes<=1_500_000&&fullBytes>1_500_000,`${leanBytes} / ${fullBytes}`);
+r=await put(owner,lean);assert.equal(r.status,413);assert.equal(r.body.code,'TOO_LARGE');assert.match(r.body.error||'',/1,5 MB.*archivált termékek is beleszámítanak/);
 assert.equal(stored(),undefined,'hibás kérés nem ír');
 
 // 4. Írás és ütközés (revision-CAS)
@@ -76,4 +81,4 @@ sql.prepare('UPDATE product_catalogs SET data = ? WHERE user_id = ?').run('{"ver
 const original=console.error;console.error=()=>{};try{r=await get(owner)}finally{console.error=original}
 assert.equal(r.status,503);assert.match(r.body.error||'',/nem tölthető be/);
 
-console.log('PASS: catalog API auth, cross-site, empty state and limits, validation errors (Hungarian), size limit, account echo, revision CAS conflicts, isolation, cascade delete, no plan writes, corrupted blob 503.');
+console.log('PASS: catalog API auth, cross-site, empty state and limits, validation errors (Hungarian), size limit (request and stored blob), account echo, revision CAS conflicts, isolation, cascade delete, no plan writes, corrupted blob 503.');

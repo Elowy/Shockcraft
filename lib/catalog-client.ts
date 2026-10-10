@@ -1,4 +1,4 @@
-import {validateCatalog,CATALOG_BYTES,type Catalog} from './catalog';
+import {validateCatalog,BYTES_ERROR,CATALOG_BYTES,type Catalog} from './catalog';
 export class CatalogError extends Error{status:number;code?:string;constructor(message:string,status:number,code?:string){super(message);this.status=status;this.code=code}}
 export type CatalogResponse={catalog:Catalog;revision:number;userId:string};
 async function call(init:RequestInit,userId:string):Promise<CatalogResponse>{
@@ -11,6 +11,6 @@ async function call(init:RequestInit,userId:string):Promise<CatalogResponse>{
 export const fetchCatalog=(userId:string)=>call({},userId);
 export function saveCatalog(userId:string,catalog:Catalog,revision:number){
  const body=JSON.stringify({catalog,revision,userId});
- if(new TextEncoder().encode(body).byteLength>CATALOG_BYTES)return Promise.reject(new CatalogError('A termékkatalógus legfeljebb 1,5 MB lehet. Archiváld vagy töröld a nem használt termékeket.',413,'TOO_LARGE'));
+ if(new TextEncoder().encode(body).byteLength>CATALOG_BYTES)return Promise.reject(new CatalogError(BYTES_ERROR,413,'TOO_LARGE'));
  return call({method:'PUT',headers:{'Content-Type':'application/json'},body},userId);
 }

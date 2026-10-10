@@ -20,6 +20,7 @@ export function refLabel(ref:string,fallback=''):string{
  if(kind==='device'&&own(labels,a))return labels[a];
  if(kind==='module'&&own(moduleLabels,a)&&b)return moduleLabels[a]+' · '+b+' modul'+(c?' · '+c+' A':'');
  if(kind==='site'&&own(siteLabels,a))return 'Telki pont: '+siteLabels[a];
- if(kind==='cable'&&a)return 'Kábel: '+(fallback||ref.slice(6));
+ // Idempotens: a már „Kábel: …” alakú (tárolt) címke nem kap még egy előtagot.
+ if(kind==='cable'&&a)return 'Kábel: '+((fallback.replace(/^\s*Kábel:\s*/,'')||ref.slice(6)));
  return ref;
 }

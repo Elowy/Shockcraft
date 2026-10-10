@@ -181,7 +181,8 @@ body{background:var(--background)}button,.leftwrap,.toolbar,.right,.field input,
 .catalog-table table,.quote-product-table table{width:100%;border-collapse:collapse;font-size:12px}
 .catalog-table th,.catalog-table td,.quote-product-table th,.quote-product-table td{padding:7px 8px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
 .catalog-table th,.quote-product-table th{position:sticky;top:0;background:var(--background)}
-.catalog-table td,.quote-product-table td{overflow-wrap:break-word}
+/* anywhere: a szóköz nélküli hosszú cikkszám vagy gyártónév is törhető (a break-word auto táblaelrendezésben nem csökkenti a min-content szélességet). */
+.catalog-table td,.quote-product-table td{overflow-wrap:anywhere}
 .quote-products,.quote-product-table,.catalog-body,.catalog-table,.catalog-import,.catalog-form,.catalog-defaults{min-width:0}
 .catalog-table small,.quote-product-table small,.material-product{display:block;color:var(--muted-foreground)}
 .report-table small.material-product{margin-top:2px}
@@ -195,11 +196,18 @@ body{background:var(--background)}button,.leftwrap,.toolbar,.right,.field input,
 /* A <details> tartalma egy belső dobozba kerül, ezért blokkelrendezés: a széles tábla így a saját dobozában görgethető. */
 .quote-products{border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:block;min-width:0;max-width:100%}.quote-products>*+*{margin-top:10px}
 .quote-products>summary{cursor:pointer;font-weight:600}
-.quote-product-buttons{display:flex;flex-wrap:nowrap;gap:6px}.quote-product-table td:nth-child(2),.quote-product-table td:nth-child(4),.quote-product-table td:nth-child(5),.catalog-table td:nth-child(5),.catalog-table td:nth-child(6){white-space:nowrap}.catalog-table td:last-child button{font-size:12px;padding:5px 8px}.quote-product-buttons button,.quote-product-table td:last-child button{font-size:12px;padding:5px 8px;white-space:nowrap}
+.quote-product-buttons{display:flex;flex-wrap:nowrap;gap:6px}.quote-product-table td:nth-child(2),.quote-product-table td:nth-child(4),.quote-product-table td:nth-child(5),.catalog-table td:nth-child(5),.catalog-table td:nth-child(6){white-space:nowrap}.catalog-table td:last-child button{font-size:12px;padding:5px 8px;white-space:nowrap}.quote-product-buttons button,.quote-product-table td:last-child button{font-size:12px;padding:5px 8px;white-space:nowrap}
 .quote-table .quote-product{margin-top:5px;max-width:100%;justify-content:flex-start;text-align:left;font-size:12px;padding:5px 8px;white-space:normal}
 .product-picker-dialog[data-slot=dialog-content]{width:min(720px,calc(100% - 24px));max-width:720px;max-height:90dvh;overflow-y:auto}
 .product-picker-list{display:grid;gap:6px;max-height:50dvh;overflow-y:auto}
 .product-picker-list>button{justify-content:space-between;text-align:left;white-space:normal;gap:10px}
 .product-picker-list>button>span:first-child{min-width:0;overflow-wrap:anywhere}.product-picker-list small{display:block;color:var(--muted-foreground);font-size:12px;margin-top:3px}
 .product-picker-badges{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
-@media(max-width:760px){.quote-product-table table{min-width:540px}.catalog-table table{min-width:600px}.catalog-form{grid-template-columns:1fr}.quote-product-table td:nth-child(4),.quote-product-table th:nth-child(4),.quote-product-table td:nth-child(5),.quote-product-table th:nth-child(5){display:none}}
+/* Keskeny kijelzőn a sorok kártyák: a műveletgomb vízszintes görgetés nélkül elérhető, a cellák a data-label feliratot kapják. */
+@media(max-width:760px){.catalog-form{grid-template-columns:1fr}
+ .catalog-table table,.catalog-table tbody,.quote-product-table table,.quote-product-table tbody{display:block}
+ .catalog-table thead,.quote-product-table thead{display:none}
+ .catalog-table tr,.quote-product-table tr{display:flex;flex-wrap:wrap;gap:4px 14px;padding:8px;border-bottom:1px solid var(--border)}
+ .catalog-table td,.quote-product-table td{display:block;padding:0;border:0}
+ .catalog-table td:not([data-label]),.quote-product-table td:not([data-label]){flex:1 1 100%}
+ .catalog-table td[data-label]::before,.quote-product-table td[data-label]::before{content:attr(data-label) ": ";color:var(--muted-foreground)}}

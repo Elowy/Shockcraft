@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {CATALOG_LIMIT,accountDefault,catalogError,emptyCatalog,productLabel,productLine,removeProduct,searchProducts,setAccountDefault,setProductArchived,skuKey,toSnapshot,upsertProduct,validateCatalog,type Catalog,type Product} from '../lib/catalog';
+import {CATALOG_LIMIT,LIMIT_ERROR,BYTES_ERROR,accountDefault,catalogError,emptyCatalog,productLabel,productLine,removeProduct,searchProducts,setAccountDefault,setProductArchived,skuKey,toSnapshot,upsertProduct,validateCatalog,type Catalog,type Product} from '../lib/catalog';
 import {catalogCsv,decodeCsv,mergeCatalogCsv,parseCatalogCsv,parseHuf,parseUnit} from '../lib/catalog-csv';
 import {SAMPLE_PRODUCTS,addSampleProducts} from '../lib/catalog-sample';
 import {cableRef,refCategory,refLabel,refUnit,validRef} from '../lib/product-refs';
@@ -166,4 +166,48 @@ assert.equal(refLabel('site:meter'),'Telki pont: Villanyóra');assert.equal(refL
 assert.equal(refCategory('module:MCB:1:B16'),'Elosztókészülék');assert.equal(refCategory('constructor:x'),undefined);assert.equal(refUnit('cable:3x2.5'),'m');
 assert.equal(skuKey({manufacturer:' Legrand ',sku:'753120 '}),skuKey({manufacturer:'legrand',sku:'753120'}));
 
-console.log('PASS: catalog schema and Hungarian errors, price parity, mutators, labels and PDF line, search, decoding (UTF-8/UTF-16LE/Windows-1250), CSV parsing (delimiters, quoting, header search, Hungarian numbers, units, limits, duplicates, markup/gross, formula guard), merge rules, round-trip, sample set, refs.');
+// 13. Felülvizsgálati javítások
+// 13a. Az ár két tizedesre kerekedik (űrlap, API, tárolt adat), így az oda-vissza CSV változatlan és kitevős alak sem keletkezik.
+const dec=catalog([product(A,'Háromtizedes',{price:312.345,labor:0.005}),product(B,'Parányi',{price:1e-7,labor:999_999.999})]);
+assert.deepEqual(dec.products.map(p=>[p.price,p.labor]),[[312.35,0.01],[0,1_000_000]]);
+assert.deepEqual(validateCatalog(dec),dec,'a kerekítés idempotens');
+const decCsv=catalogCsv(dec);assert.ok(!/\de[-+]?\d/i.test(decCsv),'kitevő nélküli export');assert.ok(decCsv.includes('"312,35";"0,01"'));
+const decBack=parseCatalogCsv(decodeCsv(new TextEncoder().encode(decCsv)).text);assert.deepEqual(decBack.errors,[]);
+const decRt=mergeCatalogCsv(dec,decBack.drafts,T2,nextId);assert.deepEqual([decRt.added,decRt.updated,decRt.unchanged],[0,0,2]);assert.deepEqual(decRt.catalog,dec);
+// 13b. A „0.500” tizedestört (nem 500): az ezres tagolás első csoportja nem kezdődhet 0-val.
+for(const [raw,v] of [['0.500',0.5],['0.250',0.25],['0.5',0.5],['1.500',1500],['999.999,5',999999.5],['0,500',0.5]] as [string,number][])assert.equal(parseHuf(raw),v,raw);
+assert.deepEqual(parseCatalogCsv('Megnevezés,Egység,Ár\nA,db,"1,234.50"\nB,db,0.500').drafts.map(d=>d.price),[1234.5,0.5]);
+// 13c. Lezáratlan idézőjel: fájlhiba a nyitó sor számával; a további sorok nem nyelődnek el csendben.
+p=parseCatalogCsv('Megnevezés;Egység;Ár\nA;db;1\nB;db;2\n"Lezáratlan;db;100;\nElnyelt sor;db;1\nElnyelt sor 2;db;2\n');
+assert.deepEqual(p.drafts,[]);assert.equal(p.errors.length,1);assert.equal(p.errors[0].line,0);assert.match(p.errors[0].message,/Lezáratlan idézőjel a\(z\) 4\. sorban/);
+p=parseCatalogCsv('Megnevezés;Egység\n"Több\nsoros";db\n"Idézett ""jel""";db\n"Le nem zárt\n');assert.match(p.errors[0].message,/a\(z\) 5\. sorban/);
+assert.deepEqual(parseCatalogCsv('Megnevezés;Egység\n"Több\nsoros";db\n"12"-es cső;db').drafts.map(d=>d.name),['Több soros','12-es cső']);
+// 13d. Láthatatlan és irányváltó karakterek (C1, nulla szélességű, bidi, BOM): a séma és a CSV is csendben elhagyja őket.
+const bidi=validateCatalog(withP({name:'ab‮dcba',manufacturer:'Gy\u0081ártó',family:'⁦Csa​lád⁩',sku:'75﻿3120'})).products[0];
+assert.deepEqual([bidi.name,bidi.manufacturer,bidi.family,bidi.sku],['abdcba','Gyártó','Család','753120']);
+rejects(withP({name:'‮​ '}),/megnevezését/);
+p=parseCatalogCsv('Megnevezés;Egység;Gyártó\n"Dugalj‮";db;"Leg\u0098rand"');assert.deepEqual(p.errors,[]);assert.deepEqual([p.drafts[0].name,p.drafts[0].manufacturer],['Dugalj','Legrand']);
+// 13e. Az aposztróffal kezdődő képletszerű szöveg is változatlanul ér vissza (az export még egy aposztrófot tesz elé).
+const apos=catalog([product(A,"'=X"),product(B,"''+36 Teszt"),product(C,"'Sima")]);
+const aposCsv=catalogCsv(apos);assert.ok(aposCsv.includes(`"''=X"`)&&aposCsv.includes(`"'''+36 Teszt"`)&&aposCsv.includes(`"'Sima"`));
+const aposBack=parseCatalogCsv(decodeCsv(new TextEncoder().encode(aposCsv)).text);assert.deepEqual(aposBack.drafts.map(d=>d.name),["'=X","''+36 Teszt","'Sima"]);
+assert.equal(mergeCatalogCsv(apos,aposBack.drafts,T2,nextId).unchanged,3);
+// 13f. Összefésülés: a cikkszám-index követi a módosítást (a régi kulcs megszűnik, az új párosít), és nagy fájlnál sem négyzetes.
+m=mergeCatalogCsv(m0,[{line:2,id:A,manufacturer:'Legrand',sku:'NEW-1',name:'Dugalj',unit:'db'},{line:3,manufacturer:'Legrand',sku:'753120',name:'Régi kód',unit:'db'},{line:4,sku:'new-1',name:'Dugalj 2',unit:'db'}],T2,nextId);
+assert.deepEqual([m.added,m.updated,m.unchanged],[1,2,0]);assert.deepEqual([m.catalog.products[0].sku,m.catalog.products[0].name],['new-1','Dugalj 2'],'a cikkszám a CSV-ben írt alakot veszi fel');assert.equal(m.catalog.products.at(-1)?.name,'Régi kód');
+const bigCatalog=catalog(Array.from({length:CATALOG_LIMIT},(_,i)=>product(`cccccccc-cccc-4ccc-8ccc-${String(i).padStart(12,'0')}`,'Termék '+i,{manufacturer:'Gyártó'+(i%37),sku:'SKU-'+i})));
+let bigCsv='Gyártó;Cikkszám;Megnevezés;Egység;Ár\n';for(let i=0;i<5000;i++)bigCsv+=`Másik${i%50};X-${i};Új termék ${i};db;12\n`;
+const bigDrafts=parseCatalogCsv(bigCsv).drafts;assert.equal(bigDrafts.length,5000);
+let started=performance.now(),limitError='';try{mergeCatalogCsv(bigCatalog,bigDrafts,T2,nextId)}catch(e){limitError=catalogError(e)}
+assert.ok(performance.now()-started<2500,'5000 sor 2000 termékes katalógusba: lineáris idő (korábban 5–12 s)');
+assert.match(limitError,/5000 érvényes sorából 5000 új termék lenne, így a katalógusban 7000 termék lenne/);assert.match(limitError,/archiváltak is beleszámítanak/);
+let updCsv='Gyártó;Cikkszám;Megnevezés;Egység;Ár\n';for(let i=0;i<CATALOG_LIMIT;i++)updCsv+=`Gyártó${i%37};SKU-${i};Termék ${i};db;${100+i}\n`;
+started=performance.now();m=mergeCatalogCsv(bigCatalog,parseCatalogCsv(updCsv).drafts,T2,nextId);assert.ok(performance.now()-started<2500);assert.deepEqual([m.added,m.updated],[0,CATALOG_LIMIT]);
+// 13g. Korlátüzenetek: az archivált termék is beleszámít, ezért archiválást nem javasolnak.
+for(const msg of [LIMIT_ERROR,BYTES_ERROR]){assert.match(msg,/archivált/);assert.doesNotMatch(msg,/Archiváld/)}
+// 13h. A kábeles fiók-alapértelmezés címkéje egyszer kapja a „Kábel:” előtagot (a tárolt címke már teljes felirat).
+assert.equal(refLabel('cable:3x2.5','Kábel: 3 × 2,5 mm²'),'Kábel: 3 × 2,5 mm²');assert.equal(refLabel('cable:3x2.5','Kábel:'),'Kábel: 3x2.5');
+for(const d of sample.catalog.defaults.filter(d=>d.ref.startsWith('cable:')))assert.equal(refLabel(d.ref,d.label).match(/Kábel:/g)?.length,1,d.ref);
+assert.equal(refLabel('cable:3x1.5',sample.catalog.defaults.find(d=>d.ref==='cable:3x1.5')!.label),'Kábel: 3 × 1,5 mm²');
+
+console.log('PASS: catalog schema and Hungarian errors, two-decimal prices, invisible-character stripping, unclosed quotes, 0.xxx prices, apostrophe round-trip, linear merge with limit message, idempotent cable label, price parity, mutators, labels and PDF line, search, decoding (UTF-8/UTF-16LE/Windows-1250), CSV parsing (delimiters, quoting, header search, Hungarian numbers, units, limits, duplicates, markup/gross, formula guard), merge rules, round-trip, sample set, refs.');
