@@ -80,6 +80,7 @@
 .kk-review{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .75rem;margin:0 0 1rem;font-size:.875rem!important;color:var(--kk-muted)!important}
 .kk-badge{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .6rem;border-radius:999px;background:var(--kk-ok-bg);color:var(--kk-ok-fg);font-size:.8125rem;font-weight:650;text-decoration:none;line-height:1.4}
 .kk-badge svg{width:1rem;height:1rem}
+.kk a.kk-badge{color:var(--kk-ok-fg)}
 .kk-badge.soon{background:var(--kk-surface);color:var(--kk-muted)}
 .kk-badge.draft{background:var(--kk-draft-bg);color:var(--kk-draft-fg)}
 .kk-preview-banner{display:flex;gap:.5rem;align-items:flex-start;padding:.75rem 1rem;border-radius:.5rem;background:var(--kk-draft-bg);color:var(--kk-draft-fg)!important;font-weight:600}
@@ -270,6 +271,7 @@ a.kk-card:hover{border-color:var(--kk-primary);box-shadow:0 4px 16px #24414b14}
 .kk .public-button.primary{background:#256459;border-color:#256459;color:#fff!important}
 .kk .public-footer{background:var(--kk-surface);color:var(--kk-muted);border-color:var(--kk-border)}
 .kk .public-footer .brand{color:var(--kk-fg)}
+.kk .public-footer .public-footer-kb strong{color:var(--kk-fg)}
 .kk .public-header nav a[aria-current]{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:6px;font-weight:650}
 .kk-head-actions{display:inline-flex;gap:.25rem;align-items:center}
 .kk-head-btn,.kk .kk-head-btn{display:inline-flex;align-items:center;gap:.35rem;min-height:2.5rem;min-width:2.5rem;justify-content:center;padding:.25rem .5rem;border:1px solid var(--kk-border);border-radius:.5rem;background:var(--kk-bg);color:var(--kk-fg);text-decoration:none;cursor:pointer}
@@ -309,6 +311,8 @@ a.kk-card:hover{border-color:var(--kk-primary);box-shadow:0 4px 16px #24414b14}
 @media(prefers-contrast:more){.kk,.kk-layer{--kk-border:currentColor}.kk-figure-svg .fig-s,.kk-figure-svg .fig-p,.kk-figure-svg .fig-q{stroke-width:5}}
 @media print{
  .kk,[data-theme=dark] .kk{--kk-bg:#fff;--kk-fg:#111;--kk-muted:#444;--kk-border:#999;--kk-surface:#fff;--kk-surface-2:#fff;--kk-primary:#1d5048;background:#fff!important;color:#111!important;padding:0}
+ /* Sötét módból is világos papírra: az állapot- és értokenek is a világos értékükre állnak. */
+ [data-theme=dark] .kk{color-scheme:light;--kk-ok-bg:#e7f4ec;--kk-ok-fg:#1d5c37;--kk-bad-bg:#fbe9e7;--kk-bad-fg:#9b2a1c;--kk-warn-bg:#fff7e8;--kk-warn-fg:#6d4c14;--kk-warn-line:#d49940;--kk-info-bg:#eef4f8;--kk-info-line:#7aa3bd;--kk-danger-bg:#fdeeee;--kk-danger-line:#c0392b;--kk-draft-bg:#fff4c2;--kk-draft-fg:#5d4a00;--kk-wire-l1:#8a4b22;--kk-wire-l2:#262626;--kk-wire-l3:#7c8790;--kk-wire-n:#2563b8;--kk-track:#e3eaee}
  .kk-appbar,.kk-bottom-nav,.kk-desktop-head,.kk-side,.kk-toc,.kk-actions,.kk-cta,.public-footer,.cookie-notice,.kk-toast-region,.kk-skip,.kk-reset,.kk-index-search,.kk-rows .kk-button,.kk-rows .kk-icon-btn{display:none!important}
  .kk-page{display:block;padding:0;max-width:none}
  .kk-main{max-width:none}

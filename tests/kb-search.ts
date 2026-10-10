@@ -35,7 +35,9 @@ assert.equal(first('hurokimpedancia'),'hurokimpedancia');
 // Egy elírás (5 betűnél hosszabb szó).
 assert.equal(first('feszutlseges'),'feszultseges');
 assert.equal(first('kondenzatr'),'eredo-kapacitas');
-assert.ok(top('teljesitmeny').includes('teljesitmeny'));
+assert.equal(first('teljesítmény'),'teljesitmeny','azonos címtalálatnál az általánosabb (rövidebb) cím az első');
+assert.ok(top('teljesítmény').includes('latszolagos-meddo-teljesitmeny'),'a többi teljesítmény-kalkulátor is a találatok elején');
+assert.equal(first('meddő teljesítmény'),'latszolagos-meddo-teljesitmeny');
 // Rangsor: a cím erősebb a leírásnál.
 assert.equal(first('áram'),'aram-teljesitmenybol');
 // Nincs találat → javaslat.

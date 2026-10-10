@@ -68,7 +68,8 @@ function scoreQuery(p:Prepared,q:string){
   if(!best)return 0;
   total+=best;
  }
- if(p.title===q)total+=20;else if(q.length>=3&&(' '+p.title).includes(' '+q))total+=10;
+ // A címben szereplő teljes lekérdezés: a rövidebb (általánosabb) cím előrébb kerül („teljesítmény” → Villamos teljesítmény).
+ if(p.title===q)total+=20;else if(q.length>=3&&(' '+p.title).includes(' '+q))total+=10+2*q.length/p.title.length;
  else if(p.fields.slice(1,3).some(f=>(' '+f.text+' ').includes(' '+q+' ')))total+=6;
  return total;
 }
