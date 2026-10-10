@@ -50,3 +50,15 @@ Egyetlen, tartalomjegyzékkel tagolt oldal, kalkulátorokkal:
 - **Fogyasztásmérők:** egy- és háromfázisú, közvetlen és áramváltós mérés, vezérelt (H- és GEO-tarifás) mérés, a bekötés elve – az elosztói engedélyes szabályaira hivatkozva.
 - **Számítások kalkulátorral, levezetéssel:** Ohm-törvény (U = I · R), teljesítmény (egyfázis P = U · I · cos φ, háromfázis P = √3 · U · I · cos φ), vezeték-ellenállás (R = ρ · l / A), soros és párhuzamos ellenállás, feszültségesés, energiafogyasztás és költség (kWh × Ft/kWh), kismegszakító- és keresztmetszet-választás alapjai.
 - Minden képlet mellett mértékegységek, kidolgozott példa és a kalkulátor; a kalkulátor bemenetei ellenőrzöttek, az eredmény kerekítése és mértékegysége egyértelmű.
+
+### 2. ötlet: online vizsgaszimuláció (feleletválasztós teszt)
+
+Gyakorló tesztfelület kb. 1000 kérdéses kérdésbankkal, véletlenszerűen összeállított feleletválasztós tesztekkel.
+
+- **Kérdésbank:** saját vagy jogtisztán licencelt kérdések; hivatalos vizsgasorok szövegét nem vesszük át. Minden kérdést szakember lektorál, mielőtt élesbe kerül (AI-val generált kérdés is csak lektorálás után). Kérdésenként: témakör (kapcsolások, érintésvédelem, földelési rendszerek, mérés, számítások, anyagismeret, szabványok), nehézség, kérdés, 3–4 válasz (egy vagy több helyes), magyarázat, hivatkozás a megfelelő Tudástár-szakaszra, opcionális ábra (SVG kapcsolási rajz), lektor és dátum, verzió.
+- **Számolós kérdések:** paraméterezett sablonok véletlen értékekkel (pl. Ohm-törvény, teljesítmény, feszültségesés), a helyes választ a Tudástár kalkulátorai számolják, a rossz válaszok tipikus hibákból (pl. √3 kihagyása, mm² és m összekeverése) képződnek.
+- **Módok:** gyakorló (azonnali visszajelzés és magyarázat kérdésenként) és vizsga (időkorlát, a végén értékelés). Választható hossz (pl. 10/20/50 kérdés) és témakör; véletlen sorrend a kérdéseken és a válaszokon; egy teszten belül nincs ismétlődő kérdés, és a korábban rosszul megválaszoltak gyakrabban jönnek.
+- **Eredmények:** pontszám, megfelelt/nem felelt meg küszöbbel, témakörönkénti erősség-gyengeség, előzmények. Fiókkal a szerveren (új tábla, a többi fiókszintű adat mintájára), vendégként csak a böngészőben.
+- **Minőség:** „Hibás kérdés jelzése” gomb; a kérdésbank a repóban verziózott adatfájl (vagy admin felület), tesztekkel ellenőrzött séma (egyedi azonosító, pontosan jelölt helyes válasz, létező Tudástár-hivatkozás).
+- **Megjelölés:** a felület nem állítja, hogy hivatalos vizsgakérdéseket tartalmaz; „gyakorló teszt” jelöléssel fut.
+- Nyitott kérdések: ingyenes vagy előfizetéses (pl. mintateszt ingyen, teljes bank előfizetéssel); melyik vizsgára készít (villanyszerelő szakmai vizsga, érintésvédelmi szabványossági felülvizsgáló stb.); ki lektorálja a kérdésbankot.
