@@ -70,7 +70,7 @@ export default async function CalculatorPage({params}:{params:Promise<{slug:stri
     {def.safety.includes('beavatkozas')&&<SafetyNotice id="beavatkozas" tone="warn"/>}
     <CalcExample def={def}/>
     {!!related.length&&<section id="kapcsolodo" className="kk-related" aria-labelledby="kapcsolodo-cim"><h2 id="kapcsolodo-cim">Kapcsolódó kalkulátorok</h2><ul>{related.map(c=><li key={c.slug}><a href={calcPath(c.slug)}><b>{c.title}</b><small>{c.short}</small></a></li>)}</ul></section>}
-    <section id="forrasok" className="kk-sources" aria-labelledby="forrasok-cim"><h2 id="forrasok-cim">Források</h2><ul>{def.sources.map(s=><li key={s}>{s}</li>)}</ul></section>
+    <section id="forrasok" className="kk-sources" aria-labelledby="forrasok-cim"><h2 id="forrasok-cim">Források</h2><ul>{def.sources.map(s=><li key={s}><Sub text={s}/></li>)}</ul></section>
     <p className="kk-meta">Verzió: v{def.version} · ujjlenyomat: {fp} · frissítve: {date(def.updated)} · {info.record?.kind==='lektoralt'?'Szakmai lektor: '+info.record.reviewer:'Ellenőrzés: '+(draft?'folyamatban':'két független számítás egyezése (automatikus teszt)')} · <ReportLink id={def.slug} version={def.version} fingerprint={fp} url={(origin??'')+url}/></p>
     <PlannerCta/>
    </main>

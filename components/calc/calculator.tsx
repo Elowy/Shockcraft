@@ -101,7 +101,7 @@ function Result({def,run}:{def:CalcDef;run:CalcRun}){
   <div className="kk-result-main">{primary.map(r=><div key={r.id}><span>{r.label}</span><strong>{r.text??r.value}</strong>{r.note&&<small>{r.note}</small>}</div>)}</div>
   {!!rest.length&&<dl className="kk-result-list">{rest.map(r=><div key={r.id}><dt>{r.label}</dt><dd>{r.text??r.value}</dd></div>)}</dl>}
   {out.verdict&&<p className={'kk-verdict '+(out.verdict.ok?'ok':'bad')}>{out.verdict.text}</p>}
-  {run.issues.map((i,n)=><p key={n} className={'kk-issue '+i.level}>{i.text}</p>)}
+  {run.issues.map((i,n)=><p key={n} className={'kk-issue '+i.level}><Sub text={i.text}/></p>)}
   {out.figure&&<figure className="kk-figure"><CalcFigure figure={out.figure} id={figId}/></figure>}
   {out.table&&<div className="kk-table-wrap"><table className="kk-table"><caption>{out.table.caption}</caption><thead><tr>{out.table.head.map(h=><th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{out.table.rows.map((r,i)=><tr key={i}>{r.map((c,j)=>j===0?<th key={j} scope="row">{c}</th>:<td key={j}>{c}</td>)}</tr>)}</tbody></table></div>}
  </div>;
@@ -154,7 +154,7 @@ function CalcForm({def,initial}:{def:CalcDef;initial:Raw}){
   <section className="kk-result-wrap" aria-label="Eredmény" id="eredmeny"><Result def={def} run={run}/></section>
   <p className="sr-only" aria-live="polite">{announce}</p>
   <details className="kk-derivation" id="levezetes" open><summary>Levezetés</summary><Steps run={run}/></details>
-  {run.ok&&!!run.out.assumptions?.length&&<details className="kk-assumptions" open><summary>Feltételezések</summary><ul>{run.out.assumptions.map(a=><li key={a}>{a}</li>)}</ul></details>}
+  {run.ok&&!!run.out.assumptions?.length&&<details className="kk-assumptions" open><summary>Feltételezések</summary><ul>{run.out.assumptions.map(a=><li key={a}><Sub text={a}/></li>)}</ul></details>}
   {printInfo&&<p className="kk-print-only">Nyomtatva: {printInfo.date} · {printInfo.url}</p>}
  </div>;
 }

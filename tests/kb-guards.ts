@@ -98,4 +98,8 @@ for(const k of [...keys].filter(k=>k.startsWith('shockcraft-kb-')&&!k.startsWith
 // 7) A statikus kalkulátoroldalak (ISR) beállításai és a gyökérlayout hidratálási jelzője.
 for(const f of ['app/(kezikonyv)/kalkulatorok/page.tsx','app/(kezikonyv)/kalkulatorok/[slug]/page.tsx']){const s=readFileSync(f,'utf8');assert.match(s,/export const dynamic='force-static'/);assert.match(s,/export const revalidate=3600/)}
 assert.match(readFileSync('app/layout.tsx','utf8'),/<html lang="hu" suppressHydrationWarning>/);
+// 8) A definíciók „I_N”, „P_átl” jelölése a felületen alsó indexként jelenik meg: a képletek, a levezetés, a figyelmeztetések, a feltételezések és a források <Sub>-on át.
+{const calc=readFileSync('components/calc/calculator.tsx','utf8'),page=readFileSync('app/(kezikonyv)/kalkulatorok/[slug]/page.tsx','utf8');
+ for(const re of [/<Sub text=\{i\.text\}\/>/,/<Sub text=\{a\}\/>/,/<Sub text=\{s\.formula\}\/>/,/<Sub text=\{s\.substituted\}\/>/])assert.match(calc,re,'calculator.tsx: '+re);
+ for(const re of [/<Sub text=\{f\}\/>/,/<Sub text=\{s\}\/>/])assert.match(page,re,'[slug]/page.tsx: '+re);}
 console.log('PASS: importgráf ('+all.files.size+' fájl, '+all.packages.size+' csomag) tiltólista nélkül, kliensszigetek szerveroldali modul nélkül, egy sziget = egy definíció, nincs getAccount/cookies/headers/fetch, dangerouslySetInnerHTML csak JSON-LD/téma, next/dynamic őr, tervező → csak links.ts, fejlécek, kulcsok, ISR-beállítások.');
