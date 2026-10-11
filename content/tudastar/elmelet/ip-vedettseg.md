@@ -31,8 +31,8 @@ sources:
     kiadás: "2016" # lektor ellenőrizze
     pont: "7. (a villamos szerkezetek érintésvédelmi osztályai: 0, I, II, III)" # pontszámot lektor ellenőrizze
 ai: vázlat
-version: 0.1
-updated: 2026-10-10
+version: 0.2
+updated: 2026-10-11
 ---
 
 > **Figyelem:** Az IP-kód a burkolat tulajdonsága, és önmagában nem dönti el, hová szerelhető egy szerelvény. Hogy egy adott helyen (különösen fürdőszobában, kültéren vagy medence közelében) legalább milyen védettség kell, azt a vonatkozó előírások alapján a tervező határozza meg. Villamos szerelést csak szakképzett személy végezhet.
@@ -69,7 +69,7 @@ Az 1–4-es fokozatot próbatestekkel vizsgálják: egy adott átmérőjű goly�
 
 A lakásban leggyakoribb IP20 azt jelenti, hogy ujjal nem érhető el feszültség alatti rész, a vízzel szemben viszont nincs védelem.
 
-[ÁBRA: abra-2 „Az első számjegy próbatestei valós méretarányban”. viewBox 0 0 360 210, méretarány 1 mm = 2,6 px. Egy vízszintes alapvonalon balról jobbra: 50 mm-es kör (130 px átmérő), 12,5 mm-es kör (32,5 px), 2,5 mm-es kör (6,5 px), 1 mm-es kör (2,6 px), végül egy 20 × 20 px-es pontfelhő (12 apró pötty) a porhoz. Körvonal --kk-fg, kitöltés --kk-surface-2, pöttyök --kk-muted. Mindegyik alatt a számjegy félkövéren (1, 2, 3, 4, 5–6) és a próbatárgy (.fig-label): „kézfej”, „ujj”, „szerszám”, „huzal”, „por”. A két legkisebb kör fölött 5× nagyított betétrajz szaggatott keretben (.fig-limit), „5× nagyítás” felirattal. Alul .fig-small: „Valós méretarány; a por bejutását az 5-ös és a 6-os fokozat különbözteti meg.”]
+[ÁBRA: abra-2 „Az első számjegy próbatestei méretarányosan”. viewBox 0 0 360 210, méretarány 1 mm = 2,6 px. Egy vízszintes alapvonalon balról jobbra: 50 mm-es kör (130 px átmérő), 12,5 mm-es kör (32,5 px), 2,5 mm-es kör (6,5 px), 1 mm-es kör (2,6 px), végül egy 20 × 20 px-es pontfelhő (12 apró pötty) a porhoz. Körvonal --kk-fg, kitöltés --kk-surface-2, pöttyök --kk-muted. Mindegyik alatt a számjegy félkövéren (1, 2, 3, 4, 5–6) és a próbatárgy (.fig-label): „kézfej”, „ujj”, „szerszám”, „huzal”, „por”. A két legkisebb kör fölött 5× nagyított betétrajz szaggatott keretben (.fig-limit), „5× nagyítás” felirattal. Alul .fig-small: „Méretarányos rajz; a por bejutását az 5-ös és a 6-os fokozat különbözteti meg.”]
 
 ## A második számjegy: víz
 

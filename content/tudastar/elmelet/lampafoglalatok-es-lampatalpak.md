@@ -25,8 +25,8 @@ sources:
     kiadás: "2019, módosításokkal"
     pont: "II. melléklet (a G9 és az R7s halogén fényforrások kivezetése)" # lektor ellenőrizze a pontot
 ai: vázlat
-version: 0.1
-updated: 2026-10-10
+version: 0.2
+updated: 2026-10-11
 ---
 
 > **Figyelem:** A cikk a fényforrások és a foglalatok azonosításában segít, nem szerelési útmutató. A foglalat, a lámpatest és a transzformátor cseréje vagy bekötése villamos szerelés, amelyet csak szakképzett személy végezhet.
@@ -57,7 +57,7 @@ A jelölés nemzetközi rendszert követ, és három részből állhat:
 - **E40 – góliát menet.** Nagy teljesítményű fényforrásokhoz: csarnok- és közvilágítás.
 - **E10.** Zseblámpák, jelzőlámpák, régi karácsonyfa-füzérek kis izzói.
 
-Az E-talpas fényforrásoknál a talp középső érintkezője (talppontja) és a menetes hüvely a két pólus. Csavaráskor a menetes rész kerül legközelebb az ujjadhoz, ezért a lámpatestet úgy kell bekötni, hogy a fázisvezető (L) a középső érintkezőre jusson, a nullavezető (N) a menetre. Ezt a bekötést szakember végzi. Izzócsere előtt kapcsold le a lámpát, és hagyd kihűlni a fényforrást. Régi vagy hibás bekötésnél a kapcsoló a nullavezetőt is megszakíthatja, ilyenkor a kikapcsolt lámpa foglalata is feszültség alatt marad; ezért biztonságosabb az áramkör kismegszakítóját is lekapcsolni.
+Az E-talpas fényforrásoknál a talp középső érintkezője (talppontja) és a menetes hüvely a két pólus. A foglalat bekötése villanyszerelői feladat. Izzócsere előtt kapcsold le a lámpát, és hagyd kihűlni a fényforrást. Régi vagy hibás bekötésnél a kapcsoló a nullavezetőt is megszakíthatja, ilyenkor a kikapcsolt lámpa foglalata is feszültség alatt marad; ezért biztonságosabb az áramkör kismegszakítóját is lekapcsolni.
 
 ## Csapos talpak
 

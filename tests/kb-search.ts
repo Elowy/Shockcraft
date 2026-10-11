@@ -1,8 +1,10 @@
-// Kereső: ékezet- és kisbetűfüggetlenség, szinonimák, egy elírás tűrése, rangsor, „Erre gondoltál?”.
+// Kereső: ékezet- és kisbetűfüggetlenség, szinonimák, egy elírás tűrése, rangsor, „Erre gondoltál?”; kalkulátorok, Tudástár-cikkek és szótári kifejezések.
 // Futtatás: node_modules/.bin/tsx tests/kb-search.ts
 import assert from 'node:assert/strict';
 import {gzipSync} from 'node:zlib';
 import {calcMetas} from '../lib/calc/registry';
+import {KB_SEARCH_ITEMS} from '../lib/kb/content/generated/search';
+import {KB_PENDING,kbSearchItems} from '../lib/kb/content/registry';
 import {editDistance,expandQuery,normalize,search,suggest,type SearchItem} from '../lib/kb/search';
 
 const items:SearchItem[]=calcMetas().map(m=>({id:m.slug,title:m.title,href:m.href,group:'Kalkulátorok',keywords:m.keywords,synonyms:m.synonyms,summary:m.short,note:m.note}));
@@ -52,6 +54,30 @@ assert.ok(search(items,'hp').length<=3,'hp: kevés, releváns találat ('+search
 assert.equal(first('LE'),'mertekegyseg-atvalto','a teljes kulcsszó („kW LE”) megelőzi a „LED” előtagot');
 assert.equal(suggest(items,'rcd'),null,'„RCD” → nincs értelmetlen javaslat (LED)');
 assert.equal(suggest(items,'lde')?.id,'led-elotet-ellenallas','egy elírás rövid lekérdezésnél is');
-// Az index (a kalkulátorok metaadatai) kicsi.
-const size=gzipSync(JSON.stringify(items)).length;assert.ok(size<40*1024,'index ≤ 40 KB gz ('+size+')');
-console.log('PASS: normalizálás, szinonimák (biztosíték → kismegszakító, kábel vastagság → keresztmetszet), elírás-tűrés, rangsor, javaslat, kiadatlan találat link nélkül; index '+size+' B gz.');
+// Tudástár: a közzétett cikkek és a szakszótár kifejezései ugyanabban a keresőben – a böngésző a generált indexet (KB_SEARCH_ITEMS) a kereső
+// első megnyitásakor tölti be, és a kalkulátorok tételeivel (ezeket a Shell adja át) együtt keres; a kettő egyezését a tests/kb-content.ts őrzi.
+const kb=kbSearchItems(false),all:SearchItem[]=[...KB_SEARCH_ITEMS,...items];
+assert.deepEqual(KB_SEARCH_ITEMS.map(i=>i.id),kb.map(i=>i.id),'a betöltött index = a szerver közzétett keresőtételei');
+const firstAll=(q:string)=>search(all,q)[0]?.item.id,topAll=(q:string,n=3)=>search(all,q).slice(0,n).map(h=>h.item.id);
+assert.ok(kb.some(i=>i.group==='Elmélet')&&kb.some(i=>i.group==='Szakkifejezések'),'cikkek és szótári kifejezések');
+for(const i of kb){assert.ok(i.href&&/^\/tudastar\/(elmelet\/[a-z0-9-]+|szotar(#[a-z0-9-]+)?)$/.test(i.href),'közzétett, belső cél: '+i.href);assert.ok(!KB_PENDING.some(p=>i.id===p.id||i.href!.endsWith('/'+p.slug)),'R3 nincs a keresőben: '+i.id)}
+for(const [q,id] of [['színjelölés','vezetekek-szinjelolese'],['szinjeloles','vezetekek-szinjelolese'],['zöld-sárga','vezetekek-szinjelolese'],['barna','vezetekek-szinjelolese'],
+ ['ip65','ip-vedettseg'],['IP44','ip-vedettseg'],['E27','lampafoglalatok-es-lampatalpak'],['GU10','lampafoglalatok-es-lampatalpak'],['H07V-K','vezetek-es-kabeljelolesek'],['NYM','vezetek-es-kabeljelolesek'],
+ ['kirchhoff','kirchhoff-torvenyei'],['rövidzárlat','rovidzarlat-es-tulterheles'],['hőhatás','joule-lenz-torveny'],['kelvin','szinhomerseklet'],['színhőmérséklet','szinhomerseklet'],
+ ['soros kapcsolás','soros-es-parhuzamos-kapcsolas'],['fényáram','lumen-es-lux'],['effektív érték','elektromos-aram'],['feszültség','elektromos-feszultseg'],['kwh','elektromos-teljesitmeny'],
+ // Szótári kifejezések (szinonimával, ékezet nélkül): /tudastar/szotar#<horgony>
+ ['fi rele','szotar-aram-vedokapcsolo-fi-rele'],['rcd','szotar-aram-vedokapcsolo-fi-rele'],['avk','szotar-aram-vedokapcsolo-fi-rele'],['pen','szotar-pen-vezeto'],['védővezető','szotar-vedovezeto'],
+ ['konnektor','szotar-dugalj'],['106','szotar-valtokapcsolo']] as const)assert.equal(firstAll(q),id,q+' → '+topAll(q,5).join(', '));
+// Egy szavas keresésnél a cikk és a kalkulátor előrébb kerül a szótári kifejezésnél (a kifejezés súlya kisebb), de a kifejezés is a találatok elején van.
+assert.equal(firstAll('ohm'),'ohm-torveny');assert.ok(topAll('ohm',2).includes('ohm-torvenye'),'ohm: a kalkulátor és a cikk');
+assert.ok(topAll('trafo',3).includes('transzformator-mukodese')&&topAll('trafo',3).includes('szotar-transzformator'),'trafo: '+topAll('trafo',3).join(', '));
+assert.ok(topAll('teljesítmény',5).includes('elektromos-teljesitmeny'),'teljesítmény: a cikk az első öt között');
+assert.equal(search(all,'fi rele').find(h=>h.item.id==='szotar-aram-vedokapcsolo-fi-rele')?.item.href,'/tudastar/szotar#aram-vedokapcsolo-fi-rele');
+assert.equal(suggest(all,'kirhhof')?.id,'kirchhoff-torvenyei','„Erre gondoltál?” cikkcímre is');
+// Az index (a kalkulátorok és a Tudástár könnyű metaadatai, cikktörzs nélkül) kicsi.
+const size=gzipSync(JSON.stringify(all)).length;assert.ok(size<40*1024,'index ≤ 40 KB gz ('+size+')');
+// A minden oldallal érkező rész (a kalkulátorok tételei) a HEAD-beli méret körül marad; a Tudástár-index csak a kereső megnyitásakor töltődik.
+const inline=gzipSync(JSON.stringify(items)).length,lazy=gzipSync(JSON.stringify(KB_SEARCH_ITEMS)).length;
+assert.ok(inline<6*1024,'az oldalba ágyazott keresőtételek (kalkulátorok) ≤ 6 KB gz ('+inline+')');
+assert.ok(!JSON.stringify(kb).includes('Kidolgozott példa'),'cikktörzs nem kerül az indexbe');
+console.log('PASS: normalizálás, szinonimák (biztosíték → kismegszakító, kábel vastagság → keresztmetszet, rcd → FI-relé), elírás-tűrés, rangsor, javaslat, kiadatlan találat link nélkül, cikkek és szótári kifejezések ('+kb.length+' tétel, R3 nélkül); index '+size+' B gz (oldalba ágyazva '+inline+' B, lustán töltve '+lazy+' B).');

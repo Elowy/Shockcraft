@@ -86,16 +86,21 @@ const sameEntry=(a:KbEntry,b:KbEntry)=>a.type===b.type&&a.id===b.id;
 export const bookmarkStore=createStore<KbEntry>({key:KB_KEYS.bookmarks,version:1,validate:validEntry,max:300,dedupe:sameEntry});
 export const recentStore=createStore<KbEntry>({key:KB_KEYS.recent,version:1,validate:validEntry,max:30,dedupe:sameEntry});
 export const searchStore=createStore<string>({key:KB_KEYS.recent,field:'searches',version:1,validate:validSearch,max:8,dedupe:(a,b)=>a===b});
-/** Kikapcsolt kényelmi funkciók (most csak a „/” gyorsbillentyű: 'slash'). Üres lista = alapállapot, ekkor a kulcs nem is jön létre. */
-const PREFS=['slash'] as const;
+/** Kikapcsolt kényelmi funkciók: a „/” gyorsbillentyű ('slash') és az olvasott cikkek előzménye ('history'). Üres lista = alapállapot,
+ * ekkor a kulcs nem is jön létre. */
+const PREFS=['slash','history'] as const;
 export const prefStore=createStore<string>({key:KB_KEYS.prefs,field:'off',version:1,validate:x=>typeof x==='string'&&(PREFS as readonly string[]).includes(x)?x:null,max:PREFS.length,dedupe:(a,b)=>a===b});
 export const slashShortcutOn=(off:readonly string[])=>!off.includes('slash');
-export function setSlashShortcut(on:boolean,storage:()=>StorageLike|null=browserStorage){
- const next=prefStore.get().filter(x=>x!=='slash').concat(on?[]:['slash']);
+function setPref(key:(typeof PREFS)[number],on:boolean,storage:()=>StorageLike|null){
+ const next=prefStore.get().filter(x=>x!==key).concat(on?[]:[key]);
  if(next.length){prefStore.set(next);return}
  try{storage()?.removeItem(KB_KEYS.prefs)}catch{}
  prefStore.reset();
 }
+export const setSlashShortcut=(on:boolean,storage:()=>StorageLike|null=browserStorage)=>setPref('slash',on,storage);
+/** Az olvasott cikkek előzménye (alapból be; kikapcsolva a cikkoldal nem ír a Legutóbbiakba). */
+export const historyOn=(off:readonly string[])=>!off.includes('history');
+export const setHistory=(on:boolean,storage:()=>StorageLike|null=browserStorage)=>setPref('history',on,storage);
 
 /** Elem a lista elejére (azonos típus+azonosító esetén csere). */
 export const pushFront=<T>(list:readonly T[],item:T,same:(a:T,b:T)=>boolean)=>[item,...list.filter(x=>!same(x,item))];

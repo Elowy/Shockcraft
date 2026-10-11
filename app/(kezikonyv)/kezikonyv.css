@@ -7,12 +7,15 @@
  --kk-warn-bg:#fff7e8;--kk-warn-fg:#6d4c14;--kk-warn-line:#d49940;--kk-info-bg:#eef4f8;--kk-info-line:#7aa3bd;
  --kk-danger-bg:#fdeeee;--kk-danger-line:#c0392b;--kk-draft-bg:#fff4c2;--kk-draft-fg:#5d4a00;
  --kk-wire-l1:#8a4b22;--kk-wire-l2:#262626;--kk-wire-l3:#7c8790;--kk-wire-n:#2563b8;--kk-track:#e3eaee;
+ /* Ábratokenek (Tudástár): zöld-sárga PE, színminta-fekete (sötét témában is fekete, világos körvonallal), réz vezető. */
+ --kk-wire-pe:#2e8b3e;--kk-wire-pe-stripe:#f2c200;--kk-wire-l2-swatch:#1f1f1f;--kk-copper:#b87333;--kk-copper-end:#d69a63;
  --kk-bar-h:3.5rem;--kk-nav-h:4rem;--kk-radius:.75rem;
 }
 [data-theme=dark] .kk,[data-theme=dark] .kk-layer{
  --kk-surface:#1d2b36;--kk-surface-2:#203a35;--kk-focus:#f0b45e;--kk-ok-bg:#173d2a;--kk-ok-fg:#9fdcb9;--kk-bad-bg:#4a1f1b;--kk-bad-fg:#ffb4a8;
  --kk-warn-bg:#3a2f17;--kk-warn-fg:#f4d28b;--kk-warn-line:#c99a3e;--kk-info-bg:#1d2f3c;--kk-info-line:#5f8aa6;--kk-danger-bg:#3d1f1d;--kk-danger-line:#ef8a7d;
  --kk-draft-bg:#4a3f10;--kk-draft-fg:#ffe48a;--kk-wire-l1:#c98a5c;--kk-wire-l2:#d9dee2;--kk-wire-l3:#9aa7b1;--kk-wire-n:#6fa8f0;--kk-track:#2b3c48;
+ --kk-wire-pe:#4fbf63;--kk-wire-pe-stripe:#e8c330;--kk-wire-l2-swatch:#141414;--kk-copper:#d9955c;--kk-copper-end:#e8b588;
 }
 .kk{min-height:100dvh;background:var(--kk-bg);color:var(--kk-fg);font-size:1rem;line-height:1.6;padding-bottom:calc(var(--kk-nav-h) + env(safe-area-inset-bottom))}
 .kk a{color:inherit}
@@ -215,10 +218,123 @@ a.kk-card:hover{border-color:var(--kk-primary);box-shadow:0 4px 16px #24414b14}
 .kk-method li svg{width:1.25rem;height:1.25rem;color:var(--kk-primary);margin-top:.2rem}
 .kk-notfound{padding:2rem 0}
 /* JS nélkül a csak szkripttel működő vezérlők rejtve (a <html> `js` osztályát a téma-indító teszi ki); a lista, a képletek és a kidolgozott példa SSR-ben olvasható. */
-html:not(.js) .kk-calc,html:not(.js) .kk-index-search,html:not(.js) [data-kb-open=search],html:not(.js) [data-kb-open=bookmarks]{display:none}
+html:not(.js) .kk-calc,html:not(.js) .kk-index-search,html:not(.js) [data-kb-open=search],html:not(.js) [data-kb-open=bookmarks],html:not(.js) .kk-actions{display:none}
 .kk-check{display:flex;gap:.5rem;align-items:flex-start;margin:.75rem 0;font-size:.9375rem}
 .kk-check input{margin-top:.3rem;accent-color:var(--kk-primary)}
 .kk-check small{color:var(--kk-muted)}
+
+/* Tudástár: cikk (törzs, dobozok, képlet, példa, táblázat, szótár, források, előző/következő) */
+.kk-page-article .kk-main{max-width:46rem}
+.kk-prose>p,.kk-prose li,.kk-prose dd{max-width:42rem}
+.kk-prose p{margin:0 0 .9rem}
+.kk-prose ul,.kk-prose ol{margin:0 0 1rem}
+.kk-prose li{margin:.2rem 0}
+.kk-example-box p{margin:.6rem 0}
+.kk-callout p,.kk-rovid p{margin:0}
+@media(max-width:949px){.kk-home-search kbd{display:none}}
+.kk-prose h2{scroll-margin-top:4.5rem}
+.kk-prose h3,.kk-term{scroll-margin-top:4.5rem}
+.kk-prose sub,.kk-prose sup{font-size:.75em;line-height:0}
+.kk-rovid{margin:1rem 0;padding:.9rem 1rem;border-radius:.6rem;background:var(--kk-surface-2);border-left:5px solid var(--kk-primary)}
+.kk-rovid p{margin:0}
+.kk-formula{margin:1rem 0;padding:.6rem 1rem;border-radius:.5rem;background:var(--kk-surface);font-family:ui-serif,Georgia,'Times New Roman',serif;font-size:1.125rem!important;letter-spacing:.01em;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.kk-example-box{margin:1.25rem 0;padding:.25rem 1rem .5rem;border:1px solid var(--kk-border);border-left:5px solid var(--kk-warn-line);border-radius:.6rem;background:var(--kk-bg)}
+.kk-example-box .kk-formula{background:var(--kk-surface)}
+.kk-prose .kk-table-wrap{margin:1rem 0}
+.kk-prose .kk-table th[scope=row]{font-weight:600}
+.kk-table-wrap:focus-visible{outline:3px solid var(--kk-focus);outline-offset:2px}
+/* Szövegközi linkek: képernyőn színnel ÉS aláhúzással különülnek el a szövegtől (WCAG 1.4.1); a link nélküli, lektorálás alatti cél
+   („hamarosan”) viszont nem kap linkszerű jelölést – csak tompított, dőlt megjegyzést. */
+.kk-prose a{color:var(--kk-primary);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.kk-prose a:hover{text-decoration-thickness:2px}
+.kk-pending-note{color:var(--kk-muted);font-size:.875em;font-style:italic}
+.kk-terms{margin:.5rem 0 1rem;display:grid;gap:.75rem}
+.kk-term{padding:.6rem .8rem;border:1px solid var(--kk-border);border-radius:.6rem}
+.kk-term:target{border-color:var(--kk-primary);box-shadow:0 0 0 2px var(--kk-primary)}
+.kk-term dt{font-weight:700}
+.kk-term dfn{font-style:normal}
+.kk-term-note{font-weight:400;color:var(--kk-muted)}
+.kk-term dd{margin:.25rem 0 0}
+.kk-letters{display:flex;flex-wrap:wrap;gap:.35rem;margin:1rem 0}
+.kk-letters a{display:inline-flex;align-items:center;justify-content:center;min-width:2.75rem;min-height:2.75rem;padding:0 .6rem;border:1px solid var(--kk-border);border-radius:.5rem;text-decoration:none;font-weight:650}
+.kk-toc-inline{margin:1rem 0;padding:.5rem 1rem;border:1px solid var(--kk-border);border-radius:var(--kk-radius)}
+.kk-toc-inline summary{cursor:pointer;font-weight:650;min-height:2.75rem;display:flex;align-items:center}
+.kk-toc-inline ol{margin:.25rem 0 .5rem;display:grid;gap:.15rem}
+.kk-toc-inline a{text-underline-offset:3px}
+.kk-related h3{margin-top:1rem}
+.kk-related-more{margin:.75rem 0 0}
+.kk .kk-related-more a{display:inline-flex;align-items:center;min-height:2.75rem;border:0;padding:0;text-decoration:underline;text-underline-offset:3px}
+.kk-safety-band{display:flex;gap:.5rem;align-items:flex-start;margin:1.5rem 0;padding:.75rem 1rem;border-radius:.5rem;border-left:4px solid var(--kk-warn-line);background:var(--kk-warn-bg);color:var(--kk-warn-fg)!important;font-weight:600}
+.kk-safety-band svg{width:1.25rem;height:1.25rem;margin-top:.15rem}
+.kk-safety-band a{color:inherit}
+.kk-related-grid{display:grid;gap:.5rem;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr))}
+.kk-sources li{margin:.25rem 0}
+.kk-source-ed{color:var(--kk-muted)}
+.kk-check-pending{display:inline-block;padding:0 .45rem;border:1px solid var(--kk-border);border-radius:999px;font-size:.75rem;line-height:1.5;color:var(--kk-muted);white-space:nowrap;vertical-align:.1em}
+/* Előző/következő: a két oszlop a hosszú szavak („Színhőmérséklet”) miatt sem szélesedhet a képernyőnél tovább (320 px-en sincs vízszintes görgetés). */
+.kk-prevnext{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem;margin:1.5rem 0}
+.kk-prevnext a{display:flex;align-items:center;gap:.4rem;padding:.75rem;border:1px solid var(--kk-border);border-radius:.6rem;text-decoration:none;min-height:3rem;min-width:0}
+.kk-prevnext a.next{justify-content:flex-end;text-align:right}
+.kk-prevnext span{display:grid;min-width:0;overflow-wrap:anywhere;hyphens:auto}
+.kk-prevnext small{color:var(--kk-muted);font-size:.8125rem}
+.kk-prevnext svg{width:1.25rem;height:1.25rem}
+.kk-changes{margin:1.5rem 0 0;padding:.5rem 1rem;border:1px solid var(--kk-border);border-radius:var(--kk-radius)}
+.kk-changes summary{cursor:pointer;font-weight:650;min-height:2.75rem;display:flex;align-items:center}
+.kk-changes ul{font-size:.9375rem}
+.kk-card.draft{border-style:dashed}
+.kk-category h2 a,.kk-home h2 a,.kk-cat-grid h3 a{text-decoration:none}
+.kk-category h2 a:hover,.kk-home h2 a:hover,.kk-cat-grid h3 a:hover{text-decoration:underline}
+
+/* Tudástár: ábrák (saját SVG; a színek tokenekből, így sötét témában és nyomtatásban is helyesek) */
+.kk-fig{margin:1.5rem 0;max-width:42rem}
+.kk-fig-wide{max-width:none}
+.kk-fig-frame{overflow-x:auto;border:1px solid var(--kk-border);border-radius:var(--kk-radius);background:var(--kk-bg);padding:.5rem}
+/* Görgethető (széles) ábra: a kereten belüli tartalom jelzése – jobb és bal oldali árnyék, amely a tartalom szélénél eltűnik. */
+.kk-fig-wide .kk-fig-frame{background:linear-gradient(to right,var(--kk-bg) 30%,transparent) left/2.5rem 100% no-repeat local,linear-gradient(to left,var(--kk-bg) 30%,transparent) right/2.5rem 100% no-repeat local,radial-gradient(farthest-side at 0 50%,#0003,transparent) left/.75rem 100% no-repeat scroll,radial-gradient(farthest-side at 100% 50%,#0003,transparent) right/.75rem 100% no-repeat scroll,var(--kk-bg)}
+.kk-fig-frame:focus-visible{outline:3px solid var(--kk-focus);outline-offset:2px}
+.kk-fig-svg{display:block;width:100%;height:auto;color:var(--kk-fg)}
+.kk-fig-wide .kk-fig-svg{min-width:var(--kk-fig-min,0)}
+.kk-fig-panels{display:flex;flex-wrap:wrap;gap:.5rem}
+.kk-fig-panels>.kk-fig-svg{flex:1 1 14rem;width:auto;min-width:0;max-width:22rem}
+.kk-fig-panels-3>.kk-fig-svg{flex-basis:12rem;max-width:16rem}
+/* Két rajzváltozat ugyanarról (pl. a színhőmérséklet-skála): 600 px alatt a keskeny (függőleges), fölötte a széles; a rejtett változat
+   display:none, így a képernyőolvasó sem látja. Nyomtatásban a széles. */
+.kk-fig-svg.kk-fig-only-narrow{display:none}
+@media(max-width:599px){.kk-fig-svg.kk-fig-only-wide{display:none}.kk-fig-svg.kk-fig-only-narrow{display:block}}
+.kk-fig figcaption{margin-top:.5rem;font-size:.9375rem}
+.kk-fig-text{display:block;margin-top:.25rem;color:var(--kk-muted);font-size:.875rem}
+.kk-fig-missing{padding:1rem;color:var(--kk-muted)}
+.kk-fig-svg text{fill:var(--kk-fg);font-family:inherit}
+.kk-fig-svg .t-muted{fill:var(--kk-muted)}.kk-fig-svg .t-halo{paint-order:stroke;stroke:var(--kk-bg);stroke-width:3px;stroke-linejoin:round}.kk-fig-svg .t-primary{fill:var(--kk-primary)}.kk-fig-svg .t-warn{fill:var(--kk-warn-fg)}.kk-fig-svg .t-danger{fill:var(--kk-bad-fg)}.kk-fig-svg .t-on-primary{fill:var(--kk-on-primary)}
+.kk-fig-svg .f-none{fill:none}.kk-fig-svg .f-fg{fill:var(--kk-fg)}.kk-fig-svg .f-bg{fill:var(--kk-bg)}.kk-fig-svg .f-muted{fill:var(--kk-muted)}.kk-fig-svg .f-primary{fill:var(--kk-primary)}.kk-fig-svg .f-warn{fill:var(--kk-warn-line)}.kk-fig-svg .f-danger{fill:var(--kk-danger-line)}
+.kk-fig-svg .f-surface{fill:var(--kk-surface)}.kk-fig-svg .f-surface2{fill:var(--kk-surface-2)}.kk-fig-svg .f-info{fill:var(--kk-info-bg)}.kk-fig-svg .f-track{fill:var(--kk-track)}
+.kk-fig-svg .f-l1{fill:var(--kk-wire-l1)}.kk-fig-svg .f-l2{fill:var(--kk-wire-l2)}.kk-fig-svg .f-l3{fill:var(--kk-wire-l3)}.kk-fig-svg .f-n{fill:var(--kk-wire-n)}.kk-fig-svg .f-pe{fill:var(--kk-wire-pe)}.kk-fig-svg .f-pe-stripe{fill:var(--kk-wire-pe-stripe)}.kk-fig-svg .f-l2-swatch{fill:var(--kk-wire-l2-swatch)}.kk-fig-svg .f-copper{fill:var(--kk-copper)}.kk-fig-svg .f-copper-end{fill:var(--kk-copper-end)}
+.kk-fig-svg .s-fg{stroke:var(--kk-fg)}.kk-fig-svg .s-muted{stroke:var(--kk-muted)}.kk-fig-svg .s-primary{stroke:var(--kk-primary)}.kk-fig-svg .s-warn{stroke:var(--kk-warn-line)}.kk-fig-svg .s-danger{stroke:var(--kk-danger-line)}.kk-fig-svg .s-border{stroke:var(--kk-border)}.kk-fig-svg .s-track{stroke:var(--kk-track)}.kk-fig-svg .s-info{stroke:var(--kk-info-line)}
+.kk-fig-svg .s-l1{stroke:var(--kk-wire-l1)}.kk-fig-svg .s-l2{stroke:var(--kk-wire-l2)}.kk-fig-svg .s-l3{stroke:var(--kk-wire-l3)}.kk-fig-svg .s-n{stroke:var(--kk-wire-n)}
+
+/* Tudástár: kezdőlap */
+.kk-home .kk-lead{max-width:44rem}
+.kk-home-search{display:flex;align-items:center;gap:.6rem;min-height:3.25rem;padding:.5rem 1rem;border:2px solid var(--kk-primary);border-radius:.75rem;text-decoration:none;color:var(--kk-muted);max-width:40rem}
+.kk-home-search svg{width:1.25rem;height:1.25rem;color:var(--kk-primary)}
+.kk-home-search span{flex:1}
+.kk-home-search kbd{font-size:.75rem;border:1px solid var(--kk-border);border-radius:.25rem;padding:0 .35rem}
+.kk-continue{margin:1.25rem 0;padding:.75rem 1rem;border:1px solid var(--kk-border);border-radius:var(--kk-radius);background:var(--kk-surface)}
+.kk-continue h2{margin:0 0 .25rem;font-size:1.0625rem}
+.kk-continue h3{display:flex;align-items:center;gap:.35rem;font-size:.9375rem;margin:.6rem 0 .35rem}
+.kk-continue h3 svg{width:1rem;height:1rem}
+.kk-chiplist{list-style:none!important;padding:0!important;margin:0;display:flex;flex-wrap:wrap;gap:.4rem}
+.kk-chiplist a{display:inline-grid;align-content:center;min-height:2.75rem;padding:.35rem .75rem;border:1px solid var(--kk-border);border-radius:.5rem;background:var(--kk-bg);text-decoration:none;font-size:.9375rem;max-width:22rem}
+.kk-chiplist small{color:var(--kk-muted);font-size:.8125rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kk-section-cards{list-style:none!important;padding:0!important;margin:1.25rem 0;display:grid;gap:.75rem;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr))}
+.kk-section-cards a{display:grid;grid-template-columns:auto 1fr;gap:.15rem .75rem;align-items:center;padding:1rem;border:1px solid var(--kk-border);border-radius:var(--kk-radius);text-decoration:none;min-height:5.5rem;background:var(--kk-bg)}
+.kk-section-cards a svg{grid-row:span 2;width:2rem;height:2rem;color:var(--kk-primary)}
+.kk-section-cards b{font-size:1.125rem}
+.kk-section-cards small{color:var(--kk-muted);font-size:.875rem}
+.kk-section-cards li.featured a{border:2px solid var(--kk-primary);background:var(--kk-surface-2)}
+.kk-cat-grid{display:grid;gap:.5rem 1.5rem;grid-template-columns:repeat(auto-fill,minmax(14rem,1fr))}
+.kk-cat-grid h3{margin:.75rem 0 .25rem}
+.kk-cat-grid ul{margin:0;padding-left:1.1rem}
+.kk-cat-grid li{font-size:.9375rem}
 
 /* Tervező-blokk (oldalanként egy, a tartalom után) */
 .kk-cta{display:grid;grid-template-columns:auto 1fr;gap:.75rem 1rem;align-items:start;margin:2.5rem 0 1rem;padding:1rem;border:1px solid var(--kk-border);border-radius:var(--kk-radius);background:var(--kk-surface-2)}
@@ -240,7 +356,8 @@ html:not(.js) .kk-calc,html:not(.js) .kk-index-search,html:not(.js) [data-kb-ope
 .kk-sheet-body p{font-size:.875rem;line-height:1.55;margin:0}
 .kk-entry-list{list-style:none;padding:0;margin:0;display:grid;gap:.35rem}
 .kk-entry-list li{display:flex;align-items:center;gap:.25rem;border:1px solid var(--kk-border);border-radius:.5rem}
-.kk-entry-list a{flex:1;display:grid;padding:.5rem .75rem;text-decoration:none;min-width:0}
+.kk-entry-list a,.kk-entry-list li.gone>span{flex:1;display:grid;padding:.5rem .75rem;text-decoration:none;min-width:0}
+.kk-entry-list li.gone{border-style:dashed;color:var(--kk-muted)}
 .kk-entry-list small{color:var(--kk-muted);font-size:.8125rem;overflow-wrap:anywhere}
 .kk-confirm{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;font-size:.875rem}
 .kk-menu ul{list-style:none;padding:0;margin:0;display:grid;border-bottom:1px solid var(--kk-border);padding-bottom:.5rem}
@@ -289,6 +406,13 @@ html:not(.js) .kk-calc,html:not(.js) .kk-index-search,html:not(.js) [data-kb-ope
 .kk-tabs a svg{width:1.1rem;height:1.1rem}
 .kk-tabs a[aria-current]{color:var(--kk-primary);border-bottom-color:var(--kk-primary)}
 
+/* Érintési célok keskeny képernyőn legalább 44 px magasak (terv 2.9): listalinkek, belső tartalomjegyzék, morzsamenü, kategóriacímek. */
+@media(max-width:949px){
+ .kk-toc-inline a,.kk-cat-grid li a,.kk-category li>a{display:block;padding:.625rem 0}
+ .kk-toc-inline ol{gap:0}
+ .kk-crumbs a{display:inline-block;padding:.75rem 0}
+ .kk-category h2 a,.kk-cat-grid h3 a{display:inline-block;padding:.625rem 0}
+}
 @media(min-width:700px){
  .kk-notes{grid-template-columns:1fr 1fr}
  .kk-shortcut-grid{grid-template-columns:1fr 1fr}
@@ -311,16 +435,20 @@ html:not(.js) .kk-calc,html:not(.js) .kk-index-search,html:not(.js) [data-kb-ope
 /* 951–1100 px: a kézikönyv fejlécében a három művelet (keresés, kedvencek, menü) miatt a „Mire használható?” link nem fér el; a főoldalon és a menüben elérhető. */
 @media(min-width:950px) and (max-width:1100px){.kk .public-header nav>a:first-child{display:none}}
 .kk .public-header nav a,.kk .public-header .public-button{white-space:nowrap}
+@media(min-width:950px){.kk-page-article{grid-template-columns:13rem minmax(0,1fr)}}
 @media(min-width:1240px){
- .kk-page-calc{grid-template-columns:13rem minmax(0,1fr) 11rem}
- .kk-toc{display:block;position:sticky;top:1rem;align-self:start}
+ .kk-page-calc,.kk-page-article{grid-template-columns:13rem minmax(0,1fr) 12rem}
+ .kk-toc{display:block;position:sticky;top:1rem;align-self:start;max-height:calc(100dvh - 2rem);overflow-y:auto}
+ .kk-page-article .kk-toc-inline{display:none}
+ .kk-toc-letters ul{grid-template-columns:repeat(4,1fr)}
+ .kk-toc-letters li:nth-last-child(-n+3){grid-column:1/-1}
 }
 @media(prefers-reduced-motion:reduce){.kk *,.kk-layer *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 @media(prefers-contrast:more){.kk,.kk-layer{--kk-border:currentColor}.kk-figure-svg .fig-s,.kk-figure-svg .fig-p,.kk-figure-svg .fig-q{stroke-width:5}}
 @media print{
  .kk,[data-theme=dark] .kk{--kk-bg:#fff;--kk-fg:#111;--kk-muted:#444;--kk-border:#999;--kk-surface:#fff;--kk-surface-2:#fff;--kk-primary:#1d5048;background:#fff!important;color:#111!important;padding:0}
  /* Sötét módból is világos papírra: az állapot- és értokenek is a világos értékükre állnak. */
- [data-theme=dark] .kk{color-scheme:light;--kk-ok-bg:#e7f4ec;--kk-ok-fg:#1d5c37;--kk-bad-bg:#fbe9e7;--kk-bad-fg:#9b2a1c;--kk-warn-bg:#fff7e8;--kk-warn-fg:#6d4c14;--kk-warn-line:#d49940;--kk-info-bg:#eef4f8;--kk-info-line:#7aa3bd;--kk-danger-bg:#fdeeee;--kk-danger-line:#c0392b;--kk-draft-bg:#fff4c2;--kk-draft-fg:#5d4a00;--kk-wire-l1:#8a4b22;--kk-wire-l2:#262626;--kk-wire-l3:#7c8790;--kk-wire-n:#2563b8;--kk-track:#e3eaee}
+ [data-theme=dark] .kk{color-scheme:light;--kk-ok-bg:#e7f4ec;--kk-ok-fg:#1d5c37;--kk-bad-bg:#fbe9e7;--kk-bad-fg:#9b2a1c;--kk-warn-bg:#fff7e8;--kk-warn-fg:#6d4c14;--kk-warn-line:#d49940;--kk-info-bg:#eef4f8;--kk-info-line:#7aa3bd;--kk-danger-bg:#fdeeee;--kk-danger-line:#c0392b;--kk-draft-bg:#fff4c2;--kk-draft-fg:#5d4a00;--kk-wire-l1:#8a4b22;--kk-wire-l2:#262626;--kk-wire-l3:#7c8790;--kk-wire-n:#2563b8;--kk-track:#e3eaee;--kk-wire-pe:#2e8b3e;--kk-wire-pe-stripe:#f2c200;--kk-wire-l2-swatch:#1f1f1f;--kk-copper:#b87333;--kk-copper-end:#d69a63}
  .kk-appbar,.kk-bottom-nav,.kk-desktop-head,.kk-side,.kk-toc,.kk-actions,.kk-cta,.public-footer,.cookie-notice,.kk-toast-region,.kk-skip,.kk-reset,.kk-index-search,.kk-rows .kk-button,.kk-rows .kk-icon-btn{display:none!important}
  .kk-page{display:block;padding:0;max-width:none}
  .kk-main{max-width:none}
@@ -331,4 +459,12 @@ html:not(.js) .kk-calc,html:not(.js) .kk-index-search,html:not(.js) [data-kb-ope
  .kk details{display:block}
  .kk-base-notice{display:flex!important}
  .kk-foot{padding:0}
+ .kk-toc-inline,.kk-letters,.kk-prevnext,.kk-home-search,.kk-continue,.kk-changes{display:none!important}
+ .kk-fig,.kk-example-box,.kk-rovid,.kk-callout,.kk-term,.kk-formula{break-inside:avoid}
+ .kk-fig-frame{overflow:visible;border:0;padding:0}
+ .kk-fig-wide .kk-fig-svg{min-width:0}
+ .kk-prose a{text-decoration:none;color:inherit}
+ /* Sötét módból „háttérgrafikákkal” nyomtatva se maradjon sötét a lap alja. */
+ html,body{background:#fff!important;color:#111!important}
+ .kk-fig-svg.kk-fig-only-wide{display:block!important}.kk-fig-svg.kk-fig-only-narrow{display:none!important}
 }

@@ -26,6 +26,7 @@ Villanyszerelőknek és lakóépületek villamos tervein dolgozóknak készül.
 - Termékkatalógus (fiókszintű): saját termék- és árlista (kézzel, CSV-ből, mintakészletből), típusonkénti és soronkénti termékválasztás az ajánlatban, fiók-alapértelmezések, árfrissítés; termék az anyagkimutatásban, a CSV-ben és az ajánlat-PDF-ben
 - Sötét/világos mód
 - Kalkulátorok (`/kalkulatorok`, a Villanyszerelő Tudástár első szekciója): ingyenes, belépés és süti nélkül; 19 közzétett T0 kalkulátor („Belsőleg ellenőrizve”), 8 T1 kalkulátor elkészült, de lektori jóváhagyásig a kiadási kapu (`lib/calc/release.ts`) mögött rejtve; kereső, kedvencek, legutóbbiak, megosztható URL, levezetés, saját SVG-ábrák
+- Tudástár – Elmélet és szakszótár (`/tudastar`, `/tudastar/elmelet`, `/tudastar/szotar`): ingyenes, belépés és süti nélkül; 17 cikk (12 R1, 5 R2) és a szakszótár (58 kifejezés) „Belsőleg ellenőrizve” jelvénnyel, 22 saját SVG-ábrával; a tartalom Markdown-vázlatból (`content/tudastar/`) generált TS-modul, ujjlenyomattal; közzétételi kapu: `lib/kb/release.ts`. A 13 R3 vázlat (bekötések, kismegszakító, FI-relé, földelés, EPH, feszültségmentesítés) csak szakmai lektor után adható ki – addig a buildbe sem kerül
 
 **Élő oldal:** https://shockcraft-villanytervezo.lollipopp23.chatgpt.site/ (a `villanyrajz.hu` domain lefoglalva, még nincs élesítve)
 
@@ -61,7 +62,8 @@ app/                    Next.js App Router oldalak
   megosztas/page.tsx    Megosztott terv, csak olvasható nyilvános nézet (#t=<token>, force-dynamic)
   (kezikonyv)/          Kézikönyv-útvonalcsoport (ThemeBoot, metadataBase, kezikonyv.css; nincs getAccount/db/auth/next/headers)
     kalkulatorok/       layout (Shell), page (hub), [slug]/page (force-static, revalidate 3600, dynamicParams=false), not-found
-  sitemap.ts, robots.ts Metaadat-útvonalak (APP_ORIGIN-ból; a sitemap csak közzétett kalkulátort tartalmaz)
+    tudastar/           page (kezdőlap), not-found, elmelet/ (page, [slug] cikk, kategoria/[kategoria]), szotar/ – mind force-static, csak közzétett tétel (lib/kb/release.ts)
+  sitemap.ts, robots.ts Metaadat-útvonalak (APP_ORIGIN-ból; a sitemap csak közzétett kalkulátort és Tudástár-tételt tartalmaz)
   admin/page.tsx        Admin panel (Stripe, email beállítások)
   api/                  API route-ok
     auth/               Belépés, regisztráció, kijelentkezés, jelszócsere
@@ -99,7 +101,7 @@ components/             43 UI komponens
   floor-drawing.tsx     Közös alaprajzi rajz (FloorShapes, RoomLabels, ScaleBar, PlanLegend) – szerkesztő és megtekintő
   catalog-manager.tsx   Termékkatalógus fül (Eszközök → Termékkatalógus): CRUD, CSV-import/-export, mintakészlet, fiók-alapértelmezések
   product-picker.tsx    Termékválasztó dialógus (típushoz vagy ajánlati sorhoz)
-  kezikonyv/            Kézikönyv-keret: shell (AppBar, Shell, alsó nav/fülek), kb-chrome (kereső, menü, kedvencek, téma, értesítés), theme-boot, json-ld, safety-notice, planner-cta, report-link
+  kezikonyv/            Kézikönyv-keret: shell (AppBar, Shell, alsó nav/fülek), kb-chrome (kereső, menü, kedvencek, téma, értesítés), theme-boot, json-ld, safety-notice, planner-cta, report-link, kb-continue („Folytasd”); article/ (cikkoldal: article-view, blocks, inline, article-list, article-actions kliensszigete); figures/ (a cikkek saját SVG-ábrái, jegyzék: index.tsx FIGURES)
   calc/                 Kalkulátor-felület: calculator (kliens), calc-index (hub), calc-example (SSR példa), calc-figures (SVG), islands/<slug> (kalkulátoronként egy kliensszigete)
   sizing-report.tsx     Méretezési segédszámítás fül (Eszközök → Méretezés): felelősségi doboz, áramkörönkénti ellenőrzések, áramköri/projekt/elosztó beállítások, Iz0-felülírások
   quote-products.tsx    Ajánlat „Termékek és katalógusárak” része (típusválasztás, alapértelmezések, árfrissítés)
@@ -157,7 +159,7 @@ lib/                    43 üzleti logika / utility modul
   utils.ts              cn() class merge
   site-origin.ts        siteOrigin() (APP_ORIGIN validálva, nem dob), kbPreview() (SHOCKCRAFT_KB_PREVIEW) – a cloudflare:workers env-ből
   calc/                 Kalkulátormotor (tiszta, zod és lib/plan nélkül): number (parseNum/formatNum/formatSI), units, constants (forrással), core (CalcDef, runCalc), url, formulas, fields, sizing-fields, categories, release (KIADÁSI KAPU – egyetlen konfigurációs pont), registry (szerver), defs/<slug>.ts (27 kalkulátor)
-  kb/                   Kézikönyv-keret: categories (KB_NAME, KB_TITLE, szekciók, CALC_HUB), safety, search (ékezetfüggetlen, szinonimák, elírás), storage (shockcraft-kb-* tárolók), theme, links (a tervező csak ezt importálja)
+  kb/                   Kézikönyv-keret: categories (KB_NAME, KB_TITLE, szekciók, CALC_HUB), safety, search (ékezetfüggetlen, szinonimák, elírás), storage (shockcraft-kb-* tárolók), theme, links (a tervező csak ezt importálja); release.ts (TUDÁSTÁR KÖZZÉTÉTELI KAPU – egyetlen konfigurációs pont); content/ (types, fingerprint, inline mini-jelölés, categories, changes, registry – szerver; generated/ – GENERÁLT, kézzel ne szerkeszd)
 
 db/
   schema.ts             Drizzle ORM séma (D1/SQLite)
@@ -179,6 +181,7 @@ scripts/
   calc-release.ts       Kalkulátorok kiadási állapota, tartalmi és forrás-ujjlenyomata (list | record <slug>)
   calc-source.ts        Kalkulátorok forrás-ujjlenyomata (a definíció és futásidejű helyi importjai; a kiadási rekord `source` mezője, CI-ben ellenőrizve)
   calc-golden-indep.py  Független Python-újraszámolás a kalkulátorpéldákhoz (belső kettős ellenőrzés)
+  kb-content.ts         Tudástár-tartalommotor: build (content/tudastar/*.md → lib/kb/content/generated) | check | list | record <id>; kb-content/ (parse, generate, figures – ábra-ujjlenyomat, schema, checklist)
   lektori-csomag.ts     Lektori csomag generátora (docs/lektori-csomag.md + .pdf; --check; kiadások: EDITIONS) – folyamat: docs/lektoralas.md
 
 deploy/
@@ -192,8 +195,12 @@ docs/                   Feature dokumentáció (Markdown)
   stripe.md             Stripe webhook és admin beállítás
   email.md              Resend beállítás
   mysql.md              MySQL migráció és beállítás
+  tudastar.md           Tudástár (Elmélet, szakszótár): tartalommotor, közzétételi kapu, R3 kiadása lektor után, ábrák
+  kalkulatorok.md       Kalkulátorok és a közös kézikönyv-keret
   lektoralas.md         Lektori csomag folyamata: küldés, javítás, a SIZING_REVIEW és a T1 kalkulátorrekordok rögzítése
   lektori-csomag.md/.pdf  Generált lektori csomag (LK-n) – kézzel ne szerkeszd
+
+content/tudastar/       Tudástár forrásvázlatai (Markdown + YAML front matter): elmelet/ (18 közzétett R1/R2), r3/ (13 R3 + netlisták – lektorra vár, NEM közzétehető), r3-sim/, lektori-kerdesek-*.md
 
 tests/
   auth-flow.mjs         Auth integrációs teszt (lokális Worker ellen)
@@ -446,11 +453,14 @@ Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja e
 - `tests/calc.ts` – kalkulátormotor: parseNum/formázás, definíciók (szóhasználat, metaadat, szigetek), kiadási kapu (az elvárt állapot a `RELEASES`-ből levezetve, T0 közzétéve, T1 csak lektori rekorddal, tartalmi és forrás-ujjlenyomat – `scripts/calc-source.ts`, táblázat-kapu, T2 tiltva), ellenőrzési regressziók, tervezői linkek, URL oda-vissza, fuzz, 10 000 seedes tulajdonságteszt, egyezés a Méretezés/Fázisterhelés számításával: `node_modules/.bin/tsx tests/calc.ts`
 - `tests/calc-golden.ts` – 217 golden eset relatív tűréssel és mutációs próbával (definíciós példák, független kiegészítő esetek, a terv 5.3 értékei): `node_modules/.bin/tsx tests/calc-golden.ts`
 - `tests/kb-search.ts`, `tests/kb-storage.ts` – kereső és vendégtárolás: `node_modules/.bin/tsx tests/kb-search.ts`
-- `tests/kb-guards.ts` – statikus őrök (importgráf: nincs db/auth/billing/pdf/lib/plan/zod/next/headers; nincs getAccount/cookies/headers/fetch; dangerouslySetInnerHTML csak JSON-LD/téma; a tervező csak lib/kb/links.ts-t importál; fejlécek; kulcsok): `node_modules/.bin/tsx tests/kb-guards.ts`
+- `tests/kb-guards.ts` – statikus őrök (importgráf: nincs db/auth/billing/pdf/lib/plan/zod/next/headers; nincs getAccount/cookies/headers/fetch; dangerouslySetInnerHTML csak JSON-LD/téma; a tervező csak lib/kb/links.ts-t importál; content/, scripts/, node:fs tiltva; kliensszigetbe nem kerül Tudástár-törzs, -regiszter vagy -kapu; a Tudástár-oldal szerverkomponens; fejlécek; kulcsok): `node_modules/.bin/tsx tests/kb-guards.ts`
 - `tests/sizing-formulas.ts` – a lib/sizing-formulas.ts kiemelésének regressziója: `node_modules/.bin/tsx tests/sizing-formulas.ts`
 - `tests/lektori-csomag.ts` – lektori csomag (LK-n): a `docs/lektori-csomag.md`/`.pdf` naprakész, kiadások (`EDITIONS`), minden táblázatérték tétele, a 2. rész a méretezés függvényeivel és a mintatervvel, a 3. rész (T1 kalkulátorok) a `runCalc`-kal és a bemeneti korlátokkal összevetve, jóváhagyó lap, a név megjelenése (`reviewText`, kalkulátorjelvény), `docs/meretezes.md` „Mit nem vizsgál” = program: `node --no-warnings --import tsx tests/lektori-csomag.ts`; generálás: `node --import tsx scripts/lektori-csomag.ts` (`--check`: csak ellenőriz); folyamat: `docs/lektoralas.md`
 - `tests/approval-simulation.ts` – szimulált jóváhagyás (betöltési horoggal, a fájlok változatlanok): a `sizing-tables`, `sizing`, `calc`, `calc-golden`, `kb-guards` teszt a jóváhagyott `SIZING_REVIEW`-ra és két T1 lektori rekordra is zöld, név nélkül és névvel: `node --no-warnings --import tsx tests/approval-simulation.ts`
-- `tests/kb-routes.mjs` – build utáni füstteszt mindkét targeten: `BASE=http://127.0.0.1:8787 node tests/kb-routes.mjs`
+- `tests/kb-content.ts` – Tudástár-tartalommotor és -kapu: generált modulok naprakészek, front matter teljes, tartalom-hűség (a renderelt szöveg = a vázlat), pontosan a 18 R1/R2 közzétett, R3 sehol (static params, sitemap, kereső, linkcél, build bemenetei), tartalmi és ábra-ujjlenyomat a rekordban és kockázati alsó korlát (mutációs próbákkal), a lustán töltődő keresőindex = a közzétett tételek, belső linkek (R3-ra szövegként, „hamarosan – szakmai lektorálás alatt”), szótár-horgonyok, ábra minden helyőrzőhöz, „kiadás ellenőrzés alatt”: `node_modules/.bin/tsx tests/kb-content.ts`
+- `tests/kb-routes.mjs` – build utáni füstteszt mindkét targeten (kalkulátorok és Tudástár; R3 404 – perjellel és RSC-kéréssel is –, a csak R3 kategóriák 404-e, R3 link és szöveg sehol: Tudástár, főoldal, hub, kalkulátoroldalak; title ≤ 60): `BASE=http://127.0.0.1:8787 node tests/kb-routes.mjs`
+- `tests/kb-figures.mjs` – build utáni böngészős (Playwright) ellenőrzés: 320 px-en nincs vízszintes görgetés, ábrafeliratok 320/390 px-en ≥ 9/10 px és keretben, szövegközi linkek linkként jelölve, JS nélkül a cikkműveletek rejtve, érintési célok ≥ 44 px: `BASE=http://127.0.0.1:8787 node tests/kb-figures.mjs`
+- `tests/kb-dist.mjs` – build utáni őr: az R3 vázlatok szövege nincs a `dist/`-ben, a cikktörzs nincs a kliens-JS-ben: `node tests/kb-dist.mjs`
 - `tests/catalog-api.ts` – `/api/catalog` route-teszt memóriabeli SQLite-on: `node_modules/.bin/esbuild tests/catalog-api.ts --bundle --platform=node --format=esm --external:mysql2 --alias:cloudflare:workers=./db/node-env.ts --outfile=.sites-runtime/catalog-api.mjs && env -u MYSQL_URL node --no-warnings .sites-runtime/catalog-api.mjs`
 - Unit tesztek nincsenek; a `validatePlan()` (`lib/plan.ts`) az elsődleges validációs pont
 
@@ -474,4 +484,6 @@ Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja e
 
 8. **Kalkulátorok** (kész, 1–2. fázis) – `/kalkulatorok`, ingyen, belépés és süti nélkül, statikus (ISR) oldalak, CSP. 19 T0 kalkulátor közzétéve („Belsőleg ellenőrizve”, független újraszámolással), 8 T1 (feszültségesés, motoráram, LED-szalag tápegység, fázisjavítás, keresztmetszet, kismegszakító, hurokimpedancia, terhelhetőség-táblázat) elkészült, de csak szakmai lektori rekorddal (és a táblázatalapúak – a feszültségesés is – `tablesApproved()`-dal) adhatók ki – az egyetlen konfigurációs pont a `lib/calc/release.ts`. T2 nem épül. Elérés: nyilvános fejléc, főoldal, tervező felső sávja, Tervsegéd, Fázisterhelés-mélylink (a Méretezés-mélylink a T1 kiadásakor jelenik meg). Új böngészőkulcsok: `shockcraft-kb-bookmarks-v1`, `shockcraft-kb-recent-v1` (előzmény csak a bemenet módosítása után), `shockcraft-kb-prefs-v1` (csak ha a „/” gyorsbillentyűt kikapcsolják). A kiadási rekord tartalmi (`fingerprint`) és forrás-ujjlenyomatot (`source`) is rögzít: a számítás kódjának vagy egy közös modulnak (pl. `lib/calc/number.ts`, `lib/sizing-formulas.ts`) a módosítása után a rekordot újra kell ellenőrizni (`scripts/calc-release.ts list`). A tervező JS-e +6,6 KB gz-vel nőtt (a terv +2 KB-ot enged; mérés és bontás a `docs/kalkulatorok.md`-ben, tulajdonosi döntésre vár). Lektori anyag: a lektori csomag 3. része (LK-3-tól, kalkulátoronként `KAL-<SLUG>` blokk az ujjlenyomat-párral és kalkulátoronkénti döntéssel; `docs/lektoralas.md`). Kód: `lib/calc/*`, `lib/kb/*`, `lib/sizing-formulas.ts`, `components/calc`, `components/kezikonyv`, `app/(kezikonyv)`, doksi: `docs/kalkulatorok.md`.
 
-9. **Tervezett:** megosztás 2. lépés (megjegyzések, háttér a megosztott nézetben, link meghosszabbítása), közös szerkesztés más fiókból, termékkatalógus 2. ütem (szerelvényenkénti termék, összeállítás/kit, rendelési lista), méretezés 2. lépés (nyomvonalankénti szerelési mód, topológiai hossz, XLPE/E-táblázat jóváhagyás után, megosztott nézet).
+9. **Tudástár – Elmélet és szakszótár** (kész, R1/R2) – `/tudastar` (kezdőlap: kereső, „Folytasd”, kalkulátorok kiemelve, kategóriák), `/tudastar/elmelet` (+ `kategoria/<id>`), `/tudastar/elmelet/<slug>` (Röviden, tartalomjegyzék, ábrák, képletek, kidolgozott példák, Gyakori tévedések, kapcsolódó cikkek és kalkulátorok, források „kiadás ellenőrzés alatt” jelöléssel, változásnapló, jelvény, R2-nél Figyelem-doboz), `/tudastar/szotar` (horgonyok, DefinedTermSet). Forrás: `content/tudastar/elmelet/*.md` → `scripts/kb-content.ts build` → `lib/kb/content/generated` (a repóban; futásidőben nincs parser, a kliensbe nem kerül törzs). A kapu (`lib/kb/release.ts`, szabálya `lib/kb/content/gate.ts`) rekordja a tartalmi és az ábra-ujjlenyomathoz (`figures`: a kirajzolt SVG-komponens modulja, `kit.tsx`, a FIGURES-bejegyzés, az ábraszínek) kötött: a tartalom vagy egy ábra bármely módosítása után újra kell ellenőrizni, a rekordot frissíteni (`scripts/kb-content.ts list|record`), és a `build`-et újra futtatni (a böngészőbe lustán töltődő keresőindex `lib/kb/content/generated/search.ts` csak közzétett tételt tartalmaz). A biztonságkritikus kategóriákba (védelmi eszközök, érintésvédelem, munkabiztonság, kapcsolások, földelés) és a Sémák szekcióba csak R3 kerülhet (`categories.ts` `minRisk`; generálási hiba és kapu). Az R2 tételek belső ellenőrzéssel való kiadásának tulajdonosi megerősítése nyitott (`docs/tudastar.md` „Eltérések”). R1/R2: belső kettős ellenőrzés; R3: CSAK szakmai lektor (+ második olvasó) után – fejlesztő vagy MI `lektoralt` rekordot nem írhat. A kalkulátoroldalak „Kapcsolódó cikkek” szakasza és a cikkek kalkulátorlinkjei a front matter `calculators` mezőjéből. Kód: `lib/kb/content/*`, `lib/kb/release.ts`, `scripts/kb-content*`, `components/kezikonyv/article`, `components/kezikonyv/figures`, `app/(kezikonyv)/tudastar`, doksi: `docs/tudastar.md`.
+
+10. **Tervezett:** Tudástár 3. lépés (Sémák és netlistás ábramotor, R3 kiadása lektor után, Tudnivalók, Könyvjelzők oldal, tervezői Tudástár-linkek), megosztás 2. lépés (megjegyzések, háttér a megosztott nézetben, link meghosszabbítása), közös szerkesztés más fiókból, termékkatalógus 2. ütem (szerelvényenkénti termék, összeállítás/kit, rendelési lista), méretezés 2. lépés (nyomvonalankénti szerelési mód, topológiai hossz, XLPE/E-táblázat jóváhagyás után, megosztott nézet).

@@ -18,6 +18,7 @@ Elfogadási feltételek:
 ## Kész
 
 - Kalkulátorok (a Tudástár 1. lépése): `/kalkulatorok`, ingyen, belépés és süti nélkül; 19 T0 kalkulátor közzétéve „Belsőleg ellenőrizve” jelvénnyel, 8 T1 kalkulátor elkészült, de szakmai lektori jóváhagyásig rejtve. Közös kézikönyv-keret (mobil-első fejléc és alsó navigáció, asztali elrendezés, kereső, kedvencek, téma, CSP, sitemap/robots). Lásd `docs/kalkulatorok.md`.
+- Tudástár – Elmélet és szakszótár (a Tudástár 2. lépése): `/tudastar` kezdőlap (kereső, „Folytasd”, kalkulátorok kiemelve), `/tudastar/elmelet` kategóriákkal, 17 cikk és a szakszótár (58 kifejezés, `/tudastar/szotar`); a 12 R1 és 6 R2 tétel „Belsőleg ellenőrizve” jelvénnyel közzétéve, 22 saját SVG-ábrával, Figyelem-dobozzal (R2), forrásokkal („kiadás ellenőrzés alatt” jelöléssel), változásnaplóval, kedvencekkel és előzményekkel. Tartalommotor: Markdown-vázlat → generált TS-modulok, ujjlenyomat, közzétételi kapu (`lib/kb/release.ts`). Az R3 vázlatok (bekötések, kismegszakító, FI-relé, földelés, EPH, feszültségmentesítés) szakmai lektorra várnak, a buildbe sem kerülnek. Lásd `docs/tudastar.md`.
 - Méretezési segédszámítás (tervezői ellenőrzést segítő): Iz/In/Ib, I2, legkisebb keresztmetszet, feszültségesés, opcionális hurokimpedancia, Tervsegéd-fül, PDF-táblák, tervellenőrzés. A táblázatértékek tervezői jóváhagyása függőben. Lásd `docs/meretezes.md`.
 - Gyártói termékkatalógus: saját, fiókszintű termék- és árlista (kézzel, CSV-ből vagy mintakészletből), típusonkénti és soronkénti termékválasztás az ajánlatban, fiók-alapértelmezések, árfrissítés a katalógusból, termék az anyagkimutatásban, a CSV-ben és az ajánlat-PDF-ben. Lásd `docs/termekkatalogus.md`.
 - Tervmegosztás: csak olvasható, lejáró, visszavonható link, PDF a megosztó engedélyével és exportjogával. Lásd `docs/tervmegosztas.md`.
@@ -30,11 +31,13 @@ Elfogadási feltételek:
 - Megosztás 2. lépés: megjegyzések, háttéralaprajz a megosztott nézetben, link meghosszabbítása.
 - Közös szerkesztés más fiókból (szerkesztési zárral).
 - Termékkatalógus 2. ütem: szerelvényenkénti termék, összeállítás (kit), rendelési lista, kiszerelés-átváltás, soros katalógustábla 2000 tétel fölött.
+- **Tulajdonosi megerősítés (Tudástár):** az R2 tételek (rövidzárlat és túlterhelés, vezetékszínek, kábeljelölések, IP-védettség, lámpafoglalatok, szakszótár) belső kettős ellenőrzéssel, a figyelmeztetés-könyvtár szakmai és jogi jóváhagyása előtt vannak kint (a `docs/tudastar-dontesek.md` értelmezése; a terv 8.1 pontja mást ír). Ezt a tulajdonos írja be kifejezetten a döntések közé – különben a döntésben név szerint nem szereplő R2 tételek rekordját ki kell venni a `lib/kb/release.ts`-ből. Lásd `docs/tudastar.md` „Eltérések”.
+- Tudástár 3. lépés: Sémák szekció és netlistás ábramotor (Bekötés / Szerelési rajz / Működés), az R3 cikkek kiadása szakmai lektor és második olvasó jóváhagyása után; `/tudastar/tudnivalok` és `/tudastar/konyvjelzok`; tervezői „Tudástár ↗” és szerelvény → séma linkek; az elméleti cikkek szakmai lektorálása („Szakmailag lektorálta” jelvény).
 - Méretezés 2. lépés: nyomvonalankénti szerelési mód, topológiai hossz, XLPE- és E-táblázat jóváhagyás után, áramkörjegyzék-oszlop, megosztott nézet.
 
 ## Tudástár (oktatóanyag) – új menüpont, ötletgyűjtés
 
-Állapot: ötletgyűjtés, a terméktulajdonos további ötleteket ad hozzá. Munkanév: **Tudástár** (lehetséges szinonimák: Oktatóanyag, Tananyag, Szakmai kézikönyv, Villanyszerelő-kézikönyv). Külön menüpont a tervezőben és a nyilvános oldalon (a főoldalról is elérhető, keresőbarát, nyomtatható).
+Állapot (2026-10-11): a Kalkulátorok és az Elmélet (R1/R2 cikkek, szakszótár) élesben – `docs/kalkulatorok.md`, `docs/tudastar.md`; a Sémák és az R3 témák szakmai lektorra várnak. Egységes terv: `docs/tudastar-terv.md`. Az alábbi ötletgyűjtés a háttéranyag; a terméktulajdonos további ötleteket adhat hozzá. Munkanév: **Tudástár** (lehetséges szinonimák: Oktatóanyag, Tananyag, Szakmai kézikönyv, Villanyszerelő-kézikönyv). Külön menüpont a tervezőben és a nyilvános oldalon (a főoldalról is elérhető, keresőbarát, nyomtatható).
 
 Közös követelmények:
 

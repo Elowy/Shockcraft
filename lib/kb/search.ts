@@ -1,7 +1,9 @@
 // Ékezet- és kisbetűfüggetlen kereső szinonimákkal és egy elírás tűrésével (tiszta modul, zod nélkül; kliensen fut).
-// Rangsor: cím > szinonima > kulcsszó > összefoglaló. Most a kalkulátorok metaadatain fut; a Tudástár cikkei és a szótár ugyanide kerülnek.
+// Rangsor: cím > szinonima > kulcsszó > összefoglaló. A tételek: a közzétett Tudástár-cikkek, a szakszótár kifejezései és a kalkulátorok
+// (csak könnyű metaadat, cikktörzs nélkül). `rank`: tételsúly (alapból 1); a szótári kifejezésé kisebb, hogy egy szavas keresésnél
+// a cikk és a kalkulátor kerüljön előre, a kifejezés pedig közvetlenül utánuk.
 
-export type SearchItem={id:string;title:string;href:string|null;group:string;keywords:readonly string[];synonyms:readonly string[];summary:string;note?:string};
+export type SearchItem={id:string;title:string;href:string|null;group:string;keywords:readonly string[];synonyms:readonly string[];summary:string;note?:string;rank?:number};
 export type SearchHit={item:SearchItem;score:number};
 
 /** Ugyanaz a normalizálás, mint a lib/catalog.ts normalizeSearch-e (NFD, ékezet nélkül, kisbetű, × → x), szóközökkel tagolva. */
@@ -90,6 +92,7 @@ export function search(items:readonly SearchItem[],query:string,limit=20):Search
  for(const item of items){
   const p=prepare(item);
   let score=0;variants.forEach((v,i)=>{score=Math.max(score,scoreQuery(p,v,i>0)*(i?0.95:1))});
+  score*=item.rank??1;
   if(score>0)hits.push({item,score:item.href?score:score*0.9});
  }
  return hits.sort((a,b)=>b.score-a.score||a.item.title.localeCompare(b.item.title,'hu')).slice(0,limit);

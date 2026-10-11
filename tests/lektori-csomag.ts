@@ -325,7 +325,10 @@ assert.ok(md.includes('hozzájárulás nélkül a programban sem rögzítjük')&
 // A lektor neve (jelvény, lábléc-sor) csak a kalkulátor saját oldalán jelenhet meg: a jelvényt vagy a lektor megnevezését használó fájlok
 // listája rögzített (új hely csak a hozzájárulás szövegének bővítésével és a lektor új hozzájárulásával kerülhet be).
 const walk=(dir:string):string[]=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(dir+'/'+e.name):/\.tsx?$/.test(e.name)?[dir+'/'+e.name]:[]);
-const badgeUsers=['app','components','lib'].flatMap(walk).filter(f=>f!=='lib/calc/registry.ts'&&/\b(?:expertMeta|expertShown|releaseBadge)\(|\.badge\b/.test(readFileSync(f,'utf8'))).sort();
+// A Tudástár-cikkek saját lektori rekordjai (lib/kb/release.ts) ettől a csomagtól független hozzájáruláshoz kötöttek; a nevük megjelenési
+// helyeit (csak a cikk saját oldala, a listán név nélkül) a tests/kb-content.ts őrzi – ezért azok a fájlok itt kimaradnak.
+const KB_OWN=/^(lib\/kb\/content\/|components\/kezikonyv\/article\/)/;
+const badgeUsers=['app','components','lib'].flatMap(walk).filter(f=>f!=='lib/calc/registry.ts'&&!KB_OWN.test(f)&&/\b(?:expertMeta|expertShown|releaseBadge)\(|\.badge\b/.test(readFileSync(f,'utf8'))).sort();
 assert.deepEqual(badgeUsers,['app/(kezikonyv)/kalkulatorok/[slug]/page.tsx'],'a lektor neve új helyen jelenne meg (pl. a kalkulátorlista kártyáján): bővítsd a hozzájárulás szövegét (CONSENT), és kérd a lektor hozzájárulását');
 assert.ok(md.includes('„Táblázatok – Állapot” sorában')&&md.includes('Tervezői ellenőrzés'));
 assert.ok(md.includes('A jóváhagyás érvénye a hozzájárulástól nem függ.'));

@@ -11,10 +11,21 @@ export const HOME='/';
 /** A Kalkulátorok rövid, stabil URL-je; a linkek ebből épülnek (egy helyen, elírás nélkül). */
 export const CALC_HUB='/kalkulatorok';
 export const calcPath=(slug:string)=>CALC_HUB+'/'+slug;
+/** A Tudástár kezdőlapja, a szakszótár és a cikkek stabil útvonalai (a kategória nem része a cikk URL-jének). */
+export const KB_HOME='/tudastar';
+export const KB_GLOSSARY='/tudastar/szotar';
+export const kbArticlePath=(section:'elmelet'|'semak',slug:string)=>KB_HOME+'/'+section+'/'+slug;
+export const kbCategoryPath=(section:'elmelet'|'semak',category:string)=>KB_HOME+'/'+section+'/kategoria/'+category;
 /** Open Graph alapmezők: az oldalak saját openGraph objektuma a layoutét teljesen felülírja (sekély összevonás), ezért mindenhol ki kell írni. */
 export const OG_BASE={siteName:SITE_NAME,locale:'hu_HU'} as const;
 /** A kalkulátoroldal <title>-je (legfeljebb 60 karakter, terv 3.7): „<cím> – Kalkulátorok – Villanyrajz”, ha belefér; különben „<cím> – Villanyrajz”. */
 export function calcSeoTitle(title:string){const full=title+' – Kalkulátorok – '+SITE_NAME;return full.length<=60?full:title+' – '+SITE_NAME}
+/** A Tudástár-oldal <title>-je (legfeljebb 60 karakter): az első, ami belefér – „<cím> – Tudástár – Villanyrajz”, „<cím> – Villanyrajz”,
+ * „<rövid cím> – Tudástár – Villanyrajz”, „<rövid cím> – Villanyrajz”, végül a rövid cím. */
+export function kbSeoTitle(title:string,navTitle:string=title){
+ for(const t of [title+' – '+KB_NAME+' – '+SITE_NAME,title+' – '+SITE_NAME,navTitle+' – '+KB_NAME+' – '+SITE_NAME,navTitle+' – '+SITE_NAME])if(t.length<=60)return t;
+ return navTitle.slice(0,60);
+}
 
 export type SectionId='elmelet'|'semak'|'kalkulatorok'|'tesztek'|'konstruktor';
 export type SectionIcon='book-open'|'plug-zap'|'calculator'|'clipboard-check'|'blocks';

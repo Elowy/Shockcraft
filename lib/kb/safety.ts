@@ -1,5 +1,10 @@
 // Figyelmeztetés-könyvtár (verziózott). Az `alap` szöveg a terv 8. pontja szerinti; a többi a kalkulátorokhoz tartozik.
-// A szövegek szakmai és jogi jóváhagyásra várnak (docs/tudastar-terv.md 8. pont); R2/R3 tartalom csak a jóváhagyás után kerülhet ki.
+// A szövegek szakmai és jogi jóváhagyásra várnak (docs/tudastar-terv.md 8. pont). A kiadási szabály (docs/tudastar.md „Eltérések”):
+// R3 tartalom csak szakmai lektor (és második olvasó) jóváhagyásával, a figyelmeztetés-könyvtár jóváhagyása után kerülhet ki. Az R1/R2
+// tételek a mérvadó docs/tudastar-dontesek.md szerint belső kettős ellenőrzéssel jelennek meg (a döntés példái között az R2-es IP-kód és
+// színjelölés is szerepel), a terv 8.1 pontjától eltérően a könyvtár jogi jóváhagyása előtt; ennek kifejezett tulajdonosi megerősítése
+// nyitott (docs/BACKLOG.md). Ha a tulajdonos nem erősíti meg, a döntésben név szerint nem szereplő R2 tételek rekordját a lib/kb/release.ts-ből
+// ki kell venni (rövidzárlat, kábeljelölés, lámpafoglalat, szakszótár).
 import type {SafetyId} from '@/lib/calc/core';
 
 export const SAFETY_VERSION=1;

@@ -15,6 +15,7 @@ import {Sub} from '@/components/calc/sub';
 import {SIZING_DISCLAIMER_SHORT} from '@/lib/sizing-formulas';
 import {reviewText} from '@/lib/sizing-tables';
 import {kbPreview,siteOrigin} from '@/lib/site-origin';
+import {articleHref,articlesForCalc} from '@/lib/kb/content/registry';
 
 export const dynamic='force-static';
 export const revalidate=3600;
@@ -38,9 +39,11 @@ export default async function CalculatorPage({params}:{params:Promise<{slug:stri
  if(!Island)notFound();
  const siblings=CALCULATORS.filter(c=>c.category===def.category&&isPublished(c));
  const related=def.related.map(bySlug).filter((c):c is NonNullable<typeof c>=>!!c&&isPublished(c));
+ // Kapcsolódó Tudástár-cikkek: a közzétett cikkek, amelyek ezt a kalkulátort kapcsolódóként jelölik (a cikk front matterének calculators mezője).
+ const articles=articlesForCalc(def.slug);
  const t1=def.tier!=='T0';
  // A tartalomjegyzék az oldal sorrendjét követi.
- const toc:[string,string][]=[['szamitas','Számítás'],['levezetes','Levezetés'],['kepletek','Képletek'],['mire-jo','Mire jó, mire nem'],...(t1&&def.notCovered?[['nem-vizsgalt','Nem vizsgált'] as [string,string]]:[]),['pelda','Kidolgozott példa'],...(related.length?[['kapcsolodo','Kapcsolódó kalkulátorok'] as [string,string]]:[]),['forrasok','Források']];
+ const toc:[string,string][]=[['szamitas','Számítás'],['levezetes','Levezetés'],['kepletek','Képletek'],['mire-jo','Mire jó, mire nem'],...(t1&&def.notCovered?[['nem-vizsgalt','Nem vizsgált'] as [string,string]]:[]),['pelda','Kidolgozott példa'],...(related.length?[['kapcsolodo','Kapcsolódó kalkulátorok'] as [string,string]]:[]),...(articles.length?[['cikkek','Kapcsolódó cikkek'] as [string,string]]:[]),['forrasok','Források']];
  // T1: a táblázatalapú számításhoz a „szabványhoz kötött” (táblázatokat említő) figyelmeztetés, a többihez a kalkulátor-figyelmeztetés kiemelt formában.
  const t1Notice=def.safety.includes('meretezes')?'meretezes' as const:'kalkulator' as const;
  return <>
@@ -70,6 +73,7 @@ export default async function CalculatorPage({params}:{params:Promise<{slug:stri
     {def.safety.includes('beavatkozas')&&<SafetyNotice id="beavatkozas" tone="warn"/>}
     <CalcExample def={def}/>
     {!!related.length&&<section id="kapcsolodo" className="kk-related" aria-labelledby="kapcsolodo-cim"><h2 id="kapcsolodo-cim">Kapcsolódó kalkulátorok</h2><ul>{related.map(c=><li key={c.slug}><a href={calcPath(c.slug)}><b>{c.title}</b><small>{c.short}</small></a></li>)}</ul></section>}
+    {!!articles.length&&<section id="cikkek" className="kk-related" aria-labelledby="cikkek-cim"><h2 id="cikkek-cim">Kapcsolódó cikkek</h2><ul>{articles.map(a=><li key={a.id}><a href={articleHref(a)}><b>{a.title}</b><small>{a.summary}</small></a></li>)}</ul></section>}
     <section id="forrasok" className="kk-sources" aria-labelledby="forrasok-cim"><h2 id="forrasok-cim">Források</h2><ul>{def.sources.map(s=><li key={s}><Sub text={s}/></li>)}</ul></section>
     <p className="kk-meta">Verzió: v{def.version} · ujjlenyomat: {fp} · frissítve: {date(def.updated)} · {info.record?.kind==='lektoralt'?expertMeta(info.record):'Ellenőrzés: '+(draft?'folyamatban':'két független számítás egyezése (automatikus teszt)')} · <ReportLink id={def.slug} version={def.version} fingerprint={fp} url={(origin??'')+url}/></p>
     <PlannerCta/>
