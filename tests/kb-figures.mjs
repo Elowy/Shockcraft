@@ -4,7 +4,9 @@
 //     ≥ 10 px; egyik ábra sem lóg ki a keretéből, és nincs olyan, amelyet oldalra kellene görgetni,
 //  3. a szövegközi linkek (.kk-prose a) linknek látszanak (aláhúzás és a környező szövegtől eltérő szín), a „hamarosan” jelölés nem,
 //  4. JS nélkül a csak szkripttel működő cikkműveletek (Kedvenc, Megosztás, Nyomtatás) rejtve vannak,
-//  5. az érintési célok (belső tartalomjegyzék, kategórialisták, morzsamenü, összecsukható szakaszok) 390 px-en legalább 44 px magasak.
+//  5. az érintési célok (belső tartalomjegyzék, kategórialisták, morzsamenü, összecsukható szakaszok) 390 px-en legalább 44 px magasak,
+//  6. a Tesztek (ha közzétett) 320 px-en: beállítás, gyakorló és vizsga, visszajelzés, eredmény görgetés nélkül, 44 px-es érintési célok;
+//     JS nélkül a sziget rejtve, a mintafeladat látszik.
 // Használat (build vagy dev szerver után): BASE=http://127.0.0.1:8787 node tests/kb-figures.mjs
 // Playwright: a helyi node_modules-ból, különben a globális telepítésből (npm root -g); böngészőt nem telepít.
 import assert from 'node:assert/strict';
@@ -95,6 +97,42 @@ try{
    for(const x of r)if(x.h<43.5)bad.push(p+': '+x.t+' ('+x.h.toFixed(0)+' px)');
   }
   await ctx.close();assert.deepEqual(bad,[],'44 px-nél kisebb érintési cél');out.push('390 px: az érintési célok legalább 44 px magasak');}
+
+ // 6. Tesztek (ha közzétett): 320 px-en a beállítás, a futó gyakorló és vizsga, a visszajelzés és az eredmény is vízszintes görgetés
+ //    nélkül; az érintési célok (válaszok, gombok, kérdéstérkép) legalább 44 px magasak; JS nélkül a sziget rejtve, a mintafeladat látszik.
+ if(paths.includes('/tudastar/tesztek')){
+  const ctx=await browser.newContext({viewport:{width:320,height:700},isMobile:true,hasTouch:true}),page=await ctx.newPage(),bad=[],small=[];
+  await page.addInitScript(()=>{try{localStorage.setItem('shockcraft-cookie-notice-v1',String(Date.now()))}catch{}});
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  const check=async(label)=>{
+   const r=await page.evaluate(()=>({sw:document.documentElement.scrollWidth,cw:document.documentElement.clientWidth,
+    t:[...document.querySelectorAll('.kk-quiz .kk-quiz-choice,.kk-quiz .kk-button,.kk-quiz-map ol button,.kk-quiz-links a,.kk-quiz-actions button')].filter(e=>e.getClientRects().length).map(e=>({t:(e.textContent||'').trim().slice(0,30),h:e.getBoundingClientRect().height}))}));
+   if(r.sw>r.cw+1)bad.push(label+' ('+r.sw+' > '+r.cw+')');
+   for(const x of r.t)if(x.h<43.5)small.push(label+': '+x.t+' ('+x.h.toFixed(0)+' px)');
+  };
+  for(const mode of ['gyakorlo','vizsga']){
+   await page.goto(BASE+'/tudastar/tesztek?hossz=5&mod='+mode,{waitUntil:'load'});
+   await page.locator('.kk-quiz-setup').waitFor();await check(mode+': beállítás');
+   await page.locator('.kk-quiz-setup button[type=submit]').click();await page.locator('#kerdes-cim').waitFor();await check(mode+': kérdés');
+   for(let i=0;i<5;i++){
+    await page.locator('.kk-quiz-choice').nth(i%4).click();
+    if(mode==='gyakorlo'){await page.getByRole('button',{name:'Ellenőrzés'}).click();await page.locator('.kk-quiz-feedback').waitFor();if(i===0)await check(mode+': visszajelzés')}
+    const next=page.locator('.kk-quiz-card .kk-quiz-actions .kk-button.primary');
+    if(i<4){await next.click();await page.locator('#kerdes-cim').filter({hasText:(i+2)+'.'}).waitFor()}
+    else{await next.click();if(mode==='vizsga'&&await page.getByRole('button',{name:'Igen, beadom'}).count())await page.getByRole('button',{name:'Igen, beadom'}).click()}
+   }
+   await page.locator('#eredmeny-cim').waitFor();await check(mode+': eredmény');
+   await page.evaluate(()=>{for(const d of document.querySelectorAll('.kk-quiz-review details'))d.open=true});await check(mode+': eredmény, kinyitott magyarázatokkal');
+  }
+  await ctx.close();
+  assert.deepEqual(errors,[],'Tesztek: oldalhiba');assert.deepEqual(bad,[],'Tesztek: vízszintes görgetés 320 px-en');assert.deepEqual(small,[],'Tesztek: 44 px-nél kisebb érintési cél');
+  const nojs=await browser.newContext({viewport:{width:320,height:700},javaScriptEnabled:false}),np=await nojs.newPage();
+  await np.goto(BASE+'/tudastar/tesztek',{waitUntil:'load'});
+  const r=await np.evaluate(()=>({island:getComputedStyle(document.querySelector('.kk-quiz-island')).display,sample:getComputedStyle(document.querySelector('.kk-quiz-sample')).display,sw:document.documentElement.scrollWidth,cw:document.documentElement.clientWidth}));
+  await nojs.close();
+  assert.ok(r.island==='none'&&r.sample!=='none'&&r.sw<=r.cw+1,'Tesztek JS nélkül: a sziget rejtve, a mintafeladat látszik, görgetés nélkül '+JSON.stringify(r));
+  out.push('Tesztek 320 px: beállítás, gyakorló (kérdés, visszajelzés), vizsga, eredmény görgetés nélkül, érintési célok ≥ 44 px; JS nélkül mintafeladat');
+ }
 }finally{await browser.close()}
 console.log(out.join('\n'));
-console.log('PASS: '+BASE+' – nincs vízszintes görgetés, olvasható és keretben maradó ábrák, linkszerű linkek, JS nélküli állapot, érintési célok.');
+console.log('PASS: '+BASE+' – nincs vízszintes görgetés, olvasható és keretben maradó ábrák, linkszerű linkek, JS nélküli állapot, érintési célok, Tesztek 320 px-en.');

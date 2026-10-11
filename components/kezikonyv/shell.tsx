@@ -4,6 +4,7 @@ import {CALC_HUB,HOME,KB_GLOSSARY,KB_HOME,KB_NAME,visibleSections,type Section,t
 import type {SearchItem} from '@/lib/kb/search';
 import {calcMetas} from '@/lib/calc/registry';
 import {glossaryTerms,kbSearchItems,publishedTargets,visibleArticles} from '@/lib/kb/content/registry';
+import {QUIZ_PATH,quizPublishedCount} from '@/lib/quiz/registry';
 import {kbPreview} from '@/lib/site-origin';
 import {KbChrome} from './kb-chrome';
 import {BaseNotice} from './safety-notice';
@@ -36,8 +37,11 @@ const CHROME=new Map<boolean,ChromeData>();
 function chromeData(preview:boolean):ChromeData{
  const hit=CHROME.get(preview);if(hit)return hit;
  const metas=calcMetas(preview);
- const sections=visibleSections({elmelet:visibleArticles(preview,'elmelet').length,kalkulatorok:metas.filter(m=>m.href).length});
- const items:SearchItem[]=[...(preview?kbSearchItems(true):[]),...metas.map(m=>({id:m.slug,title:m.title,href:m.href,group:'Kalkulátorok',keywords:m.keywords,synonyms:m.synonyms,summary:m.short,note:m.note}))];
+ const quiz=quizPublishedCount(preview);
+ const sections=visibleSections({elmelet:visibleArticles(preview,'elmelet').length,kalkulatorok:metas.filter(m=>m.href).length,tesztek:quiz});
+ // A Tesztek oldala egyetlen tételként (kérdésszöveg nem kerül a keresőbe).
+ const quizItem:SearchItem[]=quiz?[{id:'tesztek',title:'Gyakorló tesztek',href:QUIZ_PATH,group:'Tesztek',keywords:['teszt','vizsga','gyakorlás','gyakorló feladat','számolós feladat','kérdések'],synonyms:['vizsgaszimuláció','kvíz','feladatsor'],summary:'Számolós gyakorló feladatok azonnali magyarázattal és levezetéssel.'}]:[];
+ const items:SearchItem[]=[...(preview?kbSearchItems(true):[]),...metas.map(m=>({id:m.slug,title:m.title,href:m.href,group:'Kalkulátorok',keywords:m.keywords,synonyms:m.synonyms,summary:m.short,note:m.note})),...quizItem];
  const valid=[...publishedTargets(preview),...metas.filter(m=>m.href).map(m=>'calc:'+m.slug)];
  const menu=[{label:KB_NAME+' kezdőlap',href:KB_HOME},...sections.map(s=>({label:s.label,href:s.href})),...(glossaryTerms(preview).length?[{label:'Szakszótár',href:KB_GLOSSARY}]:[])];
  const data={sections,items,valid,menu};CHROME.set(preview,data);return data;
@@ -45,7 +49,8 @@ function chromeData(preview:boolean):ChromeData{
 
 /** A kézikönyv közös kerete egy szekcióhoz: asztali fejléc szekciófülekkel, lábléc alapfigyelmeztetéssel, mobil alsó navigáció és a kliensoldali keret (kereső, menü, kedvencek).
  * Az asztali fejléc műveletei ugyanazok, mint a mobil alkalmazásfejlécé: Keresés, Kedvencek és előzmények (törléssel), Menü (háromállású téma, „/” kapcsoló).
- * Csak a közzétett tartalmú szekció kap fület (Elmélet: a közzétett cikkek; Kalkulátorok: a közzétett kalkulátorok). `tudastar`: a kezdőlap (nincs kiemelt fül). */
+ * Csak a közzétett tartalmú szekció kap fület (Elmélet: a közzétett cikkek; Kalkulátorok: a közzétett kalkulátorok; Tesztek: a közzétett
+ * számolós sablonok és – élesedése után – a kérdésbank, lib/quiz/gate.ts). `tudastar`: a kezdőlap (nincs kiemelt fül). */
 export function Shell({section,children}:{section:SectionId|'tudastar';children:React.ReactNode}){
  const {sections,items,valid,menu}=chromeData(kbPreview());
  const home=section==='kalkulatorok'?CALC_HUB:KB_HOME;

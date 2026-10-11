@@ -1,11 +1,13 @@
-// Build utáni őr (mindkét target után futtatható): az R3 (lektorra váró) vázlatok szövege nem kerül a build kimenetébe – sem a kliens-
-// sem a szervercsomagba (docs/tudastar.md „Közzétételi kapu”). Pozitív kontroll: egy közzétett cikk mondata MEGVAN a szervercsomagban
+// Build utáni őr (mindkét target után futtatható): az R3 (lektorra váró) vázlatok szövege és a statikus kérdésbank kiadatlan
+// (lektorálatlan) kérdéseinek szövege nem kerül a build kimenetébe – sem a kliens-, sem a szervercsomagba (docs/tudastar.md
+// „Közzétételi kapu” és „Tesztek”). Pozitív kontroll: egy közzétett cikk mondata MEGVAN a szervercsomagban
 // (különben a keresés a kódolás miatt vak lenne), a kliens-JS-ben viszont cikktörzs sincs (a cikk SSR-ben készül).
 // Használat: npm run build (vagy build:node) után: node tests/kb-dist.mjs   (DIST=dist alapból)
 import assert from 'node:assert/strict';
 import {existsSync,readFileSync,readdirSync,statSync} from 'node:fs';
 import {join} from 'node:path';
 import {r3Needles} from './kb-r3-needles.mjs';
+import {quizNeedles,unreleasedQuestions} from './kb-quiz-needles.mjs';
 
 const DIST=process.env.DIST||'dist';
 assert.ok(existsSync(DIST),DIST+' hiányzik – előbb: npm run build vagy npm run build:node');
@@ -18,13 +20,22 @@ const esc=(s)=>s.replace(/[^\x20-\x7e]/g,c=>'\\u'+c.charCodeAt(0).toString(16).p
 const forms=(s)=>[s,esc(s),esc(s).replace(/\\u([0-9a-f]{4})/g,(_,h)=>'\\u'+h.toUpperCase())];
 const needles=r3Needles();
 assert.ok(needles.length>300,'R3 szövegminták: '+needles.length);
-const hits=[];
+// A kérdésbank kiadatlan kérdései (ha a forrás már létezik; amíg nincs, a lista üres).
+const qNeedles=quizNeedles(),qCount=unreleasedQuestions().length;
+assert.ok(!qCount||qNeedles.length>=qCount,'kérdésbank-szövegminták: '+qNeedles.length+' ('+qCount+' kiadatlan kérdés)');
+const hits=[],qHits=[];
 let bytes=0;
+const texts=new Map();
 for(const f of files){
- const s=readFileSync(f,'utf8');bytes+=s.length;
+ const s=readFileSync(f,'utf8');bytes+=s.length;texts.set(f,s);
  for(const n of needles)for(const v of forms(n))if(s.includes(v)){hits.push(f+': „'+n.slice(0,70)+'…”');break}
+ for(const n of qNeedles)for(const v of forms(n))if(s.includes(v)){qHits.push(f+': „'+n.slice(0,70)+'…”');break}
 }
 assert.deepEqual(hits,[],'R3 szöveg a build kimenetében');
+assert.deepEqual(qHits,[],'kiadatlan kérdésbank-szöveg a build kimenetében');
+// Pozitív kontroll a kérdésbank-keresőhöz: a közzétett számolós sablon szövege a kliens-JS-ben megvan (a Tesztek szigete), így a keresés nem vak.
+const tplProbe='ellenállású ohmos fogyasztóra';
+assert.ok(files.filter(f=>/[\\/]client[\\/]/.test(f)&&/\.m?js$/.test(f)).some(f=>forms(tplProbe).some(v=>texts.get(f).includes(v))),'a számolós sablon szövege a kliens-JS-ben ('+tplProbe+')');
 
 // Pozitív kontroll: egy közzétett cikk („Ohm törvénye”) Röviden-mondata a szervercsomagban megvan, a kliens-JS-ben nincs.
 const ohm=readFileSync('content/tudastar/elmelet/ohm-torvenye.md','utf8');
@@ -35,4 +46,4 @@ const has=(f)=>{const s=readFileSync(f,'utf8');return forms(probe).some(v=>s.inc
 const server=files.filter(f=>!/[\\/]client[\\/]/.test(f)),client=files.filter(f=>/[\\/]client[\\/]/.test(f)&&/\.m?js$/.test(f));
 assert.ok(server.some(has),'a közzétett cikk szövege a szervercsomagban ('+probe+')');
 assert.ok(!client.some(has),'cikktörzs nem kerül a kliens-JS-be: '+client.filter(has).join(', '));
-console.log('PASS: '+DIST+' ('+files.length+' fájl, '+(bytes/1048576).toFixed(1)+' MB): '+needles.length+' R3-szövegminta egyike sincs benne; a közzétett cikk szövege csak a szervercsomagban.');
+console.log('PASS: '+DIST+' ('+files.length+' fájl, '+(bytes/1048576).toFixed(1)+' MB): '+needles.length+' R3-szövegminta és '+qNeedles.length+' kérdésbank-szövegminta ('+qCount+' kiadatlan kérdés) egyike sincs benne; a közzétett cikk szövege csak a szervercsomagban, a számolós sablon szövege a kliens-JS-ben.');

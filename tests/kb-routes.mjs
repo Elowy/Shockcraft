@@ -8,6 +8,7 @@
 import assert from 'node:assert/strict';
 import {readdirSync} from 'node:fs';
 import {htmlText,needleText,r3Items,r3Needles} from './kb-r3-needles.mjs';
+import {quizNeedles} from './kb-quiz-needles.mjs';
 
 const BASE=(process.env.BASE||'http://127.0.0.1:8787').replace(/\/$/,'');
 const get=async(path)=>{const r=await fetch(BASE+path,{redirect:'manual',headers:{'user-agent':'kb-routes-smoke'}});return {status:r.status,headers:r.headers,text:await r.text()}};
@@ -84,7 +85,33 @@ assert.ok(ohmArt.text.includes('href="/kalkulatorok/ohm-torveny"'),'a cikk a kal
 assert.ok(ohm.text.includes('href="/tudastar/elmelet/ohm-torvenye"'),'a kalkulátor a cikkre mutat');
 const glo=await page('/tudastar/szotar');kbPages.push(glo);
 assert.match(glo.text,/"@type":"DefinedTermSet"/);for(const id of ['aram-vedokapcsolo-fi-rele','pen-vezeto','vedovezeto','ip-vedettseg'])assert.ok(glo.text.includes('id="'+id+'"'),'szótári horgony: #'+id);
-// A címhossz (≤ 60, terv 3.7) minden Tudástár-oldalon: kezdőlap, Elmélet, kategóriák, cikkek, szótár.
+// ---------------------------------------------------------------- Tesztek (lib/quiz/gate.ts kapu): /tudastar/tesztek
+// Az oldal akkor létezik (és kap fület, kezdőlapi kártyát, sitemap-bejegyzést), ha van közzétett tartalma: most a T0-kalkulátorokra
+// épülő számolós sablonok. A T1-kalkulátorra épülő sablon (feszültségesés, kismegszakító-választás, Zs,max) rejtve: sem gyakorlási link,
+// sem kliensadat. A kérdésbank kiadatlan kérdéseinek szövege egyik kiszolgált oldalon sincs (lent, a szivárgásőrnél).
+const QUIZ='/tudastar/tesztek';
+const quizLive=kb.text.includes('href="'+QUIZ+'"');
+const T1_TEMPLATES=['feszultseges-1f','kismegszakito-valasztas','zs-max'];
+let quizPage=null;
+if(quizLive){
+ quizPage=await page(QUIZ);kbPages.push(quizPage);
+ assert.match(quizPage.text,/<h1>Gyakorló tesztek<\/h1>/);
+ assert.ok(htmlText(quizPage.text).includes('Gyakorló teszt – nem hivatalos vizsgakérdések; az eredmény nem igazolás.'),'a kötelező „gyakorló teszt” jelölés');
+ assert.match(quizPage.text,/<meta name="description" content="[^"]{80,170}"/,'tesztoldal: description');
+ assert.match(quizPage.text,/"@type":"BreadcrumbList"/);
+ assert.match(quizPage.text,/canonical" href="[^"]*\/tudastar\/tesztek"/,'kanonikus URL');
+ assert.ok(/class="kk-bottom-nav"[\s\S]*?href="\/tudastar\/tesztek"/.test(quizPage.text),'„Tesztek” fül az alsó navigációban');
+ assert.match(quizPage.text,/Mintafeladat/,'JS nélküli tartalék: mintafeladat');assert.match(quizPage.text,/<noscript>/,'JS nélküli tájékoztatás');
+ assert.ok(quizPage.text.includes('href="/kalkulatorok/ohm-torveny"'),'JS nélkül: link a kalkulátorra');
+ for(const id of T1_TEMPLATES){assert.ok(!quizPage.text.includes('feladat='+id),'rejtett T1-sablon: nincs gyakorlási link ('+id+')');assert.ok(!quizPage.text.includes('\\"id\\":\\"'+id+'\\"')&&!quizPage.text.includes('"id":"'+id+'"'),'rejtett T1-sablon: nincs kliensadat ('+id+')')}
+ // A tesztkódos és előválasztó lekérdezés ugyanazt a statikus oldalt kapja (a sziget olvassa ki), ugyanazzal a kanonikus URL-lel.
+ const coded=await page(QUIZ+'?kod=g10-s1-1-0123abcd&mod=vizsga');assert.match(coded.text,/canonical" href="[^"]*\/tudastar\/tesztek"/);
+ const art=kbPages.find(p=>/canonical" href="[^"]*\/tudastar\/elmelet\/ohm-torvenye"/.test(p.text));
+ assert.ok(art&&/id="teszteld-magad"/.test(art.text)&&art.text.includes('href="/tudastar/tesztek?feladat=ohm-aram,ohm-ellenallas'),'„Teszteld magad” az Ohm-törvény cikkben');
+ for(const x of kbPages)for(const id of T1_TEMPLATES)assert.ok(!x.text.includes('feladat='+id),'T1-sablonra nincs link');
+}else await page(QUIZ,{status:404});
+console.log('Tesztek: '+(quizLive?'közzétéve (számolós gyakorló)':'nincs közzétett tartalom (404)'));
+// A címhossz (≤ 60, terv 3.7) minden Tudástár-oldalon: kezdőlap, Elmélet, kategóriák, cikkek, szótár, tesztek.
 for(const x of kbPages){const t=x.text.match(/<title>([^<]*)<\/title>/)?.[1]??'';assert.ok(t&&t.length<=60,'title ≤ 60: '+t)}
 const R3=r3Items();assert.ok(R3.length>=13,'R3 vázlatok: '+R3.length);
 // Minden oldal, ahová cikklink kerülhet: a Tudástár-oldalak, a főoldal, a kalkulátor-hub és minden közzétett kalkulátoroldal.
@@ -109,12 +136,18 @@ for(const sc of r3Cats){const [sec,cat]=sc.split('/');await page('/tudastar/'+se
 await gone('/tudastar/semak');await gone('/tudastar/semak/');
 await page('/tudastar/elmelet/nincs-ilyen',{status:404});await page('/tudastar/elmelet/kategoria/nincs-ilyen',{status:404});
 for(const x of served)noR3Text(x.text.match(/<link rel="canonical" href="([^"]+)"/)?.[1]??'?',x.text);
+// A kérdésbank kiadatlan (lektorálatlan) kérdéseinek szövege egyik kiszolgált oldalon sincs (a bank élesedéséig ez az összes kérdés).
+const qNeedles=quizNeedles().map(needleText);
+for(const x of served){const t=htmlText(x.text);for(const n of qNeedles)assert.ok(!t.includes(n),'kiadatlan kérdésbank-szöveg a kiszolgált oldalon: „'+n.slice(0,60)+'…”')}
+console.log('Kérdésbank-szivárgásőr: '+qNeedles.length+' szövegminta, '+served.length+' oldalon');
 if(sm.text.includes('<loc>')){
  const inMap=new Set([...sm.text.matchAll(/\/tudastar\/elmelet\/([a-z0-9-]+)<\/loc>/g)].map(m=>m[1]));
  assert.deepEqual([...inMap].sort(),[...ARTS].sort(),'sitemap = közzétett cikkek');
  for(const u of ['/tudastar<','/tudastar/elmelet<','/tudastar/szotar<'])assert.ok(sm.text.includes(u.replace('<','</loc>')),'sitemap: '+u);
  for(const c of CATS)assert.ok(sm.text.includes('/tudastar/elmelet/kategoria/'+c+'</loc>'),'sitemap: kategória '+c);
  for(const p of R3)assert.ok(!sm.text.includes('/'+p.slug+'</loc>'),'R3 nincs a sitemapben: '+p.slug);
+ assert.equal(sm.text.includes('/tudastar/tesztek</loc>'),quizLive,'sitemap: /tudastar/tesztek, ha van közzétett tartalma');
+ assert.ok(!/tesztek\?|kod=|feladat=/.test(sm.text),'sitemap: nincs tesztkódos vagy előválasztó URL');
 }
 console.log('Tudástár: '+ARTS.length+' közzétett cikk, '+CATS.length+' kategória, szótár; R3 (404, perjellel és RSC-kéréssel is): '+R3.length+'; csak R3 kategória (404): '+r3Cats.length+'; R3-szöveg- és linkőr: '+served.length+' oldalon');
 const rb=await get('/robots.txt');

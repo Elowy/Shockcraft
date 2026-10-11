@@ -1,0 +1,738 @@
+[
+  {
+    "id": "q-mb-0001",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mi a feszültségmentesítés öt lépésének helyes sorrendje?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Leválasztás → visszakapcsolás elleni biztosítás → a feszültségmentesség megállapítása → földelés és rövidrezárás → letakarás",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A feszültségmentesség megállapítása → leválasztás → földelés és rövidrezárás → visszakapcsolás elleni biztosítás → letakarás",
+        "correct": false,
+        "why": "Mérni a leválasztás és a biztosítás után kell; előtte a mérés semmit nem bizonyít."
+      },
+      {
+        "id": "c",
+        "text": "Leválasztás → földelés és rövidrezárás → a feszültségmentesség megállapítása → visszakapcsolás elleni biztosítás → letakarás",
+        "correct": false,
+        "why": "Földelni és rövidre zárni csak a feszültségmentesség megállapítása után szabad."
+      },
+      {
+        "id": "d",
+        "text": "Letakarás → leválasztás → a feszültségmentesség megállapítása → visszakapcsolás elleni biztosítás → földelés és rövidrezárás",
+        "correct": false,
+        "why": "A visszakapcsolás elleni biztosítás közvetlenül a leválasztás után következik."
+      }
+    ],
+    "explanation": "A sorrend: leválasztás, visszakapcsolás elleni biztosítás, a feszültségmentesség megállapítása, földelés és rövidrezárás, majd a szomszédos feszültség alatti részek letakarása vagy elkerítése. Az első kettő megakadályozza, hogy feszültség érkezzen, a harmadik igazolja, hogy nincs, a negyedik és az ötödik a maradék veszélyek ellen véd; egyik lépés sem hagyható ki és nem cserélhető fel.",
+    "ref": "feszultsegmentesites-ot-szabalya#az-ot-lepes-egy-pillantasra",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0002",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mit jelent a visszakapcsolás elleni biztosítás?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A leválasztó rögzítését (például lakattal) és figyelmeztető táblát",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A kismegszakító karjának ragasztószalaggal való lefogását, tábla nélkül",
+        "correct": false,
+        "why": "A ragasztószalag nem megbízható rögzítés, és a tábla jelzi, hogy a berendezésen dolgoznak."
+      },
+      {
+        "id": "c",
+        "text": "A feszültség ellenőrzését a visszakapcsolás után",
+        "correct": false,
+        "why": "Ez nem akadályozza meg, hogy munka közben valaki visszakapcsoljon."
+      },
+      {
+        "id": "d",
+        "text": "Egy második kismegszakító beépítését a régi mellé",
+        "correct": false,
+        "why": "Egy újabb készülék nem akadályozza meg a visszakapcsolást."
+      }
+    ],
+    "explanation": "A leválasztó készüléket úgy kell rögzíteni, hogy ne lehessen visszakapcsolni: lakattal zárható kapcsolóval, lezárt elosztóval vagy a kivett biztosítóbetét elzárásával, mellette tartós figyelmeztető táblával. Jó gyakorlat, hogy minden dolgozó a saját lakatját teszi fel, és csak ő veheti le.",
+    "ref": "feszultsegmentesites-ot-szabalya#2-visszakapcsolas-elleni-biztositas",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0003",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Miért alkalmatlan a fáziskereső csavarhúzó a feszültségmentesség igazolására?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Mert a kijelzése bizonytalan, és hibás eszköz is „nincs feszültséget” mutat",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Mert csak egyenfeszültséget jelez, a hálózati váltakozó feszültséget nem",
+        "correct": false,
+        "why": "A fáziskereső a hálózati váltakozó feszültségre készül; a gond a megbízhatósága."
+      },
+      {
+        "id": "c",
+        "text": "Mert csak 400 V fölött világít",
+        "correct": false,
+        "why": "A hálózati fázisfeszültségre is jelezhet; a hiányzó jelzés azonban semmit nem bizonyít."
+      },
+      {
+        "id": "d",
+        "text": "Mert a fázist és a nullát egyszerre kell vele megérinteni, ami túl veszélyes",
+        "correct": false,
+        "why": "Egypólusú eszköz: éppen ezért nem mér két pólus között."
+      }
+    ],
+    "explanation": "Az egypólusú fáziskereső kijelzése attól függ, hogyan állsz és milyen a padló, ezért hamisan „nincs feszültséget” is mutathat; a lemerült vagy hibás eszköz ugyanígy. A feszültségmentességet kétpólusú feszültségvizsgálóval, minden pólus között kell megállapítani, a vizsgáló működését a mérés előtt és után ellenőrizve.",
+    "ref": "feszultsegmentesites-ot-szabalya#3-a-feszultsegmentesseg-megallapitasa",
+    "shuffle": true,
+    "family": "faziskereso",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0004",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 2,
+    "type": "multi",
+    "stem": "Miért NEM feszültségmentesítés önmagában egy kismegszakító lekapcsolása? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A kismegszakító csak a fázisvezetőt bontja, a nullavezető összeköttetésben marad",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Az elosztó felirata tévedhet, és egy dobozban több áramkör is futhat",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "Valaki véletlenül visszakapcsolhatja, amíg dolgozol",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "A lekapcsolt kismegszakító továbbra is átengedi a fázist",
+        "correct": false,
+        "why": "A lekapcsolt kismegszakító bontja a fázist; a veszély a többi okból fakad."
+      },
+      {
+        "id": "e",
+        "text": "A kismegszakító lekapcsolása a védővezetőt is megszakítja",
+        "correct": false,
+        "why": "A védővezetőt semmilyen kapcsoló vagy védelem nem bontja."
+      }
+    ],
+    "explanation": "A kismegszakító csak a fázist bontja, a felirat tévedhet, egy dobozban más áramkör is futhat, és valaki visszakapcsolhatja; feszültség érkezhet visszatáplálásból (aggregátor, inverter, szünetmentes táp) is. Ezért kell mind az öt lépés: leválasztás, visszakapcsolás elleni biztosítás, a feszültségmentesség megállapítása minden pólus között, szükség szerint földelés és rövidrezárás, valamint letakarás.",
+    "ref": "feszultsegmentesites-ot-szabalya#miert-kell-ot-lepes",
+    "shuffle": true,
+    "family": "kismegszakito-nem-mentesit",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0005",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy szakember mennyezeti lámpatestet cserél. Mi a helyes kiindulás?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Leválasztás az elosztóban, biztosítás, majd mérés minden pólus között",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A falikapcsoló lekapcsolása, mert az bontja a fázist",
+        "correct": false,
+        "why": "A falikapcsoló üzemi kapcsoló, nem leválasztó; a bekötése hibás is lehet."
+      },
+      {
+        "id": "c",
+        "text": "A falikapcsoló lekapcsolása és egy ellenőrzés fáziskereső csavarhúzóval",
+        "correct": false,
+        "why": "A fáziskereső nem igazolja a feszültségmentességet."
+      },
+      {
+        "id": "d",
+        "text": "A kétpólusú falikapcsoló lekapcsolása, mert az a nullát is bontja",
+        "correct": false,
+        "why": "A kétpólusú kapcsoló sem leválasztó; a feszültségmentesítés az elosztóban történik."
+      }
+    ],
+    "explanation": "A falikapcsoló nem leválasztó: régi vagy hibás bekötésnél a nullavezetőt bonthatja, és a lámpa foglalata kikapcsolva is fázis alatt maradhat. A feszültségmentesítés az elosztóban történik, az öt szabály szerint, akkor is, ha a kapcsoló kétpólusú, és akkor is, ha a lámpa nem ég.",
+    "ref": "vilagitasi-kapcsolasok#kozos-szabalyok",
+    "shuffle": true,
+    "family": "falikapcsolo-nem-levalaszt",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0006",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Milyen sorrendben kell felszerelni a földelő-rövidzáró eszközt?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Mindig előbb a földeléshez, azután a vezetőkhöz; eltávolításkor fordítva",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Előbb a vezetőkhöz, azután a földeléshez; eltávolításkor ugyanígy",
+        "correct": false,
+        "why": "Ha előbb a vezetőkhöz csatlakozik, egy esetleges feszültség a szerelőn át kereshetne utat a föld felé."
+      },
+      {
+        "id": "c",
+        "text": "A sorrend tetszőleges, ha a feszültségmentességet már megállapították",
+        "correct": false,
+        "why": "A sorrend a maradék kockázat (téves bekapcsolás, visszatáplálás, indukció) miatt kötött."
+      },
+      {
+        "id": "d",
+        "text": "Előbb a nullavezetőhöz, utána a fázisvezetőhöz, a földeléshez pedig utoljára",
+        "correct": false,
+        "why": "A földelést kell elsőként csatlakoztatni."
+      }
+    ],
+    "explanation": "A földelő-rövidzáró eszközt mindig előbb a földeléshez, azután a vezetőkhöz kell csatlakoztatni, eltávolításkor fordítva: előbb a vezetőkről, utoljára a földről. Így ha a vezetőre mégis feszültség kerül (téves bekapcsolás, visszatáplálás, indukció), az áram a rövidzáró eszközön folyik, és a védelem lekapcsol.",
+    "ref": "feszultsegmentesites-ot-szabalya#4-foldeles-es-rovidrezaras",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0007",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 3,
+    "type": "multi",
+    "stem": "Honnan érkezhet feszültség egy leválasztottnak hitt áramkörbe? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Aggregátorról vagy napelemes inverterről való visszatáplálásból",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Szünetmentes tápegységről",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "Egy közös nullavezetőn át egy másik, működő áramkörből",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "A kikapcsolt kábelben megmaradt töltésből vagy indukcióból",
+        "correct": true
+      },
+      {
+        "id": "e",
+        "text": "A fogyasztásmérőből, amely a lekapcsolt áramkörbe is feszültséget táplál",
+        "correct": false,
+        "why": "A fogyasztásmérő mér, nem táplál; a mérőhely az elosztói engedélyes hatásköre."
+      }
+    ],
+    "explanation": "Feszültség nem várt irányból is érkezhet: aggregátorról, napelemes inverterről, szünetmentes tápegységről, közös nullavezetőn át egy másik áramkörből, és a kikapcsolt kábelben a kondenzátorok és a hosszú vezetékek töltése is megmaradhat, illetve indukált feszültség keletkezhet. Ezért kell minden betáplálási irányt leválasztani, és a feszültségmentességet a munkahelyen mérni.",
+    "ref": "feszultsegmentesites-ot-szabalya#miert-kell-ot-lepes",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0008",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "A leválasztás után a nullavezető mérés nélkül is megérinthető, mert üzemszerűen földpotenciálon van.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": false
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": true
+      }
+    ],
+    "explanation": "A nullavezetőt a leválasztás után is feszültség alattinak kell tekinteni, amíg a mérés mást nem mutat: közös nullavezetőn, nulla- vagy PEN-szakadáskor, illetve felcserélt bekötésnél veszélyes feszültség és áram lehet rajta. A nullavezető mérés nélküli megérintése a feszültségmentesítés gyakori hibái közé tartozik.",
+    "ref": "feszultsegmentesites-ot-szabalya#1-levalasztas",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0009",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy elosztóban végzett munkánál a betáplálás kapcsai feszültség alatt maradnak. Melyik lépés véd a véletlen érintésük ellen?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A szomszédos feszültség alatti részek letakarása vagy elkerítése",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A visszakapcsolás elleni biztosítás lakattal és táblával",
+        "correct": false,
+        "why": "Ez a leválasztó készülék visszakapcsolását akadályozza meg, a feszültség alatt maradó részeket nem takarja."
+      },
+      {
+        "id": "c",
+        "text": "A leválasztott részek földelése és rövidrezárása",
+        "correct": false,
+        "why": "Ez a leválasztott részekre vonatkozik, a feszültség alatt maradókra nem."
+      },
+      {
+        "id": "d",
+        "text": "Egy fáziskeresős ellenőrzés közvetlenül a munka megkezdése előtt",
+        "correct": false,
+        "why": "A fáziskereső nem véd az érintés ellen, és a feszültségmentességet sem igazolja."
+      }
+    ],
+    "explanation": "Ha a munkaterület közelében feszültség alatt maradó részek vannak, például egy elosztó betáplálási kapcsai vagy egy másik áramkör, azokat szigetelő takarással, burkolattal vagy elkerítéssel kell védeni a véletlen érintés ellen. Ez az ötödik lépés; a munkaterületet emellett jól láthatóan ki kell jelölni.",
+    "ref": "feszultsegmentesites-ot-szabalya#5-a-szomszedos-feszultseg-alatti-reszek-letakarasa-vagy-elkeritese",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0010",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Hogyan kell a munka végeztével a feszültséget visszaadni?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Fordított sorrendben, a visszakapcsolás az utolsó lépés",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Először visszakapcsolni, hogy ellenőrizni lehessen, majd leszerelni a földelő-rövidzárót",
+        "correct": false,
+        "why": "Földelő-rövidzáró mellett visszakapcsolni zárlatot okoz."
+      },
+      {
+        "id": "c",
+        "text": "A lakatokat bárki leveheti, aki a munkaterületen dolgozott, a sorrend tetszőleges",
+        "correct": false,
+        "why": "Jó gyakorlat, hogy mindenki csak a saját lakatját veszi le, és a sorrend kötött."
+      },
+      {
+        "id": "d",
+        "text": "A visszakapcsolás előtt elég szólni, a munkaterület elhagyását nem kell ellenőrizni",
+        "correct": false,
+        "why": "Meg kell győződni arról, hogy mindenki elhagyta a munkaterületet, és tud a visszakapcsolásról."
+      }
+    ],
+    "explanation": "A feszültség visszaadása fordított sorrendben történik: szerszámok és anyagok eltávolítása, takarások levétele, a földelő-rövidzáró leszerelése (előbb a vezetőkről, utoljára a földről), a lakatok és táblák eltávolítása, majd a visszakapcsolás. Előtte meg kell győződni arról, hogy mindenki elhagyta a munkaterületet, és tud a visszakapcsolásról.",
+    "ref": "feszultsegmentesites-ot-szabalya#a-feszultseg-visszaadasa",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0011",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Valakit áramütés ért, és még a vezetéket fogja. Mi a helyes első lépés?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Ne érj hozzá; ha veszély nélkül lehet, áramtalaníts, és hívd a 112-t",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Azonnal húzd el puszta kézzel a vezetéktől, mielőtt nagyobb baj lesz",
+        "correct": false,
+        "why": "Amíg áram alatt lehet, a megérintése téged is áramütésnek tesz ki."
+      },
+      {
+        "id": "c",
+        "text": "Önts rá vizet, hogy a sérült és a vezeték lehűljön",
+        "correct": false,
+        "why": "A víz vezeti az áramot, és a segítőt is veszélyezteti."
+      },
+      {
+        "id": "d",
+        "text": "Várj, amíg a sérült magától elengedi a vezetéket",
+        "correct": false,
+        "why": "A várakozás késlelteti az áramtalanítást és a segélyhívást."
+      }
+    ],
+    "explanation": "Amíg a sérült áram alatt lehet, nem szabad megérinteni, mert a segítő is áramütést szenvedhet. Ha biztonságosan megteheted, kapcsold le az áramot (például az elosztóban), és hívd a 112-t; a további teendőket a mentésirányító mondja meg.",
+    "ref": "feszultsegmentesites-ot-szabalya#mikor-hivj-szakembert",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0012",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 1,
+    "type": "truefalse",
+    "stem": "A feszültségmentesítés szakképzett személy feladata: a leválasztási pont kiválasztása, a mérés és az eredmény értékelése szakmai gyakorlatot és megfelelő eszközt igényel.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "Az öt szabály ismerete még nem tesz képessé a szerelésre: a leválasztási pont kiválasztása, a feszültségvizsgálat és az eredmény értékelése gyakorlatot és megfelelő eszközt igényel. Ha villamos berendezésen kell dolgozni, hívj szakembert.",
+    "ref": "feszultsegmentesites-ot-szabalya#mikor-hivj-szakembert",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0013",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy régi, utólag bővített elosztóban hiányosak a feliratok. Mi a helyes eljárás munkavégzés előtt?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Leválasztás, biztosítás, majd mérés a munkahelyen, minden pólus között",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A felirat alapján lekapcsolni a valószínű kismegszakítót, és mérés nélkül dolgozni",
+        "correct": false,
+        "why": "Rossz áramkör leválasztása ellenőrző mérés nélkül gyakori hiba."
+      },
+      {
+        "id": "c",
+        "text": "Az összes kismegszakítót lekapcsolni, így a mérés már felesleges",
+        "correct": false,
+        "why": "A kismegszakítók előtti részek, a visszatáplálás és a közös nullavezető miatt ilyenkor is mérni kell."
+      },
+      {
+        "id": "d",
+        "text": "Fáziskeresővel megkeresni, melyik vezeték „hideg”",
+        "correct": false,
+        "why": "A fáziskereső nem igazolja a feszültségmentességet."
+      }
+    ],
+    "explanation": "A hiányos vagy téves felirat gyakori veszélyforrás: rossz áramkört kapcsolnak le, és mérés nélkül a hiba nem derül ki. A feliratok segítenek, de nem helyettesítik a mérést; a feszültségmentességet a munkahelyen, közvetlenül a munka előtt, minden pólus között kell megállapítani.",
+    "ref": "feszultsegmentesites-ot-szabalya#regi-berendezesben",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0014",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "A lakáselosztó meleg, kattog, és égett szagot érzel. Mi a helyes teendő?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Szakembert hívni (tűznél a 112-t), a burkolatot nem leszerelni",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Leszerelni a burkolatot, és megkeresni a laza kapcsot",
+        "correct": false,
+        "why": "Az elosztó burkolata mögött a lekapcsolt kismegszakítók mellett is feszültség alatti részek vannak."
+      },
+      {
+        "id": "c",
+        "text": "A kattogó kismegszakítót egy nagyobb névleges áramúra cserélni",
+        "correct": false,
+        "why": "A nagyobb kismegszakító nem védi a vezetéket, és a hiba okát sem szünteti meg."
+      },
+      {
+        "id": "d",
+        "text": "Megvárni, hogy elmúljon, mert az elosztó melegedése normális",
+        "correct": false,
+        "why": "A forró, kattogó, égett szagú elosztó hibára utal."
+      }
+    ],
+    "explanation": "A meleg, kattogó, zümmögő vagy égett szagú elosztó laza kötésre vagy túlmelegedésre utalhat, ami tűzhöz vezethet. Hívj szakembert, füst vagy tűz esetén a 112-t; a burkolatot ne szereld le, mert mögötte a lekapcsolt kismegszakítók mellett is feszültség alatti részek vannak.",
+    "ref": "kismegszakito#mikor-hivj-szakembert",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0015",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy kismegszakító visszakapcsolás után azonnal újra kiold. Mi a helyes teendő?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Nem kapcsolgatni, hanem szakemberrel megkerestetni az okot",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Lefogni a kart bekapcsolt helyzetben, amíg a hiba megszűnik",
+        "correct": false,
+        "why": "A kismegszakító szabadkioldású: a kar lefogása sem akadályozza meg a kioldást, a hiba pedig veszélyes."
+      },
+      {
+        "id": "c",
+        "text": "Addig kapcsolni vissza, amíg bent marad",
+        "correct": false,
+        "why": "Az ismételt visszakapcsolás minden alkalommal a hibára kapcsol, ami veszélyes, és beégetheti az érintkezőket."
+      },
+      {
+        "id": "d",
+        "text": "Nagyobb névleges áramú kismegszakítóra cserélni",
+        "correct": false,
+        "why": "A nagyobb kismegszakító nem védi a vezetéket."
+      }
+    ],
+    "explanation": "Ha a kismegszakító visszakapcsoláskor azonnal kiold, valószínűleg zárlat vagy hibás készülék van az áramkörben; az ismételt visszakapcsolás minden alkalommal a hibára kapcsol, ami veszélyes, és az érintkezőket is beégetheti. Az okot szakembernek kell megkeresnie; ha egy készülék csatlakoztatásakor old ki, azt a készüléket ne használd tovább.",
+    "ref": "kismegszakito#mikor-hivj-szakembert",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0016",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Régi olvadóbiztosítós táblán a fázis- és a nullavezető fel van cserélve, ezért a biztosítóbetét a nullavezetőben ül. Mi a veszélye, ha a leválasztást csak a betét kivételével végzik?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A fázis tovább jut a fogyasztóig: a vezetékek feszültség alatt maradnak",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A betét kivétele zárlatot okoz a nullavezető és a védővezető között",
+        "correct": false,
+        "why": "A betét kivétele megszakítást jelent, nem zárlatot."
+      },
+      {
+        "id": "c",
+        "text": "Nincs veszély, mert a kivett betét minden vezetőt egyszerre leválaszt",
+        "correct": false,
+        "why": "A betét csak azt a vezetőt bontja, amelyikben ül."
+      },
+      {
+        "id": "d",
+        "text": "A betét kivételekor a védővezető is megszakad, ezért a fémházak védtelenek",
+        "correct": false,
+        "why": "A védővezetőben nincs biztosító."
+      }
+    ],
+    "explanation": "Felcserélt bekötésnél a betét a nullavezetőben lehet, és a kivétele után a fázis feszültség alatt marad: a lámpa vagy a készülék nem működik, de a vezetékei fázis alatt állnak. Ezért a feszültségmentességet a leválasztás után mindig méréssel, minden pólus között kell megállapítani.",
+    "ref": "feszultsegmentesites-ot-szabalya#regi-berendezesben",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0017",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "A lekapcsolt vagy kioldott áram-védőkapcsoló mellett is méréssel kell ellenőrizni a feszültségmentességet.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "A FI-relé nem helyettesíti a feszültségmentesítést: a kioldása után a védett áramkörök nem kapnak táplálást, de a FI-relé előtti részek és a többi áramkör feszültség alatt maradnak, és visszatáplálás vagy hibás bekötés is lehet. A feszültségmentességet ezért akkor is méréssel kell megállapítani.",
+    "ref": "aram-vedokapcsolo-fi-rele#mi-ellen-nem-ved",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0018",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 2,
+    "type": "multi",
+    "stem": "Melyek a feszültségmentesítés gyakori hibái? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Csak a kismegszakító lekapcsolása, lakat és tábla nélkül",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Mérés csak a fázis és a föld között",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "A vizsgálóeszköz ellenőrzésének elhagyása",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "A leválasztó készülék lakattal való rögzítése",
+        "correct": false,
+        "why": "Ez a visszakapcsolás elleni biztosítás helyes módja."
+      },
+      {
+        "id": "e",
+        "text": "A feszültségmentesség megállapítása minden pólus között",
+        "correct": false,
+        "why": "Ez a harmadik lépés helyes végrehajtása."
+      }
+    ],
+    "explanation": "A gyakori hibák közé tartozik a lakat és tábla nélküli lekapcsolás, a fáziskereső használata, a vizsgálóeszköz ellenőrzésének elhagyása, a csak fázis–föld mérés, a nullavezető mérés nélküli érintése és a visszatáplálás figyelmen kívül hagyása. A lakatos rögzítés és a minden pólus közötti mérés ezzel szemben a helyes eljárás része.",
+    "ref": "feszultsegmentesites-ot-szabalya#gyakori-hibak",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0019",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Miért veszélyes a fázis érintése akkor is, ha az áramkört 30 mA-es áram-védőkapcsoló védi?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Mert csak az áramütés időtartamát korlátozza, az áramütést nem",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Mert a 30 mA-es FI-relé valójában csak 300 mA-es hibaáram fölött old ki",
+        "correct": false,
+        "why": "A 30 mA-es készülék legkésőbb a névleges különbözeti áramnál kiold."
+      },
+      {
+        "id": "c",
+        "text": "Mert a FI-relé csak a nullavezető érintésekor old ki",
+        "correct": false,
+        "why": "A FI-relé a különbözeti áramra old ki, például fázis–föld érintéskor."
+      },
+      {
+        "id": "d",
+        "text": "Mert a FI-relé a testen átfolyó áramot 30 mA fölé növeli",
+        "correct": false,
+        "why": "A FI-relé nem növeli az áramot; a testen átfolyó áramot a feszültség és a test ellenállása szabja meg."
+      }
+    ],
+    "explanation": "A FI-relé az áramütést nem akadályozza meg, csak az időtartamát korlátozza; az érzet, az ijedtség és egy ebből eredő esés így is bekövetkezhet. Jól szigetelő padlón vagy cipőben az áram a kioldási érték alatt is maradhat, ilyenkor a FI-relé nem old ki, az áramütés mégis érezhető; ezért a FI-relé nem pótolja a feszültségmentesítést.",
+    "ref": "aram-vedokapcsolo-fi-rele#mikor-old-ki-es-mikor-nem",
+    "shuffle": true,
+    "family": "fi-idotartam",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mb-0020",
+    "version": 1,
+    "topic": "munkabiztonsag",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Régi berendezésben két áramkör közös nullavezetőn osztozik, és az egyik áramkört lekapcsolták. Mi a veszély, ha a közös nullavezetőt megbontják?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A másik áramkör árama tovább folyhat rajta: áramütés érhet",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Nincs veszély, mert a lekapcsolt áramkör nullavezetője feszültségmentes",
+        "correct": false,
+        "why": "A közös nullavezetőn a működő áramkör árama folyik."
+      },
+      {
+        "id": "c",
+        "text": "A lekapcsolt áramkör kismegszakítója magától újra bekapcsol",
+        "correct": false,
+        "why": "A nullavezető megbontása nem kapcsolja vissza a kismegszakítót; a veszély a másik áramkör árama."
+      },
+      {
+        "id": "d",
+        "text": "Legfeljebb a lámpák fényereje változik meg, áramütés nem érhet",
+        "correct": false,
+        "why": "A megbontáskor a két vég között veszélyes feszültség jelenhet meg."
+      }
+    ],
+    "explanation": "Közös nullavezetőnél az egyik áramkör lekapcsolása után a nullavezetőn a másik áramkör árama tovább folyhat; a megbontásakor a két vég között veszélyes feszültség jelenhet meg. Ezért a nullavezetőt is feszültség alattinak kell tekinteni, amíg a mérés mást nem mutat, és a leválasztásnak minden olyan irányra ki kell terjednie, ahonnan feszültség érkezhet.",
+    "ref": "vilagitasi-kapcsolasok#regi-berendezesben",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  }
+]

@@ -9,7 +9,7 @@ import {useEffect,useId,useMemo,useRef,useState,useSyncExternalStore} from 'reac
 import {Dialog} from 'radix-ui';
 import {ArrowUpRight,Bookmark,Clock,Search,Trash2,X} from 'lucide-react';
 import {search,suggest,type SearchItem} from '@/lib/kb/search';
-import {addSearch,bookmarkStore,clearAll,historyOn,prefStore,recentStore,removeBookmark,removeRecent,searchStore,setHistory,setSlashShortcut,slashShortcutOn,type KbEntry} from '@/lib/kb/storage';
+import {addSearch,bookmarkStore,clearAll,hasQuizData,historyOn,prefStore,recentStore,removeBookmark,removeRecent,searchStore,setHistory,setSlashShortcut,slashShortcutOn,type KbEntry} from '@/lib/kb/storage';
 import {applyTheme,readTheme,writeTheme,type ThemeChoice} from '@/lib/kb/theme';
 import {HOME,KB_NAME} from '@/lib/kb/categories';
 import {hideToast,useKbStore,useThemeChoice,useToast} from './kb-client';
@@ -107,8 +107,8 @@ function BookmarksPanel({valid}:{valid:readonly string[]}){
   <section aria-labelledby="kk-favs"><h3 id="kk-favs"><Bookmark aria-hidden="true"/> Kedvencek</h3><EntryList items={favs} valid={valid} empty="Még nincs kedvenced. A cikkeknél és a kalkulátoroknál a „Kedvenc” gombbal jelölheted meg." onRemove={e=>removeBookmark(e.type,e.id)} removeLabel="Eltávolítás a kedvencek közül"/></section>
   <section aria-labelledby="kk-recent"><h3 id="kk-recent"><Clock aria-hidden="true"/> Legutóbbiak</h3><EntryList items={recent} valid={valid} empty="Itt jelennek meg a legutóbb olvasott cikkek (legalább 15 másodperces olvasás után) és a használt kalkulátorok (a bemenet módosítása után)." onRemove={e=>removeRecent(e.type,e.id)} removeLabel="Törlés az előzményekből"/></section>
   <p className="kk-muted">Csak ebben a böngészőben tároljuk; fiók nem kell. A böngészőadatok törlésekor elvesznek.{(bookmarkStore.blocked()||recentStore.blocked())&&' A böngésző most nem engedi a mentést: a lista csak ennek a lapnak a bezárásáig marad meg.'}</p>
-  {confirm?<div className="kk-confirm" role="group" aria-label="Törlés megerősítése"><span>Biztosan törlöd a kedvenceket, az előzményeket és a kereséseket?</span><button type="button" className="kk-button danger" onClick={()=>{clearAll();setConfirm(false)}}><Trash2 aria-hidden="true"/> Igen, törlöm</button><button type="button" className="kk-button" onClick={()=>setConfirm(false)}>Mégse</button></div>
-   :<button type="button" className="kk-button" onClick={()=>setConfirm(true)} disabled={!favs.length&&!recent.length}><Trash2 aria-hidden="true"/> Minden {KB_NAME}-adat törlése</button>}
+  {confirm?<div className="kk-confirm" role="group" aria-label="Törlés megerősítése"><span>Biztosan törlöd a kedvenceket, az előzményeket, a kereséseket és a teszteredményeket?</span><button type="button" className="kk-button danger" onClick={()=>{clearAll();setConfirm(false)}}><Trash2 aria-hidden="true"/> Igen, törlöm</button><button type="button" className="kk-button" onClick={()=>setConfirm(false)}>Mégse</button></div>
+   :<button type="button" className="kk-button" onClick={()=>setConfirm(true)} disabled={!favs.length&&!recent.length&&!hasQuizData()}><Trash2 aria-hidden="true"/> Minden {KB_NAME}-adat törlése</button>}
  </div>;
 }
 

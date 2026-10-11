@@ -1,5 +1,5 @@
 import type {Metadata} from 'next';
-import {BadgeCheck,BookOpen,BookText,Calculator,Search,ShieldAlert,ShieldCheck} from 'lucide-react';
+import {BadgeCheck,BookOpen,BookText,Calculator,ClipboardCheck,Search,ShieldAlert,ShieldCheck} from 'lucide-react';
 import {AppBar,Shell} from '@/components/kezikonyv/shell';
 import {JsonLd,breadcrumbLd} from '@/components/kezikonyv/json-ld';
 import {KbContinue} from '@/components/kezikonyv/kb-continue';
@@ -7,6 +7,7 @@ import {PlannerCta} from '@/components/kezikonyv/planner-cta';
 import {calcMetas} from '@/lib/calc/registry';
 import {articleHref,articlePages,categoriesWithArticles,categoryArticles,categoryHref,glossaryTerms,pendingCount,visibleArticles} from '@/lib/kb/content/registry';
 import {CALC_HUB,KB_GLOSSARY,KB_HOME,KB_TITLE,OG_BASE,calcPath} from '@/lib/kb/categories';
+import {QUIZ_PATH,bankState,quizPublishedCount,visibleTemplates} from '@/lib/quiz/registry';
 import {kbPreview,siteOrigin} from '@/lib/site-origin';
 
 export const dynamic='force-static';
@@ -29,6 +30,7 @@ export default function TudastarHome(){
  const calcs=calcMetas(preview).filter(m=>m.href),featured=FEATURED_CALCS.map(s=>calcs.find(c=>c.slug===s)).filter((c):c is NonNullable<typeof c>=>!!c);
  const popular=POPULAR.map(id=>articles.find(a=>a.id===id)).filter((a):a is NonNullable<typeof a>=>!!a);
  const valid=[...articles.map(a=>'article:'+a.id),...calcs.map(c=>'calc:'+c.slug)];
+ const quiz=quizPublishedCount(preview),quizTypes=visibleTemplates(preview).length,bankLive=bankState().live;
  return <Shell section="tudastar">
   <AppBar title="Tudástár" home={KB_HOME}/>
   <div className="kk-page kk-page-single">
@@ -44,6 +46,7 @@ export default function TudastarHome(){
      <ul className="kk-section-cards">
       {!!articles.length&&<li><a href={KB_HOME+'/elmelet'}><BookOpen aria-hidden="true"/><b>Elmélet</b><small>{articlePages(preview,'elmelet').length} cikk: alapfogalmak, vezetékek, világítás, IP-védettség</small></a></li>}
       <li className="featured"><a href={CALC_HUB}><Calculator aria-hidden="true"/><b>Kalkulátorok</b><small>{calcs.length} ingyenes számítás képlettel és levezetéssel</small></a></li>
+      {quiz>0&&<li><a href={QUIZ_PATH}><ClipboardCheck aria-hidden="true"/><b>Tesztek</b><small>{bankLive?'Gyakorló és vizsga mód, témakörönkénti kérdésekkel':quizTypes+' számolós feladattípus gyakorló és vizsga módban, magyarázattal'}</small></a></li>}
       {!!terms.length&&<li><a href={KB_GLOSSARY}><BookText aria-hidden="true"/><b>Szakszótár</b><small>{terms.length} kifejezés A–Z, a cikkekre mutató linkekkel</small></a></li>}
      </ul>
      {pending>0&&<p className="kk-muted">Hamarosan – szakmai lektorálás alatt: bekötési sémák (101–107 kapcsolók, dugalj, földelési rendszerek) és a biztonságkritikus elméleti témák, összesen {pending} tétel.</p>}

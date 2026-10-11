@@ -62,7 +62,8 @@ export async function load(url,context,next){
 }
 
 const dir=mkdtempSync(join(tmpdir(),'villanyrajz-approval-'));
-const TESTS=['tests/sizing-tables.ts','tests/sizing.ts','tests/calc.ts','tests/calc-golden.ts','tests/kb-guards.ts'];
+// A tests/quiz.ts is: a T1-kalkulátor kiadása után a rá épülő számolós sablon rekord nélkül rejtve marad („ellenőrzésre vár”), a teszt zöld.
+const TESTS=['tests/sizing-tables.ts','tests/sizing.ts','tests/calc.ts','tests/calc-golden.ts','tests/kb-guards.ts','tests/quiz.ts'];
 const variants:Variant[]=[{name:'név nélkül',named:false},{name:'névvel (hozzájárulással)',named:true}];
 try{
  for(const v of variants){

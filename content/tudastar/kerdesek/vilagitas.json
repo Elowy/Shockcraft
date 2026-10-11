@@ -1,0 +1,719 @@
+[
+  {
+    "id": "q-vil-0001",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mit ad meg a lux (lx)?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A felület egy négyzetméterére jutó fényáramot (megvilágítást)",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A fényforrásból kilépő összes fényt",
+        "correct": false,
+        "why": "Ez a fényáram, egysége a lumen."
+      },
+      {
+        "id": "c",
+        "text": "A fény színét, árnyalatát",
+        "correct": false,
+        "why": "Ez a színhőmérséklet, egysége a kelvin."
+      },
+      {
+        "id": "d",
+        "text": "Egy watt felvett teljesítményből előállított fény mennyiségét",
+        "correct": false,
+        "why": "Ez a fényhasznosítás, egysége a lm/W."
+      }
+    ],
+    "explanation": "A lux a megvilágítás egysége: 1 lx = 1 lm/m², vagyis a felületre jutó fényáram négyzetméterenként. A lámpát a lumen (összesen) és a kandela (egy irányban) jellemzi, ezért ugyanaz a lámpa kis helyiségben sok, nagyban kevés luxot ad.",
+    "ref": "lumen-es-lux#lux-mennyi-feny-jut-a-feluletre",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0002",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 1,
+    "type": "multi",
+    "stem": "Mit érdemes ellenőrizni, ha egy régi izzó helyére LED-fényforrást vásárolsz? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A lumenértéket",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A talpat és a fényforrás feszültségét",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "A színhőmérsékletet",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "Csak a wattszámot, mert az mutatja a fény mennyiségét",
+        "correct": false,
+        "why": "A watt a felvett teljesítmény; a fény mennyiségét a lumen adja meg."
+      }
+    ],
+    "explanation": "A fény mennyiségét a lumen adja meg; a wattból csak az izzóknál lehetett a fényre következtetni, a „60 W-os izzónak megfelelő” felirat is csak tájékoztató. A talpnak a foglalathoz, a feszültségnek a rendszerhez (230 V vagy 12 V) kell illenie, a fényszínt pedig a színhőmérséklet mutatja.",
+    "ref": "fenyforrasok-tipusai#mire-figyelj-csere-elott",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0003",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy 806 lm-es LED-fényforrás 8 W-ot vesz fel. Mekkora a fényhasznosítása?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "kb. 0,01 lm/W",
+        "correct": false,
+        "why": "Ez a fordított hányados (W / lm)."
+      },
+      {
+        "id": "b",
+        "text": "kb. 13 lm/W",
+        "correct": false,
+        "why": "Ez egy azonos fényű, 60 W-os izzó értéke (806 / 60)."
+      },
+      {
+        "id": "c",
+        "text": "kb. 101 lm/W",
+        "correct": true
+      }
+    ],
+    "explanation": "A fényhasznosítás a fényáram és a felvett teljesítmény hányadosa: 806 lm / 8 W ≈ 101 lm/W. Ugyanennyi fényhez egy izzó kb. 60 W-ot vesz fel (kb. 13 lm/W), vagyis a LED egy wattra kb. 7,5-szer annyi fényt ad.",
+    "ref": "fenyforrasok-tipusai#kidolgozott-pelda-izzo-helyett-led",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0004",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 1,
+    "type": "truefalse",
+    "stem": "A nagyobb kelvinértékű fényforrás erősebb, több fényt ad.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": false
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": true
+      }
+    ],
+    "explanation": "A kelvin a fény színét (árnyalatát) adja meg, a mennyiségét a lumen. Egy 6500 K-es LED hidegebb, kékesebb fényű, mint egy 2700 K-es, de ettől még nem feltétlenül világosabb.",
+    "ref": "szinhomerseklet#gyakori-tevedesek",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0005",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Milyen színhőmérséklet-tartomány jellemző a melegfehér fényre?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "kb. 1000–1500 K",
+        "correct": false,
+        "why": "Ez még a gyertyaláng (kb. 1900 K) fényénél is vörösebb tartomány; lámpáknál nem jellemző."
+      },
+      {
+        "id": "b",
+        "text": "2700–3000 K",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "4000 K körül",
+        "correct": false,
+        "why": "Ez a semleges (természetes) fehér."
+      },
+      {
+        "id": "d",
+        "text": "5000–6500 K",
+        "correct": false,
+        "why": "Ez a hidegfehér, „nappali fehér” tartomány."
+      }
+    ],
+    "explanation": "A melegfehér fény 2700–3000 K-es, a semleges fehér kb. 4000 K-es, a hidegfehér 5000–6500 K-es. A szóhasználat első ránézésre fordított: a „meleg” fény a kisebb kelvinérték, és a hangulatra utal, nem a lámpa hőmérsékletére.",
+    "ref": "szinhomerseklet#jellemzo-ertekek",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0006",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Mit jelent egy fénycső vagy LED-fényforrás „840” kódja?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Ra 80–89 színvisszaadást és 4000 K színhőmérsékletet",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "840 lumen fényáramot",
+        "correct": false,
+        "why": "A kód nem a fényáramot adja meg."
+      },
+      {
+        "id": "c",
+        "text": "8 W teljesítményt és 40 000 óra élettartamot",
+        "correct": false,
+        "why": "A kód első jegye a színvisszaadási osztály, a második kettő a színhőmérséklet."
+      },
+      {
+        "id": "d",
+        "text": "Ra 84-es színvisszaadást, 0 °C-ig használható kivitelben",
+        "correct": false,
+        "why": "Az első jegy a színvisszaadási osztály, a második kettő a színhőmérséklet századrésze."
+      }
+    ],
+    "explanation": "A háromjegyű kód első számjegye a színvisszaadási osztály (8 = Ra 80–89, 9 = Ra 90 vagy több), a második és a harmadik a színhőmérséklet századrésze. A 840 tehát Ra 80–89-es, 4000 K-es fényforrás, az irodák jellemző fényszíne; a 827 a klasszikus melegfehér.",
+    "ref": "szinhomerseklet#mit-jelent-a-827-a-840-vagy-a-930",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0007",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mit mutat a színvisszaadási index (Ra, CRI)?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Mennyire természetesen látszanak a színek az adott fényben",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A fény színét, kelvinben megadva",
+        "correct": false,
+        "why": "Ez a színhőmérséklet."
+      },
+      {
+        "id": "c",
+        "text": "A fényforrás takarékosságát, lm/W-ban megadva",
+        "correct": false,
+        "why": "Ez a fényhasznosítás."
+      },
+      {
+        "id": "d",
+        "text": "Hány százalékra csökken a fényáram a névleges élettartam végére",
+        "correct": false,
+        "why": "Ezt az élettartam-adat (például L70) írja le."
+      }
+    ],
+    "explanation": "A színvisszaadási index azt méri, mennyire természetesen látszanak a színek egy fényforrás fényében, egy azonos színhőmérsékletű referencia-fényforráshoz képest, legfeljebb 100-as skálán; az izzó és a halogén Ra-ja 100. A színhőmérséklettől független: két 3000 K-es lámpa közül az egyik Ra 80, a másik Ra 95 is lehet.",
+    "ref": "szinhomerseklet#szinvisszaadas-az-ra-cri-ertek",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0008",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Egy 15 m²-es helyiségbe átlagosan 300 lx megvilágítást szeretnél. Lámpatestenként 2500 lm, a kihasználási tényező 0,5, a karbantartási tényező 0,8. Hány lámpatest kell (felfelé kerekítve)?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "2 db",
+        "correct": false,
+        "why": "Ez a kihasználási és a karbantartási tényező nélkül számolt 1,8 felkerekítve."
+      },
+      {
+        "id": "b",
+        "text": "4 db",
+        "correct": false,
+        "why": "Ez lefelé kerekítés; 4 db-bal csak kb. 267 lx adódik."
+      },
+      {
+        "id": "c",
+        "text": "5 db",
+        "correct": true
+      }
+    ],
+    "explanation": "A hatásfok-módszerrel N = E · A / (Φ · η · k) = 300 · 15 / (2500 · 0,5 · 0,8) = 4500 / 1000 = 4,5, felfelé kerekítve 5 db. Ellenőrzés: 5 db-bal 5 · 2500 · 0,5 · 0,8 / 15 ≈ 333 lx, 4 db-bal csak kb. 267 lx lenne.",
+    "ref": "lumen-es-lux#hany-lampa-kell-a-hatasfok-modszer",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0009",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy spot fényerőssége lefelé 900 cd, és 3 m-rel van az asztallap fölött. Mekkora a megvilágítás közvetlenül alatta?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "100 lx",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "300 lx",
+        "correct": false,
+        "why": "Itt a távolsággal osztottak, nem a négyzetével."
+      },
+      {
+        "id": "c",
+        "text": "2700 lx",
+        "correct": false,
+        "why": "Itt a távolsággal szoroztak osztás helyett."
+      },
+      {
+        "id": "d",
+        "text": "8100 lx",
+        "correct": false,
+        "why": "Itt a távolság négyzetével szoroztak osztás helyett."
+      }
+    ],
+    "explanation": "Pontszerű fényforrás alatt E = I / d² = 900 cd / (3 m)² = 100 lx. A megvilágítás a távolság négyzetével csökken: kétszeres távolságban negyedannyi, háromszorosban kilencedannyi.",
+    "ref": "lumen-es-lux#a-tavolsagtorveny",
+    "shuffle": false,
+    "family": "tavolsagtorveny",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0010",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 1,
+    "type": "truefalse",
+    "stem": "Kétszer olyan messze egy pontszerű fényforrás alatt fele akkora a megvilágítás.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": false
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": true
+      }
+    ],
+    "explanation": "A pontszerű fényforrás megvilágítása a távolság négyzetével fordított arányban csökken (E = I / d²), ezért kétszeres távolságban negyedannyi. A „fele annyi” a lineáris csökkenés téves feltételezése.",
+    "ref": "lumen-es-lux#a-tavolsagtorveny",
+    "shuffle": false,
+    "family": "tavolsagtorveny",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0011",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mit jelent a lámpatalp E27 jelölése?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Edison-féle menetes talp, 27 mm-es menetátmérővel",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Két csap, egymástól 27 mm-re",
+        "correct": false,
+        "why": "A csapos talpak jele G vagy GU, például GU10."
+      },
+      {
+        "id": "c",
+        "text": "Legfeljebb 27 W-os fényforráshoz való menetes talp",
+        "correct": false,
+        "why": "A szám méretet jelöl milliméterben, nem teljesítményt."
+      },
+      {
+        "id": "d",
+        "text": "Európai kivitelű, 27 V-os fényforrás",
+        "correct": false,
+        "why": "A szám méretet jelöl, nem feszültséget."
+      }
+    ],
+    "explanation": "A jelölés nagybetűje a kialakítást (E = Edison-féle menetes talp), a száma a fő méretet adja meg milliméterben: az E27 menete 27 mm-es, az E14-é 14 mm-es. Csapos talpnál a szám a csapok középvonalainak távolsága, például a GU10-nél 10 mm.",
+    "ref": "lampafoglalatok-es-lampatalpak#hogyan-olvasd-a-jelolest",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0012",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 2,
+    "type": "multi",
+    "stem": "Melyik lámpatalp tartozik jellemzően 12 V-os fényforráshoz? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "GU5.3",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "G4",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "GU4",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "G9",
+        "correct": false,
+        "why": "A G9 jellemzően 230 V-os kapszulák talpa."
+      },
+      {
+        "id": "e",
+        "text": "GU10",
+        "correct": false,
+        "why": "A GU10 jellemzően 230 V-os spotlámpák talpa."
+      }
+    ],
+    "explanation": "A GU5.3 (MR16 spotok), a GU4 (MR11 spotok) és a G4 (kis kapszulák) jellemzően 12 V-os fényforrásokhoz tartozik, amelyekhez transzformátor vagy LED-tápegység kell. A hasonlóan apró G9 és a GU10 viszont 230 V-os, ezért cserénél a talp mellett a feszültséget is ellenőrizni kell.",
+    "ref": "lampafoglalatok-es-lampatalpak#csapos-talpak",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0013",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Négy 20 W-os, 12 V-os halogénspot egy transzformátorról működik. Mekkora áram folyik a 12 V-os oldalon?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "kb. 0,35 A",
+        "correct": false,
+        "why": "Ez a 230 V-os primer oldal árama."
+      },
+      {
+        "id": "b",
+        "text": "kb. 1,67 A",
+        "correct": false,
+        "why": "Ez egyetlen spot árama."
+      },
+      {
+        "id": "c",
+        "text": "kb. 6,67 A",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "20 A",
+        "correct": false,
+        "why": "Itt egy spot wattszámát vették amperként."
+      }
+    ],
+    "explanation": "Az összteljesítmény 4 · 20 W = 80 W, a 12 V-os oldalon I = P / U = 80 W / 12 V ≈ 6,67 A, a 230 V-os oldalon ugyanez kb. 0,35 A. A törpefeszültség tehát nem jelent „kis áramot”: azonos teljesítményhez közel hússzor akkora áram folyik, mint 230 V-on, és a vezetékek melegedése itt is számít.",
+    "ref": "lampafoglalatok-es-lampatalpak#kidolgozott-pelda-12-v-os-spotok-csereje-led-re",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0014",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Egy elektronikus halogéntranszformátor adattábláján „25–150 W” terhelési tartomány áll. A négy 50 W-os halogénspot helyére négy 5 W-os, 12 V-os LED kerül. Mi a valószínű probléma?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A 20 W kevés: a transzformátor legkisebb terhelése 25 W",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A LED-ek túlterhelik a transzformátort",
+        "correct": false,
+        "why": "A LED-ek összteljesítménye jóval kisebb a halogénekénél."
+      },
+      {
+        "id": "c",
+        "text": "A 12 V-os LED-ek 230 V-ot kapnak",
+        "correct": false,
+        "why": "A transzformátor kimenete továbbra is 12 V-os."
+      },
+      {
+        "id": "d",
+        "text": "A halogéntranszformátor minden 12 V-os LED-del gond nélkül működik",
+        "correct": false,
+        "why": "A kompatibilitást a gyártó adja meg; a legkisebb terhelés és a kimenet jellege miatt nem mindig működik."
+      }
+    ],
+    "explanation": "Az elektronikus transzformátornak legkisebb terhelése is van: a 4 · 5 W = 20 W kevesebb a 25 W-os alsó határnál, ezért a LED-ek villoghatnak vagy el sem indulnak. Ilyenkor LED-hez való tápegység vagy a gyártó által ehhez a transzformátortípushoz ajánlott fényforrás kell; a tápegység cseréjét szakember végezze.",
+    "ref": "lampafoglalatok-es-lampatalpak#kidolgozott-pelda-12-v-os-spotok-csereje-led-re",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0015",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Mit jelent egy lámpatest IP44 jelölése?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Védett az 1 mm-es testek és a fröccsenő víz ellen",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Tartós vízbe merítésre, víz alatti használatra alkalmas",
+        "correct": false,
+        "why": "Erre a 8-as második számjegy utal, kifejezetten erre szánt lámpánál."
+      },
+      {
+        "id": "c",
+        "text": "44 W-nál nagyobb fényforrás nem tehető bele",
+        "correct": false,
+        "why": "Az IP-kód a burkolat védettségét jelöli, nem a teljesítményt."
+      },
+      {
+        "id": "d",
+        "text": "A lámpatest II. érintésvédelmi osztályú, védővezetőt nem kap",
+        "correct": false,
+        "why": "Az IP-kód az érintésvédelmi osztályt nem adja meg."
+      }
+    ],
+    "explanation": "Az első számjegy a szilárd testek és a por, a második a víz elleni védelem fokozata: az IP44-es burkolatba legalább 1 mm-es huzal sem jut be, és minden irányból fröccsenő víz ellen véd. Az érintésvédelmi osztályt és a merítésállóságot nem jelenti; hogy egy helyre milyen védettség kell, azt a tervező határozza meg.",
+    "ref": "ip-vedettseg#kidolgozott-peldak-igy-olvasd-a-jelolest",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0016",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "A kompakt fénycső élettartamát a gyakori ki-be kapcsolás jelentősen rövidíti, a LED-ét érdemben alig.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "A fénycső és a kompakt fénycső élettartamát a gyakori kapcsolgatás jelentősen csökkenti, ráadásul bekapcsolás után időbe telik, amíg eléri a teljes fényt. A LED azonnal teljes fénnyel indul, és a kapcsolgatás érdemben nem rövidíti az életét.",
+    "ref": "fenyforrasok-tipusai#led-fenyforras",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0017",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 2,
+    "type": "multi",
+    "stem": "Mire kell figyelni, ha egy fényerő-szabályozós (dimmeres) áramkörben az izzókat LED-re cserélik? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Csak „dimmelhető” jelölésű LED-fényforrás szabályozható",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A szabályozónak is illenie kell a LED-hez",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "A régi, izzókhoz készült dimmerrel a LED villoghat vagy zúghat",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "Bármilyen LED szabályozható, ha a wattszáma kisebb a dimmerénél",
+        "correct": false,
+        "why": "A szabályozhatóság a LED meghajtójától függ, nem a wattszámtól."
+      },
+      {
+        "id": "e",
+        "text": "A LED fényerejét a dimmer helyett a kismegszakítóval kell szabályozni",
+        "correct": false,
+        "why": "A kismegszakító védelmi készülék, nem szabályozó."
+      }
+    ],
+    "explanation": "Fényerő-szabályozni csak a dimmelhető jelölésű LED-et lehet, és csak hozzá illő szabályozóval; a régi, izzókhoz készült dimmerrel a LED villoghat, zúghat vagy egyáltalán nem szabályoz. A szabályozó cseréje villamos szerelés, amelyet szakember végez.",
+    "ref": "fenyforrasok-tipusai#led-fenyforras",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0018",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Egy lámpatesten „max. 60 W” felirat áll. Mire vonatkozik ez?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A fényforrás felvett teljesítményére, a lámpatest melegedése miatt",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Arra, hogy csak legfeljebb 60 W-os izzónak megfelelő fényű LED tehető bele",
+        "correct": false,
+        "why": "A felirat a felvett teljesítményt korlátozza; egy 100 W-os izzót kiváltó LED is csak kb. 13–15 W-ot vesz fel."
+      },
+      {
+        "id": "c",
+        "text": "A lámpatest áramkörét védő kismegszakító névleges teljesítményére",
+        "correct": false,
+        "why": "A kismegszakítót névleges áram jellemzi, és a felirat a lámpatestre vonatkozik."
+      },
+      {
+        "id": "d",
+        "text": "A lámpatestből kilépő fényáram felső határára",
+        "correct": false,
+        "why": "A fényáram egysége a lumen; a W a felvett teljesítmény."
+      }
+    ],
+    "explanation": "A „max. 60 W” felirat a fényforrás tényleges felvett teljesítményére vonatkozik, és a lámpatest melegedését korlátozza. Egy nagyobb fényű, de kis teljesítményű LED ebből a szempontból belefér; zárt lámpatestnél viszont azt is ellenőrizni kell, hogy a LED-et zárt térbe is szánták-e.",
+    "ref": "lampafoglalatok-es-lampatalpak#gyakori-tevedesek",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0019",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Miért feltűnőbb a 2700 K és a 3000 K közötti különbség, mint az 5000 K és az 5300 K közötti, holott mindkettő 300 K?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Mert a szem a reciprokát (mired) érzékeli közel egyenletesen",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Mert a melegfehér fényforrások jóval több lument adnak",
+        "correct": false,
+        "why": "A színhőmérséklet a fény színe, nem a mennyisége."
+      },
+      {
+        "id": "c",
+        "text": "Mert a hidegfehér fényforrások színvisszaadása mindig rosszabb",
+        "correct": false,
+        "why": "A színhőmérséklet és a színvisszaadás független egymástól."
+      },
+      {
+        "id": "d",
+        "text": "Mert 5000 K fölött a szem a színeket egyáltalán nem érzékeli",
+        "correct": false,
+        "why": "A hideg tartományban is látunk színt, csak a kelvinben azonos lépés kisebb változásnak tűnik."
+      }
+    ],
+    "explanation": "A szem a színhőmérséklet változását közelítőleg a reciprokában, mired-ben (10⁶ / T) érzékeli egyenletesen: 2700 K kb. 370, 3000 K kb. 333 mired, a különbség kb. 37 mired. 5000 K-ről (200 mired) 5300 K-re (kb. 189 mired) csak kb. 11 mired a lépés, ezért zavaró, ha egy csillárban 2700 és 3000 K-es fényforrások keverednek.",
+    "ref": "szinhomerseklet#szampelda-miert-szamit-a-300-k-a-meleg-tartomanyban",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-vil-0020",
+    "version": 1,
+    "topic": "vilagitas",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Hová érdemes legalább Ra 90-es színvisszaadású fényforrást választani?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Ahol a színek számítanak, például sminkeléshez",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Folyosóra és tárolóba, ahol a fény csak tájékozódásra kell",
+        "correct": false,
+        "why": "Itt az általános világításra jó Ra 80 is elegendő."
+      },
+      {
+        "id": "c",
+        "text": "Ahol a legkisebb energiafogyasztás a cél",
+        "correct": false,
+        "why": "A jobb színvisszaadású LED-ek fényhasznosítása jellemzően kissé kisebb."
+      },
+      {
+        "id": "d",
+        "text": "Csak kültéri, IP65-ös lámpatestekbe",
+        "correct": false,
+        "why": "A színvisszaadás és a védettség független egymástól."
+      }
+    ],
+    "explanation": "Az Ra 80–89 általános világításra jó, az Ra 90 fölötti fényforrás ott érdemes, ahol a színek számítanak: sminkelés, konyha, ruhatár, üzlet, festés. Ha a bőrszín vagy az élelmiszerek színe fontos, az adatlapon az R9 (telített vörös) értéket is érdemes megnézni.",
+    "ref": "szinhomerseklet#szinvisszaadas-az-ra-cri-ertek",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  }
+]

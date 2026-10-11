@@ -2,12 +2,14 @@
 // morzsamenü, H1, ellenőrzési jelvény, műveletek, tartalomjegyzék, törzs (Röviden, R2-nél Figyelem-doboz, ábrák, képletek, kidolgozott
 // példák, Gyakori tévedések), kapcsolódó kalkulátorok és cikkek, források („kiadás ellenőrzés alatt” jelöléssel), egy tervező-blokk,
 // előző/következő, lábléc-meta (verzió, ujjlenyomat, változásnapló, hibajelzés). Az alapfigyelmeztetés a Shell láblécében áll.
-import {BadgeCheck,ChevronLeft,ChevronRight,FileWarning} from 'lucide-react';
+import {BadgeCheck,ChevronLeft,ChevronRight,ClipboardCheck,FileWarning} from 'lucide-react';
 import {bySlug,isPublished as calcPublished} from '@/lib/calc/registry';
 import {CHANGE_LABELS,changesFor} from '@/lib/kb/content/changes';
 import {articleHref,categoryArticles,categoryById,categoryHref,prevNext,relatedArticles,resolveLink,type KbReleaseInfo} from '@/lib/kb/content/registry';
 import type {KbBody,KbMeta,KbSource} from '@/lib/kb/content/types';
 import {CALC_HUB,KB_HOME,calcPath,sectionById} from '@/lib/kb/categories';
+import {quizHref,templatesForArticle} from '@/lib/quiz/registry';
+import {QUIZ_NOTICE} from '@/lib/quiz/topics';
 import {AppBar} from '../shell';
 import {PlannerCta} from '../planner-cta';
 import {ReportLink} from '../report-link';
@@ -53,7 +55,9 @@ export function ArticleView({meta,body,info,preview,origin,glossary=false}:{meta
  const href=articleHref(meta),resolve=(id:string,anchor:string|null)=>resolveLink(id,anchor,preview);
  const siblings=categoryArticles(meta.category,preview),{prev,next}=prevNext(meta,preview),rel=relatedArticles(meta,preview);
  const calcs=meta.calculators.map(bySlug).filter((c):c is NonNullable<typeof c>=>!!c&&calcPublished(c));
- const toc:[string,string][]=[...meta.anchors.map(a=>[a.id,a.title] as [string,string]),...(calcs.length||rel.items.length?[['kapcsolodo','Kapcsolódó'] as [string,string]]:[]),['forrasok','Források']];
+ // „Teszteld magad” (terv 2.4/9.): csak ha a cikkhez van közzétett számolós sablon (lib/quiz/gate.ts).
+ const quiz=templatesForArticle(meta.id,preview);
+ const toc:[string,string][]=[...meta.anchors.map(a=>[a.id,a.title] as [string,string]),...(calcs.length||rel.items.length||quiz.length?[['kapcsolodo','Kapcsolódó'] as [string,string]]:[]),['forrasok','Források']];
  const back=cat?{href:categoryHref(cat),label:cat.label}:{href:sec.href,label:sec.label};
  return <>
   <AppBar title={glossary?meta.navTitle:sec.label} back={glossary?{href:sec.href,label:sec.label}:back} home={KB_HOME}/>
@@ -72,10 +76,13 @@ export function ArticleView({meta,body,info,preview,origin,glossary=false}:{meta
     {glossary?<nav className="kk-letters" aria-label="Betűk">{toc.map(([id,l])=><a key={id} href={'#'+id}>{l}</a>)}</nav>
      :<details className="kk-toc-inline"><summary>Tartalom</summary><ol>{toc.map(([id,l])=><li key={id}><a href={'#'+id}>{l}</a></li>)}</ol></details>}
     <ArticleBlocks blocks={body.blocks} ctx={{slug:meta.slug,resolve}}/>
-    {(!!calcs.length||!!rel.items.length||rel.pending>0)&&<section id="kapcsolodo" className="kk-related" aria-labelledby="kapcsolodo-cim">
+    {(!!calcs.length||!!rel.items.length||rel.pending>0||!!quiz.length)&&<section id="kapcsolodo" className="kk-related" aria-labelledby="kapcsolodo-cim">
      <h2 id="kapcsolodo-cim">Kapcsolódó</h2>
      {!!calcs.length&&<><h3>Kalkulátorok</h3><ul className="kk-related-grid">{calcs.map(c=><li key={c.slug}><a href={calcPath(c.slug)}><b>{c.title}</b><small>{c.short}</small></a></li>)}</ul>
       <p className="kk-related-more"><a href={CALC_HUB}>Összes kalkulátor</a></p></>}
+     {!!quiz.length&&<div className="kk-selftest"><h3 id="teszteld-magad">Teszteld magad</h3>
+      <p><a className="kk-button" href={quizHref({feladat:quiz.map(t=>t.id),hossz:5})}><ClipboardCheck aria-hidden="true"/> 5 számolós gyakorló feladat</a></p>
+      <p className="kk-muted">{quiz.map(t=>t.title).join(', ')} – minden kérdés után magyarázattal és levezetéssel. {QUIZ_NOTICE}</p></div>}
      {!!rel.items.length&&<><h3>Cikkek</h3><ul className="kk-related-grid">{rel.items.map(a=><li key={a.id}><a href={articleHref(a)}><b>{a.title}</b><small>{a.summary}</small></a></li>)}</ul></>}
      {rel.pending>0&&<p className="kk-muted">További {rel.pending} kapcsolódó cikk hamarosan – szakmai lektorálás alatt.</p>}
     </section>}

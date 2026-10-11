@@ -1,0 +1,712 @@
+[
+  {
+    "id": "q-ev-0001",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mit jelent az érintésvédelem a villamos berendezésekben?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Az áramütés megelőzését szolgáló műszaki intézkedések összességét",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A vezetékek védelmét a túlterhelés és a zárlat okozta túlmelegedés ellen",
+        "correct": false,
+        "why": "Ez a túláramvédelem feladata, amelyet a kismegszakító vagy az olvadóbiztosító lát el."
+      },
+      {
+        "id": "c",
+        "text": "A berendezés védelmét a villámcsapásból eredő túlfeszültség ellen",
+        "correct": false,
+        "why": "Erre a túlfeszültség-védelmi eszközök szolgálnak."
+      },
+      {
+        "id": "d",
+        "text": "A burkolatok védelmét a víz és a por bejutása ellen",
+        "correct": false,
+        "why": "Ezt az IP-kód írja le; az érintésvédelemnek legfeljebb egyik összetevője lehet."
+      }
+    ],
+    "explanation": "Az érintésvédelem (áramütés elleni védelem) azoknak az intézkedéseknek az összessége, amelyek megakadályozzák a veszélyes áramütést. Normál üzemben az alapvédelem (szigetelés, burkolat), hiba esetén a hibavédelem, például a táplálás önműködő lekapcsolása véd; ezt egészíti ki a 30 mA-es áram-védőkapcsoló.",
+    "ref": "szakszotar#betu-e",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0002",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 1,
+    "type": "multi",
+    "stem": "Az alábbiak közül melyek az alapvédelem eszközei, vagyis melyek akadályozzák meg normál üzemben a feszültség alatti részek megérintését? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Az aktív részek szigetelése",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A burkolat, amely ujjal elérhetetlenné teszi a feszültség alatti részeket",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "A táplálás önműködő lekapcsolása testzárlatkor",
+        "correct": false,
+        "why": "Ez a hibavédelem része: akkor működik, amikor a szigetelés már meghibásodott."
+      },
+      {
+        "id": "d",
+        "text": "A 30 mA-es áram-védőkapcsoló",
+        "correct": false,
+        "why": "Ez kiegészítő védelem: akkor is lekapcsolhat, ha az alapvédelem vagy a hibavédelem nem elég, például gondatlan érintéskor."
+      }
+    ],
+    "explanation": "Az alapvédelem a normál üzemben fennálló veszély ellen véd: a szigetelés és a burkolat megakadályozza, hogy bárki feszültség alatti részt érintsen. A hibavédelem (például az önműködő lekapcsolás) a szigetelés meghibásodásakor lép működésbe, a 30 mA-es áram-védőkapcsoló pedig kiegészítő védelmet ad.",
+    "ref": "szakszotar#betu-e",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0003",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mi jellemző az I. érintésvédelmi osztályú készülékre?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Fémházát a védővezetőhöz kell csatlakoztatni",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Kettős vagy megerősített szigetelésű, védővezetőt nem kap",
+        "correct": false,
+        "why": "Ez a II. érintésvédelmi osztály jellemzője."
+      },
+      {
+        "id": "c",
+        "text": "Törpefeszültségű (SELV vagy PELV) táplálásról működik",
+        "correct": false,
+        "why": "Ez a III. érintésvédelmi osztály jellemzője."
+      },
+      {
+        "id": "d",
+        "text": "Legalább IP44-es védettségű burkolata van",
+        "correct": false,
+        "why": "Az IP-kód a burkolat por és víz elleni védettségét adja meg, az érintésvédelmi osztályt nem."
+      }
+    ],
+    "explanation": "Az I. osztályú készülék védelme a védővezetőn alapul: a fémháza a védőérintkezős dugaljon át a védővezetőhöz csatlakozik, így testzárlatkor a hibaáram lekapcsolást okozhat. A II. osztályú készülék kettős vagy megerősített szigetelésű, a III. osztályú törpefeszültségről működik; az IP-kód ettől független jellemző.",
+    "ref": "ip-vedettseg#amit-az-ip-kod-nem-mond-meg",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0004",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "A kettős vagy megerősített szigetelésű (II. érintésvédelmi osztályú) készülék védelme a szigetelésén alapul, ezért a csatlakozóvezetéke jellemzően kéteres, védővezető nélküli.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "A II. osztályú készülék a feszültség alatti részeket kettős vagy megerősített szigeteléssel választja el a megérinthető részektől, így a védelméhez védővezető nem kell. A kéteres (kék és barna erű) csatlakozóvezeték ezért rendeltetésszerű, míg a fémházas, I. osztályú készülékhez háromeres, zöld-sárga erű vezeték tartozik.",
+    "ref": "vezetekek-szinjelolese#erek-szine-a-tobberes-kabelekben",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0005",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "TN-C-S rendszerű lakásban egy fémházas mosógép belsejében a fázisvezető a fémházhoz ér (testzárlat). Mi szünteti meg szabályos berendezésben a ház veszélyes feszültségét?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A védővezetőn folyó nagy hibaáram, amelyre a védelem önműködően lekapcsol",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A ház festékrétege, amely elszigeteli a fémet az érintőtől",
+        "correct": false,
+        "why": "A festék nem szigetelés; az érintésvédelem nem számíthat rá."
+      },
+      {
+        "id": "c",
+        "text": "A nullavezető, amely a hibaáramot visszavezeti, így a ház feszültségmentes marad",
+        "correct": false,
+        "why": "Szabályos bekötésnél a ház a védővezetőre csatlakozik; a nullavezető üzemi vezető, nem védővezető."
+      },
+      {
+        "id": "d",
+        "text": "A kismegszakító, amely a ház megérintésekor a testen át folyó áramra kiold",
+        "correct": false,
+        "why": "A testen átfolyó áram nagyságrendekkel kisebb a kismegszakító kioldási áramánál."
+      }
+    ],
+    "explanation": "A fémház a védővezetőn át a táppont földelt csillagpontjához kapcsolódik, ezért testzárlatkor fémes hurokban nagy hibaáram folyik. Erre a túláramvédelem, illetve az áram-védőkapcsoló lekapcsol (önműködő lekapcsolás); a lekapcsolásig a ház érintése veszélyes lehet, ezért kell, hogy a lekapcsolás gyors legyen.",
+    "ref": "kismegszakito#mire-valo",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0006",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "TN-rendszerben mi a feltétele annak, hogy testzárlatkor a kismegszakító az elektromágneses kioldójával, azonnal kapcsoljon le?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Elég kicsi hibahurok-impedancia, hogy a hibaáram elérje az azonnali kioldási tartományt",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A kismegszakító névleges árama minél nagyobb legyen, hogy a hibaáramot elviselje",
+        "correct": false,
+        "why": "Nagyobb névleges áramhoz nagyobb azonnali kioldási áram tartozik, ez éppen ronthat a helyzeten."
+      },
+      {
+        "id": "c",
+        "text": "A készülék burkolata legalább IP44-es legyen, hogy víz ne okozhasson testzárlatot",
+        "correct": false,
+        "why": "Az IP-kód a por és a víz elleni védettség jele, a lekapcsolás feltételeihez nincs köze."
+      },
+      {
+        "id": "d",
+        "text": "A kismegszakító D jelleggörbéjű legyen, mert az old ki a leggyorsabban",
+        "correct": false,
+        "why": "A D jelleggörbéhez kell a legnagyobb zárlati áram az azonnali kioldáshoz, tehát éppen ez a legkedvezőtlenebb."
+      }
+    ],
+    "explanation": "Az azonnali kioldáshoz a hibaáramnak el kell érnie a jelleggörbe tartományának felső határát (például B16-nál 80 A-t), a hibaáramot pedig a hibahurok impedanciája korlátozza. Hosszú vagy vékony vezetéknél a hurokimpedancia nagy lehet, ezért a szakember a beépítés után méri; hogy egy áramkörben mekkora a megengedett érték, azt a tervező a hatályos előírások alapján ellenőrzi.",
+    "ref": "kismegszakito#b-c-es-d-jelleggorbe",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0007",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Mit korlátoz a 30 mA-es áram-védőkapcsoló, ha valakit a fázis és a föld között áramütés ér?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Az áramütés időtartamát, mert gyorsan lekapcsol",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A testen átfolyó áram nagyságát, amelyet 30 mA alatt tart",
+        "correct": false,
+        "why": "Az áram nagyságát a feszültség és a test ellenállása szabja meg; a készülék ezt nem korlátozza, csak gyorsan lekapcsol."
+      },
+      {
+        "id": "c",
+        "text": "Semmit, mert csak a vezetékek túlterhelésére old ki",
+        "correct": false,
+        "why": "Túlterhelésre a kismegszakító old ki; a FI-relé a különbözeti áramot figyeli."
+      },
+      {
+        "id": "d",
+        "text": "A hálózati feszültséget, amelyet törpefeszültségre csökkent",
+        "correct": false,
+        "why": "A FI-relé kapcsolókészülék, a feszültséget nem alakítja át."
+      }
+    ],
+    "explanation": "A FI-relé a befolyó és a visszatérő áram különbségét figyeli, és ha az eléri a kioldási értéket, gyorsan lekapcsolja a fázis- és a nullavezetőt. Az áramütést tehát nem akadályozza meg, csak az időtartamát korlátozza; az érzet, az ijedtség és például egy létráról esés veszélye megmarad.",
+    "ref": "aram-vedokapcsolo-fi-rele#hogyan-mukodik",
+    "shuffle": true,
+    "family": "fi-idotartam",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0008",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Valaki a földtől jól elszigetelve, létrán állva egyszerre megérinti egy lámpakiállás fázis- és nullavezetőjét. Mit tesz a 30 mA-es áram-védőkapcsoló?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Nem old ki, mert nincs különbözeti áram",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Kiold, mert a testen átfolyó áram meghaladja a 30 mA-t",
+        "correct": false,
+        "why": "A FI-relé nem a test áramát, hanem a befolyó és a visszatérő áram különbségét figyeli."
+      },
+      {
+        "id": "c",
+        "text": "A kismegszakítóval együtt kiold, mert az érintés rövidzárlatot okoz",
+        "correct": false,
+        "why": "A test ellenállása miatt az áram nagyságrendekkel kisebb a zárlati áramnál."
+      },
+      {
+        "id": "d",
+        "text": "Kiold, de csak a 0,3 s-os késleltetés letelte után",
+        "correct": false,
+        "why": "Ebben a helyzetben egyáltalán nincs különbözeti áram, amelyre kioldhatna."
+      }
+    ],
+    "explanation": "A földtől elszigetelt ember, aki a fázist és a nullát egyszerre érinti, az áramkör szempontjából úgy viselkedik, mint egy fogyasztó: az áram a vasmagon át be- és visszafolyik, ezért a FI-relé nem érzékel különbséget. Ez az egyik oka annak, hogy a FI-relé csak kiegészítő védelem, és nem helyettesíti a feszültségmentesítést.",
+    "ref": "aram-vedokapcsolo-fi-rele#mikor-old-ki-es-mikor-nem",
+    "shuffle": true,
+    "family": "fi-nem-old-ki",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0009",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mi a fő egyenpotenciálra hozás (EPH) célja?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Az egyszerre érinthető fémrészek között se alakuljon ki veszélyes feszültség",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A villamos berendezés üzemi áramát a fém csővezetékek a föld felé vezessék el",
+        "correct": false,
+        "why": "A csővezeték nem üzemi vezető; ha áram folyik rajta, az hibára utal."
+      },
+      {
+        "id": "c",
+        "text": "A fürdőszobában kiváltsa az áram-védőkapcsolót és a védővezetőt",
+        "correct": false,
+        "why": "Az EPH a védővezetőt és az áram-védőkapcsolót nem helyettesíti, csak kiegészíti."
+      },
+      {
+        "id": "d",
+        "text": "A fém vízvezeték korrózióját villamos úton csökkentse",
+        "correct": false,
+        "why": "Az EPH érintésvédelmi célú összekötés, nem korrózióvédelem."
+      }
+    ],
+    "explanation": "Áramütést az okoz, ha két egyszerre megérintett pont között feszültség van, például egy fémházas készülék és egy vízcsap között. A fő EPH az épületbe belépő fém csővezetékeket, fémszerkezeteket és a védővezető-rendszert egy közös sínen köti össze, így hiba esetén is közel azonos potenciálon maradnak.",
+    "ref": "egyenpotencialra-hozas-eph#miert-kell",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0010",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 2,
+    "type": "multi",
+    "stem": "Mit kötnek jellemzően a fő EPH-sínre? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Az épületbe belépő fém víz- és fűtésvezetéket",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Az épület földelőjének (például az alapföldelőnek) a vezetőjét",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "A fő védővezetőt",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "A világítási áramkörök nullavezetőjét",
+        "correct": false,
+        "why": "A nullavezető üzemi vezető; a PEN szétválasztási pontja után a védővezető-rendszerrel sehol nem köthető össze."
+      }
+    ],
+    "explanation": "A fő EPH-sín az a gyűjtőpont, ahol a fő védővezető, az épület földelőjének vezetője és a fő EPH-vezetők (víz- és fűtésvezeték, a gázszolgáltató előírása szerint a gázvezeték, fémszerkezetek) találkoznak. A teljes felsorolást, a keresztmetszeteket és a kötések kialakítását a szabvány és a tervező határozza meg.",
+    "ref": "egyenpotencialra-hozas-eph#mit-kotnek-a-fo-eph-sinre",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0011",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "TN-C-S rendszerű házban megszakad a hálózati PEN-vezető. A fém vízvezeték be van kötve a fő EPH-sínre. Melyik állítás igaz?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A fémház és a vízcsap között jellemzően nincs veszélyes feszültség, a távoli föld felé viszont lehet",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Az áram-védőkapcsoló érzékeli a PEN szakadását, és a teljes lakást azonnal lekapcsolja",
+        "correct": false,
+        "why": "A fogyasztók árama a vasmagon át változatlanul visszatér, ezért különbözeti áram nem keletkezik."
+      },
+      {
+        "id": "c",
+        "text": "A kismegszakítók lekapcsolnak, mert a PEN-szakadás nagy zárlati áramot okoz a lakásban",
+        "correct": false,
+        "why": "A szakadás nem zárlat; a túláramvédelem nem működik."
+      },
+      {
+        "id": "d",
+        "text": "Az EPH miatt az összes összekötött fémrész a távoli földhöz és a kerti csaphoz képest is feszültségmentes marad",
+        "correct": false,
+        "why": "Az EPH csak az összekötött részek egymás közötti feszültségét szünteti meg; az egész rendszer potenciálja megemelkedhet."
+      }
+    ],
+    "explanation": "PEN-szakadáskor a fogyasztók árama az épület földelőjén és a talajon át keres utat, és a teljes védővezető-rendszer potenciálja megemelkedhet; ezt sem a kismegszakító, sem a FI-relé nem kapcsolja le. A bekötött vízvezeték a fémházzal azonos potenciálon marad, a távoli földhöz képest (kerti csap, kültéri fémszerkezet) viszont veszélyes feszültség lehet.",
+    "ref": "egyenpotencialra-hozas-eph#hogyan-mukodik",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0012",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Mit köt össze a kiegészítő (helyi) egyenpotenciálra hozás egy fürdőszobában?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Az egyszerre megérinthető testeket és idegen vezetőképes részeket egymással és a védővezetővel",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A lakáselosztó nullasínét a PE-sínnel, hogy a hibaáram gyorsabban és biztosabban folyjon el a föld felé",
+        "correct": false,
+        "why": "A PEN szétválasztási pontja után a nulla- és a védővezető sehol nem köthető össze."
+      },
+      {
+        "id": "c",
+        "text": "A fürdőszobai dugaljak fázisvezetőit egy közös kapocsba",
+        "correct": false,
+        "why": "Az EPH védőfunkciójú összekötés, aktív vezetőt nem érint."
+      },
+      {
+        "id": "d",
+        "text": "A fürdőszoba összes műanyag csövét egy fém sínnel",
+        "correct": false,
+        "why": "A műanyag cső nem vezető, nem idegen vezetőképes rész."
+      }
+    ],
+    "explanation": "Fürdő- és zuhanyozóhelyiségben a nedves bőr kisebb ellenállása miatt nagyobb az áramütés veszélye, ezért ott a fém kádat, a fém csöveket és a fűtőtestet kiegészítő EPH-vezetővel köthetik össze egymással és a védővezetővel. Hogy kell-e és mit kell bekötni, azt a hatályos előírások és a tervező határozzák meg; a kiegészítő EPH az áram-védőkapcsolót nem helyettesíti.",
+    "ref": "egyenpotencialra-hozas-eph#kiegeszito-helyi-eph",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0013",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 1,
+    "type": "truefalse",
+    "stem": "Az egyenpotenciálra hozás (EPH) kiépítése mellett is szükség van a védővezetőre és az előírt áram-védőkapcsolóra.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "Az EPH a fémrészek közötti feszültséget csökkenti, de testzárlatkor a lekapcsolást a védővezető és a védelmi készülék együtt biztosítja. Gyakori hiba azt feltételezni, hogy az EPH miatt nem kell áram-védőkapcsoló vagy védővezető.",
+    "ref": "egyenpotencialra-hozas-eph#gyakori-hibak",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0014",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Az alábbiak közül melyik idegen vezetőképes rész az érintésvédelem szóhasználatában?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Az épületbe a talajból belépő fém vízvezeték",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Egy mosógép fémháza, amely a védővezetőre csatlakozik",
+        "correct": false,
+        "why": "Ez test: a villamos berendezés megérinthető része, amely hiba esetén kerülhet feszültség alá."
+      },
+      {
+        "id": "c",
+        "text": "A dugalj fázishüvelye",
+        "correct": false,
+        "why": "Ez aktív rész, amely üzem közben is feszültség alatt áll."
+      },
+      {
+        "id": "d",
+        "text": "A kismegszakító műanyag kezelőkarja",
+        "correct": false,
+        "why": "A szigetelőanyag nem vezetőképes rész."
+      }
+    ],
+    "explanation": "Idegen vezetőképes résznek azt a fémrészt nevezik, amely nem tartozik a villamos berendezéshez, de kívülről potenciált hozhat be, például a víz-, fűtés- vagy gázvezeték és az épületszerkezeti acél. A test ezzel szemben a villamos berendezés megérinthető vezetőképes része (például egy fémház), amely csak hiba esetén kerül feszültség alá.",
+    "ref": "egyenpotencialra-hozas-eph#fogalmak",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0015",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Régi lakásban egy dugalj védőérintkezőjét a dugaljban a nullavezetőre kötötték („nullázott” dugalj). Mi történhet, ha a nullavezető a dugalj előtt megszakad, és egy bekapcsolt fémházas készülék csatlakozik rá?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A készülék háza a készüléken át fázisfeszültségre kerülhet",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A ház feszültségmentes marad, mert a nullavezető megszakadt",
+        "correct": false,
+        "why": "A megszakadt nullavezető fogyasztó felőli része a bekapcsolt készüléken át fázisra kerül, vele a ráhidalt védőérintkező is."
+      },
+      {
+        "id": "c",
+        "text": "A kismegszakító lekapcsol, mert a szakadás zárlatot okoz",
+        "correct": false,
+        "why": "A szakadás nem zárlat: a készülék leáll, de a túláramvédelem nem működik."
+      },
+      {
+        "id": "d",
+        "text": "A készülék csak leáll, más következménye a hibának nincs",
+        "correct": false,
+        "why": "A leállás mellett a ház fázisfeszültségre kerülhet, ami életveszélyes."
+      }
+    ],
+    "explanation": "A „nullázott” dugaljnál a készülék háza a nullavezetőn van; ha a nullavezető megszakad, a ház a bekapcsolt készüléken át fázisfeszültséget kap, és ezt semmilyen védelem nem kapcsolja le. Ezért tilos a hiányzó védővezetőt a nullavezetőből „pótolni”; a korszerűsítéshez külön védővezető kell, amelyről szakember dönt.",
+    "ref": "dugalj-bekotese#regi-berendezesben",
+    "shuffle": true,
+    "family": "nullazott-dugalj",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0016",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 1,
+    "type": "truefalse",
+    "stem": "Ha egy készülék fémházának megérintésekor enyhe bizsergést érzel, elég a készüléket újra megérinteni, hogy kiderüljön, valóban hibás-e.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": false
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": true
+      }
+    ],
+    "explanation": "A bizsergés testzárlatra, hibás védővezetőre vagy nulla-, illetve PEN-szakadásra utalhat, és a következő érintés már súlyos áramütést okozhat. Ne érintsd meg újra; ha veszély nélkül megteheted, kapcsold le az áramkört az elosztóban, és amíg szakember meg nem vizsgálta, ne kapcsold vissza.",
+    "ref": "aram-vedokapcsolo-fi-rele#mikor-hivj-szakembert",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0017",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 3,
+    "type": "multi",
+    "stem": "Melyik helyzet ellen NEM véd a 30 mA-es áram-védőkapcsoló? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A PEN-vezető szakadása, amely miatt a védővezetőre kötött fémházak feszültség alá kerülnek",
+        "correct": true,
+        "why": "A fogyasztók árama a vasmagon át változatlanul visszatér, nincs különbözeti áram."
+      },
+      {
+        "id": "b",
+        "text": "Egy laza kötés melegedése a dugaljban",
+        "correct": true,
+        "why": "Laza kötésnél nincs különbözeti áram, ezért a FI-relé nem érzékeli."
+      },
+      {
+        "id": "c",
+        "text": "A FI-relé előtti szakasz (betáp, mérőhely) hibája",
+        "correct": true,
+        "why": "A készülék csak a mögötte lévő, védett áramköröket figyeli."
+      },
+      {
+        "id": "d",
+        "text": "Testzárlat, amelynél a hibaáram a védővezetőn tér vissza",
+        "correct": false,
+        "why": "Ilyenkor az áram megkerüli a vasmagot, a FI-relé kiold."
+      },
+      {
+        "id": "e",
+        "text": "Fázis–föld érintés, amelynél a testen át a kioldási értéket elérő áram folyik",
+        "correct": false,
+        "why": "Ez a kiegészítő védelem tipikus esete: a FI-relé kiold."
+      }
+    ],
+    "explanation": "Az áram-védőkapcsoló csak a mögötte lévő áramkörökben, a befolyó és a visszatérő áram különbségére old ki. PEN-szakadásnál, laza kötés melegedésénél és a készülék előtti szakaszon nincs ilyen különbség, ezért ezekben a helyzetekben nem véd; testzárlatkor és fázis–föld érintéskor viszont kiold.",
+    "ref": "aram-vedokapcsolo-fi-rele#mi-ellen-nem-ved",
+    "shuffle": true,
+    "family": "fi-nem-old-ki",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0018",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Legfeljebb mekkora váltakozó feszültség számít törpefeszültségnek a villamos biztonság szempontjából?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "12 V",
+        "correct": false,
+        "why": "Gyakori törpefeszültség (például halogénspotoknál), de nem ez a határ."
+      },
+      {
+        "id": "b",
+        "text": "24 V",
+        "correct": false,
+        "why": "Gyakori törpefeszültség, de nem ez a határ."
+      },
+      {
+        "id": "c",
+        "text": "50 V",
+        "correct": true
+      }
+    ],
+    "explanation": "A villamos biztonság szempontjából a legfeljebb 50 V-os váltakozó feszültség számít törpefeszültségnek (egyenfeszültségre magasabb határ vonatkozik); erre épülnek a SELV és a PELV védelmi módok. A kis feszültség nem jelent automatikus veszélytelenséget: egy nagy áramú forrás rövidzárlata törpefeszültségen is tüzet okozhat.",
+    "ref": "elektromos-feszultseg#mertekegyseg-es-nagysagrendek",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0019",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 3,
+    "type": "truefalse",
+    "stem": "Egyszerre megérinthető, de eltérő módon (nullázással, illetve védőföldeléssel) védett fémházak között hiba esetén veszélyes feszültség léphet fel.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "Ha az egyik fémház a hálózat védővezetőjén (nullázás, TN), a másik egy külön földelőn (védőföldelés, TT) van, a kettő potenciálja hiba esetén eltérhet, és aki egyszerre érinti őket, áramütést szenvedhet. A régi, vegyes érintésvédelmű berendezések átalakításáról ezért szakember dönt.",
+    "ref": "foldelesi-rendszerek#regi-berendezesben",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ev-0020",
+    "version": 1,
+    "topic": "erintesvedelem",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Egy készülék csatlakoztatásakor az áram-védőkapcsoló (FI-relé) kiold. Mi a helyes teendő?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A készüléket kihúzni, és szakemberrel megvizsgáltatni",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A FI-relét áthidalni, hogy a készülék működhessen",
+        "correct": false,
+        "why": "A FI-relé áthidalása vagy kiiktatása életveszélyes."
+      },
+      {
+        "id": "c",
+        "text": "A készüléket egy másik, FI-relé nélküli áramkörről üzemeltetni",
+        "correct": false,
+        "why": "A hibás készülék ott is veszélyes, csak a védelem hiányzik."
+      },
+      {
+        "id": "d",
+        "text": "Addig kapcsolni vissza a FI-relét, amíg bent marad",
+        "correct": false,
+        "why": "Az ismételt visszakapcsolás nem szünteti meg a hibát."
+      }
+    ],
+    "explanation": "A kioldás jellemzően azt jelzi, hogy a készülékből áram szökik a védővezető vagy a föld felé, például szigetelési hiba miatt. A készüléket ne használd tovább, amíg szakember meg nem vizsgálta; a FI-relé áthidalása vagy kiiktatása életveszélyes.",
+    "ref": "aram-vedokapcsolo-fi-rele#mikor-hivj-szakembert",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  }
+]

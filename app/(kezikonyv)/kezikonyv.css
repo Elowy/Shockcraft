@@ -62,7 +62,9 @@
 .kk-bottom-nav a svg{width:1.5rem;height:1.5rem}
 .kk-bottom-nav a[aria-current]{color:var(--kk-primary);border-top-color:var(--kk-primary)}
 .kk-bottom-nav a[aria-current] svg{stroke-width:2.6}
-.kk:has(input:focus,select:focus,textarea:focus) .kk-bottom-nav{display:none}
+/* Csak szövegbevitelnél (a képernyő-billentyűzet miatt) rejtőzik; választógomb és jelölőnégyzet fókusza nem mozdítja (különben a gomb alól
+   „előugró” sáv elnyelné a következő koppintást, pl. a Tesztek „Következő” gombján). */
+.kk:has(input:not([type=radio]):not([type=checkbox]):focus,select:focus,textarea:focus) .kk-bottom-nav{display:none}
 @media(max-width:949px){:root:has(.kk-bottom-nav) .cookie-notice{bottom:calc(var(--kk-nav-h, 4rem) + 10px)}}
 
 /* Oldalszerkezet */
@@ -405,6 +407,129 @@ html:not(.js) .kk-calc,html:not(.js) .kk-index-search,html:not(.js) [data-kb-ope
 .kk-tabs a{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem .9rem;text-decoration:none;font-weight:600;font-size:.9375rem;color:var(--kk-muted);border-bottom:3px solid transparent;margin-bottom:-1px}
 .kk-tabs a svg{width:1.1rem;height:1.1rem}
 .kk-tabs a[aria-current]{color:var(--kk-primary);border-bottom-color:var(--kk-primary)}
+
+/* Tesztek (/tudastar/tesztek): a sziget csak JS-sel látszik; JS nélkül a mintafeladat és a feladattípusok. */
+html:not(.js) .kk-quiz-island{display:none}
+html.js .kk-quiz-nojs{display:none}
+.kk-quiz-host{scroll-margin-top:calc(var(--kk-bar-h) + .5rem)}
+.kk-quiz{display:grid;gap:1rem;min-width:0;margin:1rem 0}
+.kk-quiz h2{margin:.25rem 0 .25rem}
+.kk-quiz-setup,.kk-quiz-codepanel,.kk-quiz-card{display:grid;gap:1rem;min-width:0;padding:1rem;border:1px solid var(--kk-border);border-radius:var(--kk-radius);background:var(--kk-surface)}
+.kk-quiz-setup fieldset{min-width:0}
+.kk-quiz-types .kk-check{margin:.35rem 0}
+.kk-quiz-types .kk-check span{min-width:0;overflow-wrap:anywhere}
+.kk-quiz-types .kk-check input,.kk-quiz-setup .kk-check input{width:1.25rem;height:1.25rem;flex:0 0 auto;margin-top:.2rem}
+.kk-quiz-types .kk-check{min-height:2.75rem;align-items:flex-start}
+.kk-quiz-types .kk-badge{margin-left:.4rem;vertical-align:.1em}
+.kk-quiz-all{margin:0;font-size:.9375rem}
+.kk .kk-quiz-all .kk-link{min-height:2.75rem;display:inline-flex;align-items:center}
+.kk-quiz-topic{margin-top:.5rem}
+.kk-quiz-topic-title{margin:.5rem 0 0;font-weight:650;font-size:.9375rem}
+.kk-quiz-minutes{display:grid;gap:.35rem;max-width:22rem;font-size:.9375rem}
+.kk-quiz-notice-inline{display:flex;gap:.5rem;align-items:flex-start;margin:0;padding:.6rem .8rem;border-radius:.5rem;border-left:4px solid var(--kk-info-line);background:var(--kk-info-bg);font-size:.9375rem!important;font-weight:600}
+.kk-quiz-notice-inline svg{width:1.15rem;height:1.15rem;margin-top:.2rem}
+.kk-quiz-code{display:grid;gap:.4rem;max-width:32rem}
+.kk-quiz-code label{font-weight:600;font-size:.9375rem;display:grid}
+.kk-quiz-code input{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:1rem}
+.kk-quiz-facts{display:grid;gap:.25rem;margin:0}
+.kk-quiz-facts div{display:flex;gap:.5rem;flex-wrap:wrap}
+.kk-quiz-facts dt{font-weight:650}
+.kk-quiz-facts dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.kk-quiz-actions{display:flex;flex-wrap:wrap;gap:.5rem;margin:0}
+.kk-quiz-paused{margin:0}.kk-quiz-paused>div{display:grid;gap:.5rem}
+.kk-quiz-card .kk-confirm{padding:.75rem;border:1px solid var(--kk-warn-line);border-radius:.5rem;background:var(--kk-warn-bg);color:var(--kk-warn-fg)}
+.kk-quiz-history{min-width:0}
+.kk-quiz-results{list-style:none!important;padding:0!important;margin:.5rem 0 1rem;display:grid;gap:.4rem}
+.kk-quiz-results li{display:grid;gap:.1rem;padding:.5rem .75rem;border:1px solid var(--kk-border);border-radius:.5rem;min-width:0}
+.kk-quiz-results small{color:var(--kk-muted);font-size:.8125rem;overflow-wrap:anywhere}
+.kk-quiz-results a{display:inline-flex;align-items:center;min-height:2.75rem;font-size:.9375rem;text-decoration:underline;text-underline-offset:3px;justify-self:start}
+.kk-quiz-stats{margin:.5rem 0 1rem}
+.kk-quiz-stats summary{cursor:pointer;font-weight:650;min-height:2.75rem;display:flex;align-items:center}
+/* Futó teszt */
+.kk-quiz-bar{display:flex;flex-wrap:wrap;gap:.35rem 1rem;align-items:center;position:sticky;top:var(--kk-bar-h);z-index:5;padding:.5rem .75rem;border:1px solid var(--kk-border);border-radius:.5rem;background:var(--kk-bg)}
+.kk-quiz-bar p{margin:0;font-size:.9375rem}
+.kk-quiz-bar progress{flex:1 1 6rem;min-width:5rem;height:.6rem;appearance:none;-webkit-appearance:none;border:0;border-radius:999px;background:var(--kk-track);overflow:hidden;color:var(--kk-primary)}
+.kk-quiz-bar progress::-webkit-progress-bar{background:var(--kk-track);border-radius:999px}
+.kk-quiz-bar progress::-webkit-progress-value{background:var(--kk-primary);border-radius:999px}
+.kk-quiz-bar progress::-moz-progress-bar{background:var(--kk-primary);border-radius:999px}
+.kk-quiz-timer{display:inline-flex;gap:.35rem;align-items:center;font-variant-numeric:tabular-nums;font-weight:650}
+.kk-quiz-timer svg{width:1.1rem;height:1.1rem}
+.kk-quiz-timer.low{color:var(--kk-bad-fg)!important}
+.kk-quiz-timer-actions{margin:-.5rem 0 0;font-size:.9375rem}
+.kk .kk-quiz-timer-actions .kk-link{min-height:2.75rem;display:inline-flex;align-items:center}
+.kk-quiz-alert{margin:0;min-height:0;font-weight:650;color:var(--kk-bad-fg)!important;display:flex;gap:.4rem;align-items:center}
+.kk-quiz-alert:empty{display:none}
+.kk-quiz-alert svg{width:1.15rem;height:1.15rem}
+.kk-quiz-card h2{font-size:1.125rem;line-height:1.45;margin:0;overflow-wrap:anywhere}
+/* A kérdés és az eredmény címe programból kap fókuszt (képernyőolvasó), nem kezelőelem: keret nélkül. */
+.kk-quiz h2[tabindex='-1']:focus{outline:none}
+.kk-quiz-num{color:var(--kk-muted)}
+.kk-quiz-choices{display:grid;gap:.5rem;margin:0;padding:0;border:0;min-width:0}
+.kk-quiz-choice{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:.25rem .6rem;align-items:center;min-height:3rem;padding:.5rem .75rem;border:1px solid var(--kk-border);border-radius:.5rem;background:var(--kk-bg);cursor:pointer;font-variant-numeric:tabular-nums}
+.kk-quiz-choice input{width:1.25rem;height:1.25rem;margin:0;accent-color:var(--kk-primary)}
+.kk-quiz-choice:has(input:focus-visible){outline:3px solid var(--kk-focus);outline-offset:2px}
+.kk-quiz-choice:has(input:disabled){cursor:default}
+.kk-quiz-choice.picked{border-color:var(--kk-primary);box-shadow:inset 0 0 0 1px var(--kk-primary)}
+.kk-quiz-choice.ok{border-color:var(--kk-ok-fg);background:var(--kk-ok-bg);color:var(--kk-ok-fg)}
+.kk-quiz-choice.bad{border-color:var(--kk-bad-fg);background:var(--kk-bad-bg);color:var(--kk-bad-fg)}
+.kk-quiz-letter{display:inline-grid;place-items:center;width:1.6rem;height:1.6rem;border:1px solid currentColor;border-radius:999px;font-size:.8125rem;font-weight:650}
+.kk-quiz-text{min-width:0;overflow-wrap:anywhere;font-size:1.0625rem}
+.kk-quiz-mark{grid-column:3;display:inline-flex;gap:.3rem;align-items:center;font-size:.8125rem;font-weight:650}
+.kk-quiz-mark svg{width:1rem;height:1rem}
+.kk-quiz-feedback{display:grid;gap:.5rem;padding:.75rem 1rem;border-radius:.5rem;border-left:5px solid var(--kk-ok-fg);background:var(--kk-bg);min-width:0}
+.kk-quiz-feedback.bad{border-left-color:var(--kk-bad-fg)}
+.kk-quiz-feedback p{margin:0;overflow-wrap:anywhere}
+.kk-quiz-verdict{display:flex;gap:.4rem;align-items:flex-start;flex-wrap:wrap;font-weight:650}
+.kk-quiz-feedback.ok .kk-quiz-verdict{color:var(--kk-ok-fg)!important}
+.kk-quiz-feedback.bad .kk-quiz-verdict{color:var(--kk-bad-fg)!important}
+.kk-quiz-verdict svg{width:1.2rem;height:1.2rem;margin-top:.2rem}
+.kk-quiz-why{color:var(--kk-muted)!important;font-size:.9375rem!important}
+.kk-quiz-feedback .kk-derivation{margin:.25rem 0;background:var(--kk-bg)}
+.kk-quiz-links{display:flex;flex-wrap:wrap;gap:.25rem 1rem}
+.kk-quiz-links a{display:inline-flex;gap:.35rem;align-items:center;min-height:2.75rem;text-underline-offset:3px;overflow-wrap:anywhere}
+.kk-quiz-links a svg{width:1.1rem;height:1.1rem}
+.kk-quiz-links .kk-report{color:var(--kk-muted);font-size:.875rem}
+.kk-quiz-map ol{list-style:none!important;padding:0!important;margin:.5rem 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(2.75rem,1fr));gap:.35rem}
+.kk-quiz-map ol button{width:100%;min-height:2.75rem;display:inline-flex;align-items:center;justify-content:center;gap:.15rem;border:1px solid var(--kk-border);border-radius:.5rem;background:var(--kk-bg);font-weight:650;font-variant-numeric:tabular-nums;cursor:pointer}
+.kk-quiz-map ol button.done{background:var(--kk-surface-2);border-color:var(--kk-primary)}
+.kk-quiz-map ol button.flag{border-style:dashed;border-width:2px}
+.kk-quiz-map ol button[aria-current]{outline:2px solid var(--kk-primary);outline-offset:1px}
+.kk-quiz-map ol button svg{width:.85rem;height:.85rem}
+.kk-quiz-map p{margin:0}
+.kk-quiz-abort{margin:0}
+.kk .kk-quiz-abort>.kk-link{min-height:2.75rem;display:inline-flex;align-items:center;color:var(--kk-muted)}
+/* Eredmény */
+.kk-quiz-result .kk-verdict{margin:0}
+.kk-quiz-review{display:grid;gap:.6rem;padding-left:1.5rem}
+.kk-quiz-review li{min-width:0;padding:.5rem .75rem;border:1px solid var(--kk-border);border-left-width:5px;border-radius:.5rem}
+.kk-quiz-review li.ok{border-left-color:var(--kk-ok-fg)}
+.kk-quiz-review li.bad{border-left-color:var(--kk-bad-fg)}
+.kk-quiz-review p{margin:0;overflow-wrap:anywhere}
+.kk-quiz-review-head{display:flex;gap:.4rem;align-items:flex-start}
+.kk-quiz-review-head svg{width:1.1rem;height:1.1rem;margin-top:.3rem}
+.kk-quiz-review li.ok .kk-quiz-review-head svg{color:var(--kk-ok-fg)}
+.kk-quiz-review li.bad .kk-quiz-review-head svg{color:var(--kk-bad-fg)}
+.kk-quiz-review-ans{font-size:.9375rem!important}
+.kk-quiz-review details summary{cursor:pointer;min-height:2.75rem;display:flex;align-items:center;font-weight:600;font-size:.9375rem}
+/* Statikus rész: mintafeladat, feladattípusok */
+.kk-quiz-sample{margin:1rem 0;padding:1rem;border:1px solid var(--kk-border);border-radius:var(--kk-radius)}
+.kk-quiz-sample h2{margin-top:0}
+.kk-quiz-sample-stem{font-weight:600}
+.kk ol.kk-quiz-sample-choices{list-style-type:upper-alpha}
+.kk-quiz-sample details summary{cursor:pointer;min-height:2.75rem;display:flex;align-items:center;font-weight:650}
+.kk-quiz-type{display:grid;gap:.15rem;height:100%;padding:.75rem;border:1px solid var(--kk-border);border-radius:.5rem;min-width:0}
+.kk-quiz-type small{color:var(--kk-muted);font-size:.875rem}
+.kk-quiz-type-links{display:flex;flex-wrap:wrap;gap:0 .9rem;font-size:.9375rem}
+.kk-quiz-type-links a{display:inline-flex;gap:.3rem;align-items:center;min-height:2.75rem;text-underline-offset:3px;overflow-wrap:anywhere}
+.kk-quiz-type-links a svg{width:1rem;height:1rem}
+.kk-quiz-types-list h3{margin-top:1.25rem}
+.kk-quiz-types-list .kk-related-grid{list-style:none;padding:0}
+.kk-selftest{margin-top:1rem}
+.kk-selftest p{margin:.5rem 0}
+.kk-quiz-review summary::before,.kk-quiz-stats summary::before,.kk-quiz-sample summary::before{content:'▸';display:inline-block;width:1.1em}
+.kk-quiz-review details[open]>summary::before,.kk-quiz-stats[open]>summary::before,.kk-quiz-sample details[open]>summary::before{content:'▾'}
+@media(min-width:950px){.kk-quiz-host{scroll-margin-top:1rem}.kk-quiz-bar{top:0}}
+@media print{.kk-quiz-code,.kk-quiz-history,.kk-quiz-abort,.kk-quiz-actions,.kk-quiz-timer-actions{display:none!important}.kk-quiz-bar{position:static}}
 
 /* Érintési célok keskeny képernyőn legalább 44 px magasak (terv 2.9): listalinkek, belső tartalomjegyzék, morzsamenü, kategóriacímek. */
 @media(max-width:949px){

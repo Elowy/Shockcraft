@@ -112,7 +112,8 @@ export function Steps({run}:{run:CalcRun}){
  return <StepList steps={run.out.steps}/>;
 }
 /** A levezetés lépései: képlet → behelyettesítés → eredmény → forrás (a kidolgozott példa szerveroldali párja: calc-example.tsx). */
-function StepList({steps}:{steps:readonly Step[]}){
+/** A levezetés lépései (a kalkulátor és a Tesztek visszajelzése közös komponense). */
+export function StepList({steps}:{steps:readonly Step[]}){
  return <ol className="kk-steps">{steps.map((s,i)=><li key={i}><b>{s.label}</b><code><Sub text={s.formula}/></code><span><Sub text={s.substituted}/></span><strong>= <Sub text={s.result}/></strong>{s.ref&&<small>Forrás: {s.ref}</small>}</li>)}</ol>;
 }
 

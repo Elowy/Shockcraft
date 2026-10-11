@@ -3,7 +3,9 @@
 // Csak belső relatív útvonal fogadható el. Kulcsok: shockcraft-kb-* (a components/legal-page.tsx sütitáblázatában felsorolva).
 
 export type StorageLike={getItem(key:string):string|null;setItem(key:string,value:string):void;removeItem(key:string):void};
-export const KB_KEYS={bookmarks:'shockcraft-kb-bookmarks-v1',recent:'shockcraft-kb-recent-v1',prefs:'shockcraft-kb-prefs-v1'} as const;
+export const KB_KEYS={bookmarks:'shockcraft-kb-bookmarks-v1',recent:'shockcraft-kb-recent-v1',prefs:'shockcraft-kb-prefs-v1',quiz:'shockcraft-kb-quiz-v1'} as const;
+/** sessionStorage-kulcsok: a futó teszt (újratöltés-álló, a lap bezárásával törlődik). */
+export const KB_SESSION_KEYS={quizSession:'shockcraft-kb-quiz-session'} as const;
 
 /** Belső, relatív útvonal: /kalkulatorok vagy /tudastar alatt, opcionális lekérdezéssel és horgonnyal. */
 export const INTERNAL_PATH=/^\/(?:kalkulatorok|tudastar)(?:\/[a-z0-9-]+)*\/?(?:\?[^#\s<>"']{0,600})?(?:#[a-z0-9-]{1,80})?$/;
@@ -110,8 +112,21 @@ export const isBookmarked=(list:readonly KbEntry[],type:EntryType,id:string)=>li
 export const addRecent=(e:KbEntry)=>recentStore.set(pushFront(recentStore.get(),e,sameEntry));
 export const removeRecent=(type:EntryType,id:string)=>recentStore.set(recentStore.get().filter(x=>!(x.type===type&&x.id===id)));
 export const addSearch=(q:string)=>{const v=validSearch(q);if(v)searchStore.set(pushFront(searchStore.get(),v,(a,b)=>a===b))};
-/** „Minden Tudástár-adat törlése”: a könyvjelzők, az előzmények, a keresések és a beállítások. A téma (shockcraft-theme) a tervezővel közös, megmarad. */
-export function clearAll(storage:()=>StorageLike|null=browserStorage){
+const browserSession=():StorageLike|null=>{try{return typeof window!=='undefined'?window.sessionStorage:null}catch{return null}};
+/** „Minden Tudástár-adat törlése”: a könyvjelzők, az előzmények, a keresések, a beállítások, a teszteredmények és a futó teszt.
+ * A téma (shockcraft-theme) a tervezővel közös, megmarad. */
+export function clearAll(storage:()=>StorageLike|null=browserStorage,session:()=>StorageLike|null=browserSession){
  try{const s=storage();for(const k of Object.values(KB_KEYS))s?.removeItem(k)}catch{}
+ try{const s=session();for(const k of Object.values(KB_SESSION_KEYS))s?.removeItem(k)}catch{}
  for(const s of [bookmarkStore,recentStore,searchStore,prefStore])s.reset();
+ // A Tesztek tárolói (lib/quiz/storage.ts) és a futó teszt memóriabeli tartaléka a sziget eseménykezelőjében állnak alaphelyzetbe.
+ try{window.dispatchEvent(new Event(KB_CLEARED_EVENT))}catch{}
+}
+/** A törlés eseménye (a futó teszt kliensszigete ezt figyeli). Eseménynév, nem tárolókulcs. */
+export const KB_CLEARED_EVENT='kk-adat-torolve';
+/** Van-e a Tesztekhez tárolt adat (eredmény, statisztika vagy futó teszt) – a „Minden Tudástár-adat törlése” gomb engedélyezéséhez. */
+export function hasQuizData(storage:()=>StorageLike|null=browserStorage,session:()=>StorageLike|null=browserSession){
+ try{if(storage()?.getItem(KB_KEYS.quiz))return true}catch{}
+ try{if(session()?.getItem(KB_SESSION_KEYS.quizSession))return true}catch{}
+ return false;
 }

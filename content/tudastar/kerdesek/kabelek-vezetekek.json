@@ -1,0 +1,740 @@
+[
+  {
+    "id": "q-kab-0001",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Melyik a védővezető (PE) színe a mai hazai gyakorlatban?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Zöld-sárga",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Világoskék",
+        "correct": false,
+        "why": "A kék (világoskék) a nullavezető színe."
+      },
+      {
+        "id": "c",
+        "text": "Fekete",
+        "correct": false,
+        "why": "A fekete fázisvezető-szín (L2)."
+      },
+      {
+        "id": "d",
+        "text": "Szürke",
+        "correct": false,
+        "why": "A szürke fázisvezető-szín (L3)."
+      }
+    ],
+    "explanation": "A védővezető zöld-sárga, és ezt a színkombinációt kizárólag védőfunkciójú vezető kaphatja: védővezető, PEN-vezető és potenciálkiegyenlítő (EPH) vezető. Régi berendezésben a színek eltérhetnek, ezért a vezető szerepét mérés dönti el.",
+    "ref": "vezetekek-szinjelolese#a-mai-szinek-egy-pillantasra",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0002",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mi a háromfázisú áramkörökben bevett színsorrend az L1, L2 és L3 fázisvezetőre?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Barna, fekete, szürke",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Szürke, fekete, barna",
+        "correct": false,
+        "why": "Ezek a fázisszínek, de fordított sorrendben; a bevett sorrend L1 barna, L2 fekete, L3 szürke."
+      },
+      {
+        "id": "c",
+        "text": "Fekete, barna, kék",
+        "correct": false,
+        "why": "A kék a nullavezető színe, fázisvezetőnek nem bevett."
+      },
+      {
+        "id": "d",
+        "text": "Barna, kék, zöld-sárga",
+        "correct": false,
+        "why": "A kék a nullavezető, a zöld-sárga a védővezető színe."
+      }
+    ],
+    "explanation": "A mai hazai gyakorlatban a fázisvezetők barnák, feketék és szürkék, a bevett sorrend L1 barna, L2 fekete, L3 szürke; a Villanyrajz elosztótervezője is ezt használja. Egyfázisú áramkörben a fázis többnyire barna, akkor is, ha az áramkör az L2-ről vagy az L3-ról kap táplálást.",
+    "ref": "vezetekek-szinjelolese#fazisvezetok-barna-fekete-szurke",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0003",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "Egyfázisú áramkörben a barna ér mindig az L1 fázisra csatlakozik.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": false
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": true
+      }
+    ],
+    "explanation": "Az egyfázisú áramkörök kábelében a fázisvezető többnyire a barna ér, függetlenül attól, hogy az áramkört az elosztóban melyik fázisról táplálják. Hogy melyik fázisra kerül, azt az elosztó felirata és a terv mutatja meg.",
+    "ref": "vezetekek-szinjelolese#fazisvezetok-barna-fekete-szurke",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0004",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "Egy többeres kábel „fölösleges” zöld-sárga ere tartalékként fázis- vagy nullavezetőnek is felhasználható.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": false
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": true
+      }
+    ],
+    "explanation": "A zöld-sárga színkombinációt kizárólag védőfunkciójú vezető kaphatja (védővezető, PEN- és EPH-vezető); fázis- vagy nullavezetőként soha nem használható, akkor sem, ha a kábelben éppen fölösleges. Fordított irányban van kivétel: nullavezető nélküli áramkörben a kék ér tartós jelöléssel más célra felhasználható, védővezetőnek azonban soha.",
+    "ref": "vezetekek-szinjelolese#vedovezeto-zold-sarga-es-csak-az",
+    "shuffle": false,
+    "family": "vedovezeto-szabalyok",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0005",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy 2000 W-os vízforraló működik egy egyfázisú, 230 V-os áramkörön. Mekkora áram folyik a nullavezetőben?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "0 A, mert a nullavezető mindig földpotenciálon van",
+        "correct": false,
+        "why": "A nullavezető üzemi vezető: rajta folyik vissza az áram."
+      },
+      {
+        "id": "b",
+        "text": "kb. 4,35 A, a fázisáram fele",
+        "correct": false,
+        "why": "Az áram nem oszlik meg a két vezető között: ugyanaz az áram folyik oda és vissza."
+      },
+      {
+        "id": "c",
+        "text": "kb. 8,7 A, ugyanannyi, mint a fázisvezetőben",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "kb. 15 A, a fázisáram √3-szorosa",
+        "correct": false,
+        "why": "A √3 a háromfázisú vonali feszültséghez tartozik, egyfázisú áramkörben nincs szerepe."
+      }
+    ],
+    "explanation": "Egyfázisú áramkörben a nullavezetőn ugyanakkora áram folyik vissza, mint a fázisvezetőn: 2000 W / 230 V ≈ 8,7 A. A kék eret ezért ugyanúgy veszélyesnek kell tekinteni, mint a fázisvezetőt; szakadáskor a fogyasztó felőli része feszültség alá is kerülhet.",
+    "ref": "vezetekek-szinjelolese#nullavezeto-kek-de-nem-veszelytelen",
+    "shuffle": false,
+    "family": "nulla-egyfazis",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0006",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mit jelent a H05VV-F 3G1,5 jelölés végén álló „3G1,5”?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Három ér, köztük egy zöld-sárga, erenként 1,5 mm²",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Három ér, összesen 1,5 mm² keresztmetszettel",
+        "correct": false,
+        "why": "A keresztmetszet erenként értendő."
+      },
+      {
+        "id": "c",
+        "text": "Harmadik generációs, 1,5 kV névleges feszültségű vezeték",
+        "correct": false,
+        "why": "A névleges feszültséget a típusjel elején álló szám (itt 05) adja meg."
+      },
+      {
+        "id": "d",
+        "text": "Három ér zöld-sárga nélkül, egyenként 1,5 mm átmérővel",
+        "correct": false,
+        "why": "A G zöld-sárga eret jelent (az X jelöli, ha nincs); a szám keresztmetszet mm²-ben, nem átmérő."
+      }
+    ],
+    "explanation": "A harmonizált jelölésben az érszám után a G azt jelenti, hogy az egyik ér zöld-sárga, az X, hogy nincs zöld-sárga ér; a szám egy ér névleges keresztmetszete mm²-ben. A 3G1,5 tehát három, egyenként 1,5 mm²-es ér, köztük egy zöld-sárga.",
+    "ref": "vezetek-es-kabeljelolesek#erszam-es-keresztmetszet-3g2-5-vagy-3-2-5",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0007",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "Az NYM-J szerelővezeték közvetlenül földbe is fektethető, mert PVC-köpenye van.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": false
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": true
+      }
+    ],
+    "explanation": "Az NYM-J épületen belüli fix szerelésre készült köpenyes szerelővezeték; földbe jellemzően NYY-J vagy hasonló, 0,6/1 kV-os földkábel kerül. A konkrét típust a szerelési körülmények alapján a tervező választja ki.",
+    "ref": "vezetek-es-kabeljelolesek#gyakori-tevedesek",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0008",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Mit jelent a H07V-K típusjelölés?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Harmonizált, 450/750 V-os, PVC-szigetelésű, finomhuzalos egyeres vezeték",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Harmonizált, 700 V-os, PVC-köpenyes, tömör rezű többeres kábel",
+        "correct": false,
+        "why": "A 07 a 450/750 V-os feszültségértékpárt jelöli; a K finomhuzalos vezetőt, nem tömör rezet."
+      },
+      {
+        "id": "c",
+        "text": "Hétéres, PVC-köpenyes, hajlékony tömlővezeték mozgatható készülékekhez",
+        "correct": false,
+        "why": "A 07 a névleges feszültséget jelöli, nem az érszámot."
+      },
+      {
+        "id": "d",
+        "text": "Halogénmentes, 0,6/1 kV-os, földbe fektethető erősáramú kábel",
+        "correct": false,
+        "why": "A H itt a harmonizált típust jelöli, nem a halogénmentességet."
+      }
+    ],
+    "explanation": "A harmonizált jelölésben a H a harmonizált típus, a 07 a 450/750 V-os névleges feszültség, a V a PVC-szigetelés, a K pedig a fix szerelésre szánt finomhuzalos vezető. Köpeny nélküli egyeres vezeték, ezért védőcsőben, vezetékcsatornában vagy elosztón belül szerelik.",
+    "ref": "vezetek-es-kabeljelolesek#a-harmonizalt-jeloles-beturol-beture",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0009",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Mit jelent a vezeték jelölésében a 300/500 V-os feszültségértékpár (például a H05VV-F típusnál)?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A vezető–föld (300 V) és a vezető–vezető (500 V) névleges feszültséget",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Az egyenfeszültségű (300 V) és a váltakozó feszültségű (500 V) alkalmazás felső határát",
+        "correct": false,
+        "why": "Mindkét érték váltakozó feszültségre vonatkozik: az első a vezető–föld, a második a vezető–vezető feszültség."
+      },
+      {
+        "id": "c",
+        "text": "A legkisebb (300 V) és a legnagyobb (500 V) megengedett üzemi feszültséget",
+        "correct": false,
+        "why": "A vezetéknek nincs „legkisebb” üzemi feszültsége; mindkét érték felső határ."
+      },
+      {
+        "id": "d",
+        "text": "A 20 °C-on (300 V) és a 70 °C-on (500 V) megengedett feszültséget",
+        "correct": false,
+        "why": "A feszültségérték nem hőmérsékletfüggő megadás."
+      }
+    ],
+    "explanation": "A kettős feszültségérték (U0/U) első tagja a vezető és a föld, a második két vezető közötti feszültségre vonatkozik. A hazai 230/400 V-os hálózat feszültségei a 300/500 V-os és a 450/750 V-os értékpár alatt maradnak; a 300/300 V-os típusnál viszont a két fázis közötti 400 V már nagyobb az U értéknél.",
+    "ref": "vezetek-es-kabeljelolesek#a-harmonizalt-jeloles-beturol-beture",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0010",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Mi a gond, ha egy háromfázisú, 400 V-os fogyasztó csatlakozóvezetékének H03VV-F típusú (300/300 V-os) vezetéket választanak?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A két fázisvezető közötti 400 V nagyobb a vezeték 300 V-os U értékénél",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A H03VV-F csak egyenáramú készülékekhez alkalmas",
+        "correct": false,
+        "why": "A típusjel váltakozó feszültségű alkalmazásra szól; a gond a feszültségértékkel van."
+      },
+      {
+        "id": "c",
+        "text": "A 03 jelölés három eret jelent, ez pedig háromfázisú bekötéshez kevés",
+        "correct": false,
+        "why": "A 03 a névleges feszültséget (300/300 V) jelöli, nem az érszámot."
+      },
+      {
+        "id": "d",
+        "text": "A 03-as típus tömör rezű, ezért mozgatható csatlakozáshoz túl merev",
+        "correct": false,
+        "why": "A H03VV-F finomhuzalos, hajlékony vezeték; a 03 a névleges feszültséget jelöli."
+      }
+    ],
+    "explanation": "A kettős feszültségérték második tagja (U) a két vezető közötti névleges feszültség: a 300/300 V-os vezetéknél ez 300 V, a hazai hálózat két fázisa között viszont 400 V van. A H03VV-F ezért könnyű készülékek, lámpák csatlakozóvezetéke; hogy egy adott helyre melyik típus kell, a tervező és a gyártói adatlap dönti el.",
+    "ref": "vezetek-es-kabeljelolesek#a-harmonizalt-jeloles-beturol-beture",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0011",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Hogyan változik egy rézvezeték ellenállása, ha azonos hossz mellett a keresztmetszetét kétszeresére növeljük?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A felére csökken",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A kétszeresére nő",
+        "correct": false,
+        "why": "A nagyobb keresztmetszet kisebb ellenállást jelent: R = ρ · l / A."
+      },
+      {
+        "id": "c",
+        "text": "A negyedére csökken",
+        "correct": false,
+        "why": "Az ellenállás a keresztmetszettel egyszerűen fordítottan arányos; negyedére az átmérő kétszerezésekor csökkenne."
+      },
+      {
+        "id": "d",
+        "text": "Változatlan marad, mert az anyag ugyanaz",
+        "correct": false,
+        "why": "Az anyag a fajlagos ellenállást határozza meg; a keresztmetszet ettől függetlenül számít."
+      }
+    ],
+    "explanation": "A vezeték ellenállása R = ρ · l / A, vagyis a hosszal egyenesen, a keresztmetszettel fordítottan arányos. Kétszeres keresztmetszetnél az ellenállás a felére csökken; ha viszont az átmérő nő kétszeresére, a keresztmetszet négyszeres, az ellenállás a negyedére csökken.",
+    "ref": "elektromos-ellenallas#a-vezetek-ellenallasa-r-l-a",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0012",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy egyfázisú áramkör 20 m hosszú, 2,5 mm²-es rézvezetékkel készült (ρ = 0,01724 Ω·mm²/m, 20 °C). Mekkora a fázis- és a nullavezető együttes, oda-vissza számított ellenállása?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "kb. 0,138 Ω",
+        "correct": false,
+        "why": "Ez csak az egyik irány (20 m); az áram a nullavezetőn vissza is folyik."
+      },
+      {
+        "id": "b",
+        "text": "kb. 0,276 Ω",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "kb. 0,690 Ω",
+        "correct": false,
+        "why": "Itt a keresztmetszettel való osztás maradt el."
+      },
+      {
+        "id": "d",
+        "text": "kb. 1,72 Ω",
+        "correct": false,
+        "why": "Itt a keresztmetszettel szoroztak osztás helyett."
+      }
+    ],
+    "explanation": "Az áram a fázisvezetőn oda, a nullavezetőn vissza folyik, ezért a számításba vett hossz 2 · 20 m = 40 m: R = 0,01724 Ω·mm²/m · 40 m / 2,5 mm² ≈ 0,276 Ω. Az egyirányú hossz (0,138 Ω) a leggyakoribb hiba; üzemmeleg, 70 °C-os vezetéknél az ellenállás kb. 20 %-kal nagyobb.",
+    "ref": "elektromos-ellenallas#a-vezetek-ellenallasa-r-l-a",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0013",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mit nevez a szaknyelv köpenyes szerelővezetéknek?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Több szigetelt eret közös köpenyben, fix szerelésre (például NYM-J)",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Egyetlen szigetelt vezetőt köpeny nélkül (például H07V-U)",
+        "correct": false,
+        "why": "Ez szigetelt vezeték; a mechanikai védelmet a védőcső vagy a csatorna adja."
+      },
+      {
+        "id": "c",
+        "text": "Hajlékony, köpenyes vezetéket mozgatható készülékekhez (például H05VV-F)",
+        "correct": false,
+        "why": "Ez tömlővezeték."
+      },
+      {
+        "id": "d",
+        "text": "0,6/1 kV-os, földbe is fektethető vezetéket (például NYY-J)",
+        "correct": false,
+        "why": "Ez erősáramú kábel."
+      }
+    ],
+    "explanation": "A szaknyelv megkülönbözteti a szigetelt vezetéket (köpeny nélkül), a köpenyes szerelővezetéket (fix szerelésre), a tömlővezetéket (mozgatható csatlakozásra) és az erősáramú kábelt (0,6/1 kV, erősebb köpeny). A köznyelv mindegyiket kábelnek hívja, de a típus megválasztásánál a különbség lényeges.",
+    "ref": "vezetek-es-kabeljelolesek#vezetek-szerelovezetek-kabel",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0014",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 3,
+    "type": "multi",
+    "stem": "Mitől függ egy vezeték tartós terhelhetősége (Iz)? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A keresztmetszettől és a vezető anyagától",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A szerelési módtól (falba süllyesztve, védőcsőben, falon)",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "A környezeti hőmérséklettől és attól, hány terhelt vezeték fut együtt",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "A szigetelés színétől",
+        "correct": false,
+        "why": "A szín a vezető szerepét jelöli, a terhelhetőséghez nincs köze."
+      },
+      {
+        "id": "e",
+        "text": "Az áramkör kismegszakítójának jelleggörbéjétől",
+        "correct": false,
+        "why": "A jelleggörbe a védelem zárlati kioldását jellemzi, a vezeték terhelhetőségét nem."
+      }
+    ],
+    "explanation": "A terhelhetőség az az áram, amelynél a vezeték szigetelése tartósan a megengedett hőmérsékleten marad (PVC-nél 70 °C). Ezt a keresztmetszeten és az anyagon kívül a szerelési mód, a környezeti hőmérséklet, a hőszigetelés és a csoportosítás is befolyásolja, ezért a típusjelölésből vagy egy ökölszabályból nem olvasható ki; ez a méretezés feladata.",
+    "ref": "joule-lenz-torveny#karos-hohatas-a-vezetekek-melegedese",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0015",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 1,
+    "type": "truefalse",
+    "stem": "A dobra feltekert hosszabbító kisebb terhelést bír el, mint a teljesen letekert, mert a menetek egymást melegítik.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "A feltekert kábel nem tud hőt leadni, a menetek egymást melegítik, ezért nagyobb terhelésnél a kábeldobot teljesen le kell tekerni. A gyártók a feltekert és a letekert állapotra külön terhelhetőséget adnak meg.",
+    "ref": "joule-lenz-torveny#karos-hohatas-a-vezetekek-melegedese",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0016",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy régi lakásban alumínium vezetékezés van. Melyik állítás igaz rá?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Kisebb a terhelhetősége, mint az azonos keresztmetszetű rézé",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Az alumínium jobban vezet a réznél, ezért vékonyabb is elég belőle",
+        "correct": false,
+        "why": "Az alumínium fajlagos ellenállása a rézének kb. 1,64-szerese."
+      },
+      {
+        "id": "c",
+        "text": "Bármilyen, rézvezetőhöz készült kapocsba köthető, nincs különbség",
+        "correct": false,
+        "why": "Alumínium vezető csak alumíniumhoz is alkalmas kapocsba vagy összekötőbe köthető."
+      },
+      {
+        "id": "d",
+        "text": "Az alumínium vezeték nem melegszik, ezért túlterhelés ellen sem kell védeni",
+        "correct": false,
+        "why": "Minden vezetőnek van ellenállása, ezért terhelés alatt melegszik."
+      }
+    ],
+    "explanation": "Az alumínium fajlagos ellenállása a rézének kb. 1,64-szerese, ezért azonos keresztmetszetnél nagyobb az ellenállása és kisebb a terhelhetősége; a régi kismegszakító névleges árama ezért túl nagy lehet hozzá. Csak alumíniumhoz is alkalmas kapocsba köthető, és könnyen törik, ezért az állapotát szakember mérje fel.",
+    "ref": "kismegszakito#regi-berendezesben",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0017",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Azonos hosszon és ellenálláson körülbelül mekkora keresztmetszetű alumíniumvezető felel meg egy 2,5 mm²-es rézvezetőnek (ρ réz ≈ 0,0172, ρ alumínium ≈ 0,0283 Ω·mm²/m)?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "kb. 1,5 mm²",
+        "correct": false,
+        "why": "Az arányt fordítva alkalmazták: alumíniumból több kell, nem kevesebb."
+      },
+      {
+        "id": "b",
+        "text": "2,5 mm²",
+        "correct": false,
+        "why": "Azonos keresztmetszetnél az alumínium ellenállása kb. 1,64-szer nagyobb."
+      },
+      {
+        "id": "c",
+        "text": "kb. 4,1 mm²",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "kb. 6,8 mm²",
+        "correct": false,
+        "why": "Itt az arányt négyzetre emelték; a keresztmetszet az ellenállással egyszerűen fordítottan arányos."
+      }
+    ],
+    "explanation": "Az ellenállás R = ρ · l / A, így azonos hosszon és ellenálláson az alumínium keresztmetszete a fajlagos ellenállások arányában nagyobb: 2,5 mm² · 0,0283 / 0,0172 ≈ 4,1 mm². Ez kb. 1,64-szeres arány; egy 4 mm²-es alumíniumvezető ellenállása még kissé nagyobb is a 2,5 mm²-es rézénél.",
+    "ref": "elektromos-ellenallas#rez-vagy-aluminium",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0018",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy új, beépítetlen kábeldarab tömör rézerének átmérőjét tolómérővel 1,78 mm-nek méred. Melyik névleges keresztmetszethez illik ez?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "1,5 mm²",
+        "correct": false,
+        "why": "Ehhez kb. 1,38 mm-es átmérő tartozna."
+      },
+      {
+        "id": "b",
+        "text": "1,78 mm²",
+        "correct": false,
+        "why": "Az átmérő milliméterben nem azonos a keresztmetszettel; a terület A = π · d² / 4."
+      },
+      {
+        "id": "c",
+        "text": "2,5 mm²",
+        "correct": true
+      }
+    ],
+    "explanation": "Tömör, kör keresztmetszetű érnél A = π · d² / 4 = 3,1416 · (1,78 mm)² / 4 ≈ 2,49 mm², ami a 2,5 mm²-es névleges értéknek felel meg. Sodrott vagy finomhuzalos érnél a köteg külső átmérőjéből így nem lehet keresztmetszetet számolni, mert az elemi szálak között hézag van.",
+    "ref": "elektromos-ellenallas#keresztmetszet-es-atmero",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0019",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy dugaljban egy meglazult kötés ellenállása 0,1 Ω. Mekkora teljesítmény alakul hővé ebben a kötésben 16 A-es terhelőáramnál?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "kb. 0,26 W",
+        "correct": false,
+        "why": "Ennyi egy jó, 1 mΩ-os kötés vesztesége."
+      },
+      {
+        "id": "b",
+        "text": "1,6 W",
+        "correct": false,
+        "why": "Ez I · R, a kötésen eső feszültség számértéke, nem teljesítmény."
+      },
+      {
+        "id": "c",
+        "text": "25,6 W",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "160 W",
+        "correct": false,
+        "why": "Ez I / R, amelynek itt nincs fizikai értelme."
+      }
+    ],
+    "explanation": "A kötésben fejlődő hőteljesítmény P = I² · R = 16² · 0,1 Ω = 25,6 W, nagyjából egy kisebb forrasztópáka teljesítménye, egyetlen apró pontban. Ez elszíneződéshez, a szigetelés megolvadásához, súlyos esetben tűzhöz vezethet; ha egy dugalj érezhetően melegszik vagy elszíneződik, ne használd tovább, és vizsgáltasd meg szakemberrel.",
+    "ref": "joule-lenz-torveny#kotesek-es-csatlakozasok",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0020",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 3,
+    "type": "multi",
+    "stem": "Melyik állítás igaz a kék színű érre? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A mai színrendben a nullavezető színe",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Nullavezető nélküli áramkörben, tartós jelöléssel más célra is felhasználható",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "Régi berendezésben fázist is vezethet",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "Védővezetőként használható, ha a kábelben nincs zöld-sárga ér",
+        "correct": false,
+        "why": "A kék ér védővezetőnek soha nem használható."
+      },
+      {
+        "id": "e",
+        "text": "Érintése mindig veszélytelen, mert a nullavezető földpotenciálon van",
+        "correct": false,
+        "why": "A nullavezető üzem közben áramot vezet, szakadáskor fázisfeszültségre is kerülhet."
+      }
+    ],
+    "explanation": "A kék a nullavezető színe; ha egy áramkörben nincs nullavezető, a kék ér a végeken tartós jelöléssel más célra is felhasználható, védővezetőnek azonban soha. Régi vezetékezésben a kék ér fázist is vezethet, és a nullavezető sem veszélytelen, ezért a szín nem helyettesíti a mérést.",
+    "ref": "vezetekek-szinjelolese#vedovezeto-zold-sarga-es-csak-az",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kab-0021",
+    "version": 1,
+    "topic": "kabelek-vezetekek",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "Kiegyenlített háromfázisú terhelésnél (fázisonként egyforma, azonos jellegű, szinuszos áram) a közös nullavezető árama közel nulla.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "A közös nullavezetőben a fázisáramok fázishelyes (vektoros) összege folyik: egyforma, 120°-kal eltolt áramoknál ez kioltja egymást, egyenlőtlen terhelésnél viszont nem. Ha például csak az L1 terhelt 16 A-rel, a nullavezetőben is 16 A folyik; a felharmonikusokat termelő fogyasztók a nullavezető áramát tovább növelhetik.",
+    "ref": "vezetekek-szinjelolese#nullavezeto-kek-de-nem-veszelytelen",
+    "shuffle": false,
+    "family": "nulla-aram",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  }
+]

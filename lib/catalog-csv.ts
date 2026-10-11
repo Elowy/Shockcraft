@@ -78,6 +78,12 @@ function records(text:string,delimiter:CsvDelimiter):{rows:{line:number;cells:st
 // tabulátor szóközzé válik, a láthatatlan és irányváltó karakter kimarad (mint a katalógussémában).
 const cleanCell=(s:string)=>stripInvisible(s).replace(/^'(?='*\s*[=+@-])/,'').replace(/[\r\n\t]+/g,' ').trim();
 const ctrl=/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/;
+/** A tagolt szöveg rekordjai (elválasztó-felismeréssel, RFC 4180-szerű idézéssel, a képletvédő aposztróf levételével) – a fejlécet a hívó
+ * keresi meg. A lektori kérdés-CSV visszaolvasása (scripts/quiz/csv.ts) ugyanezt a dekódolót és tagolót használja. */
+export function csvRows(input:string):{delimiter:CsvDelimiter;rows:{line:number;cells:string[]}[];unclosed:number}{
+ const text=input.replace(/^\uFEFF/,''),delimiter=detectDelimiter(text),{rows,unclosed}=records(text,delimiter);
+ return {delimiter,rows:rows.map(r=>({line:r.line,cells:r.cells.map(cleanCell)})),unclosed};
+}
 
 export function parseCatalogCsv(input:string,{markupPercent=0,gross=false}:{markupPercent?:number;gross?:boolean}={}):CsvParse{
  const text=input.replace(/^﻿/,''),delimiter=detectDelimiter(text);

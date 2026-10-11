@@ -1,0 +1,715 @@
+[
+  {
+    "id": "q-gep-0001",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Miért működik a transzformátor csak váltakozó feszültséggel?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Mert csak a változó fluxus indukál feszültséget a szekunder tekercsben",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Mert az egyenáram egyáltalán nem tud áthaladni a transzformátor primer tekercsén",
+        "correct": false,
+        "why": "Egyenáram átfolyik a tekercsen, csak a kis ellenállás miatt nagy lesz, és fluxusváltozás nélkül nincs indukált feszültség."
+      },
+      {
+        "id": "c",
+        "text": "Mert egyenfeszültségen a menetszámok aránya megfordul",
+        "correct": false,
+        "why": "A menetszám-arány szerkezeti adat, nem függ a táplálástól."
+      },
+      {
+        "id": "d",
+        "text": "Mert a vasmag egyenáramtól azonnal elveszíti a mágnesességét",
+        "correct": false,
+        "why": "Állandó áram állandó fluxust kelt; éppen a változás hiányzik."
+      }
+    ],
+    "explanation": "A primer tekercs váltakozó árama a vasmagban változó fluxust kelt, és ez indukál feszültséget a szekunder tekercsben. Egyenfeszültségnél a fluxus nem változik, így nincs indukált feszültség, a primer áramot pedig csak a tekercs kis ellenállása korlátozza, ezért az áram nagy lesz, és a tekercs túlmelegszik.",
+    "ref": "transzformator-mukodese#mukodesi-elv-valtozo-magneses-fluxus",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0002",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Egy ideális transzformátor primer tekercse 1000, szekunder tekercse 50 menetes. A primer oldalra 230 V-ot kapcsolunk. Mekkora a szekunder feszültség?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "4,6 V",
+        "correct": false,
+        "why": "Ez 230 / 50; a menetszámok arányát kell alkalmazni."
+      },
+      {
+        "id": "b",
+        "text": "11,5 V",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "230 V",
+        "correct": false,
+        "why": "Az ideális transzformátor a menetszámok arányában alakítja a feszültséget."
+      },
+      {
+        "id": "d",
+        "text": "4600 V",
+        "correct": false,
+        "why": "Ez a fordított arány: a kevesebb menetes tekercs feszültsége a kisebb."
+      }
+    ],
+    "explanation": "Ideális transzformátorra U1 / U2 = N1 / N2, így U2 = 230 V · 50 / 1000 = 11,5 V. A valóságban a szekunder feszültség terhelés alatt csökken, ezért kis transzformátoroknál a névleges szekunder feszültség névleges terhelésre vonatkozik.",
+    "ref": "transzformator-mukodese#az-attetel",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0003",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy ideális, 230/12 V-os transzformátor szekunder oldalán 5 A áram folyik. Körülbelül mekkora a primer áram?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "kb. 0,26 A",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "kb. 2,6 A",
+        "correct": false,
+        "why": "Tizedesvessző-hiba: 60 VA / 230 V ≈ 0,26 A."
+      },
+      {
+        "id": "c",
+        "text": "5 A",
+        "correct": false,
+        "why": "A teljesítmény a két oldalon azonos, ezért az áram nem lehet ugyanakkora."
+      },
+      {
+        "id": "d",
+        "text": "kb. 95,8 A",
+        "correct": false,
+        "why": "Ez a fordított arány: a nagyobb feszültségű oldalon kisebb az áram, nem nagyobb."
+      }
+    ],
+    "explanation": "A veszteségektől eltekintve a teljesítmény a két oldalon azonos: 12 V · 5 A = 60 VA, így a primer áram 60 VA / 230 V ≈ 0,26 A. Az áramok aránya a feszültségek arányának fordítottja (5 A / 0,261 A ≈ 19,2 ≈ 230 / 12).",
+    "ref": "transzformator-mukodese#az-attetel",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0004",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Miért látszólagos teljesítményként (VA-ben, kVA-ben) adják meg a transzformátor névleges teljesítményét?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Mert a melegedése a teljes áramtól függ, a terhelés cos φ-jétől függetlenül",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Mert a transzformátor kizárólag meddő teljesítményt alakít át, hatásosat nem",
+        "correct": false,
+        "why": "A transzformátor a hatásos teljesítményt is átviszi."
+      },
+      {
+        "id": "c",
+        "text": "Mert a VA nagyobb számot ad, így a készülék erősebbnek látszik",
+        "correct": false,
+        "why": "A VA-ben való megadásnak műszaki oka van: a melegedést a teljes áram okozza."
+      },
+      {
+        "id": "d",
+        "text": "Mert egyenáramú üzemre is így adják meg az adatait",
+        "correct": false,
+        "why": "A transzformátor egyenárammal nem működik."
+      }
+    ],
+    "explanation": "A transzformátor tekercsvesztesége az áramtól, vasvesztesége a feszültségtől függ, a terhelés teljesítménytényezőjétől nem; ezért a terhelhetőségét látszólagos teljesítményként adják meg. Egy 60 VA-es, 12 V-os transzformátor cos φ = 0,5-ös terhelésnél is 5 A-t ad névleges terhelésen, de csak 30 W hatásos teljesítménnyel.",
+    "ref": "transzformator-mukodese#teljesitmeny-miert-va-es-nem-w",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0005",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 1,
+    "type": "truefalse",
+    "stem": "A terhelés nélkül, üresjárásban bekapcsolva hagyott transzformátor is fogyaszt energiát.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "A vasmag ismétlődő átmágnesezése (hiszterézis) és az örvényáramok vasveszteséget okoznak, amely gyakorlatilag független a terheléstől. Egy feltételezett 2 W-os üresjárási veszteség egy év alatt 2 W · 8760 h ≈ 17,5 kWh energiát jelent.",
+    "ref": "transzformator-mukodese#vesztesegek-es-hatasfok",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0006",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Egy transzformátor névleges terhelésnél mért tekercsvesztesége (terhelési vesztesége) 3 kW. Mekkora a tekercsvesztesége 50 %-os terhelésnél?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "0,375 kW",
+        "correct": false,
+        "why": "Ez a terhelés köbével számolt érték; a tekercsveszteség az áram négyzetével arányos."
+      },
+      {
+        "id": "b",
+        "text": "0,75 kW",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "1,5 kW",
+        "correct": false,
+        "why": "A tekercsveszteség az áram négyzetével arányos, nem egyenesen."
+      },
+      {
+        "id": "d",
+        "text": "3 kW",
+        "correct": false,
+        "why": "A tekercsveszteség a terheléssel változik; a vasveszteség az, amely közel állandó."
+      }
+    ],
+    "explanation": "A tekercsveszteség a tekercsek ellenállásán keletkező I² · R hő, ezért a terhelés négyzetével arányos: β-szoros terhelésnél β² · Pk = 0,5² · 3 kW = 0,75 kW. A vasveszteség ezzel szemben gyakorlatilag független a terheléstől.",
+    "ref": "transzformator-mukodese#vesztesegek-es-hatasfok",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0007",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 2,
+    "type": "multi",
+    "stem": "Melyik transzformátor biztosít galvanikus leválasztást a hálózattól? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Biztonsági elválasztó transzformátor",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "1:1 áttételű elválasztó transzformátor",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "Csengőtranszformátor",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "Takarékkapcsolású transzformátor (autotranszformátor)",
+        "correct": false,
+        "why": "A két oldal közös tekercsen osztozik, ezért nincs galvanikus leválasztás."
+      }
+    ],
+    "explanation": "Galvanikus leválasztásnál a primer és a szekunder tekercs között nincs villamos összeköttetés, csak mágneses csatolás; ilyen a biztonsági elválasztó transzformátor (például a csengőtranszformátor) és az 1:1 áttételű elválasztó transzformátor. Az autotranszformátornál a két oldal közös tekercsen osztozik, ezért biztonsági leválasztásra nem alkalmas.",
+    "ref": "transzformator-mukodese#fajtak-a-gyakorlatban",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0008",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "Ha egy aggregátor szabálytalanul a lakás hálózatára táplál vissza, a transzformátoron át a lekapcsoltnak hitt közcélú hálózat is feszültség alá kerülhet.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "A transzformátor mindkét irányba működik: a kisfeszültségű oldalra kapcsolt feszültség az áttétel szerint a középfeszültségű oldalon is megjelenik. Ezért veszélyes a szabálytalanul csatlakoztatott aggregátor, és ezért kell a feszültségmentesítésnél a visszatáplálás lehetőségével is számolni.",
+    "ref": "transzformator-mukodese#gyakori-tevedesek",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0009",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mit jelent egy villanymotor adattábláján a teljesítményadat (például 7,5 kW)?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A tengelyen leadott mechanikai teljesítményt",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A hálózatból felvett hatásos teljesítményt",
+        "correct": false,
+        "why": "A felvett teljesítmény a hatásfok miatt nagyobb a leadottnál."
+      },
+      {
+        "id": "c",
+        "text": "A hálózatból felvett látszólagos teljesítményt",
+        "correct": false,
+        "why": "Az adattábla teljesítményadata a tengelyen leadott teljesítmény; a látszólagos ennél is nagyobb."
+      },
+      {
+        "id": "d",
+        "text": "A motor indításakor felvett legnagyobb teljesítményt",
+        "correct": false,
+        "why": "Az indítási adat nem a névleges teljesítmény."
+      }
+    ],
+    "explanation": "A motor adattábláján a tengelyen leadott mechanikai teljesítmény szerepel. A hálózatból felvett hatásos teljesítmény ennél a hatásfok miatt nagyobb: P_felvett = P_leadott / η, ezért az áramot sem lehet egyszerűen a leadott teljesítményből számolni.",
+    "ref": "elektromos-teljesitmeny#aram-a-teljesitmenybol",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0010",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy motor tengelyen leadott teljesítménye 4 kW, hatásfoka 0,8. Mekkora hatásos teljesítményt vesz fel a hálózatból?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "3,2 kW",
+        "correct": false,
+        "why": "Itt a hatásfokkal szoroztak osztás helyett; a felvett teljesítmény nem lehet kisebb a leadottnál."
+      },
+      {
+        "id": "b",
+        "text": "4 kW",
+        "correct": false,
+        "why": "Ez a leadott teljesítmény; a veszteség miatt a felvett ennél nagyobb."
+      },
+      {
+        "id": "c",
+        "text": "5 kW",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "20 kW",
+        "correct": false,
+        "why": "Itt a veszteségaránnyal (1 − η = 0,2) osztottak a hatásfok helyett."
+      }
+    ],
+    "explanation": "A felvett hatásos teljesítmény P_felvett = P_leadott / η = 4 kW / 0,8 = 5 kW; a különbség (1 kW) a motor vesztesége, amely hővé alakul. Ha a hatásfokkal szoroznánk, a leadottnál kisebb felvett teljesítményt kapnánk, ami fizikailag lehetetlen.",
+    "ref": "elektromos-teljesitmeny#aram-a-teljesitmenybol",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0011",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Egy régi motor adattábláján 10 LE áll (1 LE ≈ 735,5 W). Körülbelül hány kW ez?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "kb. 0,74 kW",
+        "correct": false,
+        "why": "Tizedesvessző-hiba: 10 · 735,5 W = 7355 W."
+      },
+      {
+        "id": "b",
+        "text": "kb. 7,4 kW",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "kb. 13,6 kW",
+        "correct": false,
+        "why": "Fordítva váltottak: a 10-et osztották 0,7355-tel."
+      },
+      {
+        "id": "d",
+        "text": "kb. 73,6 kW",
+        "correct": false,
+        "why": "Tizedesvessző-hiba: 7355 W = 7,355 kW."
+      }
+    ],
+    "explanation": "A lóerő régi teljesítményegység: 1 LE ≈ 735,5 W, így 10 LE ≈ 7355 W ≈ 7,4 kW. Visszafelé egy 7,5 kW-os motor kb. 10,2 LE.",
+    "ref": "elektromos-teljesitmeny#aram-a-teljesitmenybol",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0012",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy egyfázisú motor 230 V-on 4 A-t vesz fel, teljesítménytényezője cos φ = 0,75. Mekkora a felvett hatásos teljesítménye?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "kb. 610 W",
+        "correct": false,
+        "why": "Ez a meddő teljesítmény számértéke (U · I · sin φ), mértékegysége var."
+      },
+      {
+        "id": "b",
+        "text": "690 W",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "920 W",
+        "correct": false,
+        "why": "Ez a látszólagos teljesítmény (U · I), mértékegysége VA."
+      },
+      {
+        "id": "d",
+        "text": "kb. 1227 W",
+        "correct": false,
+        "why": "Itt cos φ-vel osztottak szorzás helyett."
+      }
+    ],
+    "explanation": "A hatásos teljesítmény P = U · I · cos φ = 230 V · 4 A · 0,75 = 690 W. A látszólagos teljesítmény S = U · I = 920 VA, a meddő Q = S · sin φ ≈ 920 · 0,661 ≈ 610 var; ellenőrzésként √(690² + 610²) ≈ 920.",
+    "ref": "elektromos-teljesitmeny#egyfazisu-valtakozo-aram-p-q-s-es-cos",
+    "shuffle": false,
+    "family": "p-cosfi",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0013",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Egy háromfázisú motor a 400 V-os hálózatból 5,5 kW hatásos teljesítményt vesz fel, cos φ = 0,8. Mekkora a vonali áram?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "kb. 7,9 A",
+        "correct": false,
+        "why": "A cos φ kimaradt: P / (√3 · U)."
+      },
+      {
+        "id": "b",
+        "text": "kb. 9,9 A",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "kb. 17,2 A",
+        "correct": false,
+        "why": "A √3 kimaradt: P / (U · cos φ)."
+      },
+      {
+        "id": "d",
+        "text": "kb. 29,9 A",
+        "correct": false,
+        "why": "Ez P / (230 V · cos φ), mintha az egész teljesítmény egy fázison lenne."
+      }
+    ],
+    "explanation": "Szimmetrikus háromfázisú terhelésnél I = P / (√3 · U_v · cos φ) = 5500 W / (1,732 · 400 V · 0,8) ≈ 9,9 A. A felvett teljesítménnyel kell számolni; ha csak a tengelyen leadott teljesítmény ismert, előbb a hatásfokkal kell osztani.",
+    "ref": "elektromos-teljesitmeny#haromfazisu-teljesitmeny",
+    "shuffle": false,
+    "family": "aram-3f",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0014",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 1,
+    "type": "truefalse",
+    "stem": "A háromfázisú motor forgásirányát a táplálás fázissorrendje határozza meg.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "A háromfázisú motor forgásirányát a fázissorrend szabja meg; két fázis felcserélése megfordítja a forgást, ami egyes gépeknél balesetveszélyes. Ezért a háromfázisú dugaljat a tervező előírása szerint szakember köti be.",
+    "ref": "dugalj-bekotese#haromfazisu-dugalj",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0015",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Miért NEM számolható ki egy villanymotor üzemi árama a tekercsének egyenáramú ellenállásából, Ohm törvényével?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Mert az áramot az induktivitás és a forgásból eredő ellenfeszültség is korlátozza",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Mert a motor tekercsének egyáltalán nincs mérhető egyenáramú ellenállása, így osztani sem lehet vele",
+        "correct": false,
+        "why": "A tekercsnek van ellenállása, csak az áramot nem ez határozza meg."
+      },
+      {
+        "id": "c",
+        "text": "Mert a motor a hálózatból egyenáramot vesz fel",
+        "correct": false,
+        "why": "A hálózati motor váltakozó áramot vesz fel."
+      },
+      {
+        "id": "d",
+        "text": "Mert Ohm törvénye csak 230 V fölött érvényes",
+        "correct": false,
+        "why": "Ohm törvénye feszültségtől függetlenül érvényes, ha az ellenállás állandó."
+      }
+    ],
+    "explanation": "Ohm törvénye arányosságot állít, ami állandó ellenállásnál igaz; a forgó motor áramát a tekercsek induktivitása és az indukálódó ellenfeszültség korlátozza, nagysága pedig a terheléstől is függ. Álló, még nem forgó motorban nincs ellenfeszültség, ezért induláskor jóval nagyobb áramot vesz fel.",
+    "ref": "ohm-torvenye#mikor-nem-ervenyes-egyszeruen",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0016",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Egy nagy bekapcsolási áramú motor áramkörében a B jelleggörbéjű kismegszakító indításkor leold. Mi a jellemző tervezői megoldás?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "C jelleggörbéjű kismegszakító, ha a hurokimpedancia ehhez is elég kicsi",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Nagyobb névleges áramú B kismegszakító, a vezeték terhelhetőségének ellenőrzése nélkül",
+        "correct": false,
+        "why": "A névleges áram növelése a vezeték túlterhelés elleni védelmét veszélyezteti."
+      },
+      {
+        "id": "c",
+        "text": "A kismegszakító áthidalása az indítás idejére",
+        "correct": false,
+        "why": "A védelem áthidalása életveszélyes."
+      },
+      {
+        "id": "d",
+        "text": "A motor védővezetőjének lekötése, hogy kisebb legyen az indítóáram",
+        "correct": false,
+        "why": "A védővezető az indítóáramot nem befolyásolja, a lekötése pedig életveszélyes."
+      }
+    ],
+    "explanation": "A C jelleggörbéjű kismegszakító csak a névleges áram 5–10-szeresénél old ki azonnal, ezért a bekapcsolási áramlökést jobban tűri; nagyobb bekapcsolási áramú fogyasztókhoz (motorok, transzformátorok) gyakran ezt választják. A magasabb betűhöz viszont nagyobb zárlati áram, vagyis kisebb hurokimpedancia kell, ezért a választás tervezői döntés.",
+    "ref": "kismegszakito#b-c-es-d-jelleggorbe",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0017",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy háromfázisú frekvenciaváltóval hajtott gép áramkörében sima egyenáramú hibaáram is felléphet. Milyen típusú áram-védőkapcsoló érzékeli ezt?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "B típus",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "AC típus",
+        "correct": false,
+        "why": "Csak a szinuszos váltakozó hibaáramot érzékeli."
+      },
+      {
+        "id": "c",
+        "text": "A típus",
+        "correct": false,
+        "why": "A lüktető egyenáramot érzékeli, a simát nem."
+      },
+      {
+        "id": "d",
+        "text": "F típus",
+        "correct": false,
+        "why": "A vegyes frekvenciájú hibaáramot is érzékeli, a sima egyenáramot nem."
+      }
+    ],
+    "explanation": "A sima egyenáramú hibaáramot a típusok közül csak a B érzékeli; ilyen hibaáram háromfázisú frekvenciaváltóknál, egyes elektromosautó-töltőknél és napelemes invertereknél fordulhat elő. A sima egyenáram „elvakíthatja” az AC vagy az A típust, ezért a típust a csatlakozó készülékek és a gyártói előírások alapján a tervező választja meg.",
+    "ref": "aram-vedokapcsolo-fi-rele#tipusok-ac-a-f-b",
+    "shuffle": true,
+    "family": "fi-b-tipus",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0018",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 1,
+    "type": "truefalse",
+    "stem": "A motorok és az induktív előtétek meddő teljesítményt is felvesznek, amely kondenzátorral kompenzálható.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "A meddő teljesítmény a tekercsek mágneses terének felépítéséhez kell; munkát nem végez, de növeli az áramot, így a vezeték melegedését és a feszültségesést is. Kondenzátorral kompenzálható, mert a kondenzátor árama a tekercsével ellentétes irányban tolódik el a feszültséghez képest.",
+    "ref": "elektromos-teljesitmeny#egyfazisu-valtakozo-aram-p-q-s-es-cos",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0019",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Egy transzformátor üresjárási vesztesége 0,4 kW, névleges terhelésnél mért tekercsvesztesége 3,6 kW. Körülbelül hány százalékos terhelésnél a legnagyobb a hatásfoka?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "kb. 11 %",
+        "correct": false,
+        "why": "Ez a két veszteség aránya; ennek a négyzetgyöke adja a terhelést."
+      },
+      {
+        "id": "b",
+        "text": "kb. 33 %",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "50 %",
+        "correct": false,
+        "why": "A legjobb hatásfok ott van, ahol a két veszteség egyenlő, és ez nem feltétlenül a terhelés fele."
+      },
+      {
+        "id": "d",
+        "text": "100 %",
+        "correct": false,
+        "why": "Névleges terhelésnél a tekercsveszteség jóval nagyobb a vasveszteségnél."
+      }
+    ],
+    "explanation": "A hatásfok ott a legnagyobb, ahol a terheléstől függő tekercsveszteség (β² · Pk) egyenlő az állandó vasveszteséggel: β = √(P0 / Pk) = √(0,4 / 3,6) = 1/3 ≈ 0,33, vagyis kb. 33 %-os terhelésnél. Itt a tekercsveszteség (1/3)² · 3,6 kW = 0,4 kW, éppen annyi, mint a vasveszteség.",
+    "ref": "transzformator-mukodese#vesztesegek-es-hatasfok",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-gep-0020",
+    "version": 1,
+    "topic": "gepek",
+    "difficulty": 2,
+    "type": "multi",
+    "stem": "Melyik állítás igaz a transzformátorra? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A feszültségek aránya ideális esetben a menetszámok arányával egyezik",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Ideális esetben a teljesítmény a két oldalon ugyanannyi",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "A lemezelt vasmag a vasmagban indukálódó örvényáramokat csökkenti",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "Feltranszformálással a kimenő teljesítmény nagyobb lesz a bemenőnél",
+        "correct": false,
+        "why": "Ahányszorosára nő a feszültség, nagyjából annyiad részére csökken az áram, és még a veszteség is levonódik."
+      },
+      {
+        "id": "e",
+        "text": "A tekercsveszteség terheléstől független, üresjárásban is ugyanakkora",
+        "correct": false,
+        "why": "A tekercsveszteség a terhelés négyzetével arányos; a terheléstől független rész a vasveszteség."
+      }
+    ],
+    "explanation": "Ideális transzformátorra U1 / U2 = N1 / N2 = I2 / I1, így a teljesítmény a két oldalon azonos; a feltranszformálás teljesítményt nem „termel”. A lemezelés a vasveszteség egyik részét, az örvényáramokat csökkenti, a tekercsveszteség pedig a terhelés négyzetével arányos.",
+    "ref": "transzformator-mukodese#felepites",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  }
+]
