@@ -87,6 +87,40 @@ A szolgáltatónak ES-modulos Node.js-indítást és tartós folyamatot kell tá
 
 A proxy őrizze meg a valódi Host fejlécet, és állítsa felül az X-Real-IP fejlécet az ügyfél hiteles címével. A felhasználó által küldött IP-fejlécet nem szabad változtatás nélkül átengedni: a belépési próbálkozások korlátozása ezt is használja. Az e-mail szerinti korlát ettől függetlenül működik. Ne legyen megkerülhető közvetlen publikus Node-port.
 
+### Automatikus telepítés GitHubról FTP-n (luiz-tech.hu)
+
+Mit csinál:
+
+- A `main` ágra pusholt kódot (vagy kézi indításra: Actions → „Telepítés FTP-re” → Run workflow) a GitHub leforgatja, és a kész Node.js-kiadást FTPS-en (21-es port, explicit TLS) feltölti a tárhelyre.
+- Csak a változott fájlokat tölti fel (a szerveren az action `.ftp-deploy-sync-state.json` állapotfájlt tart).
+- A `tmp/restart.txt` minden kiadásnál megváltozik, ezért a Passenger újraindítja az alkalmazást.
+- A workflow: `.github/workflows/deploy-ftp.yml`; a lépései: előfeltétel-ellenőrzés, `npm run install:ci`, típusellenőrzés, `npm run build:node`, telepítőcsomag összeállítása, feltöltés.
+
+Egyszeri beállítás a GitHubon (Settings → Secrets and variables → Actions):
+
+- Titkok: `FTP_USERNAME` (az FTP-felhasználó), `FTP_PASSWORD` (az FTP-jelszó). A jelszó csak itt szerepeljen, soha ne kerüljön a repóba vagy üzenetbe.
+- Változók: `FTP_SERVER_DIR` – a célkönyvtár az FTP-fiókon belül, pl. `./villanyrajz-app/`; a záró perjel kötelező, és nem lehet a nyilvános webgyökér (public_html).
+- Opcionális változók: `FTP_SERVER` (alapértelmezés: `ftp.luiz-tech.hu`) és `FTP_PROTOCOL` (alapértelmezés: `ftps`; ha a tárhely nem támogat TLS-t, `ftp` – nem javasolt, mert a jelszó titkosítatlanul utazik).
+- Ha valamelyik kötelező érték hiányzik, a workflow az első lépésben magyar hibaüzenettel leáll.
+
+Egyszeri beállítás a tárhelyen (cPanel → Setup Node.js App):
+
+- Node.js: legalább 22.13.
+- Application root: az `FTP_SERVER_DIR` könyvtár.
+- Application startup file: `app.cjs`.
+- Környezeti változók a kezelőfelületen (a `.env.production` nem töltődik fel): `APP_ORIGIN`, `MYSQL_URL`, `SESSION_SECRET`, `ADMIN_USER_ID`, `SHOCKCRAFT_NODE_RUNTIME=1`, valamint a többi a 3. pont szerint.
+- A „Run NPM Install” gombot nem kell megnyomni: a csomag saját `node_modules`-t hoz.
+- MySQL: a sémát egyszer kell létrehozni – phpMyAdminban a `db/mysql-schema.sql` importálásával, vagy a `scripts/mysql-setup.mjs` futtatásával. Minden kiadásnál futtasd az újonnan megjelent táblákat is (pl. `workbooks`, `plan_shares`, `product_catalogs`).
+
+Ellenőrzés:
+
+- A GitHub Actions futásának naplója legyen zöld.
+- Utána a `GET /api/health` végpont 200-at adjon.
+
+Megjegyzés:
+
+- A feltöltés alatt rövid ideig vegyes fájlállapot lehet (régi és új fájlok együtt). Forgalmas oldalnál a kézi indítást érdemes csendes időszakban végezni.
+
 ## 5. VPS: domain, HTTPS és folyamatos futás
 
 A DNS-ben irányítsd a választott aldomaint a VPS-re. Telepíts érvényes HTTPS-tanúsítványt a szolgáltatód vagy az általad választott ACME-kliens útmutatója szerint. A deploy/nginx.conf kész mintát tartalmaz; a domain és a tanúsítványútvonal átírandó. Tanúsítvány nélkül a TLS-es blokk nem indul el.

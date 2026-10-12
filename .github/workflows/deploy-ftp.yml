@@ -1,0 +1,130 @@
+# Villanyrajz – automatikus telepítés FTP-n (Node.js kiadás).
+# A main ágra pusholt kódból Node.js-buildet készít, és a kész kiadást
+# FTPS-en feltölti a tárhelyre (csak a változott fájlokat).
+# Beállítás: docs/telepites.md, „Automatikus telepítés GitHubról FTP-n”.
+name: "Telepítés FTP-re (Node.js build)"
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Egyszerre csak egy telepítés fusson; a futó telepítést nem szakítjuk meg,
+# mert a félbeszakított feltöltés vegyes fájlállapotot hagyna a szerveren.
+concurrency:
+  group: deploy-ftp
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Forráskód letöltése
+        uses: actions/checkout@v4
+
+      - name: Node.js beállítása
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Előfeltételek ellenőrzése
+        # A titkokat környezeti változón át kapja a shell; az értékük nem kerül kiírásra.
+        env:
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR }}
+        run: |
+          hiba=0
+          if [ -z "$FTP_USERNAME" ]; then
+            echo "::error::Hiányzik az FTP_USERNAME titok. Add meg a GitHubon: Settings → Secrets and variables → Actions → Secrets."
+            hiba=1
+          fi
+          if [ -z "$FTP_PASSWORD" ]; then
+            echo "::error::Hiányzik az FTP_PASSWORD titok. Add meg a GitHubon: Settings → Secrets and variables → Actions → Secrets."
+            hiba=1
+          fi
+          if [ -z "$FTP_SERVER_DIR" ]; then
+            echo "::error::Hiányzik az FTP_SERVER_DIR változó (a célkönyvtár az FTP-fiókon belül, pl. ./villanyrajz-app/). Add meg a GitHubon: Settings → Secrets and variables → Actions → Variables."
+            hiba=1
+          fi
+          if [ "$hiba" -ne 0 ]; then
+            exit 1
+          fi
+          echo "Az FTP-beállítások megvannak."
+
+      - name: Függőségek telepítése
+        run: npm run install:ci
+
+      - name: Típusellenőrzés
+        run: npx tsc --noEmit -p .
+
+      - name: Node.js build
+        env:
+          SHOCKCRAFT_TARGET: node
+        run: npm run build:node
+
+      - name: Telepítőcsomag összeállítása
+        run: |
+          set -euo pipefail
+          rm -rf deploy-pkg
+          mkdir -p deploy-pkg/dist deploy-pkg/scripts deploy-pkg/tmp
+
+          # A teljes önálló (standalone) kiadás, saját node_modules-szal.
+          cp -a dist/standalone deploy-pkg/dist/standalone
+          cp scripts/start-node.mjs deploy-pkg/scripts/start-node.mjs
+
+          # Minimális package.json, függőségek nélkül (a standalone saját node_modules-t hoz).
+          cat > deploy-pkg/package.json <<'JSON'
+          {"name":"villanyrajz","private":true,"type":"module","engines":{"node":">=22.13.0"},"scripts":{"start":"node scripts/start-node.mjs"}}
+          JSON
+
+          # CommonJS-indító Passenger/cPanel-hez.
+          cat > deploy-pkg/app.cjs <<'CJS'
+          // A cPanel „Setup Node.js App” felületén az „Application startup file”
+          // mezőbe ezt a fájlt kell írni: app.cjs
+          import('./scripts/start-node.mjs').catch((e) => { console.error(e); process.exit(1); });
+          CJS
+
+          # A Passenger e fájl változásakor újraindítja az alkalmazást.
+          echo "${GITHUB_SHA} $(date -u +%Y-%m-%dT%H:%M:%SZ)" > deploy-pkg/tmp/restart.txt
+
+          # Ellenőrzés: megvan-e a szerver belépési pontja.
+          if [ ! -f deploy-pkg/dist/standalone/server.js ]; then
+            echo "::error::Hiányzik a deploy-pkg/dist/standalone/server.js – a build nem készítette el a standalone kiadást."
+            exit 1
+          fi
+
+          # Biztonság: .env* fájl semmilyen körülmények között nem kerülhet a csomagba.
+          find deploy-pkg -name '.env*' -delete
+          if [ -n "$(find deploy-pkg -name '.env*' -print -quit)" ]; then
+            echo "::error::A telepítőcsomagban .env* fájl maradt, a telepítés megszakad."
+            exit 1
+          fi
+
+          echo "A telepítőcsomag kész:"
+          du -sh deploy-pkg
+
+      - name: Feltöltés FTP-n
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ vars.FTP_SERVER || 'ftp.luiz-tech.hu' }}
+          port: 21
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
+          local-dir: ./deploy-pkg/
+          server-dir: ${{ vars.FTP_SERVER_DIR }}
+          dangerous-clean-slate: false
+          log-level: standard
+          timeout: 600000
+          # Az action alapértelmezetten kihagyja a node_modules könyvtárat; a standalone
+          # kiadásnak viszont kell a saját node_modules-a, ezért csak a git-fájlokat zárjuk ki.
+          exclude: |
+            **/.git*
+            **/.git*/**
