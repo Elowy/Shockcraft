@@ -167,9 +167,36 @@ for(const k of keys)assert.ok(k.startsWith('shockcraft-kb-')||['shockcraft-theme
 const legal=readFileSync('components/legal-page.tsx','utf8');
 for(const k of [...keys].filter(k=>k.startsWith('shockcraft-kb-')&&!k.startsWith('shockcraft-kb-test')))assert.ok(legal.includes("'"+k+"'"),'sütitáblázat: '+k);
 // 7) A statikus kalkulátoroldalak (ISR) beállításai és a gyökérlayout hidratálási jelzője.
-for(const f of ['app/(kezikonyv)/kalkulatorok/page.tsx','app/(kezikonyv)/kalkulatorok/[slug]/page.tsx','app/(kezikonyv)/tudastar/page.tsx','app/(kezikonyv)/tudastar/tesztek/page.tsx','app/(kezikonyv)/tudastar/elmelet/page.tsx','app/(kezikonyv)/tudastar/elmelet/[slug]/page.tsx','app/(kezikonyv)/tudastar/elmelet/kategoria/[kategoria]/page.tsx','app/(kezikonyv)/tudastar/szotar/page.tsx']){const s=readFileSync(f,'utf8');assert.match(s,/export const dynamic='force-static'/,f);assert.match(s,/export const revalidate=3600/,f)}
+for(const f of ['app/(kezikonyv)/kalkulatorok/page.tsx','app/(kezikonyv)/kalkulatorok/[slug]/page.tsx','app/(kezikonyv)/tudastar/page.tsx','app/(kezikonyv)/tudastar/tesztek/page.tsx','app/(kezikonyv)/tudastar/elmelet/page.tsx','app/(kezikonyv)/tudastar/elmelet/[slug]/page.tsx','app/(kezikonyv)/tudastar/elmelet/kategoria/[kategoria]/page.tsx','app/(kezikonyv)/tudastar/szotar/page.tsx','app/(kezikonyv)/tudastar/semak/page.tsx','app/(kezikonyv)/tudastar/semak/[slug]/page.tsx']){const s=readFileSync(f,'utf8');assert.match(s,/export const dynamic='force-static'/,f);assert.match(s,/export const revalidate=3600/,f)}
 // A paraméteres oldalak csak a generateStaticParams elemeit (a kiadási kapu szerint közzétett tételeket) szolgálják ki; minden más 404.
-for(const f of ['app/(kezikonyv)/kalkulatorok/[slug]/page.tsx','app/(kezikonyv)/tudastar/elmelet/[slug]/page.tsx','app/(kezikonyv)/tudastar/elmelet/kategoria/[kategoria]/page.tsx'])assert.match(readFileSync(f,'utf8'),/export const dynamicParams=false/,f);
+for(const f of ['app/(kezikonyv)/kalkulatorok/[slug]/page.tsx','app/(kezikonyv)/tudastar/elmelet/[slug]/page.tsx','app/(kezikonyv)/tudastar/elmelet/kategoria/[kategoria]/page.tsx','app/(kezikonyv)/tudastar/semak/[slug]/page.tsx'])assert.match(readFileSync(f,'utf8'),/export const dynamicParams=false/,f);
+// 9) Ábramotor (Sémák, docs/tudastar.md „Sémák és ábramotor”):
+//  - a rajzoló modulok (components/kezikonyv/diagram, components/kezikonyv/semak, lib/kb/circuit.ts) nem importálnak tervezőkódot,
+//    adatbázist, hitelesítést vagy számlázást (a tervező rajzjelei sem – ha kellenének, egy közös, kicsi, tiszta modulba kell kiemelni),
+//  - a netlista-JSON-t és az elrendezést csak a generátor (scripts/) és a tesztek olvassák: a futó kódban (app, components, lib) nincs rájuk
+//    hivatkozás, a generált ábramodult (lib/kb/content/generated/diagrams.ts – csak közzétett ábra) csak a regiszter importálja,
+//  - a Működés nézet szigete csak a Reactot importálja: szimulátor, netlista és regiszter nem kerül a böngészőbe.
+{
+ const DG=[...walk('components/kezikonyv/diagram'),...walk('components/kezikonyv/semak'),resolve('lib/kb/circuit.ts')];
+ const c=closure(DG);
+ const PLANNER=/^(components\/(plan-|board-|circuit-|floor-|share-|pdf-|quote-|sizing-|phase-load|electrical)|app\/tervezo\/|lib\/(plan|schematic|board|board-size|geometry|plan-tools|circuit-assignment|wall-snap|route-points|architecture|projects|pdf-export|sizing|phase-load)\.ts$|db\/|lib\/(auth|billing|subscription-access)\.ts$|scripts\/|content\/)/;
+ for(const f of c.files)assert.ok(!PLANNER.test(rel(f)),'ábramodulból tervező-, db-, auth- vagy billing-kód (vagy forrás): '+c.chain(f));
+ assert.ok(!c.packages.has('node:fs')&&!c.packages.has('fs')&&!c.packages.has('zod'),'az ábramodul tiszta (fájlrendszer és zod nélkül)');
+ const strip=(src:string)=>src.replace(/\/\*[\s\S]*?\*\//g,'').replace(/(^|[^:'"])\/\/.*$/gm,'$1');
+ for(const f of [...walk('app'),...walk('components'),...walk('lib')].filter(f=>rel(f)!=='lib/kb/content/generated/diagrams.ts')){
+  const src=strip(readFileSync(f,'utf8'));
+  assert.ok(!/\.netlist\.json|tudastar\/diagramok|tudastar\/r3\//.test(src),rel(f)+': netlista vagy elrendezés a futó kódban (csak a generátor és a teszt olvashatja)');
+ }
+ const dgImporters=[...walk('app'),...walk('components'),...walk('lib')].filter(f=>imports(f).some(i=>/generated\/diagrams$/.test(i.spec))).map(rel);
+ assert.deepEqual(dgImporters,['lib/kb/content/registry.ts'],'a generált ábramodult csak a regiszter importálja');
+ const island=closure([resolve('components/kezikonyv/diagram/diagram-run.tsx')]);
+ assert.deepEqual([...island.files].map(rel),['components/kezikonyv/diagram/diagram-run.tsx'],'a Működés sziget csak a Reactot importálja');
+ assert.deepEqual([...island.packages].sort(),['react'],'a Működés sziget csomagjai');
+ assert.match(readFileSync('components/kezikonyv/diagram/diagram-run.tsx','utf8').trimStart(),/^'use client'/);
+ // a netlista-JSON-t olvasó fájlok: a generátor és a lektori csomag (scripts), a tesztek
+ const readers=[...walk('scripts'),...walk('tests')].filter(f=>/\.netlist\.json/.test(readFileSync(f,'utf8'))).map(rel).sort();
+ assert.ok(readers.every(f=>/^(scripts|tests)\//.test(f))&&readers.includes('scripts/kb-content/diagrams.ts'),'a netlistát a generátor olvassa: '+readers.join(', '));
+}
 // A Tudástár minden útvonala a kézikönyv-csoportban van (közös keret, CSP-fejlécek, nincs fiók-/adatbázis-hívás).
 assert.ok(!existsSync('app/tudastar'),'a Tudástár-útvonalak az app/(kezikonyv) csoportban vannak');
 for(const f of walk('app/(kezikonyv)/tudastar'))assert.ok(!/['"]use client['"]/.test(readFileSync(f,'utf8').slice(0,40)),rel(f)+': a Tudástár-oldal szerverkomponens');
@@ -178,4 +205,4 @@ assert.match(readFileSync('app/layout.tsx','utf8'),/<html lang="hu" suppressHydr
 {const calc=readFileSync('components/calc/calculator.tsx','utf8'),page=readFileSync('app/(kezikonyv)/kalkulatorok/[slug]/page.tsx','utf8');
  for(const re of [/<Sub text=\{i\.text\}\/>/,/<Sub text=\{a\}\/>/,/<Sub text=\{s\.formula\}\/>/,/<Sub text=\{s\.substituted\}\/>/])assert.match(calc,re,'calculator.tsx: '+re);
  for(const re of [/<Sub text=\{f\}\/>/,/<Sub text=\{s\}\/>/])assert.match(page,re,'[slug]/page.tsx: '+re);}
-console.log('PASS: importgráf ('+all.files.size+' fájl, '+all.packages.size+' csomag) tiltólista nélkül (content/, scripts/, node:fs sem), kliensszigetek szerveroldali modul és Tudástár-tartalom nélkül, a Tesztek szigete definíció, tábla, regiszter és zod nélkül (lusta betöltés), egy sziget = egy definíció, nincs getAccount/cookies/headers/fetch, dangerouslySetInnerHTML csak JSON-LD/téma, next/dynamic őr, tervező → csak links.ts, fejlécek, kulcsok, ISR-beállítások.');
+console.log('PASS: importgráf ('+all.files.size+' fájl, '+all.packages.size+' csomag) tiltólista nélkül (content/, scripts/, node:fs sem), kliensszigetek szerveroldali modul és Tudástár-tartalom nélkül, a Tesztek szigete definíció, tábla, regiszter és zod nélkül (lusta betöltés), egy sziget = egy definíció, nincs getAccount/cookies/headers/fetch, dangerouslySetInnerHTML csak JSON-LD/téma, next/dynamic őr, tervező → csak links.ts, fejlécek, kulcsok, ISR-beállítások, ábramotor (tervező-, db-, auth-, billing-kód nélkül; netlista csak a generátorban és a tesztben; a Működés sziget csak React).');

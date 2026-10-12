@@ -6,7 +6,7 @@
 import assert from 'node:assert/strict';
 import {existsSync,readFileSync,readdirSync,statSync} from 'node:fs';
 import {join} from 'node:path';
-import {r3Needles} from './kb-r3-needles.mjs';
+import {DIAGRAM_MARKERS,netlistNeedles,r3Needles} from './kb-r3-needles.mjs';
 import {quizNeedles,unreleasedQuestions} from './kb-quiz-needles.mjs';
 
 const DIST=process.env.DIST||'dist';
@@ -32,6 +32,12 @@ for(const f of files){
  for(const n of qNeedles)for(const v of forms(n))if(s.includes(v)){qHits.push(f+': „'+n.slice(0,70)+'…”');break}
 }
 assert.deepEqual(hits,[],'R3 szöveg a build kimenetében');
+// A lektorra váró bekötési ábrák: a netlisták feliratai és a kirajzolt ábra jelölői sincsenek a build kimenetében (a generált
+// lib/kb/content/generated/diagrams.ts lektorálásig üres; a rajzoló kód benne lehet, a tartalom nem).
+const nNeedles=netlistNeedles();assert.ok(nNeedles.length>=150,'netlista-feliratminták: '+nNeedles.length);
+const nHits=[];
+for(const [f,s] of texts){for(const n of nNeedles)if(forms(n).some(v=>s.includes(v))){nHits.push(f+': „'+n+'”');break}for(const m of DIAGRAM_MARKERS)if(s.includes(m))nHits.push(f+': '+m)}
+assert.deepEqual(nHits,[],'netlista-felirat vagy bekötési ábra a build kimenetében');
 assert.deepEqual(qHits,[],'kiadatlan kérdésbank-szöveg a build kimenetében');
 // Pozitív kontroll a kérdésbank-keresőhöz: a közzétett számolós sablon szövege a kliens-JS-ben megvan (a Tesztek szigete), így a keresés nem vak.
 const tplProbe='ellenállású ohmos fogyasztóra';
@@ -59,4 +65,4 @@ const has=(f)=>{const s=readFileSync(f,'utf8');return forms(probe).some(v=>s.inc
 const server=files.filter(f=>!/[\\/]client[\\/]/.test(f)),client=files.filter(f=>/[\\/]client[\\/]/.test(f)&&/\.m?js$/.test(f));
 assert.ok(server.some(has),'a közzétett cikk szövege a szervercsomagban ('+probe+')');
 assert.ok(!client.some(has),'cikktörzs nem kerül a kliens-JS-be: '+client.filter(has).join(', '));
-console.log('PASS: '+DIST+' ('+files.length+' fájl, '+(bytes/1048576).toFixed(1)+' MB): '+needles.length+' R3-szövegminta és '+qNeedles.length+' kérdésbank-szövegminta ('+qCount+' kiadatlan kérdés) egyike sincs benne; a közzétett cikk szövege csak a szervercsomagban, a számolós sablon szövege a kliens-JS-ben, a T1-sablonoké csak a saját, külön csomagjukban ('+t1Files.length+' fájl).');
+console.log('PASS: '+DIST+' ('+files.length+' fájl, '+(bytes/1048576).toFixed(1)+' MB): '+needles.length+' R3-szövegminta, '+nNeedles.length+' netlista-feliratminta és a bekötési ábra jelölői, valamint '+qNeedles.length+' kérdésbank-szövegminta ('+qCount+' kiadatlan kérdés) egyike sincs benne; a közzétett cikk szövege csak a szervercsomagban, a számolós sablon szövege a kliens-JS-ben, a T1-sablonoké csak a saját, külön csomagjukban ('+t1Files.length+' fájl).');

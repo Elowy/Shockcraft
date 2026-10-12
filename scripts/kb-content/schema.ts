@@ -21,5 +21,18 @@ export const frontMatterSchema=z.object({
  ai:z.enum(['nincs','vázlat','nyelvi']),
  version:z.string().regex(/^\d+(?:\.\d+)?$/),
  updated:z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-}).strict();
+ // Csak R3 vázlatban (a superRefine köti a kockázathoz):
+ safety:z.enum(['bekotes','munkavegzes']).optional(),
+ review:z.enum(['lektorra-var']).optional(),
+ plannerKinds:z.array(z.enum(['socket','double','switch1','switch2','switch5','switch6','switch7','rj45','phone','light','box','panel'])).optional(),
+ plannerModules:z.array(text(1,20)).optional(),
+ simulation:z.enum(['false','true']).optional(),
+ lektorKerdesek:z.array(text(10,1200)).optional(),
+ figures:z.array(z.object({id:z.string().regex(/^abra-\d+$/),netlist:z.string().regex(/^[a-z0-9-]+\.netlist\.json$/).optional(),kind:text(1,40).optional(),
+  views:z.array(z.enum(['bekotes','szerelesi-rajz','mukodes','folyamat'])).min(1),variants:z.array(z.string().regex(/^[a-z0-9-]+\.netlist\.json$/)).optional(),
+  netlists:z.array(z.string().regex(/^[a-z0-9-]+\.netlist\.json$/)).optional()}).strict().refine(f=>!!f.netlist!==!!f.kind,'ábránként vagy netlist, vagy kind')).optional(),
+}).strict().superRefine((f,ctx)=>{
+ if(f.risk==='R3'&&!f.safety)ctx.addIssue({code:'custom',path:['safety'],message:'R3 vázlathoz a veszély-doboz könyvtári tétele kell (safety)'});
+ if(f.risk!=='R3')for(const k of ['safety','review','plannerKinds','plannerModules','simulation','lektorKerdesek','figures'] as const)if(f[k]!==undefined)ctx.addIssue({code:'custom',path:[k],message:'csak R3 vázlatban'});
+});
 export type FrontMatterChecked=z.infer<typeof frontMatterSchema>;

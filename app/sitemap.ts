@@ -23,6 +23,8 @@ export default function sitemap():MetadataRoute.Sitemap{
   {url:origin+'/',changeFrequency:'monthly',priority:1},
   {url:origin+KB_HOME,changeFrequency:'weekly',priority:0.8,...(kbLatest?{lastModified:kbLatest}:{})},
   ...(articles.some(a=>a.section==='elmelet')?[{url:origin+KB_HOME+'/elmelet',changeFrequency:'weekly' as const,priority:0.7,...(kbLatest?{lastModified:kbLatest}:{})}]:[]),
+  // Sémák: csak ha van közzétett (szakmailag lektorált) séma
+  ...(articles.some(a=>a.section==='semak')?[{url:origin+KB_HOME+'/semak',changeFrequency:'weekly' as const,priority:0.7,...(kbLatest?{lastModified:kbLatest}:{})}]:[]),
   ...cats.map(c=>({url:origin+categoryHref(c),changeFrequency:'monthly' as const,priority:0.5,lastModified:categoryArticles(c.id).map(a=>modified(a.id,a.updated)).sort().at(-1)})),
   ...articles.map(a=>({url:origin+articleHref(a),lastModified:modified(a.id,a.updated),changeFrequency:'monthly' as const,priority:0.6})),
   ...(quizPublishedCount()?[{url:origin+QUIZ_PATH,changeFrequency:'monthly' as const,priority:0.6,...(quizLastModified()?{lastModified:quizLastModified()}:{})}]:[]),

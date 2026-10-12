@@ -32,7 +32,7 @@ import {FIG_CSS,FIG_DIR,FIG_INDEX,figureSource} from '../scripts/kb-content/figu
 import {OUT_DIR,R3_DIR,SECTION_DIRS,buildModel,figureIds,renderFiles} from '../scripts/kb-content/generate';
 import {FRONT_KEYS,parseDraft,splitFrontMatter} from '../scripts/kb-content/parse';
 import {frontMatterSchema} from '../scripts/kb-content/schema';
-import {r3Needles} from './kb-r3-needles.mjs';
+import {netlistNeedles,r3Needles} from './kb-r3-needles.mjs';
 
 const ROOT=resolve('.');
 const rel=(p:string)=>relative(ROOT,p).split('\\').join('/');
@@ -243,6 +243,9 @@ assert.ok(articlesForCalc('ohm-torveny').some(a=>a.id==='ohm-torvenye'),'a kalku
  const walk=(d:string):string[]=>readdirSync(d).flatMap(f=>{const p=join(d,f);return statSync(p).isDirectory()?(f==='node_modules'?[]:walk(p)):/\.(tsx?|css|json|mjs)$/.test(f)?[p]:[]});
  const files=[...walk('lib'),...walk('components'),...walk('app')];
  for(const f of files){const s=readFileSync(f,'utf8');for(const n of needles)assert.ok(!s.includes(n),rel(f)+': R3 szöveg került a build bemenetébe: „'+n.slice(0,60)+'…”')}
+ // a lektorra váró netlisták feliratai sem (a bekötési ábrák csak a közzétett cikkhez generálódnak – lib/kb/content/generated/diagrams.ts)
+ const nl=netlistNeedles();assert.ok(nl.length>=150);
+ for(const f of files){const s=readFileSync(f,'utf8');for(const n of nl)assert.ok(!s.includes(n),rel(f)+': netlista-felirat került a build bemenetébe: „'+n+'”')}
 }
 
 // ------------------------------------------------------------------ 5. Belső linkek, horgonyok, kapcsolódók

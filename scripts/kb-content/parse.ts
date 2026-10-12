@@ -12,12 +12,19 @@ import {slugify} from '../../lib/kb/content/inline';
 import type {KbBlock,KbTerm} from '../../lib/kb/content/types';
 
 export type RawSource={standard:string;kiadas:string;pont:string;comments:string[]};
+/** Az R3 vázlat ábrája a front matterben: netlistás bekötési ábra (`netlist`, változatai: `variants`) vagy más fajta (`kind`). */
+export type RawFigure={id:string;netlist?:string;kind?:string;views:string[];variants?:string[];netlists?:string[]};
 export type FrontMatter={
  slug:string;title:string;navTitle:string;summary:string;section:string;category:string;risk:string;
  audience:string[];keywords:string[];synonyms:string[];related:string[];calculators:string[];
  sources:RawSource[];ai:string;version:string;updated:string;
+ /** Csak R3 (biztonságkritikus) vázlatban: a felső veszély-doboz figyelmeztetés-könyvtári tétele (lib/kb/safety.ts), a lektori
+  * állapot, a tervező jelei, a lektori kérdések és az ábrák (netlistás bekötési ábrák). */
+ safety?:string;review?:string;plannerKinds?:string[];plannerModules?:string[];simulation?:string;lektorKerdesek?:string[];figures?:RawFigure[];
 };
 export const FRONT_KEYS=['slug','title','navTitle','summary','section','category','risk','audience','keywords','synonyms','related','calculators','sources','ai','version','updated'] as const;
+/** Az R3 vázlatok további (nem kötelező) mezői. */
+export const R3_FRONT_KEYS=['safety','review','plannerKinds','plannerModules','simulation','lektorKerdesek','figures'] as const;
 
 export function splitFrontMatter(src:string):{yaml:string;body:string}{
  const t=src.replace(/\r\n/g,'\n');
@@ -70,15 +77,44 @@ export function parseFrontMatter(yaml:string):FrontMatter{
    }
    continue;
   }
+  if(key==='lektorKerdesek'&&!(rest??'').trim()){
+   const items:string[]=[];
+   while(i+1<lines.length&&/^\s+/.test(lines[i+1])){
+    i++;const m=/^\s+-\s+(.*)$/.exec(lines[i]);if(!m)throw new Error('Nem értelmezhető lektori kérdés: '+lines[i]);
+    const v=scalar(m[1]);if(typeof v.value!=='string')throw new Error('A lektori kérdés szöveg: '+lines[i]);items.push(v.value);
+   }
+   out[key]=items;continue;
+  }
+  if(key==='figures'&&!(rest??'').trim()){
+   // - id: abra-1 / netlist: … / views: [ … ] / variants: (alatta „- fájl” sorok) / netlists: (ugyanígy) / kind: …
+   const figs:Record<string,unknown>[]=[];let list:string|null=null;
+   while(i+1<lines.length&&/^\s+/.test(lines[i+1])){
+    i++;const l=lines[i];
+    const item=/^ {2}-\s+(\w+):\s*(.*)$/.exec(l),field=/^ {4}(\w+):\s*(.*)$/.exec(l),sub=/^ {6}-\s+(.*)$/.exec(l);
+    if(item){figs.push({});list=null}
+    const m=item??field;
+    if(m&&figs.length){
+     const [,k,raw]=m,v=scalar(raw);
+     if(!raw.trim()||(!v.value.length&&typeof v.value==='string')){list=k;figs[figs.length-1][k]=[];continue}
+     figs[figs.length-1][k]=v.value;list=null;continue;
+    }
+    if(sub&&list&&figs.length){const v=scalar(sub[1]);(figs[figs.length-1][list] as string[]).push(String(v.value));continue}
+    throw new Error('Nem értelmezhető ábrasor: '+l);
+   }
+   out[key]=figs;continue;
+  }
   const v=scalar(rest??'');
   out[key]=v.value;
  }
- for(const k of Object.keys(out))if(!(FRONT_KEYS as readonly string[]).includes(k))throw new Error('Ismeretlen front matter mező: '+k);
+ for(const k of Object.keys(out))if(!(FRONT_KEYS as readonly string[]).includes(k)&&!(R3_FRONT_KEYS as readonly string[]).includes(k))throw new Error('Ismeretlen front matter mező: '+k);
  const str=(k:string)=>{const v=out[k];if(typeof v!=='string')throw new Error('Hiányzó vagy nem szöveges mező: '+k);return v};
  const list=(k:string)=>{const v=out[k];if(!Array.isArray(v))throw new Error('Hiányzó vagy nem lista mező: '+k);return v as string[]};
  return {slug:str('slug'),title:str('title'),navTitle:str('navTitle'),summary:str('summary'),section:str('section'),category:str('category'),risk:str('risk'),
   audience:list('audience'),keywords:list('keywords'),synonyms:list('synonyms'),related:list('related'),calculators:list('calculators'),
-  sources,ai:str('ai'),version:str('version'),updated:str('updated')};
+  sources,ai:str('ai'),version:str('version'),updated:str('updated'),
+  ...(out.safety!==undefined?{safety:str('safety')}:{}),...(out.review!==undefined?{review:str('review')}:{}),...(out.simulation!==undefined?{simulation:str('simulation')}:{}),
+  ...(out.plannerKinds!==undefined?{plannerKinds:list('plannerKinds')}:{}),...(out.plannerModules!==undefined?{plannerModules:list('plannerModules')}:{}),
+  ...(out.lektorKerdesek!==undefined?{lektorKerdesek:list('lektorKerdesek')}:{}),...(out.figures!==undefined?{figures:out.figures as RawFigure[]}:{})};
 }
 
 /** Lektorra váró (R3) vázlat: csak az azonosító mezők (a szöveg nem kerülhet a generált modulokba). */
@@ -91,9 +127,10 @@ export function pendingFields(src:string):{slug:string;section:string;category:s
 /** Markdown alsó index → mini-jelölés: „I_eff” → „I_{eff}” (a szó eleji _dőlt_ jelölést nem érinti). */
 export const subscripts=(s:string)=>s.replace(/([\p{L}\p{N}])_([\p{L}\p{N}]+)(?![\p{L}\p{N}_])/gu,'$1_{$2}');
 
-type Raw={t:'para';lines:string[]}|{t:'bullets';items:string[]}|{t:'numbered';items:string[]}|{t:'rows';rows:string[]}|{t:'quote';lines:string[]};
+type Raw={t:'para';lines:string[]}|{t:'bullets';items:string[]}|{t:'numbered';items:string[]}|{t:'rows';rows:string[]}|{t:'quote';lines:string[]}|{t:'simraw';kind:string;src:string[];opts:string[];body:string};
 
-const cells=(row:string)=>{const s=row.trim().replace(/^\|/,'').replace(/\|$/,'');return s.split('|').map(c=>c.trim())};
+/** Táblázatsor cellái; a belső link ([[id|szöveg]]) függőleges vonala nem cellahatár. */
+const cells=(row:string)=>{const s=row.trim().replace(/^\|/,'').replace(/\|$/,'');return s.split(/\|(?![^[]*\]\])/).map(c=>c.trim())};
 
 /** Önálló képletsor: egysoros bekezdés „=” jellel, legfeljebb 100 karakter, nem kettősponttal végződik, és az első „=” előtti rész
  * képletszerű (nincs benne 5 betűsnél hosszabb szó). Csak megjelenítés: a szöveg nem változik. */
@@ -156,16 +193,30 @@ function groupExamples(blocks:KbBlock[]):KbBlock[]{
 }
 
 /** Markdown-törzs → blokkok. `glossary`: a szakszótár betűs (egy-két betűs) szakaszai alatti listák szótári tételek. */
+/** A szimulációs blokk (R3): `<!-- sim:<fajta> src=<netlista> … -->` … `<!-- /sim:<fajta> -->`. A tartalmát (táblázat, lábjegyzet) a
+ * content/tudastar/r3-sim/check_articles.py veti össze a szimulátorral; itt csak a forma: a belső blokkok változatlanok. */
+const SIM_OPEN=/^<!-- sim:([a-z]+)((?:\s+\S+)+?)\s*-->$/;
 export function parseBody(body:string,{glossary=false}:{glossary?:boolean}={}):KbBlock[]{
  const raw:(Raw|KbBlock)[]=[];let cur:Raw|null=null;
  const flush=()=>{if(cur)raw.push(cur);cur=null};
- for(const line0 of body.split('\n')){
-  const line=line0.replace(/\s+$/,'');
+ const all=body.split('\n');
+ for(let li=0;li<all.length;li++){
+  const line=all[li].replace(/\s+$/,'');
   if(!line.trim()){flush();continue}
+  const sim=SIM_OPEN.exec(line);
+  if(sim){
+   flush();
+   const end='<!-- /sim:'+sim[1]+' -->',j=all.findIndex((l,k)=>k>li&&l.trim()===end);
+   if(j<0)throw new Error('Lezáratlan szimulációs blokk: '+line);
+   const args=sim[2].trim().split(/\s+/),src=args.filter(a=>a.startsWith('src=')).map(a=>a.slice(4));
+   if(!src.length)throw new Error('A szimulációs blokknak nincs forrása (src=…): '+line);
+   raw.push({t:'simraw',kind:sim[1],src,opts:args.filter(a=>!a.startsWith('src=')),body:all.slice(li+1,j).join('\n')});
+   li=j;continue;
+  }
   if(/^##\s/.test(line)){flush();raw.push({t:'h2',id:'',text:subscripts(line.replace(/^##\s+/,''))});continue}
   if(/^###\s/.test(line)){flush();raw.push({t:'h3',id:'',text:subscripts(line.replace(/^###\s+/,''))});continue}
   if(/^#/.test(line))throw new Error('Nem támogatott címsorszint: '+line);
-  if(line.startsWith('<'))throw new Error('HTML-elem vagy -megjegyzés (pl. szimulációs blokk) nem támogatott – az R3 Sémákhoz az ábramotor kell: '+line.slice(0,60));
+  if(line.startsWith('<'))throw new Error('HTML-elem vagy -megjegyzés nem támogatott (csak a szimulációs blokk: <!-- sim:… src=… -->): '+line.slice(0,60));
   if(line.startsWith('[ÁBRA:')){flush();raw.push(parseFigure(line));continue}
   if(line.startsWith('>')){if(cur?.t!=='quote'){flush();cur={t:'quote',lines:[]}}cur.lines.push(line.replace(/^>\s?/,''));continue}
   if(line.startsWith('|')){if(cur?.t!=='rows'){flush();cur={t:'rows',rows:[]}}cur.rows.push(line);continue}
@@ -187,9 +238,13 @@ export function parseBody(body:string,{glossary=false}:{glossary?:boolean}={}):K
    case 'h3':blocks.push({t:'h3',id:uniq(slugify(r.text)),text:r.text});break;
    case 'quote':{
     const text=subscripts(r.lines.join(' ').trim()),m=/^\*\*(Figyelem):\*\*\s+([\s\S]*)$/.exec(text);
-    if(!m)throw new Error('Csak „> **Figyelem:** …” doboz támogatott: '+text.slice(0,60));
+    // R3: „> **Veszély – életveszély: …** …” – a nem zárható felső veszély-doboz (a figyelmeztetés-könyvtár tételét tartalmazza).
+    const v=/^\*\*(Veszély – [^*]+?)\.?\*\*\s+([\s\S]*)$/.exec(text);
+    if(v){blocks.push({t:'callout',kind:'veszely',label:v[1],text:v[2]});break}
+    if(!m)throw new Error('Csak „> **Figyelem:** …” és (R3-ban) „> **Veszély – …**” doboz támogatott: '+text.slice(0,60));
     blocks.push({t:'callout',kind:'figyelem',label:m[1],text:m[2]});break;
    }
+   case 'simraw':blocks.push({t:'sim',kind:r.kind,src:r.src,...(r.opts.length?{opts:r.opts}:{}),blocks:parseBody(r.body)});break;
    case 'rows':{
     const rows=r.rows.filter(x=>!/^\|\s*:?-{3,}/.test(x)).map(x=>cells(x).map(subscripts));
     const [head,...rest]=rows;

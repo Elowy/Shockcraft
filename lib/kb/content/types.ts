@@ -18,8 +18,11 @@ export type KbTerm={id:string;term:string;note:string|null;text:string};
 export type KbBlock=
  /** „Röviden:” doboz. */
  |{t:'rovid';text:string}
- /** A vázlat „> **Figyelem:** …” doboza (R2-nél kötelező). */
- |{t:'callout';kind:'figyelem';label:string;text:string}
+ /** A vázlat „> **Figyelem:** …” doboza (R2-nél kötelező), illetve R3-ban a „> **Veszély – …**” nem zárható felső veszély-doboz. */
+ |{t:'callout';kind:'figyelem'|'veszely';label:string;text:string}
+ /** R3: a szimulátorral ellenőrzött tartalom (`<!-- sim:<fajta> src=… -->` blokk): kapcsolóállás-, vezeték- vagy szakasztáblázat és
+  * lábjegyzete; `src`: a netlistafájl(ok). A belső blokkok a vázlat szövege (a check_articles.py veti össze a szimulátorral). */
+ |{t:'sim';kind:string;src:readonly string[];opts?:readonly string[];blocks:readonly KbBlock[]}
  |{t:'h2';id:string;text:string}
  |{t:'h3';id:string;text:string}
  /** Bekezdés; a forrás sortörései megmaradnak (kidolgozott példák lépései). */
@@ -52,6 +55,9 @@ export type KbMeta={
  /** A H2-k (tartalomjegyzék, kereső, horgonyos linkek ellenőrzése). */
  anchors:readonly {id:string;title:string}[];
  words:number;fingerprint:string;figures:string;
+ /** Csak R3: a felső veszély-doboz könyvtári tétele (lib/kb/safety.ts), a tervező jelei (Sémák), és a netlistás ábrák: ábra-id →
+  * netlista-id-k (az első a fő ábra, a többi változat). A tartalmi ujjlenyomat része (csak ha van). */
+ safety?:string;plannerKinds?:readonly string[];diagrams?:readonly {figure:string;ids:readonly string[]}[];
 };
 
 /** Lektorra váró (R3) vázlat a regiszterben: SZÖVEG NÉLKÜL (se cím, se összefoglaló) – csak azonosítók, hogy a belső linkek

@@ -12,7 +12,10 @@ import {mainResults,parseInputs,runCalc,type Raw} from '../lib/calc/core';
 import {CALCULATORS,bySlug,calcFingerprint} from '../lib/calc/registry';
 import {T1_SLUGS,TABLE_GATED,type ExpertReview} from '../lib/calc/release';
 import {sourceFingerprint} from '../scripts/calc-source';
-import {EDITION,EDITIONS,ID_PREFIXES,calcBadgeTexts,ID_REF,NAME_PLACES,PARTS,PATHS,PDF_PLACEHOLDERS,T1_ORDER,allIds,allItems,approvedFingerprints,approvedTexts,assumptionsText,buildPackage,pdfInline,calcPairs,checkOutputs,committedEditions,contentFingerprint,declaration,editionLabel,editionProblems,eol,exact,formulasText,kalId,leafPaths,notCoveredFrom,packageProblems,packageTexts,parseEditions,partFingerprint,pdfText,readFont,releaseRefProblems,render,reviewRefProblems,selectCombos,verifiedText,type CalcExpect,type CommittedEdition,type Edition,type Expect,type Package,type ProgramCheck,type RuleItem,type Scenario} from '../scripts/lektori-csomag';
+import {DIAGRAM_ORDER,EDITION,EDITIONS,ID_PREFIXES,articleDiagrams,bekId,calcBadgeTexts,cssColor,diagramPairs,diagramRefProblems,ID_REF,NAME_PLACES,PARTS,PATHS,PDF_PLACEHOLDERS,T1_ORDER,allIds,allItems,approvedFingerprints,approvedTexts,assumptionsText,buildPackage,pdfDiagramStyles,pdfInline,calcPairs,checkOutputs,committedEditions,contentFingerprint,declaration,editionLabel,editionProblems,eol,exact,formulasText,kalId,leafPaths,notCoveredFrom,packageProblems,packageTexts,parseEditions,partFingerprint,pdfText,r3Questions,readFont,releaseRefProblems,render,reviewRefProblems,selectCombos,verifiedText,type CalcExpect,type CommittedEdition,type Edition,type Expect,type Package,type ProgramCheck,type RuleItem,type Scenario} from '../scripts/lektori-csomag';
+import {loadNetlist,netlistFingerprint,runNetlist,wireTable,type Netlist} from '../lib/kb/circuit';
+import {diagramSource,netlistFiles} from '../scripts/kb-content/diagrams';
+import type {KbRelease} from '../lib/kb/release';
 
 const pkg=buildPackage(),font=readFont(),out=render(pkg,font),md=out.md;
 const T=SIZING_TABLES;
@@ -24,7 +27,11 @@ assert.equal(EDITION.content,pkg.fingerprints.content,'tartalmi változásnál �
 assert.deepEqual(editionProblems(pkg,null),[],'az EDITIONS előzménylista érvényes');
 // A nem tervezet kiadás bejegyzése részenként rögzíti a jóváhagyható ujjlenyomatokat (a jóváhagyások ehhez kötődnek).
 assert.ok(!EDITION.draft,'az aktuális kiadás kiküldhető (nem tervezet)');
-assert.deepEqual([EDITION.tables,EDITION.formulas,EDITION.calcs],[pkg.fingerprints.tables,pkg.fingerprints.formulas,calcPairs(pkg)]);
+assert.deepEqual([EDITION.tables,EDITION.formulas,EDITION.calcs,EDITION.diagrams],[pkg.fingerprints.tables,pkg.fingerprints.formulas,calcPairs(pkg),diagramPairs(pkg)]);
+// Az LK-4 az 1–3. részt változatlanul hozza (a 3. rész kalkulátoronkénti ujjlenyomat-párjai és az 1–2. rész ujjlenyomata azonos az LK-3-éval).
+{const lk3=EDITIONS.find(e=>e.number===3)!;assert.ok(EDITION.number>=4&&lk3.tables===EDITION.tables&&lk3.formulas===EDITION.formulas&&JSON.stringify(lk3.calcs)===JSON.stringify(EDITION.calcs),'az 1–3. rész változatlan')}
+assert.ok(editionProblems(pkg,null,[...EDITIONS.slice(0,-1),{...EDITION,diagrams:undefined}]).some(p=>p.includes('ábránkénti ujjlenyomat-pár')),'az LK-4-től kötelező a diagrams');
+assert.ok(editionProblems(pkg,null,[...EDITIONS.slice(0,-1),{...EDITION,diagrams:{...EDITION.diagrams,'valtokapcsolo-106':'00000000/00000000'}}]).some(p=>p.includes('eltérnek az LK-')),'az ábra ujjlenyomat-párja is a bejegyzés része');
 assert.ok(EDITIONS.filter(e=>e.number<=2).every(e=>e.draft&&e.sent===undefined),'az LK-1 és az LK-2 belső tervezet');
 // A git HEAD-ben lévő EDITIONS: a korábbi és a kiküldött (sent) kiadás nem írható át, a kiadásszám nem mehet vissza; csak a még ki
 // nem küldött utolsó kiadás tartalma változhat (pl. a commitolt, de lektornak még nem küldött LK-3).
@@ -61,7 +68,7 @@ const matrixChanged=structuredClone(pkg) as Package;
 matrixChanged.parts[0].blocks.find(b=>b.matrix)!.matrix!.rows[0].cells[0]='999';
 assert.notEqual(contentFingerprint(matrixChanged.parts),pkg.fingerprints.content,'mátrix → csomag-ujjlenyomat');
 const texts=packageTexts();
-assert.notEqual(contentFingerprint(pkg.parts,{...texts,approval:{...texts.approval,declaration:texts.approval.declaration.replace('nem terjed ki a csomag 4–6. részére','kiterjed a csomag 4–6. részére is')}}),pkg.fingerprints.content,'nyilatkozat → csomag-ujjlenyomat');
+assert.notEqual(contentFingerprint(pkg.parts,{...texts,approval:{...texts.approval,declaration:texts.approval.declaration.replace('nem terjed ki a csomag 5–6. részére','kiterjed a csomag 5–6. részére is')}}),pkg.fingerprints.content,'nyilatkozat → csomag-ujjlenyomat');
 assert.notEqual(contentFingerprint(pkg.parts,{...texts,approval:{...texts.approval,calcNote:texts.approval.calcNote+' '}}),pkg.fingerprints.content,'kalkulátoronkénti döntés szövege → csomag-ujjlenyomat');
 assert.notEqual(contentFingerprint(pkg.parts,{...texts,intro:texts.intro.slice(1)}),pkg.fingerprints.content,'bevezető → csomag-ujjlenyomat');
 // CRLF-es klónban sem jelez hamisan elavultat.
@@ -109,14 +116,14 @@ assert.ok(packageProblems({...pkg,parts:[...pkg.parts,{no:9,title:'próba',intro
 assert.equal(pkg.fingerprints.tables,tablesFingerprint());
 assert.equal(pkg.fingerprints.tables,fingerprint(reviewedContent()));
 assert.ok(md.includes(`| 1. rész – táblázat-ujjlenyomat | ${tablesFingerprint()} `),'a fejléc a táblázat-ujjlenyomatot mutatja');
-assert.ok(md.includes(`1. rész: ${tablesFingerprint()}; 2. rész: ${pkg.fingerprints.formulas}; 3. rész: ${pkg.fingerprints.calculators}`),'a jóváhagyó lap az ujjlenyomatokat mutatja');
+assert.ok(md.includes(`1. rész: ${tablesFingerprint()}; 2. rész: ${pkg.fingerprints.formulas}; 3. rész: ${pkg.fingerprints.calculators}; 4. rész: ${pkg.fingerprints.diagrams}`),'a jóváhagyó lap az ujjlenyomatokat mutatja');
 assert.equal(pkg.fingerprints.calculators,partFingerprint(pkg.parts[2]));assert.ok(md.includes(`| Jóváhagyott csomagverzió és ujjlenyomatok | ${approvedFingerprints(pkg)} |`));
 assert.ok(md.includes(`| Táblázatváltozat | ${T.version} |`));
 assert.ok(md.includes(`| Csomagverzió | ${editionLabel()} |`));
 
 // (e) A PDF legenerálható, determinisztikus, ésszerű terjedelmű, és minden kiírt karakter szerepel a betűkészletben.
 assert.ok(out.pdf.length>20000,'PDF mérete: '+out.pdf.length);
-assert.ok(out.pages>=40&&out.pages<=110,'PDF oldalszáma: '+out.pages);
+assert.ok(out.pages>=80&&out.pages<=160,'PDF oldalszáma: '+out.pages);
 assert.ok(out.pdf.equals(render(pkg,font).pdf),'a PDF determinisztikus');
 assert.ok(out.pdf.subarray(0,5).toString()==='%PDF-');
 assert.ok(md.includes(declaration(out.pages))&&declaration(out.pages).includes(`${out.pages} oldalas`),'a nyilatkozat a PDF oldalszámát rögzíti');
@@ -303,9 +310,9 @@ assert.deepEqual(releaseRefProblems({'ohm-torveny':rec('')}),[],'T0 rekordot a c
 
 // (h) Szerkezet: helyőrzők, jóváhagyó lap, szóhasználat, a név megjelenésének leírása.
 assert.deepEqual(pkg.parts.map(p=>p.no),[1,2,3,4,5,6]);assert.equal(PARTS.length,6);
-for(const p of pkg.parts.filter(p=>p.no<=3))assert.ok(!p.placeholder&&p.blocks.length,p.no+'. rész kész');
-for(const p of pkg.parts.filter(p=>p.no>=4))assert.ok(p.placeholder&&!p.blocks.length,p.no+'. rész helyőrző');
-assert.ok(md.includes('A Sémák ábráinak elkészülte után kerül be'));
+for(const p of pkg.parts.filter(p=>p.no<=4))assert.ok(!p.placeholder&&p.blocks.length,p.no+'. rész kész');
+for(const p of pkg.parts.filter(p=>p.no>=5))assert.ok(p.placeholder&&!p.blocks.length,p.no+'. rész helyőrző');
+assert.ok(!md.includes('A Sémák ábráinak elkészülte után kerül be'),'a 4. rész már nem helyőrző');
 for(const t of ['## Jóváhagyó lap','### 3. rész – kalkulátoronkénti döntés','### Döntés és aláírás','Jóváhagyó neve','Kamarai / névjegyzéki szám','Jogosultság megnevezése','| Hely |','| Dátum |','| Aláírás |','### Teendő eltérés esetén','Mit jelent a jóváhagyás – és mit nem?','### Becsült ráfordítás','### Hogyan kell kitölteni?','a többi, pipálatlanul hagyott tétel egyezőnek számít','Megjegyzés a blokkhoz (forrás, kiadás)','külön mellékletben'])assert.ok(md.includes(t),'hiányzik: '+t);
 assert.ok(!/szakmailag ellenőrzött|MSZ szerint megfelel|megfelel a szabványnak|szabványos méretezés/i.test(md),'tiltott kifejezés');
 // A név megjelenése a program pontos szövegével és helyeivel van leírva: névvel (hozzájárulással) és név nélkül, a jogosultsággal.
@@ -400,5 +407,63 @@ const hurNc=bySlug('hurokimpedancia')!.notCovered!;assert.ok(!hurNc.some(x=>/cs�
 // A kalkulátorok példái a tervező méretezésével is egyeznek (pl. ΔU 23,4 m-en = a mintaterv c1 áramkörének esése, K-DU1).
 assert.ok(near(scenario({circuit:'c1',set:{load:3680}}).drop!,voltageDropPercent({b:2,length:23.4,current:16,section:2.5,cosPhi:1})));
 
+// (j) 4. rész – bekötési ábrák: mind a 20 netlista saját BEK-blokkot kap a megadott sorrendben, a mostani netlista- és ábra-ujjlenyomattal
+// (scripts/kb-content/diagrams.ts – ugyanez kerül a cikk kiadási rekordjába), a program vezetéktáblájával és minden kapcsolóállással; a
+// TS = Python egyezést a generátor a rögzített referencián ellenőrzi (eltérésnél meg sem áll össze a csomag); a PDF a rajzot vektorosan,
+// a stíluslap színeivel rajzolja; a jóváhagyó lapon ábránként Jóváhagyom / Javítással / Elutasítom és a második olvasó mezői.
+const part4=pkg.parts[3];
+assert.equal(part4.no,4);
+const nlById=new Map(netlistFiles('.').map(f=>{const n=JSON.parse(readFileSync('content/tudastar/r3/'+f,'utf8')) as Netlist;return [n.id,{f,n}]}));
+assert.deepEqual(part4.blocks.map(b=>b.id),DIAGRAM_ORDER.map(bekId),'a 20 ábra a megadott sorrendben');
+assert.equal(part4.blocks.length,20);
+for(const b of part4.blocks){
+ const d=b.diagram!;assert.ok(d,b.id+': ábra');
+ const {f,n}=nlById.get(d.netlistId)!,c=loadNetlist(n),rep=runNetlist(c);
+ assert.equal(d.netlistFp,netlistFingerprint(n),b.id+': netlista-ujjlenyomat');
+ assert.equal(d.diagramFp,diagramSource('.',[f]),b.id+': ábra-ujjlenyomat (a cikk rekordjáé is ebből áll)');
+ assert.deepEqual(d.wires,wireTable(c).map(w=>[String(w.no),w.fromLabel,w.toLabel,w.conductor,w.color,w.section]),b.id+': vezetéktábla');
+ assert.equal(d.truth.rows.length,rep.combinations,b.id+': minden állás');
+ assert.ok(d.python.startsWith('egyezik ('+rep.combinations+' állás'),b.id+': TS = Python');
+ assert.ok(d.prims.some(p=>p.k==='poly'&&p.data?.wire),b.id+': a rajz vezetékei');
+ assert.ok(!d.prims.some(p=>(p.cls??'').includes('is-off')),b.id+': csak az alapállás érintkezői');
+ assert.deepEqual(b.items.map(i=>i.id),[b.id+'-NL',b.id+'-RAJZ',b.id+'-VEZ',...(d.sections.length?[b.id+'-SZAK']:[]),b.id+'-ALL'],b.id+': tételek');
+ const row=pkg.diagrams.find(x=>x.block===b.id)!;assert.deepEqual([row.netlistFp,row.diagramFp],[d.netlistFp,d.diagramFp]);
+ assert.ok(md.includes(`| ${b.title} | ${b.id} | ${d.netlistFp} | ${d.diagramFp} | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |`),b.id+': ábránkénti döntés sora');
+ assert.ok(md.includes(`**Döntés (${b.id}):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom`),b.id+': döntés a blokk végén');
+ assert.ok(md.includes('Netlista-ujjlenyomat: '+d.netlistFp),b.id+': a netlista ujjlenyomata a blokk elején');
+}
+// Kérdések: a témakör közös kérdései (content/tudastar/lektori-kerdesek-r3.md) a csoport első ábrájánál, a cikk sajátjai a cikk első ábrájánál.
+for(const [first,sec] of [['BEK-EGYPOLUSU-KAPCSOLO-101','Világítási kapcsolások (101–107)'],['BEK-DUGALJ-ATHURKOLAS','Dugalj, kismegszakító, FI-relé'],['BEK-FOLDELES-TN-C','Földelési rendszerek, EPH, feszültségmentesítés']] as const){
+ const qs=r3Questions(sec);assert.ok(qs.length>=5,sec);
+ const b=part4.blocks.find(x=>x.id===first)!;for(const q of qs)assert.ok(b.questions!.some(x=>x.text.endsWith(q)),first+': közös kérdés: '+q.slice(0,40));
+}
+assert.equal(part4.blocks.filter(b=>b.questions?.some(q=>q.text.includes('saját kérdése')&&q.text.includes('PEN szétválasztásának helye'))).length,1,'a cikk saját kérdései egyszer (a cikk első ábrájánál)');
+// A jóváhagyó lap: ábránkénti döntés és a második olvasó (R3).
+for(const t of ['### 4. rész – ábránkénti döntés','### 4. rész – második olvasó','| Második olvasó jogosultsága |'])assert.ok(md.includes(t),'hiányzik: '+t);
+assert.ok(declaration(out.pages).includes('4. (bekötési ábrák)')&&declaration(out.pages).includes('második olvasó'));
+// PDF: a rajz a stíluslap színeivel (világos téma), és a rajz feliratai is a betűkészletből (a glyph-ellenőrzés fedi őket).
+{
+ const st=pdfDiagramStyles();
+ assert.equal(cssColor(st.tokens,st.rules['w-l1'].stroke),'#8a4b22','L1/L barna');assert.equal(cssColor(st.tokens,st.rules['w-n'].stroke),'#2563b8','N kék');
+ assert.equal(cssColor(st.tokens,st.rules['w-pe'].stroke),'#2e8b3e','PE zöld');assert.equal(cssColor(st.tokens,st.rules['w-pes'].stroke),'#f2c200','PE sárga csík');
+ assert.equal(cssColor(st.tokens,st.rules['w-gap'].stroke),'#ffffff','a keresztezési rés a lap színe');
+ assert.equal(st.rules['w-pes']['stroke-dasharray'],'5 5');
+ for(const t of ['Kötődoboz','Betáp','Lakáselosztó','Föld (talaj)','IΔn'])assert.ok(out.texts.includes(t),'a PDF-rajz felirata: '+t);
+}
+// Az R3 cikk lektori rekordja (lib/kb/release.ts) a 4. rész kiküldött kiadásához kötött: az approvalRef az LK-n kiadást, annak
+// csomag-ujjlenyomatát és a cikk ábráinak ujjlenyomat-párjait nevezi meg; eltérő (azóta módosított) ábra esetén hiba.
+{
+ const sent=[...EDITIONS.slice(0,-1),{...EDITION,sent:'2026-10-13'}];
+ const pairs=diagramPairs(pkg),arts=articleDiagrams(pkg),ids=arts['valtokapcsolo-106-bekotese'];
+ assert.deepEqual(ids,['valtokapcsolo-106']);
+ const r=(ref:string):KbRelease=>({kind:'lektoralt',section:'semak',risk:'R3',qualification:'x',date:'2026-10-14',fingerprint:'00000000',approvalRef:ref,secondReader:'y'});
+ const okRef=`LK-${EDITION.number} (${EDITION.content}); valtokapcsolo-106: ${pairs['valtokapcsolo-106']}`;
+ assert.deepEqual(diagramRefProblems({'valtokapcsolo-106-bekotese':r(okRef)},arts,pairs,sent),[]);
+ assert.ok(diagramRefProblems({'valtokapcsolo-106-bekotese':r(okRef)},arts,pairs,EDITIONS)[0].includes('kiküldöttként'),'ki nem küldött kiadásra nem hivatkozhat');
+ assert.ok(diagramRefProblems({'valtokapcsolo-106-bekotese':r(okRef)},arts,{...pairs,'valtokapcsolo-106':'909db559/00000000'},sent)[0].includes('nem ezt az ábrát'),'az ábra azóta változott');
+ assert.ok(diagramRefProblems({'valtokapcsolo-106-bekotese':r(`LK-${EDITION.number} (${EDITION.content})`)},arts,pairs,sent)[0].includes('ujjlenyomat-párja'),'a pár hiányzik a hivatkozásból');
+ assert.deepEqual(diagramRefProblems({},arts,pairs),[],'most nincs R3 rekord');
+}
+
 const counts=pkg.parts.map(p=>p.blocks.reduce((s,b)=>s+b.items.length,0));
-console.log(`PASS: lektori csomag – ${editionLabel()}, ${counts[0]+counts[1]+counts[2]} tétel (1. rész ${counts[0]}, 2. rész ${counts[1]}, 3. rész ${counts[2]}), ${checks.length} programmal összevetett eset, ${out.pages} PDF-oldal; naprakész, ujjlenyomatok: 1. rész ${pkg.fingerprints.tables}, 2. rész ${pkg.fingerprints.formulas}, 3. rész ${pkg.fingerprints.calculators}.`);
+console.log(`PASS: lektori csomag – ${editionLabel()}, ${counts[0]+counts[1]+counts[2]+counts[3]} tétel (1. rész ${counts[0]}, 2. rész ${counts[1]}, 3. rész ${counts[2]}, 4. rész ${counts[3]} – 20 bekötési ábra), ${checks.length} programmal összevetett eset, ${out.pages} PDF-oldal; naprakész, ujjlenyomatok: 1. rész ${pkg.fingerprints.tables}, 2. rész ${pkg.fingerprints.formulas}, 3. rész ${pkg.fingerprints.calculators}, 4. rész ${pkg.fingerprints.diagrams}.`);

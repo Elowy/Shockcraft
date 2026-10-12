@@ -7,7 +7,7 @@
 // lib/calc/release.ts), és minden definícióra (lib/calc/defs) ellenőrizzük, hogy hub-link ⇔ 200 ⇔ sitemap; a többi 404.
 import assert from 'node:assert/strict';
 import {readdirSync} from 'node:fs';
-import {htmlText,needleText,r3Items,r3Needles} from './kb-r3-needles.mjs';
+import {DIAGRAM_MARKERS,htmlText,needleText,netlistNeedles,r3Items,r3Needles} from './kb-r3-needles.mjs';
 import {quizNeedles} from './kb-quiz-needles.mjs';
 
 const BASE=(process.env.BASE||'http://127.0.0.1:8787').replace(/\/$/,'');
@@ -136,6 +136,16 @@ for(const sc of r3Cats){const [sec,cat]=sc.split('/');await page('/tudastar/'+se
 await gone('/tudastar/semak');await gone('/tudastar/semak/');
 await page('/tudastar/elmelet/nincs-ilyen',{status:404});await page('/tudastar/elmelet/kategoria/nincs-ilyen',{status:404});
 for(const x of served)noR3Text(x.text.match(/<link rel="canonical" href="([^"]+)"/)?.[1]??'?',x.text);
+// Sémák: lektorálásig nincs fül, link, bekötési ábra és netlista-felirat egyik kiszolgált oldalon sem.
+{
+ const nl=netlistNeedles().map(needleText);
+ for(const x of served){
+  const label=x.text.match(/<link rel="canonical" href="([^"]+)"/)?.[1]??'?';
+  assert.ok(!/href="\/tudastar\/semak[/"#]/.test(x.text),label+': link a Sémákra (lektorálásig nincs)');
+  for(const m of DIAGRAM_MARKERS)assert.ok(!x.text.includes(m),label+': bekötési ábra a kiszolgált oldalon ('+m+')');
+  const t=htmlText(x.text);for(const n of nl)assert.ok(!t.includes(n),label+': netlista-felirat a kiszolgált oldalon: „'+n+'”');
+ }
+}
 // A kérdésbank kiadatlan (lektorálatlan) kérdéseinek szövege egyik kiszolgált oldalon sincs (a bank élesedéséig ez az összes kérdés).
 const qNeedles=quizNeedles().map(needleText);
 for(const x of served){const t=htmlText(x.text);for(const n of qNeedles)assert.ok(!t.includes(n),'kiadatlan kérdésbank-szöveg a kiszolgált oldalon: „'+n.slice(0,60)+'…”')}

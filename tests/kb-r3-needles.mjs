@@ -26,8 +26,27 @@ export function r3Needles(root='.'){
   }
  }
  const own=md(join(root,'content/tudastar/elmelet')).map(f=>readFileSync(f,'utf8')).join('\n');
- return [...out].filter(n=>!own.includes(n));
+ // A figyelmeztetés-könyvtár (lib/kb/safety.ts) közös szövege – pl. a `bekotes` veszély-doboz mondatai – nem R3 cikkszöveg: a vázlatok
+ // veszély-doboza ezeket tartalmazza (a generátor ellenőrzi), a könyvtár maga a build része.
+ const lib=readFileSync(join(root,'lib/kb/safety.ts'),'utf8');
+ return [...out].filter(n=>!own.includes(n)&&!lib.includes(n));
 }
+
+/** A lektorra váró netlisták feliratai (content/tudastar/r3/*.netlist.json): címek, alkatrész- és kapocsfeliratok a vezetéktábla
+ * „alkatrész: kapocs” alakjában – legalább 20 karakter, és nem fordul elő a közzétett vázlatokban. A bekötési ábra (SVG, vezetéktábla)
+ * ezekből készül, így a kiszolgált oldalakon és a build kimenetében sem lehetnek (tests/kb-dist.mjs, tests/kb-routes.mjs). */
+export function netlistNeedles(root='.'){
+ const out=new Set();
+ for(const f of readdirSync(join(root,'content/tudastar/r3')).filter(f=>f.endsWith('.netlist.json')).sort()){
+  const n=JSON.parse(readFileSync(join(root,'content/tudastar/r3',f),'utf8'));
+  out.add(n.title);
+  for(const c of n.components){if(c.label)out.add(c.label);for(const t of c.terminals)out.add((c.label??c.id)+': '+(t.label??t.id))}
+ }
+ const own=md(join(root,'content/tudastar/elmelet')).map(f=>readFileSync(f,'utf8')).join('\n');
+ return [...out].filter(x=>x&&x.length>=20&&!own.includes(x));
+}
+/** A bekötési ábra jelölői a kirajzolt HTML-ben (csak a renderelt SVG-ben fordulnak elő, a kódban nem). */
+export const DIAGRAM_MARKERS=['data-diagram="','data-wire="','data-diagram-figure="'];
 
 /** A HTML-ben a szöveg entitásokkal is állhat; a keresés a szövegcsomópontok egyszerűsített alakján fut. */
 export const htmlText=(html)=>html.replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#x27;|&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;| /g,' ').replace(/\s+/g,' ');

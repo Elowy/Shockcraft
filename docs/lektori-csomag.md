@@ -2,19 +2,20 @@
 
 # Villanyrajz – lektori csomag
 
-Szakmai lektori ellenőrzőcsomag a méretezési segédszámításhoz és a szabványhoz kötött kalkulátorokhoz: táblázatok, képletek, programozott döntések és kalkulátorok
+Szakmai lektori ellenőrzőcsomag a méretezési segédszámításhoz, a szabványhoz kötött kalkulátorokhoz és a Tudástár bekötési ábráihoz: táblázatok, képletek, programozott döntések, kalkulátorok és bekötési ábrák
 
 | Adat | Érték |
 |---|---|
-| Csomagverzió | LK-3 (2026. 10. 10.) |
-| Csomag-ujjlenyomat | 77cbe404 (a csomag teljes szövegéé: bevezető, tételek, jóváhagyó lap) |
+| Csomagverzió | LK-4 (2026. 10. 12.) |
+| Csomag-ujjlenyomat | 09c63bbe (a csomag teljes szövegéé: bevezető, tételek, jóváhagyó lap) |
 | Táblázatváltozat | 2026.10-1 |
 | 1. rész – táblázat-ujjlenyomat | c78b23ee (ehhez köti a program a jóváhagyást) |
 | 2. rész – képlet-ujjlenyomat | 25b6c94f (a fejlesztési folyamat automatikus tesztje ellenőrzi) |
 | 3. rész – kalkulátor-ujjlenyomat | e65e37f3 (a 3. rész egészéé; kalkulátoronként: a döntési táblázatban) |
+| 4. rész – ábra-ujjlenyomat | f2384506 (a 4. rész egészéé; ábránként: a döntési táblázatban) |
 | Jóváhagyási állapot (1. rész) | ellenőrizendő – jogosult tervező még nem hagyta jóvá |
-| Ellenőrizendő tételek | 1. rész: 146; 2. rész: 38; 3. rész: 126 (összesen 310) |
-| Becsült ráfordítás | kb. 6 óra 5 perc |
+| Ellenőrizendő tételek | 1. rész: 146; 2. rész: 38; 3. rész: 126; 4. rész: 100 (összesen 410) |
+| Becsült ráfordítás | kb. 11 óra 10 perc |
 
 > Belső munkaanyag a szakmai lektor részére – nem nyilvános. A csomagot a program generálja; a táblázatértékek a program jelenlegi értékei, amelyeket a szabvánnyal kell összevetni.
 
@@ -24,7 +25,7 @@ Szakmai lektori ellenőrzőcsomag a méretezési segédszámításhoz és a szab
 - 1. rész – Méretezési táblázatok
 - 2. rész – Képletek és programozott döntések
 - 3. rész – Szabványhoz kötött kalkulátorok (T1)
-- 4. rész – Bekötési ábrák (R3) (helyőrző)
+- 4. rész – Bekötési ábrák (R3)
 - 5. rész – Biztonsági cikkek (R3) (helyőrző)
 - 6. rész – Vizsgakérdések (helyőrző)
 - Jóváhagyó lap
@@ -54,14 +55,16 @@ A jóváhagyás jelenti:
 
 - az 1. rész értékei, táblázatszámai, kiadásai és leírásai a hivatkozott szabványok hatályos kiadásával egyeznek (vagy a lektor megadta a helyes értéket);
 - a 2. rész képletei helyesek, és a programozott döntések, alapértékek iránya és jelölése elfogadható egy tervezői ellenőrzést segítő számításhoz;
-- a 3. rész „Jóváhagyom” jelölésű kalkulátorainak képletei, bemeneti korlátai, alapértékei, figyelmeztetései és szóhasználata helyesek, illetve elfogadhatók egy tájékoztató, „számítás szerinti” kalkulátorhoz.
+- a 3. rész „Jóváhagyom” jelölésű kalkulátorainak képletei, bemeneti korlátai, alapértékei, figyelmeztetései és szóhasználata helyesek, illetve elfogadhatók egy tájékoztató, „számítás szerinti” kalkulátorhoz;
+- a 4. rész „Jóváhagyom” jelölésű bekötési ábrái (bekötés, érszínek, kapcsok szerepe, szakaszok érszáma, működés minden állásban) helyesek, és alkalmasak szakember tájékoztatására; R3 tartalomként ehhez a második olvasó egyetértése is kell.
 
 A jóváhagyás nem jelenti:
 
 - tervezői felelősségvállalást az egyes, a programmal készült tervekért vagy a kalkulátorokkal végzett egyes számításokért: az eredmény továbbra is „tervezői ellenőrzést segítő”, illetve „számítás szerinti” érték, nem tervezői méretezés; a tervért annak tervezője felel – a programban megjelenő jóváhagyási szöveg is csak a táblázatértékekre vonatkozik;
 - a program egészének (forráskód, felület, más funkciók) vizsgálatát vagy minősítését;
 - a felhasználó által megadott adatok (terhelés, hossz, szerelési mód, Zs, projekt-felülírás) helyességének igazolását, illetve a kész berendezés mérésének kiváltását;
-- a hatókörön kívüli esetek (D-HATOKOR és a kalkulátorok „Nem vizsgált” listái) vizsgálatát, és a 4–6. részt, amely jelenleg helyőrző.
+- a hatókörön kívüli esetek (D-HATOKOR és a kalkulátorok „Nem vizsgált” listái) vizsgálatát, és az 5–6. részt, amely jelenleg helyőrző;
+- a 4. rész ábráihoz tartozó cikkek szövegének jóváhagyását: a cikk csak akkor jelenhet meg, ha a szövegét is jóváhagyták (az 5. rész elkészültéig a cikkvázlat alapján, docs/lektoralas.md).
 
 ### Hogyan kell kitölteni?
 
@@ -70,9 +73,10 @@ A jóváhagyás nem jelenti:
 3. Gyorsítás: ha a blokk minden tétele egyezik, elég a blokk végén „A blokk minden tétele egyezik” négyzetet jelölni; a tételeket nem kell egyenként pipálni. Ha bármelyik tétel eltér, a blokk négyzetét ne jelölje; az eltérő tételeket jelölje ✗-szel, a többi, pipálatlanul hagyott tétel egyezőnek számít. A terhelhetőségi táblák elején álló áttekintő mátrix soronként vethető össze a szabvány táblázatával.
 4. A 2. és a 3. részben minden szabálytétel egy szabályt, indoklást és kézzel számolt példát tartalmaz; a példát érdemes újraszámolni. A „Kérdés a lektorhoz” pontokra kérjük külön választ a megjegyzés mezőben.
 5. A 3. részben a táblázatértékeket nem kell újra összevetni (az 1. rész azonosítóival hivatkozunk rájuk). A kalkulátorok kalkulátoronként hagyhatók jóvá (Jóváhagyó lap, „3. rész – kalkulátoronkénti döntés”). A kalkulátorok előnézetben ki is próbálhatók (a hozzáférést a megbízó adja), de a csomag önmagában is ellenőrizhető.
-6. Ha két forrás egy értékre eltérő számot ad, mindkettőt kérjük a megjegyzésbe írni a forrással; az érték a tisztázásig „ellenőrizendő” marad.
-7. Terjedelmesebb javítást (pl. egy teljes táblázat javasolt értékeit) külön mellékletben kérjük, a tételazonosítókra hivatkozva.
-8. Végül a Jóváhagyó lapot kell kitölteni és aláírni (a lapokat a láblécben szignálni), és a jelölt csomaggal együtt (papíron vagy szkennelve) visszaküldeni.
+6. A 4. részben ábránként a rajzot, a vezetéktáblát, a szakaszok érszámát és a kapcsolóállás-táblázatot kell átnézni, és a blokk végén (és a Jóváhagyó lap „4. rész – ábránkénti döntés” táblázatában) jelölni: Jóváhagyom, Javítással (a hibát a megjegyzésbe), vagy Elutasítom. A cikkek saját és a témakör közös lektori kérdései a blokkok elején állnak.
+7. Ha két forrás egy értékre eltérő számot ad, mindkettőt kérjük a megjegyzésbe írni a forrással; az érték a tisztázásig „ellenőrizendő” marad.
+8. Terjedelmesebb javítást (pl. egy teljes táblázat javasolt értékeit) külön mellékletben kérjük, a tételazonosítókra hivatkozva.
+9. Végül a Jóváhagyó lapot kell kitölteni és aláírni (a lapokat a láblécben szignálni), és a jelölt csomaggal együtt (papíron vagy szkennelve) visszaküldeni.
 
 A csomag belső munkaanyag, nem nyilvános. A benne szereplő számértékek a program jelenlegi értékei, amelyeket a szabvánnyal össze kell vetni; nem a szabvány szövegének másolatai.
 
@@ -115,8 +119,28 @@ A becslés a szabványok kéznél lévő, hatályos kiadását és a csomag egys
 | KAL-KISMEGSZAKITO | Kismegszakító-választás | 15 | 20 perc |
 | KAL-HUROKIMPEDANCIA | Hurokimpedancia és zárlati áram | 14 | 22 perc |
 | KAL-TERHELHETOSEG-TABLAZAT | Terhelhetőségi táblázat | 12 | 18 perc |
+| BEK-EGYPOLUSU-KAPCSOLO-101 | Egypólusú kapcsoló (101): egy lámpa egy helyről | 5 | 13 perc |
+| BEK-KETPOLUSU-KAPCSOLO-102 | Kétpólusú kapcsoló (102): a fázis- és a nullavezető együttes bontása | 5 | 13 perc |
+| BEK-CSILLARKAPCSOLO-105 | Csillárkapcsoló (105): két lámpakör egy helyről | 5 | 15 perc |
+| BEK-VALTOKAPCSOLO-106 | Váltókapcsolás (2 × 106): egy lámpa két helyről | 5 | 14 perc |
+| BEK-KETTOS-VALTOKAPCSOLO-106-6 | Kettős váltókapcsoló (106+6): két lámpa, mindkettő két helyről | 5 | 18 perc |
+| BEK-KERESZTKAPCSOLO-107 | Keresztkapcsolás (106 + 107 + 106): egy lámpa három helyről | 5 | 15 perc |
+| BEK-KERESZTKAPCSOLO-107-2X107 | Keresztkapcsolás (106 + 2 × 107 + 106): egy lámpa 4 helyről | 5 | 17 perc |
+| BEK-KERESZTKAPCSOLO-107-3X107 | Keresztkapcsolás (106 + 3 × 107 + 106): egy lámpa 5 helyről | 5 | 20 perc |
+| BEK-KERESZTKAPCSOLO-107-4X107 | Keresztkapcsolás (106 + 4 × 107 + 106): egy lámpa 6 helyről | 5 | 25 perc |
+| BEK-DUGALJ-ATHURKOLAS | Dugaljkör áthurkolással: két védőérintkezős dugalj FI-relé és kismegszakító után | 5 | 14 perc |
+| BEK-DUGALJ-LEAGAZTATAS | Dugaljkör leágaztatással: két dugalj a kötődobozból, FI-relé és kismegszakító után | 5 | 15 perc |
+| BEK-KISMEGSZAKITO-ARAMKOROK | Két dugaljkör saját kismegszakítóval, közös FI-relé után | 5 | 14 perc |
+| BEK-FI-RELE-BEKOTES | Áram-védőkapcsoló (FI-relé) bekötése dugaljkör elé, próbagombbal | 5 | 14 perc |
+| BEK-FI-RELE-HIBAHELYZETEK | Mikor old ki a FI-relé? Testzárlat, fázis–föld és fázis–nulla érintés | 5 | 14 perc |
+| BEK-FOLDELES-TN-C | TN-C rendszer: a PEN-vezető a fogyasztóig fut | 5 | 13 perc |
+| BEK-FOLDELES-TN-S | TN-S rendszer: külön nulla- és védővezető a táppontól | 5 | 14 perc |
+| BEK-FOLDELES-TN-C-S | TN-C-S rendszer: PEN a szétválasztási pontig, utána külön N és PE | 5 | 14 perc |
+| BEK-FOLDELES-TT | TT rendszer: a fémház a saját földelőn | 5 | 13 perc |
+| BEK-FOLDELES-IT | IT rendszer: földeletlen táppont, földelt fémházak | 5 | 16 perc |
+| BEK-EPH-ALAPOK | Egyenpotenciálra hozás: a fő EPH-sín és a vízvezeték bekötése (TN-C-S) | 5 | 14 perc |
 | – | Jóváhagyó lap kitöltése | – | 10 perc |
-|  | Összesen | 310 | kb. 6 óra 5 perc |
+|  | Összesen | 410 | kb. 11 óra 10 perc |
 
 ## 1. rész – Méretezési táblázatok
 
@@ -1829,11 +1853,1499 @@ Programmal összevetve: igen – 13 eset (a program listája, bemeneti korlát),
 
 Megjegyzés a blokkhoz (forrás, kiadás):
 
-## 4. rész – Bekötési ábrák (R3) (helyőrző)
+## 4. rész – Bekötési ábrák (R3)
 
-> **Helyőrző.** A Sémák ábráinak elkészülte után kerül be: ábránként a kapcsolási rajz, a kapcsolóállás-táblázat és a kapocsjelölési megjegyzés. Biztonságkritikus (R3) tartalom: lektor és második olvasó hagyja jóvá.
+A Villanyszerelő Tudástár Sémák szekciójának és biztonsági cikkeinek bekötési ábrái. Minden ábra egy netlistából (alkatrészek, kapcsok, erek szerepe és színe, kábelszakaszok, kapcsolóállások) és egy elrendezésből (helyek, útvonalak) készül; a program ugyanebből rajzolja a cikk ábráját, a vezetéktáblát és a Működés nézetet. Ábránként egy blokk: az ábra (Bekötés nézet, alapállás), a jelmagyarázat, a vezetéktábla, a szakaszok érszáma és a kapcsolóállás-táblázat, a netlista és az ábra ujjlenyomatával.
 
-Tervezett tartalom: 101–107 kapcsolások, dugalj bekötése, földelési rendszerek és PEN-szétválasztás, áram-védőkapcsoló (FI-relé) bekötése. Azonosító-előtag: `ABR-`.
+Az ábra és a netlista egyezését (a vezetékvégpontok a kapcsokon, a csomópontok, az érszínek, a feliratok, az érintkezők) automatikus teszt ellenőrzi; a kapcsolóállás-táblázatot két, egymástól független szimulátor (TypeScript és Python) számolja azonosan. A lektortól a villamos tartalom ellenőrzését kérjük: helyes-e a bekötés, az érszín-kiosztás, a kapcsok szerepe, a szakaszok érszáma és a működés minden állásban, és alkalmas-e a rajz szakember tájékoztatására.
+
+Biztonságkritikus (R3) tartalom: az ábrát a lektor és egy második olvasó hagyja jóvá (Jóváhagyó lap, „4. rész – ábránkénti döntés”). A cikk csak akkor jelenik meg, ha minden ábrája jóváhagyott, és a cikk szövegét is jóváhagyták (az 5. rész elkészültéig a cikkvázlat alapján: content/tudastar/r3/*.md, docs/lektoralas.md). Az ábra bármely változása (netlista, elrendezés, szimbólum, rajzoló kód, ábraszín) új ujjlenyomatot ad: a cikk ilyenkor „újraellenőrzendő”, és új jóváhagyás kell.
+
+A rajzon az erek színe a valódi ér színe (a zöld-sárga ér zöld alapon sárga csíkos); a szín mellett minden éren felirat áll. A tervező alaprajzán a védővezető egyszínű zöld (az ábra „Így látod a tervezőben” sora ezt magyarázza). A szaggatott szürke vonal készüléken belüli kötést vagy érintési pontot, a piros szaggatott vonal jelképes hibahelyet jelöl – ezek nem szerelt erek.
+
+### BEK-EGYPOLUSU-KAPCSOLO-101 – Egypólusú kapcsoló (101): egy lámpa egy helyről
+
+Forrás: content/tudastar/r3/egypolusu-kapcsolo-101-bekotese.netlist.json (netlista), content/tudastar/diagramok/egypolusu-kapcsolo-101.json (elrendezés); cikk: egypolusu-kapcsolo-101-bekotese, abra-1 („Egypólusú kapcsoló (101) bekötése kötődobozzal”)
+
+Ábra-azonosító: egypolusu-kapcsolo-101. Netlista-ujjlenyomat: 162c980a; ábra-ujjlenyomat: 0b299afb (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (2 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Egy lehetséges, következetes érszín-kiosztás: barna = betáp fázis, fekete = kapcsolt fázis, szürke = váltóvezetékek (felirattal megkülönböztetve), kék = nullavezető, zöld-sárga = védővezető. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó.
+
+**Kérdés a lektorhoz (BEK-EGYPOLUSU-KAPCSOLO-101).** (Világítási kapcsolások (101–107) – közös kérdés 1.) Kék ér kapcsolt fázisként vagy váltóvezetékként, ha a szakaszban nincs nullavezető, és a végén tartós jelölés van: a cikkek ezt megengedettként írják (MSZ HD 60364-5-51 514.3). A hazai értelmezést és a jelölés módját a lektor erősítse meg; a szimulátor a kék fázisvezetőt jelenleg mindig hibának veszi.
+
+**Kérdés a lektorhoz (BEK-EGYPOLUSU-KAPCSOLO-101).** (Világítási kapcsolások (101–107) – közös kérdés 2.) R3 bekötési cikkek audience mezőjében szerepel a „laikus”, közben a cikkekben lépésenkénti szerelési sorrend van. Most „A szerelés menete szakembernek” cím és „ne használd szerelési útmutatóként” mondat jelzi a korlátot. Döntés kell: kikerüljön-e a laikus az audience-ből, vagy rejtve legyen-e laikusnak ez a szakasz (terv 8.2: „nem barkácsútmutató”).
+
+**Kérdés a lektorhoz (BEK-EGYPOLUSU-KAPCSOLO-101).** (Világítási kapcsolások (101–107) – közös kérdés 3.) Ajánljuk vagy csak megemlítjük, hogy a 106-os kapcsoló egypólusúként, a 107-es a sor végén váltókapcsolóként is beköthető? A szimuláció szerint mindkettő működik, de a szabad kapocs fázis alá kerül. Ezt most a cikkek figyelmeztetéssel írják.
+
+**Kérdés a lektorhoz (BEK-EGYPOLUSU-KAPCSOLO-101).** (Világítási kapcsolások (101–107) – közös kérdés 4.) A FI-relé korlátairól szóló új mondatok szakmai megfogalmazása: L–N érintésnél „nem feltétlenül old ki”, a nullát bontó kapcsolót és a felcserélt polaritást nem jelzi. Kell-e hivatkozni a FI-relé cikkre, vagy a figyelmeztetés-könyvtár egy tétele legyen?
+
+**Kérdés a lektorhoz (BEK-EGYPOLUSU-KAPCSOLO-101).** (Világítási kapcsolások (101–107) – közös kérdés 5.) A „bizsergés” teendő (ne érintsd újra, kapcsold le az áramkört az elosztóban, ne kapcsold vissza) laikusnak szóló cselekvési utasítás. Igazodjon-e szó szerint a lib/kb/safety.ts tervezett `elsosegely` és `munkavegzes` tételeihez (szakmai és jogi jóváhagyás)?
+
+**Kérdés a lektorhoz (BEK-EGYPOLUSU-KAPCSOLO-101).** (Világítási kapcsolások (101–107) – közös kérdés 6.) Az új, félkövér felvezetésű „A kikapcsolt lámpa nem feszültségmentes / mellett is van feszültség” bekezdések a 101-es, 106-os és 107-es cikkben legyenek-e a terv 8.1 szerinti egy inline doboz (például `munkavegzes` vagy `meres`)?
+
+**Kérdés a lektorhoz (BEK-EGYPOLUSU-KAPCSOLO-101).** (Világítási kapcsolások (101–107) – közös kérdés 7.) Közös nulla két áramkörre, különböző fázisokról: a cikk szerint a nulla szakadásakor a fogyasztók sorba kapcsolódva a két fázis közötti feszültségre kerülhetnek. A szakmai megfogalmazást a lektor ellenőrizze.
+
+**Kérdés a lektorhoz (BEK-EGYPOLUSU-KAPCSOLO-101).** (Világítási kapcsolások (101–107) – közös kérdés 8.) Lépcsőházi világítás táplálása a közös hálózatról (a lakás elosztójától függetlenül): a lektor erősítse meg, és döntse el, kell-e REG jelölés.
+
+**Kérdés a lektorhoz (BEK-EGYPOLUSU-KAPCSOLO-101).** (Világítási kapcsolások (101–107) – közös kérdés 9.) A kapcsolási netlisták TN-S/TN-C-S rendszert tételeznek fel (a betápnak külön N- és PE-kapcsa van). A PEN-t érintő állítások (PEN kapcsolása, PEN-szétválasztás utáni összekötés) csak szövegként szerepelnek, nincs mögöttük netlista. Modellezzük-e ezeket a földelési bővítéssel (foldeles_ext), például a 102-es kapcsoló TN-C változatán?
+
+**Kérdés a lektorhoz (BEK-EGYPOLUSU-KAPCSOLO-101).** (Világítási kapcsolások (101–107) – közös kérdés 10.) Szabványpontok (front matter, „lektor ellenőrizze”): az MSZ HD 60364-5-537 honosítási éve és alpontjai, az MSZ HD 60364-5-559 menetes foglalatra vonatkozó alpontja, az MSZ EN 60335-1 7.12.2, az MSZ HD 60364-6 6.4.x. Változatlanok; lektori ellenőrzésre várnak.
+
+**Kérdés a lektorhoz (BEK-EGYPOLUSU-KAPCSOLO-101).** (Világítási kapcsolások (101–107) – közös kérdés 11.) Ajánlott érszín-kiosztás a netlistákban: barna a betáp, fekete a kapcsolt fázis, szürke a váltóvezeték; a 102-esnél háromeres kábellel barna a kapcsolt fázis. A lektor erősítse meg ajánlásként; a tervező egyszínű zöld PE-jéről az 5. fázisban döntenek.
+
+**Kérdés a lektorhoz (BEK-EGYPOLUSU-KAPCSOLO-101).** (Világítási kapcsolások (101–107) – közös kérdés 12.) A gyűjtőoldal prózája 1488 szó, az 1500-as határ közelében. További bővítéshez rövidíteni kell.
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (egypolusu-kapcsolo-101, ábra-ujjlenyomat 0b299afb).
+
+**Jelmagyarázat:** L – fázis (barna); N – nullavezető (kék); PE – védővezető (zöld-sárga); Lk – kapcsolt fázis (fekete).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | Betáp: L | Kötődoboz: L-kötés | L | barna | Elosztó – kötődoboz |
+| 2 | Betáp: N | Kötődoboz: N-kötés | N | kék | Elosztó – kötődoboz |
+| 3 | Betáp: PE | Kötődoboz: PE-kötés | PE | zöld-sárga | Elosztó – kötődoboz |
+| 4 | Kötődoboz: L-kötés | Kapcsoló (101): L kapocs (betáp) | L | barna | Kötődoboz – kapcsoló |
+| 5 | Kapcsoló (101): 1-es kapocs (kimenet) | Kötődoboz: kapcsoltfázis-kötés | kapcsolt fázis | fekete | Kötődoboz – kapcsoló |
+| 6 | Kötődoboz: kapcsoltfázis-kötés | Lámpa: L (fázis) | kapcsolt fázis | fekete | Kötődoboz – lámpa |
+| 7 | Kötődoboz: N-kötés | Lámpa: N | N | kék | Kötődoboz – lámpa |
+| 8 | Kötődoboz: PE-kötés | Lámpa: PE | PE | zöld-sárga | Kötődoboz – lámpa |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztó – kötődoboz | L (barna), N (kék), PE (zöld-sárga) | 3 |
+| Kötődoboz – kapcsoló | L (barna), kapcsolt fázis (fekete) | 2 |
+| Kötődoboz – lámpa | kapcsolt fázis (fekete), N (kék), PE (zöld-sárga) | 3 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (2 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: S1 – Kapcsoló (101).
+
+| S1 | Eredmény (a szimuláció szerint) |
+|---|---|
+| ki | Lámpa: nem ég |
+| be | Lámpa: ég |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-EGYPOLUSU-KAPCSOLO-101-NL | Netlista (a rajz és a táblák forrása) | egypolusu-kapcsolo-101-bekotese.netlist.json · 162c980a | ☐ | ☐ | |
+| BEK-EGYPOLUSU-KAPCSOLO-101-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · 0b299afb | ☐ | ☐ | |
+| BEK-EGYPOLUSU-KAPCSOLO-101-VEZ | Vezetéktábla (8 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-EGYPOLUSU-KAPCSOLO-101-SZAK | Szakaszok és érszám (3 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-EGYPOLUSU-KAPCSOLO-101-ALL | Kapcsolóállás-táblázat (2 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-EGYPOLUSU-KAPCSOLO-101):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-EGYPOLUSU-KAPCSOLO-101).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-KETPOLUSU-KAPCSOLO-102 – Kétpólusú kapcsoló (102): a fázis- és a nullavezető együttes bontása
+
+Forrás: content/tudastar/r3/ketpolusu-kapcsolo-102-bekotese.netlist.json (netlista), content/tudastar/diagramok/ketpolusu-kapcsolo-102.json (elrendezés); cikk: ketpolusu-kapcsolo-102-bekotese, abra-1 („Kétpólusú kapcsoló (102) bekötése”)
+
+Ábra-azonosító: ketpolusu-kapcsolo-102. Netlista-ujjlenyomat: a253fd8a; ábra-ujjlenyomat: 361fdb2a (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (2 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Egy lehetséges, következetes érszín-kiosztás: barna = betáp fázis, fekete = kapcsolt fázis, szürke = váltóvezetékek (felirattal megkülönböztetve), kék = nullavezető, zöld-sárga = védővezető. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. Ebben a változatban a betáp a kapcsolódobozon át megy a fogyasztóhoz; a védővezető a kapcsolódobozban, kapcsolón kívül, vezetékösszekötővel folytatódik. A fogyasztóhoz háromeres kábel megy, ezért itt – a fenti kiosztástól eltérően – a kapcsolt fázis barna, a kapcsolt nulla kék.
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (ketpolusu-kapcsolo-102, ábra-ujjlenyomat 361fdb2a).
+
+**Jelmagyarázat:** L – fázis (barna); N – nullavezető (kék); PE – védővezető (zöld-sárga); Lk – kapcsolt fázis (barna); Nk – kapcsolt nullavezető (kék).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | Betáp: L | Kapcsoló (102): L kapocs (betáp) | L | barna | Betáp – kapcsolódoboz |
+| 2 | Betáp: N | Kapcsoló (102): N kapocs (betáp) | N | kék | Betáp – kapcsolódoboz |
+| 3 | Betáp: PE | Kapcsolódoboz: PE-összekötő | PE | zöld-sárga | Betáp – kapcsolódoboz |
+| 4 | Kapcsoló (102): L kimenet | Lámpa (vagy más fogyasztó): L (fázis) | kapcsolt fázis | barna | Kapcsolódoboz – lámpa |
+| 5 | Kapcsoló (102): N kimenet | Lámpa (vagy más fogyasztó): N | kapcsolt nulla | kék | Kapcsolódoboz – lámpa |
+| 6 | Kapcsolódoboz: PE-összekötő | Lámpa (vagy más fogyasztó): PE | PE | zöld-sárga | Kapcsolódoboz – lámpa |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Betáp – kapcsolódoboz | L (barna), N (kék), PE (zöld-sárga) | 3 |
+| Kapcsolódoboz – lámpa | kapcsolt fázis (barna), kapcsolt nulla (kék), PE (zöld-sárga) | 3 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (2 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: S1 – Kapcsoló (102).
+
+| S1 | Eredmény (a szimuláció szerint) |
+|---|---|
+| ki | Lámpa (vagy más fogyasztó): nem ég |
+| be | Lámpa (vagy más fogyasztó): ég |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-KETPOLUSU-KAPCSOLO-102-NL | Netlista (a rajz és a táblák forrása) | ketpolusu-kapcsolo-102-bekotese.netlist.json · a253fd8a | ☐ | ☐ | |
+| BEK-KETPOLUSU-KAPCSOLO-102-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · 361fdb2a | ☐ | ☐ | |
+| BEK-KETPOLUSU-KAPCSOLO-102-VEZ | Vezetéktábla (6 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-KETPOLUSU-KAPCSOLO-102-SZAK | Szakaszok és érszám (2 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-KETPOLUSU-KAPCSOLO-102-ALL | Kapcsolóállás-táblázat (2 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-KETPOLUSU-KAPCSOLO-102):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-KETPOLUSU-KAPCSOLO-102).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-CSILLARKAPCSOLO-105 – Csillárkapcsoló (105): két lámpakör egy helyről
+
+Forrás: content/tudastar/r3/csillarkapcsolo-105-bekotese.netlist.json (netlista), content/tudastar/diagramok/csillarkapcsolo-105.json (elrendezés); cikk: csillarkapcsolo-105-bekotese, abra-1 („Csillárkapcsoló (105) bekötése”)
+
+Ábra-azonosító: csillarkapcsolo-105. Netlista-ujjlenyomat: 171c858b; ábra-ujjlenyomat: f7930873 (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Egy lehetséges, következetes érszín-kiosztás: barna = betáp fázis, fekete = kapcsolt fázis, szürke = váltóvezetékek (felirattal megkülönböztetve), kék = nullavezető, zöld-sárga = védővezető. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A két kapcsolt fázis itt: 1. kör fekete, 2. kör szürke (felirattal).
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (csillarkapcsolo-105, ábra-ujjlenyomat f7930873).
+
+**Jelmagyarázat:** L – fázis (barna); N – nullavezető (kék); PE – védővezető (zöld-sárga); Lk1 – kapcsolt fázis (fekete); Lk2 – kapcsolt fázis (szürke).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | Betáp: L | Kötődoboz: L-kötés | L | barna | Elosztó – kötődoboz |
+| 2 | Betáp: N | Kötődoboz: N-kötés | N | kék | Elosztó – kötődoboz |
+| 3 | Betáp: PE | Kötődoboz: PE-kötés | PE | zöld-sárga | Elosztó – kötődoboz |
+| 4 | Kötődoboz: L-kötés | Csillárkapcsoló (105): L kapocs (közös betáp) | L | barna | Kötődoboz – kapcsoló |
+| 5 | Csillárkapcsoló (105): 1-es kapocs (1. kör) | Kötődoboz: 1. kör kapcsoltfázis-kötése | kapcsolt fázis 1 | fekete | Kötődoboz – kapcsoló |
+| 6 | Csillárkapcsoló (105): 2-es kapocs (2. kör) | Kötődoboz: 2. kör kapcsoltfázis-kötése | kapcsolt fázis 2 | szürke | Kötődoboz – kapcsoló |
+| 7 | Kötődoboz: 1. kör kapcsoltfázis-kötése | Csillár sorkapcsa: 1 | kapcsolt fázis 1 | fekete | Kötődoboz – csillár |
+| 8 | Kötődoboz: 2. kör kapcsoltfázis-kötése | Csillár sorkapcsa: 2 | kapcsolt fázis 2 | szürke | Kötődoboz – csillár |
+| 9 | Kötődoboz: N-kötés | Csillár sorkapcsa: N | N | kék | Kötődoboz – csillár |
+| 10 | Kötődoboz: PE-kötés | Csillár sorkapcsa: PE | PE | zöld-sárga | Kötődoboz – csillár |
+| 11 | Csillár sorkapcsa: 1 | 1. lámpacsoport: L (fázis) | kapcsolt fázis 1 | fekete | dobozon belül |
+| 12 | Csillár sorkapcsa: 2 | 2. lámpacsoport: L (fázis) | kapcsolt fázis 2 | szürke | dobozon belül |
+| 13 | Csillár sorkapcsa: N | 1. lámpacsoport: N | N | kék | dobozon belül |
+| 14 | Csillár sorkapcsa: N | 2. lámpacsoport: N | N | kék | dobozon belül |
+| 15 | Csillár sorkapcsa: PE | 1. lámpacsoport: PE | PE | zöld-sárga | dobozon belül |
+| 16 | Csillár sorkapcsa: PE | 2. lámpacsoport: PE | PE | zöld-sárga | dobozon belül |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztó – kötődoboz | L (barna), N (kék), PE (zöld-sárga) | 3 |
+| Kötődoboz – kapcsoló | L (barna), kapcsolt fázis 1 (fekete), kapcsolt fázis 2 (szürke) | 3 |
+| Kötődoboz – csillár | kapcsolt fázis 1 (fekete), kapcsolt fázis 2 (szürke), N (kék), PE (zöld-sárga) | 4 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: S1.b1 – Csillárkapcsoló (105) – 1. billentyű; S1.b2 – Csillárkapcsoló (105) – 2. billentyű.
+
+| S1.b1 | S1.b2 | Eredmény (a szimuláció szerint) |
+|---|---|---|
+| ki | ki | 1. lámpacsoport: nem ég; 2. lámpacsoport: nem ég |
+| ki | be | 1. lámpacsoport: nem ég; 2. lámpacsoport: ég |
+| be | ki | 1. lámpacsoport: ég; 2. lámpacsoport: nem ég |
+| be | be | 1. lámpacsoport: ég; 2. lámpacsoport: ég |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-CSILLARKAPCSOLO-105-NL | Netlista (a rajz és a táblák forrása) | csillarkapcsolo-105-bekotese.netlist.json · 171c858b | ☐ | ☐ | |
+| BEK-CSILLARKAPCSOLO-105-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · f7930873 | ☐ | ☐ | |
+| BEK-CSILLARKAPCSOLO-105-VEZ | Vezetéktábla (16 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-CSILLARKAPCSOLO-105-SZAK | Szakaszok és érszám (3 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-CSILLARKAPCSOLO-105-ALL | Kapcsolóállás-táblázat (4 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-CSILLARKAPCSOLO-105):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-CSILLARKAPCSOLO-105).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-VALTOKAPCSOLO-106 – Váltókapcsolás (2 × 106): egy lámpa két helyről
+
+Forrás: content/tudastar/r3/valtokapcsolo-106-bekotese.netlist.json (netlista), content/tudastar/diagramok/valtokapcsolo-106.json (elrendezés); cikk: valtokapcsolo-106-bekotese, abra-1 („Váltókapcsolás két 106-os kapcsolóval”)
+
+Ábra-azonosító: valtokapcsolo-106. Netlista-ujjlenyomat: 909db559; ábra-ujjlenyomat: 79d7b08a (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Egy lehetséges, következetes érszín-kiosztás: barna = betáp fázis, fekete = kapcsolt fázis, szürke = váltóvezetékek (felirattal megkülönböztetve), kék = nullavezető, zöld-sárga = védővezető. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó.
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (valtokapcsolo-106, ábra-ujjlenyomat 79d7b08a).
+
+**Jelmagyarázat:** L – fázis (barna); N – nullavezető (kék); PE – védővezető (zöld-sárga); 1, 2 – váltóvezeték (szürke); Lk – kapcsolt fázis (fekete).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | Betáp: L | Kötődoboz: L-kötés | L | barna | Elosztó – kötődoboz |
+| 2 | Betáp: N | Kötődoboz: N-kötés | N | kék | Elosztó – kötődoboz |
+| 3 | Betáp: PE | Kötődoboz: PE-kötés | PE | zöld-sárga | Elosztó – kötődoboz |
+| 4 | Kötődoboz: L-kötés | K1 (A hely): közös kapocs (C) | L | barna | Kötődoboz – K1 (A hely) |
+| 5 | K1 (A hely): 1-es kapocs | Kötődoboz: 1-es váltóvezeték kötése | váltóvezeték 1 | szürke | Kötődoboz – K1 (A hely) |
+| 6 | K1 (A hely): 2-es kapocs | Kötődoboz: 2-es váltóvezeték kötése | váltóvezeték 2 | szürke | Kötődoboz – K1 (A hely) |
+| 7 | Kötődoboz: 1-es váltóvezeték kötése | K2 (B hely): 1-es kapocs | váltóvezeték 1 | szürke | Kötődoboz – K2 (B hely) |
+| 8 | Kötődoboz: 2-es váltóvezeték kötése | K2 (B hely): 2-es kapocs | váltóvezeték 2 | szürke | Kötődoboz – K2 (B hely) |
+| 9 | K2 (B hely): közös kapocs (C) | Kötődoboz: kapcsoltfázis-kötés | kapcsolt fázis | fekete | Kötődoboz – K2 (B hely) |
+| 10 | Kötődoboz: kapcsoltfázis-kötés | Lámpa: L (fázis) | kapcsolt fázis | fekete | Kötődoboz – lámpa |
+| 11 | Kötődoboz: N-kötés | Lámpa: N | N | kék | Kötődoboz – lámpa |
+| 12 | Kötődoboz: PE-kötés | Lámpa: PE | PE | zöld-sárga | Kötődoboz – lámpa |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztó – kötődoboz | L (barna), N (kék), PE (zöld-sárga) | 3 |
+| Kötődoboz – K1 (A hely) | L (barna), váltóvezeték 1 (szürke), váltóvezeték 2 (szürke) | 3 |
+| Kötődoboz – K2 (B hely) | váltóvezeték 1 (szürke), váltóvezeték 2 (szürke), kapcsolt fázis (fekete) | 3 |
+| Kötődoboz – lámpa | kapcsolt fázis (fekete), N (kék), PE (zöld-sárga) | 3 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: S1 – K1 (A hely); S2 – K2 (B hely).
+
+| S1 | S2 | Eredmény (a szimuláció szerint) |
+|---|---|---|
+| 0 (közös–1) | 0 (közös–1) | Lámpa: ég |
+| 0 (közös–1) | 1 (közös–2) | Lámpa: nem ég |
+| 1 (közös–2) | 0 (közös–1) | Lámpa: nem ég |
+| 1 (közös–2) | 1 (közös–2) | Lámpa: ég |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-VALTOKAPCSOLO-106-NL | Netlista (a rajz és a táblák forrása) | valtokapcsolo-106-bekotese.netlist.json · 909db559 | ☐ | ☐ | |
+| BEK-VALTOKAPCSOLO-106-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · 79d7b08a | ☐ | ☐ | |
+| BEK-VALTOKAPCSOLO-106-VEZ | Vezetéktábla (12 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-VALTOKAPCSOLO-106-SZAK | Szakaszok és érszám (4 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-VALTOKAPCSOLO-106-ALL | Kapcsolóállás-táblázat (4 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-VALTOKAPCSOLO-106):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-VALTOKAPCSOLO-106).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-KETTOS-VALTOKAPCSOLO-106-6 – Kettős váltókapcsoló (106+6): két lámpa, mindkettő két helyről
+
+Forrás: content/tudastar/r3/kettos-valtokapcsolo-106-6-bekotese.netlist.json (netlista), content/tudastar/diagramok/kettos-valtokapcsolo-106-6.json (elrendezés); cikk: kettos-valtokapcsolo-106-6-bekotese, abra-1 („Két lámpa két helyről, kettős váltókapcsolókkal”)
+
+Ábra-azonosító: kettos-valtokapcsolo-106-6. Netlista-ujjlenyomat: 837cd200; ábra-ujjlenyomat: 7a0aa663 (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (16 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Egy lehetséges, következetes érszín-kiosztás: barna = betáp fázis, fekete = kapcsolt fázis, szürke = váltóvezetékek (felirattal megkülönböztetve), kék = nullavezető, zöld-sárga = védővezető. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A két billentyű közös kapcsát (C1, C2) itt az A helyen áthidaló köti ugyanarra a fázisra; ahol a gyártó a két közös kapcsot belül összeköti, az áthidaló elmarad. A váltóvezetékek: 1a, 2a (1. kör) és 1b, 2b (2. kör).
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (kettos-valtokapcsolo-106-6, ábra-ujjlenyomat 7a0aa663).
+
+**Jelmagyarázat:** L – fázis (barna); N – nullavezető (kék); PE – védővezető (zöld-sárga); L – áthidaló (fázis) (barna); 1a, 2a, 1b, 2b – váltóvezeték (szürke); Lk1, Lk2 – kapcsolt fázis (fekete).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | Betáp: L | Kötődoboz: L-kötés | L | barna | Elosztó – kötődoboz |
+| 2 | Betáp: N | Kötődoboz: N-kötés | N | kék | Elosztó – kötődoboz |
+| 3 | Betáp: PE | Kötődoboz: PE-kötés | PE | zöld-sárga | Elosztó – kötődoboz |
+| 4 | Kötődoboz: L-kötés | K1 (A hely): 1. billentyű közös kapcsa (C1) | L | barna | Kötődoboz – K1 (A hely) |
+| 5 | K1 (A hely): 1. billentyű közös kapcsa (C1) | K1 (A hely): 2. billentyű közös kapcsa (C2) | áthidaló | barna | dobozon belül |
+| 6 | K1 (A hely): 1a kapocs | Kötődoboz: 1a váltóvezeték kötése | váltóvezeték 1a | szürke | Kötődoboz – K1 (A hely) |
+| 7 | K1 (A hely): 2a kapocs | Kötődoboz: 2a váltóvezeték kötése | váltóvezeték 2a | szürke | Kötődoboz – K1 (A hely) |
+| 8 | K1 (A hely): 1b kapocs | Kötődoboz: 1b váltóvezeték kötése | váltóvezeték 1b | szürke | Kötődoboz – K1 (A hely) |
+| 9 | K1 (A hely): 2b kapocs | Kötődoboz: 2b váltóvezeték kötése | váltóvezeték 2b | szürke | Kötődoboz – K1 (A hely) |
+| 10 | Kötődoboz: 1a váltóvezeték kötése | K2 (B hely): 1a kapocs | váltóvezeték 1a | szürke | Kötődoboz – K2 (B hely) |
+| 11 | Kötődoboz: 2a váltóvezeték kötése | K2 (B hely): 2a kapocs | váltóvezeték 2a | szürke | Kötődoboz – K2 (B hely) |
+| 12 | Kötődoboz: 1b váltóvezeték kötése | K2 (B hely): 1b kapocs | váltóvezeték 1b | szürke | Kötődoboz – K2 (B hely) |
+| 13 | Kötődoboz: 2b váltóvezeték kötése | K2 (B hely): 2b kapocs | váltóvezeték 2b | szürke | Kötődoboz – K2 (B hely) |
+| 14 | K2 (B hely): 1. billentyű közös kapcsa (C1) | Kötődoboz: 1. lámpa kapcsoltfázis-kötése | kapcsolt fázis 1 | fekete | Kötődoboz – K2 (B hely) |
+| 15 | K2 (B hely): 2. billentyű közös kapcsa (C2) | Kötődoboz: 2. lámpa kapcsoltfázis-kötése | kapcsolt fázis 2 | fekete | Kötődoboz – K2 (B hely) |
+| 16 | Kötődoboz: 1. lámpa kapcsoltfázis-kötése | 1. lámpa: L (fázis) | kapcsolt fázis 1 | fekete | Kötődoboz – 1. lámpa |
+| 17 | Kötődoboz: N-kötés | 1. lámpa: N | N | kék | Kötődoboz – 1. lámpa |
+| 18 | Kötődoboz: PE-kötés | 1. lámpa: PE | PE | zöld-sárga | Kötődoboz – 1. lámpa |
+| 19 | Kötődoboz: 2. lámpa kapcsoltfázis-kötése | 2. lámpa: L (fázis) | kapcsolt fázis 2 | fekete | Kötődoboz – 2. lámpa |
+| 20 | Kötődoboz: N-kötés | 2. lámpa: N | N | kék | Kötődoboz – 2. lámpa |
+| 21 | Kötődoboz: PE-kötés | 2. lámpa: PE | PE | zöld-sárga | Kötődoboz – 2. lámpa |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztó – kötődoboz | L (barna), N (kék), PE (zöld-sárga) | 3 |
+| Kötődoboz – K1 (A hely) | L (barna), váltóvezeték 1a (szürke), váltóvezeték 2a (szürke), váltóvezeték 1b (szürke), váltóvezeték 2b (szürke) | 5 |
+| Kötődoboz – K2 (B hely) | váltóvezeték 1a (szürke), váltóvezeték 2a (szürke), váltóvezeték 1b (szürke), váltóvezeték 2b (szürke), kapcsolt fázis 1 (fekete), kapcsolt fázis 2 (fekete) | 6 |
+| Kötődoboz – 1. lámpa | kapcsolt fázis 1 (fekete), N (kék), PE (zöld-sárga) | 3 |
+| Kötődoboz – 2. lámpa | kapcsolt fázis 2 (fekete), N (kék), PE (zöld-sárga) | 3 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (16 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: S1.b1 – K1 (A hely) – 1. billentyű; S1.b2 – K1 (A hely) – 2. billentyű; S2.b1 – K2 (B hely) – 1. billentyű; S2.b2 – K2 (B hely) – 2. billentyű.
+
+| S1.b1 | S1.b2 | S2.b1 | S2.b2 | Eredmény (a szimuláció szerint) |
+|---|---|---|---|---|
+| 0 (C1–1a) | 0 (C2–1b) | 0 (C1–1a) | 0 (C2–1b) | 1. lámpa: ég; 2. lámpa: ég |
+| 0 (C1–1a) | 0 (C2–1b) | 0 (C1–1a) | 1 (C2–2b) | 1. lámpa: ég; 2. lámpa: nem ég |
+| 0 (C1–1a) | 0 (C2–1b) | 1 (C1–2a) | 0 (C2–1b) | 1. lámpa: nem ég; 2. lámpa: ég |
+| 0 (C1–1a) | 0 (C2–1b) | 1 (C1–2a) | 1 (C2–2b) | 1. lámpa: nem ég; 2. lámpa: nem ég |
+| 0 (C1–1a) | 1 (C2–2b) | 0 (C1–1a) | 0 (C2–1b) | 1. lámpa: ég; 2. lámpa: nem ég |
+| 0 (C1–1a) | 1 (C2–2b) | 0 (C1–1a) | 1 (C2–2b) | 1. lámpa: ég; 2. lámpa: ég |
+| 0 (C1–1a) | 1 (C2–2b) | 1 (C1–2a) | 0 (C2–1b) | 1. lámpa: nem ég; 2. lámpa: nem ég |
+| 0 (C1–1a) | 1 (C2–2b) | 1 (C1–2a) | 1 (C2–2b) | 1. lámpa: nem ég; 2. lámpa: ég |
+| 1 (C1–2a) | 0 (C2–1b) | 0 (C1–1a) | 0 (C2–1b) | 1. lámpa: nem ég; 2. lámpa: ég |
+| 1 (C1–2a) | 0 (C2–1b) | 0 (C1–1a) | 1 (C2–2b) | 1. lámpa: nem ég; 2. lámpa: nem ég |
+| 1 (C1–2a) | 0 (C2–1b) | 1 (C1–2a) | 0 (C2–1b) | 1. lámpa: ég; 2. lámpa: ég |
+| 1 (C1–2a) | 0 (C2–1b) | 1 (C1–2a) | 1 (C2–2b) | 1. lámpa: ég; 2. lámpa: nem ég |
+| 1 (C1–2a) | 1 (C2–2b) | 0 (C1–1a) | 0 (C2–1b) | 1. lámpa: nem ég; 2. lámpa: nem ég |
+| 1 (C1–2a) | 1 (C2–2b) | 0 (C1–1a) | 1 (C2–2b) | 1. lámpa: nem ég; 2. lámpa: ég |
+| 1 (C1–2a) | 1 (C2–2b) | 1 (C1–2a) | 0 (C2–1b) | 1. lámpa: ég; 2. lámpa: nem ég |
+| 1 (C1–2a) | 1 (C2–2b) | 1 (C1–2a) | 1 (C2–2b) | 1. lámpa: ég; 2. lámpa: ég |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-KETTOS-VALTOKAPCSOLO-106-6-NL | Netlista (a rajz és a táblák forrása) | kettos-valtokapcsolo-106-6-bekotese.netlist.json · 837cd200 | ☐ | ☐ | |
+| BEK-KETTOS-VALTOKAPCSOLO-106-6-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · 7a0aa663 | ☐ | ☐ | |
+| BEK-KETTOS-VALTOKAPCSOLO-106-6-VEZ | Vezetéktábla (21 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-KETTOS-VALTOKAPCSOLO-106-6-SZAK | Szakaszok és érszám (5 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-KETTOS-VALTOKAPCSOLO-106-6-ALL | Kapcsolóállás-táblázat (16 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-KETTOS-VALTOKAPCSOLO-106-6):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-KETTOS-VALTOKAPCSOLO-106-6).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-KERESZTKAPCSOLO-107 – Keresztkapcsolás (106 + 107 + 106): egy lámpa három helyről
+
+Forrás: content/tudastar/r3/keresztkapcsolo-107-bekotese.netlist.json (netlista), content/tudastar/diagramok/keresztkapcsolo-107.json (elrendezés); cikk: keresztkapcsolo-107-bekotese, abra-1 („Keresztkapcsolás: 106 + 107 + 106”)
+
+Ábra-azonosító: keresztkapcsolo-107. Netlista-ujjlenyomat: 835f0537; ábra-ujjlenyomat: 2902a14a (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (8 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Egy lehetséges, következetes érszín-kiosztás: barna = betáp fázis, fekete = kapcsolt fázis, szürke = váltóvezetékek (felirattal megkülönböztetve), kék = nullavezető, zöld-sárga = védővezető. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A keresztkapcsoló bemenő párja (A1, A2) az előző, kimenő párja (B1, B2) a következő kapcsoló felé néz; a kapcsok elrendezése gyártónként eltér.
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (keresztkapcsolo-107, ábra-ujjlenyomat 2902a14a).
+
+**Jelmagyarázat:** L – fázis (barna); N – nullavezető (kék); PE – védővezető (zöld-sárga); 1a, 2a, 1b, 2b – váltóvezeték (szürke); Lk – kapcsolt fázis (fekete).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | Betáp: L | Kötődoboz: L-kötés | L | barna | Elosztó – kötődoboz |
+| 2 | Betáp: N | Kötődoboz: N-kötés | N | kék | Elosztó – kötődoboz |
+| 3 | Betáp: PE | Kötődoboz: PE-kötés | PE | zöld-sárga | Elosztó – kötődoboz |
+| 4 | Kötődoboz: L-kötés | K1 (106, 1. hely): közös kapocs (C) | L | barna | Kötődoboz – K1 (1. hely) |
+| 5 | K1 (106, 1. hely): 1-es kapocs | Kötődoboz: 1a váltóvezeték kötése | váltóvezeték 1a | szürke | Kötődoboz – K1 (1. hely) |
+| 6 | K1 (106, 1. hely): 2-es kapocs | Kötődoboz: 2a váltóvezeték kötése | váltóvezeték 2a | szürke | Kötődoboz – K1 (1. hely) |
+| 7 | Kötődoboz: 1a váltóvezeték kötése | X1 (107, 2. hely): A1 (bemenő pár) | váltóvezeték 1a | szürke | Kötődoboz – X1 (2. hely) |
+| 8 | Kötődoboz: 2a váltóvezeték kötése | X1 (107, 2. hely): A2 (bemenő pár) | váltóvezeték 2a | szürke | Kötődoboz – X1 (2. hely) |
+| 9 | X1 (107, 2. hely): B1 (kimenő pár) | Kötődoboz: 1b váltóvezeték kötése | váltóvezeték 1b | szürke | Kötődoboz – X1 (2. hely) |
+| 10 | X1 (107, 2. hely): B2 (kimenő pár) | Kötődoboz: 2b váltóvezeték kötése | váltóvezeték 2b | szürke | Kötődoboz – X1 (2. hely) |
+| 11 | Kötődoboz: 1b váltóvezeték kötése | K2 (106, 3. hely): 1-es kapocs | váltóvezeték 1b | szürke | Kötődoboz – K2 (3. hely) |
+| 12 | Kötődoboz: 2b váltóvezeték kötése | K2 (106, 3. hely): 2-es kapocs | váltóvezeték 2b | szürke | Kötődoboz – K2 (3. hely) |
+| 13 | K2 (106, 3. hely): közös kapocs (C) | Kötődoboz: kapcsoltfázis-kötés | kapcsolt fázis | fekete | Kötődoboz – K2 (3. hely) |
+| 14 | Kötődoboz: kapcsoltfázis-kötés | Lámpa: L (fázis) | kapcsolt fázis | fekete | Kötődoboz – lámpa |
+| 15 | Kötődoboz: N-kötés | Lámpa: N | N | kék | Kötődoboz – lámpa |
+| 16 | Kötődoboz: PE-kötés | Lámpa: PE | PE | zöld-sárga | Kötődoboz – lámpa |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztó – kötődoboz | L (barna), N (kék), PE (zöld-sárga) | 3 |
+| Kötődoboz – K1 (1. hely) | L (barna), váltóvezeték 1a (szürke), váltóvezeték 2a (szürke) | 3 |
+| Kötődoboz – X1 (2. hely) | váltóvezeték 1a (szürke), váltóvezeték 2a (szürke), váltóvezeték 1b (szürke), váltóvezeték 2b (szürke) | 4 |
+| Kötődoboz – K2 (3. hely) | váltóvezeték 1b (szürke), váltóvezeték 2b (szürke), kapcsolt fázis (fekete) | 3 |
+| Kötődoboz – lámpa | kapcsolt fázis (fekete), N (kék), PE (zöld-sárga) | 3 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (8 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: S1 – K1 (106, 1. hely); X1 – X1 (107, 2. hely); S2 – K2 (106, 3. hely).
+
+| S1 | X1 | S2 | Eredmény (a szimuláció szerint) |
+|---|---|---|---|
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: nem ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: nem ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: nem ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: nem ég |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-KERESZTKAPCSOLO-107-NL | Netlista (a rajz és a táblák forrása) | keresztkapcsolo-107-bekotese.netlist.json · 835f0537 | ☐ | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · 2902a14a | ☐ | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-VEZ | Vezetéktábla (16 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-SZAK | Szakaszok és érszám (5 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-ALL | Kapcsolóállás-táblázat (8 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-KERESZTKAPCSOLO-107):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-KERESZTKAPCSOLO-107).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-KERESZTKAPCSOLO-107-2X107 – Keresztkapcsolás (106 + 2 × 107 + 106): egy lámpa 4 helyről
+
+Forrás: content/tudastar/r3/keresztkapcsolo-107-bekotese-2x107.netlist.json (netlista), content/tudastar/diagramok/keresztkapcsolo-107-2x107.json (elrendezés); cikk: keresztkapcsolo-107-bekotese, abra-1 („Keresztkapcsolás: 106 + 107 + 106”)
+
+Ábra-azonosító: keresztkapcsolo-107-2x107. Netlista-ujjlenyomat: 9566473c; ábra-ujjlenyomat: 96217f1e (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (16 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Egy lehetséges, következetes érszín-kiosztás: barna = betáp fázis, fekete = kapcsolt fázis, szürke = váltóvezetékek (felirattal megkülönböztetve), kék = nullavezető, zöld-sárga = védővezető. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A keresztkapcsoló bemenő párja (A1, A2) az előző, kimenő párja (B1, B2) a következő kapcsoló felé néz; a kapcsok elrendezése gyártónként eltér.
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (keresztkapcsolo-107-2x107, ábra-ujjlenyomat 96217f1e).
+
+**Jelmagyarázat:** L – fázis (barna); N – nullavezető (kék); PE – védővezető (zöld-sárga); 1a, 2a, 1b, 2b, 1c, 2c – váltóvezeték (szürke); Lk – kapcsolt fázis (fekete).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | Betáp: L | Kötődoboz: L-kötés | L | barna | Elosztó – kötődoboz |
+| 2 | Betáp: N | Kötődoboz: N-kötés | N | kék | Elosztó – kötődoboz |
+| 3 | Betáp: PE | Kötődoboz: PE-kötés | PE | zöld-sárga | Elosztó – kötődoboz |
+| 4 | Kötődoboz: L-kötés | K1 (106, 1. hely): közös kapocs (C) | L | barna | Kötődoboz – K1 (1. hely) |
+| 5 | K1 (106, 1. hely): 1-es kapocs | Kötődoboz: 1a váltóvezeték kötése | váltóvezeték 1a | szürke | Kötődoboz – K1 (1. hely) |
+| 6 | K1 (106, 1. hely): 2-es kapocs | Kötődoboz: 2a váltóvezeték kötése | váltóvezeték 2a | szürke | Kötődoboz – K1 (1. hely) |
+| 7 | Kötődoboz: 1a váltóvezeték kötése | X1 (107, 2. hely): A1 (bemenő pár) | váltóvezeték 1a | szürke | Kötődoboz – X1 (2. hely) |
+| 8 | Kötődoboz: 2a váltóvezeték kötése | X1 (107, 2. hely): A2 (bemenő pár) | váltóvezeték 2a | szürke | Kötődoboz – X1 (2. hely) |
+| 9 | X1 (107, 2. hely): B1 (kimenő pár) | Kötődoboz: 1b váltóvezeték kötése | váltóvezeték 1b | szürke | Kötődoboz – X1 (2. hely) |
+| 10 | X1 (107, 2. hely): B2 (kimenő pár) | Kötődoboz: 2b váltóvezeték kötése | váltóvezeték 2b | szürke | Kötődoboz – X1 (2. hely) |
+| 11 | Kötődoboz: 1b váltóvezeték kötése | X2 (107, 3. hely): A1 (bemenő pár) | váltóvezeték 1b | szürke | Kötődoboz – X2 (3. hely) |
+| 12 | Kötődoboz: 2b váltóvezeték kötése | X2 (107, 3. hely): A2 (bemenő pár) | váltóvezeték 2b | szürke | Kötődoboz – X2 (3. hely) |
+| 13 | X2 (107, 3. hely): B1 (kimenő pár) | Kötődoboz: 1c váltóvezeték kötése | váltóvezeték 1c | szürke | Kötődoboz – X2 (3. hely) |
+| 14 | X2 (107, 3. hely): B2 (kimenő pár) | Kötődoboz: 2c váltóvezeték kötése | váltóvezeték 2c | szürke | Kötődoboz – X2 (3. hely) |
+| 15 | Kötődoboz: 1c váltóvezeték kötése | K2 (106, 4. hely): 1-es kapocs | váltóvezeték 1c | szürke | Kötődoboz – K2 (4. hely) |
+| 16 | Kötődoboz: 2c váltóvezeték kötése | K2 (106, 4. hely): 2-es kapocs | váltóvezeték 2c | szürke | Kötődoboz – K2 (4. hely) |
+| 17 | K2 (106, 4. hely): közös kapocs (C) | Kötődoboz: kapcsoltfázis-kötés | kapcsolt fázis | fekete | Kötődoboz – K2 (4. hely) |
+| 18 | Kötődoboz: kapcsoltfázis-kötés | Lámpa: L (fázis) | kapcsolt fázis | fekete | Kötődoboz – lámpa |
+| 19 | Kötődoboz: N-kötés | Lámpa: N | N | kék | Kötődoboz – lámpa |
+| 20 | Kötődoboz: PE-kötés | Lámpa: PE | PE | zöld-sárga | Kötődoboz – lámpa |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztó – kötődoboz | L (barna), N (kék), PE (zöld-sárga) | 3 |
+| Kötődoboz – K1 (1. hely) | L (barna), váltóvezeték 1a (szürke), váltóvezeték 2a (szürke) | 3 |
+| Kötődoboz – X1 (2. hely) | váltóvezeték 1a (szürke), váltóvezeték 2a (szürke), váltóvezeték 1b (szürke), váltóvezeték 2b (szürke) | 4 |
+| Kötődoboz – X2 (3. hely) | váltóvezeték 1b (szürke), váltóvezeték 2b (szürke), váltóvezeték 1c (szürke), váltóvezeték 2c (szürke) | 4 |
+| Kötődoboz – K2 (4. hely) | váltóvezeték 1c (szürke), váltóvezeték 2c (szürke), kapcsolt fázis (fekete) | 3 |
+| Kötődoboz – lámpa | kapcsolt fázis (fekete), N (kék), PE (zöld-sárga) | 3 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (16 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: S1 – K1 (106, 1. hely); X1 – X1 (107, 2. hely); X2 – X2 (107, 3. hely); S2 – K2 (106, 4. hely).
+
+| S1 | X1 | X2 | S2 | Eredmény (a szimuláció szerint) |
+|---|---|---|---|---|
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: nem ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: nem ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: nem ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: nem ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: nem ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: nem ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: nem ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: nem ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: ég |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-KERESZTKAPCSOLO-107-2X107-NL | Netlista (a rajz és a táblák forrása) | keresztkapcsolo-107-bekotese-2x107.netlist.json · 9566473c | ☐ | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-2X107-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · 96217f1e | ☐ | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-2X107-VEZ | Vezetéktábla (20 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-2X107-SZAK | Szakaszok és érszám (6 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-2X107-ALL | Kapcsolóállás-táblázat (16 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-KERESZTKAPCSOLO-107-2X107):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-KERESZTKAPCSOLO-107-2X107).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-KERESZTKAPCSOLO-107-3X107 – Keresztkapcsolás (106 + 3 × 107 + 106): egy lámpa 5 helyről
+
+Forrás: content/tudastar/r3/keresztkapcsolo-107-bekotese-3x107.netlist.json (netlista), content/tudastar/diagramok/keresztkapcsolo-107-3x107.json (elrendezés); cikk: keresztkapcsolo-107-bekotese, abra-1 („Keresztkapcsolás: 106 + 107 + 106”)
+
+Ábra-azonosító: keresztkapcsolo-107-3x107. Netlista-ujjlenyomat: f9fd89d8; ábra-ujjlenyomat: 5e3b5a40 (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (32 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Egy lehetséges, következetes érszín-kiosztás: barna = betáp fázis, fekete = kapcsolt fázis, szürke = váltóvezetékek (felirattal megkülönböztetve), kék = nullavezető, zöld-sárga = védővezető. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A keresztkapcsoló bemenő párja (A1, A2) az előző, kimenő párja (B1, B2) a következő kapcsoló felé néz; a kapcsok elrendezése gyártónként eltér.
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (keresztkapcsolo-107-3x107, ábra-ujjlenyomat 5e3b5a40).
+
+**Jelmagyarázat:** L – fázis (barna); N – nullavezető (kék); PE – védővezető (zöld-sárga); 1a, 2a, 1b, 2b, 1c, 2c, 1d, 2d – váltóvezeték (szürke); Lk – kapcsolt fázis (fekete).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | Betáp: L | Kötődoboz: L-kötés | L | barna | Elosztó – kötődoboz |
+| 2 | Betáp: N | Kötődoboz: N-kötés | N | kék | Elosztó – kötődoboz |
+| 3 | Betáp: PE | Kötődoboz: PE-kötés | PE | zöld-sárga | Elosztó – kötődoboz |
+| 4 | Kötődoboz: L-kötés | K1 (106, 1. hely): közös kapocs (C) | L | barna | Kötődoboz – K1 (1. hely) |
+| 5 | K1 (106, 1. hely): 1-es kapocs | Kötődoboz: 1a váltóvezeték kötése | váltóvezeték 1a | szürke | Kötődoboz – K1 (1. hely) |
+| 6 | K1 (106, 1. hely): 2-es kapocs | Kötődoboz: 2a váltóvezeték kötése | váltóvezeték 2a | szürke | Kötődoboz – K1 (1. hely) |
+| 7 | Kötődoboz: 1a váltóvezeték kötése | X1 (107, 2. hely): A1 (bemenő pár) | váltóvezeték 1a | szürke | Kötődoboz – X1 (2. hely) |
+| 8 | Kötődoboz: 2a váltóvezeték kötése | X1 (107, 2. hely): A2 (bemenő pár) | váltóvezeték 2a | szürke | Kötődoboz – X1 (2. hely) |
+| 9 | X1 (107, 2. hely): B1 (kimenő pár) | Kötődoboz: 1b váltóvezeték kötése | váltóvezeték 1b | szürke | Kötődoboz – X1 (2. hely) |
+| 10 | X1 (107, 2. hely): B2 (kimenő pár) | Kötődoboz: 2b váltóvezeték kötése | váltóvezeték 2b | szürke | Kötődoboz – X1 (2. hely) |
+| 11 | Kötődoboz: 1b váltóvezeték kötése | X2 (107, 3. hely): A1 (bemenő pár) | váltóvezeték 1b | szürke | Kötődoboz – X2 (3. hely) |
+| 12 | Kötődoboz: 2b váltóvezeték kötése | X2 (107, 3. hely): A2 (bemenő pár) | váltóvezeték 2b | szürke | Kötődoboz – X2 (3. hely) |
+| 13 | X2 (107, 3. hely): B1 (kimenő pár) | Kötődoboz: 1c váltóvezeték kötése | váltóvezeték 1c | szürke | Kötődoboz – X2 (3. hely) |
+| 14 | X2 (107, 3. hely): B2 (kimenő pár) | Kötődoboz: 2c váltóvezeték kötése | váltóvezeték 2c | szürke | Kötődoboz – X2 (3. hely) |
+| 15 | Kötődoboz: 1c váltóvezeték kötése | X3 (107, 4. hely): A1 (bemenő pár) | váltóvezeték 1c | szürke | Kötődoboz – X3 (4. hely) |
+| 16 | Kötődoboz: 2c váltóvezeték kötése | X3 (107, 4. hely): A2 (bemenő pár) | váltóvezeték 2c | szürke | Kötődoboz – X3 (4. hely) |
+| 17 | X3 (107, 4. hely): B1 (kimenő pár) | Kötődoboz: 1d váltóvezeték kötése | váltóvezeték 1d | szürke | Kötődoboz – X3 (4. hely) |
+| 18 | X3 (107, 4. hely): B2 (kimenő pár) | Kötődoboz: 2d váltóvezeték kötése | váltóvezeték 2d | szürke | Kötődoboz – X3 (4. hely) |
+| 19 | Kötődoboz: 1d váltóvezeték kötése | K2 (106, 5. hely): 1-es kapocs | váltóvezeték 1d | szürke | Kötődoboz – K2 (5. hely) |
+| 20 | Kötődoboz: 2d váltóvezeték kötése | K2 (106, 5. hely): 2-es kapocs | váltóvezeték 2d | szürke | Kötődoboz – K2 (5. hely) |
+| 21 | K2 (106, 5. hely): közös kapocs (C) | Kötődoboz: kapcsoltfázis-kötés | kapcsolt fázis | fekete | Kötődoboz – K2 (5. hely) |
+| 22 | Kötődoboz: kapcsoltfázis-kötés | Lámpa: L (fázis) | kapcsolt fázis | fekete | Kötődoboz – lámpa |
+| 23 | Kötődoboz: N-kötés | Lámpa: N | N | kék | Kötődoboz – lámpa |
+| 24 | Kötődoboz: PE-kötés | Lámpa: PE | PE | zöld-sárga | Kötődoboz – lámpa |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztó – kötődoboz | L (barna), N (kék), PE (zöld-sárga) | 3 |
+| Kötődoboz – K1 (1. hely) | L (barna), váltóvezeték 1a (szürke), váltóvezeték 2a (szürke) | 3 |
+| Kötődoboz – X1 (2. hely) | váltóvezeték 1a (szürke), váltóvezeték 2a (szürke), váltóvezeték 1b (szürke), váltóvezeték 2b (szürke) | 4 |
+| Kötődoboz – X2 (3. hely) | váltóvezeték 1b (szürke), váltóvezeték 2b (szürke), váltóvezeték 1c (szürke), váltóvezeték 2c (szürke) | 4 |
+| Kötődoboz – X3 (4. hely) | váltóvezeték 1c (szürke), váltóvezeték 2c (szürke), váltóvezeték 1d (szürke), váltóvezeték 2d (szürke) | 4 |
+| Kötődoboz – K2 (5. hely) | váltóvezeték 1d (szürke), váltóvezeték 2d (szürke), kapcsolt fázis (fekete) | 3 |
+| Kötődoboz – lámpa | kapcsolt fázis (fekete), N (kék), PE (zöld-sárga) | 3 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (32 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: S1 – K1 (106, 1. hely); X1 – X1 (107, 2. hely); X2 – X2 (107, 3. hely); X3 – X3 (107, 4. hely); S2 – K2 (106, 5. hely).
+
+| S1 | X1 | X2 | X3 | S2 | Eredmény (a szimuláció szerint) |
+|---|---|---|---|---|---|
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: nem ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: nem ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: nem ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: nem ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: nem ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: nem ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: nem ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: nem ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: nem ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: nem ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: nem ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: nem ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: nem ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: nem ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: nem ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: nem ég |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-KERESZTKAPCSOLO-107-3X107-NL | Netlista (a rajz és a táblák forrása) | keresztkapcsolo-107-bekotese-3x107.netlist.json · f9fd89d8 | ☐ | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-3X107-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · 5e3b5a40 | ☐ | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-3X107-VEZ | Vezetéktábla (24 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-3X107-SZAK | Szakaszok és érszám (7 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-3X107-ALL | Kapcsolóállás-táblázat (32 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-KERESZTKAPCSOLO-107-3X107):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-KERESZTKAPCSOLO-107-3X107).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-KERESZTKAPCSOLO-107-4X107 – Keresztkapcsolás (106 + 4 × 107 + 106): egy lámpa 6 helyről
+
+Forrás: content/tudastar/r3/keresztkapcsolo-107-bekotese-4x107.netlist.json (netlista), content/tudastar/diagramok/keresztkapcsolo-107-4x107.json (elrendezés); cikk: keresztkapcsolo-107-bekotese, abra-1 („Keresztkapcsolás: 106 + 107 + 106”)
+
+Ábra-azonosító: keresztkapcsolo-107-4x107. Netlista-ujjlenyomat: e67cbcc6; ábra-ujjlenyomat: b7949588 (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (64 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Egy lehetséges, következetes érszín-kiosztás: barna = betáp fázis, fekete = kapcsolt fázis, szürke = váltóvezetékek (felirattal megkülönböztetve), kék = nullavezető, zöld-sárga = védővezető. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A keresztkapcsoló bemenő párja (A1, A2) az előző, kimenő párja (B1, B2) a következő kapcsoló felé néz; a kapcsok elrendezése gyártónként eltér.
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (keresztkapcsolo-107-4x107, ábra-ujjlenyomat b7949588).
+
+**Jelmagyarázat:** L – fázis (barna); N – nullavezető (kék); PE – védővezető (zöld-sárga); 1a, 2a, 1b, 2b, 1c, 2c, 1d, 2d, 1e, 2e – váltóvezeték (szürke); Lk – kapcsolt fázis (fekete).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | Betáp: L | Kötődoboz: L-kötés | L | barna | Elosztó – kötődoboz |
+| 2 | Betáp: N | Kötődoboz: N-kötés | N | kék | Elosztó – kötődoboz |
+| 3 | Betáp: PE | Kötődoboz: PE-kötés | PE | zöld-sárga | Elosztó – kötődoboz |
+| 4 | Kötődoboz: L-kötés | K1 (106, 1. hely): közös kapocs (C) | L | barna | Kötődoboz – K1 (1. hely) |
+| 5 | K1 (106, 1. hely): 1-es kapocs | Kötődoboz: 1a váltóvezeték kötése | váltóvezeték 1a | szürke | Kötődoboz – K1 (1. hely) |
+| 6 | K1 (106, 1. hely): 2-es kapocs | Kötődoboz: 2a váltóvezeték kötése | váltóvezeték 2a | szürke | Kötődoboz – K1 (1. hely) |
+| 7 | Kötődoboz: 1a váltóvezeték kötése | X1 (107, 2. hely): A1 (bemenő pár) | váltóvezeték 1a | szürke | Kötődoboz – X1 (2. hely) |
+| 8 | Kötődoboz: 2a váltóvezeték kötése | X1 (107, 2. hely): A2 (bemenő pár) | váltóvezeték 2a | szürke | Kötődoboz – X1 (2. hely) |
+| 9 | X1 (107, 2. hely): B1 (kimenő pár) | Kötődoboz: 1b váltóvezeték kötése | váltóvezeték 1b | szürke | Kötődoboz – X1 (2. hely) |
+| 10 | X1 (107, 2. hely): B2 (kimenő pár) | Kötődoboz: 2b váltóvezeték kötése | váltóvezeték 2b | szürke | Kötődoboz – X1 (2. hely) |
+| 11 | Kötődoboz: 1b váltóvezeték kötése | X2 (107, 3. hely): A1 (bemenő pár) | váltóvezeték 1b | szürke | Kötődoboz – X2 (3. hely) |
+| 12 | Kötődoboz: 2b váltóvezeték kötése | X2 (107, 3. hely): A2 (bemenő pár) | váltóvezeték 2b | szürke | Kötődoboz – X2 (3. hely) |
+| 13 | X2 (107, 3. hely): B1 (kimenő pár) | Kötődoboz: 1c váltóvezeték kötése | váltóvezeték 1c | szürke | Kötődoboz – X2 (3. hely) |
+| 14 | X2 (107, 3. hely): B2 (kimenő pár) | Kötődoboz: 2c váltóvezeték kötése | váltóvezeték 2c | szürke | Kötődoboz – X2 (3. hely) |
+| 15 | Kötődoboz: 1c váltóvezeték kötése | X3 (107, 4. hely): A1 (bemenő pár) | váltóvezeték 1c | szürke | Kötődoboz – X3 (4. hely) |
+| 16 | Kötődoboz: 2c váltóvezeték kötése | X3 (107, 4. hely): A2 (bemenő pár) | váltóvezeték 2c | szürke | Kötődoboz – X3 (4. hely) |
+| 17 | X3 (107, 4. hely): B1 (kimenő pár) | Kötődoboz: 1d váltóvezeték kötése | váltóvezeték 1d | szürke | Kötődoboz – X3 (4. hely) |
+| 18 | X3 (107, 4. hely): B2 (kimenő pár) | Kötődoboz: 2d váltóvezeték kötése | váltóvezeték 2d | szürke | Kötődoboz – X3 (4. hely) |
+| 19 | Kötődoboz: 1d váltóvezeték kötése | X4 (107, 5. hely): A1 (bemenő pár) | váltóvezeték 1d | szürke | Kötődoboz – X4 (5. hely) |
+| 20 | Kötődoboz: 2d váltóvezeték kötése | X4 (107, 5. hely): A2 (bemenő pár) | váltóvezeték 2d | szürke | Kötődoboz – X4 (5. hely) |
+| 21 | X4 (107, 5. hely): B1 (kimenő pár) | Kötődoboz: 1e váltóvezeték kötése | váltóvezeték 1e | szürke | Kötődoboz – X4 (5. hely) |
+| 22 | X4 (107, 5. hely): B2 (kimenő pár) | Kötődoboz: 2e váltóvezeték kötése | váltóvezeték 2e | szürke | Kötődoboz – X4 (5. hely) |
+| 23 | Kötődoboz: 1e váltóvezeték kötése | K2 (106, 6. hely): 1-es kapocs | váltóvezeték 1e | szürke | Kötődoboz – K2 (6. hely) |
+| 24 | Kötődoboz: 2e váltóvezeték kötése | K2 (106, 6. hely): 2-es kapocs | váltóvezeték 2e | szürke | Kötődoboz – K2 (6. hely) |
+| 25 | K2 (106, 6. hely): közös kapocs (C) | Kötődoboz: kapcsoltfázis-kötés | kapcsolt fázis | fekete | Kötődoboz – K2 (6. hely) |
+| 26 | Kötődoboz: kapcsoltfázis-kötés | Lámpa: L (fázis) | kapcsolt fázis | fekete | Kötődoboz – lámpa |
+| 27 | Kötődoboz: N-kötés | Lámpa: N | N | kék | Kötődoboz – lámpa |
+| 28 | Kötődoboz: PE-kötés | Lámpa: PE | PE | zöld-sárga | Kötődoboz – lámpa |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztó – kötődoboz | L (barna), N (kék), PE (zöld-sárga) | 3 |
+| Kötődoboz – K1 (1. hely) | L (barna), váltóvezeték 1a (szürke), váltóvezeték 2a (szürke) | 3 |
+| Kötődoboz – X1 (2. hely) | váltóvezeték 1a (szürke), váltóvezeték 2a (szürke), váltóvezeték 1b (szürke), váltóvezeték 2b (szürke) | 4 |
+| Kötődoboz – X2 (3. hely) | váltóvezeték 1b (szürke), váltóvezeték 2b (szürke), váltóvezeték 1c (szürke), váltóvezeték 2c (szürke) | 4 |
+| Kötődoboz – X3 (4. hely) | váltóvezeték 1c (szürke), váltóvezeték 2c (szürke), váltóvezeték 1d (szürke), váltóvezeték 2d (szürke) | 4 |
+| Kötődoboz – X4 (5. hely) | váltóvezeték 1d (szürke), váltóvezeték 2d (szürke), váltóvezeték 1e (szürke), váltóvezeték 2e (szürke) | 4 |
+| Kötődoboz – K2 (6. hely) | váltóvezeték 1e (szürke), váltóvezeték 2e (szürke), kapcsolt fázis (fekete) | 3 |
+| Kötődoboz – lámpa | kapcsolt fázis (fekete), N (kék), PE (zöld-sárga) | 3 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (64 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: S1 – K1 (106, 1. hely); X1 – X1 (107, 2. hely); X2 – X2 (107, 3. hely); X3 – X3 (107, 4. hely); X4 – X4 (107, 5. hely); S2 – K2 (106, 6. hely).
+
+| S1 | X1 | X2 | X3 | X4 | S2 | Eredmény (a szimuláció szerint) |
+|---|---|---|---|---|---|---|
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: nem ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: nem ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: nem ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: nem ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: nem ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: nem ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: nem ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: nem ég |
+| 0 (közös–1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: nem ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: nem ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: nem ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: nem ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: nem ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: nem ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: nem ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: ég |
+| 0 (közös–1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: nem ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: nem ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: nem ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: nem ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: nem ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: nem ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: nem ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: nem ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: ég |
+| 1 (közös–2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: nem ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: nem ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: nem ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: nem ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: nem ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: nem ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: nem ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 0 (közös–1) | Lámpa: ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | egyenes (A1–B1, A2–B2) | 1 (közös–2) | Lámpa: nem ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 0 (közös–1) | Lámpa: nem ég |
+| 1 (közös–2) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | keresztezett (A1–B2, A2–B1) | 1 (közös–2) | Lámpa: ég |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-KERESZTKAPCSOLO-107-4X107-NL | Netlista (a rajz és a táblák forrása) | keresztkapcsolo-107-bekotese-4x107.netlist.json · e67cbcc6 | ☐ | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-4X107-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · b7949588 | ☐ | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-4X107-VEZ | Vezetéktábla (28 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-4X107-SZAK | Szakaszok és érszám (8 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-4X107-ALL | Kapcsolóállás-táblázat (64 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-KERESZTKAPCSOLO-107-4X107):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-KERESZTKAPCSOLO-107-4X107).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-DUGALJ-ATHURKOLAS – Dugaljkör áthurkolással: két védőérintkezős dugalj FI-relé és kismegszakító után
+
+Forrás: content/tudastar/r3/dugalj-bekotese.netlist.json (netlista), content/tudastar/diagramok/dugalj-athurkolas.json (elrendezés); cikk: dugalj-bekotese, abra-1 („Dugaljkör áthurkolással, FI-relé és kismegszakító után”)
+
+Ábra-azonosító: dugalj-athurkolas. Netlista-ujjlenyomat: 9bb3ff8e; ábra-ujjlenyomat: f68b16a5 (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Érszínek: barna = fázisvezető (L), kék = nullavezető (N), zöld-sárga = védővezető (PE). A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A betáp a lakáselosztó gyűjtősínjeit jelképezi (TN-C-S rendszer, a PEN szétválasztása a betáp előtt); a szétválasztási pont után a nulla- és a védővezető sehol nem köthető újra össze (a szimulátor az ilyen kötést zárlatként elutasítja). A mérőhelyi és csatlakozási rész az elosztói engedélyes hatásköre, ezért itt nem szerepel. A keresztmetszet és a kismegszakító névleges árama méretezés kérdése (lib/sizing-tables.ts, jóváhagyásra vár), ezért az ábra nem ad számot. Áthurkolás: a továbbmenő vezetők a dugalj kapcsain mennek át (a kapocs két vezető befogására alkalmas kell legyen; ezt a gyártó adja meg).
+
+**Kérdés a lektorhoz (BEK-DUGALJ-ATHURKOLAS).** (1., a cikk saját kérdése) Van-e kötelező hazai előírás arra, hogy a védővezetőt ne a dugalj kapcsán hurkolják át, hanem kötőelemmel ágaztassák le? A cikk jelenleg csak szakmai megfontolásként tárgyalja.
+
+**Kérdés a lektorhoz (BEK-DUGALJ-ATHURKOLAS).** (2., a cikk saját kérdése) Van-e kialakult hazai szabály arra, hogy jelöletlen kapcsú dugaljnál szemből nézve melyik oldalra kerüljön a fázis? A cikk most csak az egységes bekötést javasolja.
+
+**Kérdés a lektorhoz (BEK-DUGALJ-ATHURKOLAS).** (3., a cikk saját kérdése) A CEE 7/3 aljzat hazai termékszabványa (MSZ 9871 sorozat vagy más) és kiadása.
+
+**Kérdés a lektorhoz (BEK-DUGALJ-ATHURKOLAS).** (4., a cikk saját kérdése) Elegendő-e a háromfázisú (CEE-rendszerű, ötpólusú) dugalj puszta említése, vagy külön cikk kell (P2)?
+
+**Kérdés a lektorhoz (BEK-DUGALJ-ATHURKOLAS).** (5., a cikk saját kérdése) A kikapcsolt dugalj állapotát a táblázat „nem ad feszültséget” szóval jelöli (nem „feszültségmentes”), mert lekapcsolt kismegszakító mellett a nullavezető a nullasínen marad. Elfogadható-e ez a szóhasználat (a független biztonsági ellenőr javaslata)?
+
+**Kérdés a lektorhoz (BEK-DUGALJ-ATHURKOLAS).** (6., a cikk saját kérdése) Maradjon-e „A szerelés menete szakembernek” lépéssor a laikusokat is megszólító (audience: laikus) cikkben, vagy kerüljön szakembernek szóló, összecsukott blokkba? A „hogyan kell bekötni a konnektort” keresőszinonimát az ellenőr kivette; visszakerüljön-e?
+
+**Kérdés a lektorhoz (BEK-DUGALJ-ATHURKOLAS).** (Dugalj, kismegszakító, FI-relé – közös kérdés 1.) Szóhasználat: a dugalj kikapcsolt állapota a táblákban mostantól „nem ad feszültséget”, a „feszültségmentes” helyett. Elfogadja-e a lektor? A változás a sim.py OUT_WORDS-ét érinti, csak a dugalj típusnál.
+
+**Kérdés a lektorhoz (BEK-DUGALJ-ATHURKOLAS).** (Dugalj, kismegszakító, FI-relé – közös kérdés 2.) Maradjon-e „A szerelés menete szakembernek” lépéssor a dugaljcikkben, amelynek a közönségei között a laikus is szerepel (audience: laikus)? Vagy kerüljön összecsukott, szakembernek szóló blokkba? A „hogyan kell bekötni a konnektort” keresőszinonimát kivettem. Ha marketing-szempontból vissza kell tenni, az a tulajdonos döntése.
+
+**Kérdés a lektorhoz (BEK-DUGALJ-ATHURKOLAS).** (Dugalj, kismegszakító, FI-relé – közös kérdés 3.) Az I16 szabály szerint minden dugaljnak FI-relé mögött kell lennie, az I15 szerint minden dugaljnak és fogyasztónak kismegszakító mögött. Ha egy későbbi „régi berendezés” ábra szándékosan FI nélküli dugaljkört mutat, ehhez kifejezett kivételmező kell (pl. checks.noRcd). Erről a tulajdonos és a lektor dönt.
+
+**Kérdés a lektorhoz (BEK-DUGALJ-ATHURKOLAS).** (Dugalj, kismegszakító, FI-relé – közös kérdés 4.) A kismegszakító-cikk TT-mondata számok nélküli. Elfogadható-e így: „a testzárlati áram jellemzően a kismegszakító kioldásához is kicsi; ott az önműködő lekapcsolást is áram-védőkapcsoló végzi”?
+
+**Kérdés a lektorhoz (BEK-DUGALJ-ATHURKOLAS).** (Dugalj, kismegszakító, FI-relé – közös kérdés 5.) Új forráshivatkozások, a kiadást lektor ellenőrizze: MSZ HD 60364-4-46 461.2 (a PEN nem kapcsolható) és MSZ HD 60364-5-54 543.4.3 (a szétválasztás után nincs újra-összekötés).
+
+**Kérdés a lektorhoz (BEK-DUGALJ-ATHURKOLAS).** (Dugalj, kismegszakító, FI-relé – közös kérdés 6.) FI-cikk: elfogadható-e a PEN-szakadásról („a FI nem érzékeli”) és a FI utáni N–PE összekötésről („romlik az érzékenység”) szóló megfogalmazás? Kell-e a P1 esethez számérték: IΔn/2, vagy az IEC TS 60479-1 tartományai?
+
+**Kérdés a lektorhoz (BEK-DUGALJ-ATHURKOLAS).** (Dugalj, kismegszakító, FI-relé – közös kérdés 7.) A független orákulum modellfeltevéseit lektornak kell jóváhagynia: emberi test 1 kΩ, talaj 10 Ω, testzárlat 5 Ω, próbaellenállás 10 kΩ, kioldási küszöb IΔn/2 = 15 mA. A szimulátor csak logikai összefüggőséget számol; a „kiold” cellák azt az esetet mutatják, amikor az áram eléri a kioldási értéket. Ezt most a cikk szövege is kimondja.
+
+**Kérdés a lektorhoz (BEK-DUGALJ-ATHURKOLAS).** (Dugalj, kismegszakító, FI-relé – közös kérdés 8.) A kapcsolási csoport szimulátorrészét (106, 107 minden állása, 102 N-bontás) nem én bővítettem. A párhuzamos ellenőr probak_biztonsag.py készletét futtattam újra: 9121 mutáns, 0 hamis PASS; 1260 torzított kapcsolómodell, mind FAIL. A kapcsolási cikkek szövegét nem néztem át, mert az a másik ellenőr hatásköre.
+
+**Kérdés a lektorhoz (BEK-DUGALJ-ATHURKOLAS).** (Dugalj, kismegszakító, FI-relé – közös kérdés 9.) R3 bekötési cikkben maradjon-e „laikus” a közönségek (audience) között? A veszély-doboz most kifejezetten azt mondja, hogy a leírás szakembernek szól.
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (dugalj-athurkolas, ábra-ujjlenyomat f68b16a5).
+
+**Jelmagyarázat:** L – fázis (barna); N – nullavezető (kék); PE – védővezető (zöld-sárga).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | Betáp (gyűjtősín): L | Q1 áram-védőkapcsoló (FI-relé): 1 (fázis, táp oldal) | L | barna | elosztón belül |
+| 2 | Betáp (gyűjtősín): N | Q1 áram-védőkapcsoló (FI-relé): N (táp oldal) | N | kék | elosztón belül |
+| 3 | Q1 áram-védőkapcsoló (FI-relé): N (védett oldal) | Nullasín (N) a FI-relé után: N | N | kék | elosztón belül |
+| 4 | Betáp (gyűjtősín): PE | PE-sín: PE | PE | zöld-sárga | elosztón belül |
+| 5 | Q1 áram-védőkapcsoló (FI-relé): 2 (fázis, védett oldal) | F1 kismegszakító (dugaljkör): 1 (be) | L | barna | elosztón belül |
+| 6 | F1 kismegszakító (dugaljkör): 2 (ki) | X1 dugalj: L kapocs | L | barna | Elosztó – X1 dugalj |
+| 7 | Nullasín (N) a FI-relé után: N | X1 dugalj: N kapocs | N | kék | Elosztó – X1 dugalj |
+| 8 | PE-sín: PE | X1 dugalj: védőérintkező kapocs | PE | zöld-sárga | Elosztó – X1 dugalj |
+| 9 | X1 dugalj: L kapocs | X2 dugalj: L kapocs | L | barna | X1 – X2 dugalj (áthurkolás) |
+| 10 | X1 dugalj: N kapocs | X2 dugalj: N kapocs | N | kék | X1 – X2 dugalj (áthurkolás) |
+| 11 | X1 dugalj: védőérintkező kapocs | X2 dugalj: védőérintkező kapocs | PE | zöld-sárga | X1 – X2 dugalj (áthurkolás) |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztó – X1 dugalj | L (barna), N (kék), PE (zöld-sárga) | 3 |
+| X1 – X2 dugalj (áthurkolás) | L (barna), N (kék), PE (zöld-sárga) | 3 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: Q1 – Q1 áram-védőkapcsoló (FI-relé); F1 – F1 kismegszakító (dugaljkör).
+
+| Q1 | F1 | Eredmény (a szimuláció szerint) |
+|---|---|---|
+| be (bekapcsolva) | be (bekapcsolva) | X1 dugalj: feszültség alatt; X2 dugalj: feszültség alatt; Q1 FI-relé: nem old ki |
+| be (bekapcsolva) | ki (kikapcsolva) | X1 dugalj: nem ad feszültséget; X2 dugalj: nem ad feszültséget; Q1 FI-relé: nem old ki |
+| ki (kikapcsolva) | be (bekapcsolva) | X1 dugalj: nem ad feszültséget; X2 dugalj: nem ad feszültséget; Q1 FI-relé: nem old ki |
+| ki (kikapcsolva) | ki (kikapcsolva) | X1 dugalj: nem ad feszültséget; X2 dugalj: nem ad feszültséget; Q1 FI-relé: nem old ki |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-DUGALJ-ATHURKOLAS-NL | Netlista (a rajz és a táblák forrása) | dugalj-bekotese.netlist.json · 9bb3ff8e | ☐ | ☐ | |
+| BEK-DUGALJ-ATHURKOLAS-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · f68b16a5 | ☐ | ☐ | |
+| BEK-DUGALJ-ATHURKOLAS-VEZ | Vezetéktábla (11 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-DUGALJ-ATHURKOLAS-SZAK | Szakaszok és érszám (2 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-DUGALJ-ATHURKOLAS-ALL | Kapcsolóállás-táblázat (4 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-DUGALJ-ATHURKOLAS):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-DUGALJ-ATHURKOLAS).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-DUGALJ-LEAGAZTATAS – Dugaljkör leágaztatással: két dugalj a kötődobozból, FI-relé és kismegszakító után
+
+Forrás: content/tudastar/r3/dugalj-bekotese-leagaztatas.netlist.json (netlista), content/tudastar/diagramok/dugalj-leagaztatas.json (elrendezés); cikk: dugalj-bekotese, abra-2 („Dugaljkör leágaztatással, kötődobozból”)
+
+Ábra-azonosító: dugalj-leagaztatas. Netlista-ujjlenyomat: 143d7450; ábra-ujjlenyomat: ff622029 (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Érszínek: barna = fázisvezető (L), kék = nullavezető (N), zöld-sárga = védővezető (PE). A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A betáp a lakáselosztó gyűjtősínjeit jelképezi (TN-C-S rendszer, a PEN szétválasztása a betáp előtt); a szétválasztási pont után a nulla- és a védővezető sehol nem köthető újra össze (a szimulátor az ilyen kötést zárlatként elutasítja). A mérőhelyi és csatlakozási rész az elosztói engedélyes hatásköre, ezért itt nem szerepel. A keresztmetszet és a kismegszakító névleges árama méretezés kérdése (lib/sizing-tables.ts, jóváhagyásra vár), ezért az ábra nem ad számot. Leágaztatás: a kötődobozban szerepenként egy-egy kötőelem (L, N, PE) fogja össze a vezetőket, mindegyik dugaljhoz külön szakasz megy.
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (dugalj-leagaztatas, ábra-ujjlenyomat ff622029).
+
+**Jelmagyarázat:** L – fázis (barna); N – nullavezető (kék); PE – védővezető (zöld-sárga).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | Betáp (gyűjtősín): L | Q1 áram-védőkapcsoló (FI-relé): 1 (fázis, táp oldal) | L | barna | elosztón belül |
+| 2 | Betáp (gyűjtősín): N | Q1 áram-védőkapcsoló (FI-relé): N (táp oldal) | N | kék | elosztón belül |
+| 3 | Q1 áram-védőkapcsoló (FI-relé): N (védett oldal) | Nullasín (N) a FI-relé után: N | N | kék | elosztón belül |
+| 4 | Betáp (gyűjtősín): PE | PE-sín: PE | PE | zöld-sárga | elosztón belül |
+| 5 | Q1 áram-védőkapcsoló (FI-relé): 2 (fázis, védett oldal) | F1 kismegszakító (dugaljkör): 1 (be) | L | barna | elosztón belül |
+| 6 | F1 kismegszakító (dugaljkör): 2 (ki) | Kötődoboz: L-kötés | L | barna | Elosztó – kötődoboz |
+| 7 | Nullasín (N) a FI-relé után: N | Kötődoboz: N-kötés | N | kék | Elosztó – kötődoboz |
+| 8 | PE-sín: PE | Kötődoboz: PE-kötés | PE | zöld-sárga | Elosztó – kötődoboz |
+| 9 | Kötődoboz: L-kötés | X1 dugalj: L kapocs | L | barna | Kötődoboz – X1 dugalj |
+| 10 | Kötődoboz: N-kötés | X1 dugalj: N kapocs | N | kék | Kötődoboz – X1 dugalj |
+| 11 | Kötődoboz: PE-kötés | X1 dugalj: védőérintkező kapocs | PE | zöld-sárga | Kötődoboz – X1 dugalj |
+| 12 | Kötődoboz: L-kötés | X2 dugalj: L kapocs | L | barna | Kötődoboz – X2 dugalj |
+| 13 | Kötődoboz: N-kötés | X2 dugalj: N kapocs | N | kék | Kötődoboz – X2 dugalj |
+| 14 | Kötődoboz: PE-kötés | X2 dugalj: védőérintkező kapocs | PE | zöld-sárga | Kötődoboz – X2 dugalj |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztó – kötődoboz | L (barna), N (kék), PE (zöld-sárga) | 3 |
+| Kötődoboz – X1 dugalj | L (barna), N (kék), PE (zöld-sárga) | 3 |
+| Kötődoboz – X2 dugalj | L (barna), N (kék), PE (zöld-sárga) | 3 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: Q1 – Q1 áram-védőkapcsoló (FI-relé); F1 – F1 kismegszakító (dugaljkör).
+
+| Q1 | F1 | Eredmény (a szimuláció szerint) |
+|---|---|---|
+| be (bekapcsolva) | be (bekapcsolva) | X1 dugalj: feszültség alatt; X2 dugalj: feszültség alatt; Q1 FI-relé: nem old ki |
+| be (bekapcsolva) | ki (kikapcsolva) | X1 dugalj: nem ad feszültséget; X2 dugalj: nem ad feszültséget; Q1 FI-relé: nem old ki |
+| ki (kikapcsolva) | be (bekapcsolva) | X1 dugalj: nem ad feszültséget; X2 dugalj: nem ad feszültséget; Q1 FI-relé: nem old ki |
+| ki (kikapcsolva) | ki (kikapcsolva) | X1 dugalj: nem ad feszültséget; X2 dugalj: nem ad feszültséget; Q1 FI-relé: nem old ki |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-DUGALJ-LEAGAZTATAS-NL | Netlista (a rajz és a táblák forrása) | dugalj-bekotese-leagaztatas.netlist.json · 143d7450 | ☐ | ☐ | |
+| BEK-DUGALJ-LEAGAZTATAS-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · ff622029 | ☐ | ☐ | |
+| BEK-DUGALJ-LEAGAZTATAS-VEZ | Vezetéktábla (14 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-DUGALJ-LEAGAZTATAS-SZAK | Szakaszok és érszám (3 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-DUGALJ-LEAGAZTATAS-ALL | Kapcsolóállás-táblázat (4 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-DUGALJ-LEAGAZTATAS):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-DUGALJ-LEAGAZTATAS).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-KISMEGSZAKITO-ARAMKOROK – Két dugaljkör saját kismegszakítóval, közös FI-relé után
+
+Forrás: content/tudastar/r3/kismegszakito.netlist.json (netlista), content/tudastar/diagramok/kismegszakito-aramkorok.json (elrendezés); cikk: kismegszakito, abra-2 („Két dugaljkör saját kismegszakítóval, közös FI-relé után”)
+
+Ábra-azonosító: kismegszakito-aramkorok. Netlista-ujjlenyomat: 3bf085c5; ábra-ujjlenyomat: 244ec1ac (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (8 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Érszínek: barna = fázisvezető (L), kék = nullavezető (N), zöld-sárga = védővezető (PE). A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A betáp a lakáselosztó gyűjtősínjeit jelképezi (TN-C-S rendszer, a PEN szétválasztása a betáp előtt); a szétválasztási pont után a nulla- és a védővezető sehol nem köthető újra össze (a szimulátor az ilyen kötést zárlatként elutasítja). A mérőhelyi és csatlakozási rész az elosztói engedélyes hatásköre, ezért itt nem szerepel. A keresztmetszet és a kismegszakító névleges árama méretezés kérdése (lib/sizing-tables.ts, jóváhagyásra vár), ezért az ábra nem ad számot. A kismegszakítók táplálása fésűs sínnel vagy áthidalóval történik; az ábrán ez egy fázisvezetőként jelenik meg. A világítási áramkör ugyanígy kapcsolódik, csak a kismegszakító után kapcsoló és lámpa következik.
+
+**Kérdés a lektorhoz (BEK-KISMEGSZAKITO-ARAMKOROK).** (1., a cikk saját kérdése) A B, C, D pillanatkioldási tartományok (3–5, 5–10, 10–20 · In) és az 1,13 / 1,45 · In egyezményes áramok egyeznek-e a hatályos MSZ EN 60898-1-gyel? A felső határokat a lib/sizing-tables.ts is használja (ellenőrizendő).
+
+**Kérdés a lektorhoz (BEK-KISMEGSZAKITO-ARAMKOROK).** (2., a cikk saját kérdése) Szükséges-e a cikkben a megszakítóképesség hazai minimumára (elosztói előírás) utalni, vagy elég a „tervezői döntés” megfogalmazás?
+
+**Kérdés a lektorhoz (BEK-KISMEGSZAKITO-ARAMKOROK).** (3., a cikk saját kérdése) A „Jellemző alkalmazás” oszlop (B: lakás általános áramkörei, C: nagy bekapcsolási áram, D: nagyon nagy bekapcsolási áram) elfogadható-e így, számok nélkül?
+
+**Kérdés a lektorhoz (BEK-KISMEGSZAKITO-ARAMKOROK).** (4., a cikk saját kérdése) A TT-rendszerre tett állítás („a testzárlati áram jellemzően a kismegszakító kioldásához is kicsi; ott az önműködő lekapcsolást is áram-védőkapcsoló végzi”) elfogadható-e így, számok nélkül?
+
+**Kérdés a lektorhoz (BEK-KISMEGSZAKITO-ARAMKOROK).** (5., a cikk saját kérdése) Az MSZ HD 60364-4-46 461.2 pontja (TN-C rendszerben a PEN-vezető nem választható le és nem kapcsolható) a hatályos hazai kiadásban is így szerepel-e?
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (kismegszakito-aramkorok, ábra-ujjlenyomat 244ec1ac).
+
+**Jelmagyarázat:** L – fázis (barna); N – nullavezető (kék); PE – védővezető (zöld-sárga).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | Betáp (gyűjtősín): L | Q1 áram-védőkapcsoló (FI-relé): 1 (fázis, táp oldal) | L | barna | elosztón belül |
+| 2 | Betáp (gyűjtősín): N | Q1 áram-védőkapcsoló (FI-relé): N (táp oldal) | N | kék | elosztón belül |
+| 3 | Q1 áram-védőkapcsoló (FI-relé): N (védett oldal) | Nullasín (N) a FI-relé után: N | N | kék | elosztón belül |
+| 4 | Betáp (gyűjtősín): PE | PE-sín: PE | PE | zöld-sárga | elosztón belül |
+| 5 | Q1 áram-védőkapcsoló (FI-relé): 2 (fázis, védett oldal) | F1 kismegszakító (nappali dugaljak): 1 (be) | L | barna | elosztón belül |
+| 6 | F1 kismegszakító (nappali dugaljak): 1 (be) | F2 kismegszakító (konyhai dugaljak): 1 (be) | L (fésűs sín) | barna | elosztón belül |
+| 7 | F1 kismegszakító (nappali dugaljak): 2 (ki) | X1 dugalj (nappali): L kapocs | L | barna | Elosztó – X1 dugalj (nappali) |
+| 8 | Nullasín (N) a FI-relé után: N | X1 dugalj (nappali): N kapocs | N | kék | Elosztó – X1 dugalj (nappali) |
+| 9 | PE-sín: PE | X1 dugalj (nappali): védőérintkező kapocs | PE | zöld-sárga | Elosztó – X1 dugalj (nappali) |
+| 10 | F2 kismegszakító (konyhai dugaljak): 2 (ki) | X2 dugalj (konyha): L kapocs | L | barna | Elosztó – X2 dugalj (konyha) |
+| 11 | Nullasín (N) a FI-relé után: N | X2 dugalj (konyha): N kapocs | N | kék | Elosztó – X2 dugalj (konyha) |
+| 12 | PE-sín: PE | X2 dugalj (konyha): védőérintkező kapocs | PE | zöld-sárga | Elosztó – X2 dugalj (konyha) |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztó – X1 dugalj (nappali) | L (barna), N (kék), PE (zöld-sárga) | 3 |
+| Elosztó – X2 dugalj (konyha) | L (barna), N (kék), PE (zöld-sárga) | 3 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (8 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: Q1 – Q1 áram-védőkapcsoló (FI-relé); F1 – F1 kismegszakító (nappali dugaljak); F2 – F2 kismegszakító (konyhai dugaljak).
+
+| Q1 | F1 | F2 | Eredmény (a szimuláció szerint) |
+|---|---|---|---|
+| be (bekapcsolva) | be (bekapcsolva) | be (bekapcsolva) | X1 dugalj (nappali): feszültség alatt; X2 dugalj (konyha): feszültség alatt; Q1 FI-relé: nem old ki |
+| be (bekapcsolva) | be (bekapcsolva) | ki (kikapcsolva) | X1 dugalj (nappali): feszültség alatt; X2 dugalj (konyha): nem ad feszültséget; Q1 FI-relé: nem old ki |
+| be (bekapcsolva) | ki (kikapcsolva) | be (bekapcsolva) | X1 dugalj (nappali): nem ad feszültséget; X2 dugalj (konyha): feszültség alatt; Q1 FI-relé: nem old ki |
+| be (bekapcsolva) | ki (kikapcsolva) | ki (kikapcsolva) | X1 dugalj (nappali): nem ad feszültséget; X2 dugalj (konyha): nem ad feszültséget; Q1 FI-relé: nem old ki |
+| ki (kikapcsolva) | be (bekapcsolva) | be (bekapcsolva) | X1 dugalj (nappali): nem ad feszültséget; X2 dugalj (konyha): nem ad feszültséget; Q1 FI-relé: nem old ki |
+| ki (kikapcsolva) | be (bekapcsolva) | ki (kikapcsolva) | X1 dugalj (nappali): nem ad feszültséget; X2 dugalj (konyha): nem ad feszültséget; Q1 FI-relé: nem old ki |
+| ki (kikapcsolva) | ki (kikapcsolva) | be (bekapcsolva) | X1 dugalj (nappali): nem ad feszültséget; X2 dugalj (konyha): nem ad feszültséget; Q1 FI-relé: nem old ki |
+| ki (kikapcsolva) | ki (kikapcsolva) | ki (kikapcsolva) | X1 dugalj (nappali): nem ad feszültséget; X2 dugalj (konyha): nem ad feszültséget; Q1 FI-relé: nem old ki |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-KISMEGSZAKITO-ARAMKOROK-NL | Netlista (a rajz és a táblák forrása) | kismegszakito.netlist.json · 3bf085c5 | ☐ | ☐ | |
+| BEK-KISMEGSZAKITO-ARAMKOROK-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · 244ec1ac | ☐ | ☐ | |
+| BEK-KISMEGSZAKITO-ARAMKOROK-VEZ | Vezetéktábla (12 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-KISMEGSZAKITO-ARAMKOROK-SZAK | Szakaszok és érszám (2 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-KISMEGSZAKITO-ARAMKOROK-ALL | Kapcsolóállás-táblázat (8 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-KISMEGSZAKITO-ARAMKOROK):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-KISMEGSZAKITO-ARAMKOROK).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-FI-RELE-BEKOTES – Áram-védőkapcsoló (FI-relé) bekötése dugaljkör elé, próbagombbal
+
+Forrás: content/tudastar/r3/aram-vedokapcsolo-fi-rele.netlist.json (netlista), content/tudastar/diagramok/fi-rele-bekotes.json (elrendezés); cikk: aram-vedokapcsolo-fi-rele, abra-2 („Áram-védőkapcsoló bekötése dugaljkör elé, próbagombbal”)
+
+Ábra-azonosító: fi-rele-bekotes. Netlista-ujjlenyomat: 8f0e1c8c; ábra-ujjlenyomat: d8644f80 (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (8 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Érszínek: barna = fázisvezető (L), kék = nullavezető (N), zöld-sárga = védővezető (PE). A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A betáp a lakáselosztó gyűjtősínjeit jelképezi (TN-C-S rendszer, a PEN szétválasztása a betáp előtt); a szétválasztási pont után a nulla- és a védővezető sehol nem köthető újra össze (a szimulátor az ilyen kötést zárlatként elutasítja). A mérőhelyi és csatlakozási rész az elosztói engedélyes hatásköre, ezért itt nem szerepel. A keresztmetszet és a kismegszakító névleges árama méretezés kérdése (lib/sizing-tables.ts, jóváhagyásra vár), ezért az ábra nem ad számot. A próbagomb és a próbaellenállás a FI-relé házán belül van („belső” kapcsolat, nem szerelt ér); a próbaáramkör pontos kialakítása gyártónként eltér, az elv azonos: a próbaáram az összegáramváltót csak az egyik póluson kerüli meg.
+
+**Kérdés a lektorhoz (BEK-FI-RELE-BEKOTES).** (1., a cikk saját kérdése) Egyezik-e a hatályos MSZ EN 61008-1-gyel: kioldás IΔn/2 és IΔn között; általános típusnál legfeljebb 0,3 s IΔn-nél és 0,04 s 5 · IΔn-nél?
+
+**Kérdés a lektorhoz (BEK-FI-RELE-BEKOTES).** (2., a cikk saját kérdése) Az AC típus alkalmazhatóságáról a cikk csak óvatosan fogalmaz („sok helyen korlátozott”). Kell-e konkrét hazai előírásra hivatkozni (MSZ HD 60364-5-53, 531.3.3)?
+
+**Kérdés a lektorhoz (BEK-FI-RELE-BEKOTES).** (3., a cikk saját kérdése) Tegyen-e a cikk konkrét javaslatot a próbagomb használatának gyakoriságára, vagy maradjon a „gyártó által megadott időközönként”?
+
+**Kérdés a lektorhoz (BEK-FI-RELE-BEKOTES).** (4., a cikk saját kérdése) A próbaáramkör netlistabeli modellje (védett oldali fázis → ellenállás → táp oldali nulla) elfogadható-e általános elvként?
+
+**Kérdés a lektorhoz (BEK-FI-RELE-BEKOTES).** (5., a cikk saját kérdése) A hibahelyzet-ábrán a testzárlatnál TN-rendszerben a kismegszakító is működhet; elég-e ezt a szövegben megemlíteni?
+
+**Kérdés a lektorhoz (BEK-FI-RELE-BEKOTES).** (6., a cikk saját kérdése) A „Mi ellen nem véd?” két új pontja (PEN-szakadás TN-C-S rendszerben; a feszültségmentesítést nem helyettesíti) és a „nulla–védővezető összekötés a FI után rontja az érzékenységet” állítás elfogadható-e így?
+
+**Kérdés a lektorhoz (BEK-FI-RELE-BEKOTES).** (7., a cikk saját kérdése) A P1 esetnél a cikk most kimondja, hogy jól szigetelő padlón az áram a kioldási érték alatt maradhat. Kell-e ehhez szám (IΔn/2) vagy az IEC TS 60479-1 tartományaira hivatkozás?
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (fi-rele-bekotes, ábra-ujjlenyomat d8644f80).
+
+**Jelmagyarázat:** L – fázis (barna); N – nullavezető (kék); PE – védővezető (zöld-sárga); készüléken belüli kötés (nem szerelt ér).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | Betáp (gyűjtősín): L | Q1 áram-védőkapcsoló (FI-relé): 1 (fázis, táp oldal) | L | barna | elosztón belül |
+| 2 | Betáp (gyűjtősín): N | Q1 áram-védőkapcsoló (FI-relé): N (táp oldal) | N | kék | elosztón belül |
+| 3 | Q1 áram-védőkapcsoló (FI-relé): N (védett oldal) | Nullasín (N) a FI-relé után: N | N | kék | elosztón belül |
+| 4 | Betáp (gyűjtősín): PE | PE-sín: PE | PE | zöld-sárga | elosztón belül |
+| 5 | Q1 áram-védőkapcsoló (FI-relé): 2 (fázis, védett oldal) | F1 kismegszakító (dugaljkör): 1 (be) | L | barna | elosztón belül |
+| 6 | F1 kismegszakító (dugaljkör): 2 (ki) | X1 dugalj: L kapocs | L | barna | Elosztó – X1 dugalj |
+| 7 | Nullasín (N) a FI-relé után: N | X1 dugalj: N kapocs | N | kék | Elosztó – X1 dugalj |
+| 8 | PE-sín: PE | X1 dugalj: védőérintkező kapocs | PE | zöld-sárga | Elosztó – X1 dugalj |
+| 9 | X1 dugalj: L kapocs | M1 mosógép (I. érintésvédelmi osztály, fémház): L | L | barna | Csatlakozózsinór és dugó |
+| 10 | X1 dugalj: N kapocs | M1 mosógép (I. érintésvédelmi osztály, fémház): N | N | kék | Csatlakozózsinór és dugó |
+| 11 | X1 dugalj: védőérintkező kapocs | M1 mosógép (I. érintésvédelmi osztály, fémház): fémház (PE) | PE | zöld-sárga | Csatlakozózsinór és dugó |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztó – X1 dugalj | L (barna), N (kék), PE (zöld-sárga) | 3 |
+| Csatlakozózsinór és dugó | L (barna), N (kék), PE (zöld-sárga) | 3 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (8 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: Q1 – Q1 áram-védőkapcsoló (FI-relé); T1 – Q1 próbagomb (T); F1 – F1 kismegszakító (dugaljkör).
+
+| Q1 | T1 | F1 | Eredmény (a szimuláció szerint) |
+|---|---|---|---|
+| be (bekapcsolva) | nyugalom (nincs megnyomva) | be (bekapcsolva) | M1 mosógép: működik; X1 dugalj: feszültség alatt; Q1 FI-relé: nem old ki |
+| be (bekapcsolva) | nyugalom (nincs megnyomva) | ki (kikapcsolva) | M1 mosógép: nem működik; X1 dugalj: nem ad feszültséget; Q1 FI-relé: nem old ki |
+| be (bekapcsolva) | megnyomva | be (bekapcsolva) | M1 mosógép: működik; X1 dugalj: feszültség alatt; Q1 FI-relé: kiold |
+| be (bekapcsolva) | megnyomva | ki (kikapcsolva) | M1 mosógép: nem működik; X1 dugalj: nem ad feszültséget; Q1 FI-relé: kiold |
+| ki (kikapcsolva) | nyugalom (nincs megnyomva) | be (bekapcsolva) | M1 mosógép: nem működik; X1 dugalj: nem ad feszültséget; Q1 FI-relé: nem old ki |
+| ki (kikapcsolva) | nyugalom (nincs megnyomva) | ki (kikapcsolva) | M1 mosógép: nem működik; X1 dugalj: nem ad feszültséget; Q1 FI-relé: nem old ki |
+| ki (kikapcsolva) | megnyomva | be (bekapcsolva) | M1 mosógép: nem működik; X1 dugalj: nem ad feszültséget; Q1 FI-relé: nem old ki |
+| ki (kikapcsolva) | megnyomva | ki (kikapcsolva) | M1 mosógép: nem működik; X1 dugalj: nem ad feszültséget; Q1 FI-relé: nem old ki |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-FI-RELE-BEKOTES-NL | Netlista (a rajz és a táblák forrása) | aram-vedokapcsolo-fi-rele.netlist.json · 8f0e1c8c | ☐ | ☐ | |
+| BEK-FI-RELE-BEKOTES-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · d8644f80 | ☐ | ☐ | |
+| BEK-FI-RELE-BEKOTES-VEZ | Vezetéktábla (11 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-FI-RELE-BEKOTES-SZAK | Szakaszok és érszám (2 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-FI-RELE-BEKOTES-ALL | Kapcsolóállás-táblázat (8 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-FI-RELE-BEKOTES):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-FI-RELE-BEKOTES).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-FI-RELE-HIBAHELYZETEK – Mikor old ki a FI-relé? Testzárlat, fázis–föld és fázis–nulla érintés
+
+Forrás: content/tudastar/r3/aram-vedokapcsolo-fi-rele-hibahelyzetek.netlist.json (netlista), content/tudastar/diagramok/fi-rele-hibahelyzetek.json (elrendezés); cikk: aram-vedokapcsolo-fi-rele, abra-3 („Hibahelyzetek: testzárlat, fázis–föld és fázis–nulla érintés”)
+
+Ábra-azonosító: fi-rele-hibahelyzetek. Netlista-ujjlenyomat: 704b52c6; ábra-ujjlenyomat: bcf3e28d (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (8 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Érszínek: barna = fázisvezető (L), kék = nullavezető (N), zöld-sárga = védővezető (PE). A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A betáp a lakáselosztó gyűjtősínjeit jelképezi (TN-C-S rendszer, a PEN szétválasztása a betáp előtt); a szétválasztási pont után a nulla- és a védővezető sehol nem köthető újra össze (a szimulátor az ilyen kötést zárlatként elutasítja). A mérőhelyi és csatlakozási rész az elosztói engedélyes hatásköre, ezért itt nem szerepel. A keresztmetszet és a kismegszakító névleges árama méretezés kérdése (lib/sizing-tables.ts, jóváhagyásra vár), ezért az ábra nem ad számot. A hibahely és az érintés jelképes elem (impedancia), nem szerelt vezeték. A Q1 és az F1 végig bekapcsolt; a táblázat a hiba pillanatát mutatja, a kioldás előtt. A föld (talaj) a betáp csillagpontján át visszavezető potenciál.
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (fi-rele-hibahelyzetek, ábra-ujjlenyomat bcf3e28d).
+
+**Jelmagyarázat:** L – fázis (barna); N – nullavezető (kék); PE – védővezető (zöld-sárga); jelképes hibahely (nem szerelt ér); érintési pont (nem szerelt ér).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | Betáp (gyűjtősín): L | Q1 áram-védőkapcsoló (FI-relé): 1 (fázis, táp oldal) | L | barna | elosztón belül |
+| 2 | Betáp (gyűjtősín): N | Q1 áram-védőkapcsoló (FI-relé): N (táp oldal) | N | kék | elosztón belül |
+| 3 | Q1 áram-védőkapcsoló (FI-relé): N (védett oldal) | Nullasín (N) a FI-relé után: N | N | kék | elosztón belül |
+| 4 | Betáp (gyűjtősín): PE | PE-sín: PE | PE | zöld-sárga | elosztón belül |
+| 5 | Q1 áram-védőkapcsoló (FI-relé): 2 (fázis, védett oldal) | F1 kismegszakító (dugaljkör): 1 (be) | L | barna | elosztón belül |
+| 6 | F1 kismegszakító (dugaljkör): 2 (ki) | X1 dugalj: L kapocs | L | barna | Elosztó – X1 dugalj |
+| 7 | Nullasín (N) a FI-relé után: N | X1 dugalj: N kapocs | N | kék | Elosztó – X1 dugalj |
+| 8 | PE-sín: PE | X1 dugalj: védőérintkező kapocs | PE | zöld-sárga | Elosztó – X1 dugalj |
+| 9 | X1 dugalj: L kapocs | M1 mosógép (I. érintésvédelmi osztály, fémház): L | L | barna | Csatlakozózsinór és dugó |
+| 10 | X1 dugalj: N kapocs | M1 mosógép (I. érintésvédelmi osztály, fémház): N | N | kék | Csatlakozózsinór és dugó |
+| 11 | X1 dugalj: védőérintkező kapocs | M1 mosógép (I. érintésvédelmi osztály, fémház): fémház (PE) | PE | zöld-sárga | Csatlakozózsinór és dugó |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztó – X1 dugalj | L (barna), N (kék), PE (zöld-sárga) | 3 |
+| Csatlakozózsinór és dugó | L (barna), N (kék), PE (zöld-sárga) | 3 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (8 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: Q1 – Q1 áram-védőkapcsoló (FI-relé); F1 – F1 kismegszakító (dugaljkör); H1 – H1 testzárlat a mosógépben (fázis → fémház); P1 – P1 érintés: fázis és föld; P2 – P2 érintés: fázis és nulla, a földtől elszigetelve.
+
+| Q1 | F1 | H1 | P1 | P2 | Eredmény (a szimuláció szerint) |
+|---|---|---|---|---|---|
+| be (bekapcsolva) | be (bekapcsolva) | nincs | nincs | nincs | M1 mosógép: működik; X1 dugalj: feszültség alatt; H1: hibaáram: nincs hibaáram; P1: áram a testen át: nem folyik áram; P2: áram a testen át: nem folyik áram; Q1 FI-relé: nem old ki |
+| be (bekapcsolva) | be (bekapcsolva) | nincs | nincs | fennáll | M1 mosógép: működik; X1 dugalj: feszültség alatt; H1: hibaáram: nincs hibaáram; P1: áram a testen át: nem folyik áram; P2: áram a testen át: áram folyik át rajta; Q1 FI-relé: nem old ki |
+| be (bekapcsolva) | be (bekapcsolva) | nincs | fennáll | nincs | M1 mosógép: működik; X1 dugalj: feszültség alatt; H1: hibaáram: nincs hibaáram; P1: áram a testen át: áram folyik át rajta; P2: áram a testen át: nem folyik áram; Q1 FI-relé: kiold |
+| be (bekapcsolva) | be (bekapcsolva) | nincs | fennáll | fennáll | M1 mosógép: működik; X1 dugalj: feszültség alatt; H1: hibaáram: nincs hibaáram; P1: áram a testen át: áram folyik át rajta; P2: áram a testen át: áram folyik át rajta; Q1 FI-relé: kiold |
+| be (bekapcsolva) | be (bekapcsolva) | fennáll | nincs | nincs | M1 mosógép: működik; X1 dugalj: feszültség alatt; H1: hibaáram: hibaáram folyik; P1: áram a testen át: nem folyik áram; P2: áram a testen át: nem folyik áram; Q1 FI-relé: kiold |
+| be (bekapcsolva) | be (bekapcsolva) | fennáll | nincs | fennáll | M1 mosógép: működik; X1 dugalj: feszültség alatt; H1: hibaáram: hibaáram folyik; P1: áram a testen át: nem folyik áram; P2: áram a testen át: áram folyik át rajta; Q1 FI-relé: kiold |
+| be (bekapcsolva) | be (bekapcsolva) | fennáll | fennáll | nincs | M1 mosógép: működik; X1 dugalj: feszültség alatt; H1: hibaáram: hibaáram folyik; P1: áram a testen át: áram folyik át rajta; P2: áram a testen át: nem folyik áram; Q1 FI-relé: kiold |
+| be (bekapcsolva) | be (bekapcsolva) | fennáll | fennáll | fennáll | M1 mosógép: működik; X1 dugalj: feszültség alatt; H1: hibaáram: hibaáram folyik; P1: áram a testen át: áram folyik át rajta; P2: áram a testen át: áram folyik át rajta; Q1 FI-relé: kiold |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-FI-RELE-HIBAHELYZETEK-NL | Netlista (a rajz és a táblák forrása) | aram-vedokapcsolo-fi-rele-hibahelyzetek.netlist.json · 704b52c6 | ☐ | ☐ | |
+| BEK-FI-RELE-HIBAHELYZETEK-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · bcf3e28d | ☐ | ☐ | |
+| BEK-FI-RELE-HIBAHELYZETEK-VEZ | Vezetéktábla (11 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-FI-RELE-HIBAHELYZETEK-SZAK | Szakaszok és érszám (2 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-FI-RELE-HIBAHELYZETEK-ALL | Kapcsolóállás-táblázat (8 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-FI-RELE-HIBAHELYZETEK):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-FI-RELE-HIBAHELYZETEK).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-FOLDELES-TN-C – TN-C rendszer: a PEN-vezető a fogyasztóig fut
+
+Forrás: content/tudastar/r3/foldelesi-rendszerek-tn-c.netlist.json (netlista), content/tudastar/diagramok/foldeles-tn-c.json (elrendezés); cikk: foldelesi-rendszerek, abra-1 („TN-C rendszer”)
+
+Ábra-azonosító: foldeles-tn-c. Netlista-ujjlenyomat: 742e564d; ábra-ujjlenyomat: a2c56b74 (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Elvi rajz: a táppont az elosztói engedélyes transzformátora, a hálózat és a csatlakozás az elosztói engedélyes hatásköre; a rajz nem szerelési utasítás. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A keresztmetszet, a túláramvédelem névleges árama és a földelési ellenállás méretezés kérdése, ezért az ábra nem ad számot. A hibahely (testzárlat) és az érintési pont jelképes, nem szerelt vezeték. A táblázat a hiba fennállásának pillanatát mutatja, a lekapcsolás előtt. A régi, kéteres („nullázott”) berendezésekre jellemző felépítés; új berendezés így nem készül.
+
+**Kérdés a lektorhoz (BEK-FOLDELES-TN-C).** (1., a cikk saját kérdése) Hazai előfordulás: helytálló-e, hogy a közcélú kisfeszültségű hálózat jellemzően TN-C (négyvezetős), a lakossági fogyasztói berendezések nagy része TN-C-S, és TT ma inkább kivételesen fordul elő? Kell-e konkrétabb (elosztói engedélyesenkénti) megfogalmazás?
+
+**Kérdés a lektorhoz (BEK-FOLDELES-TN-C).** (2., a cikk saját kérdése) A PEN szétválasztásának helye (csatlakozószekrény, mérőhely, első elosztó) és az ott kötelező földelés (ismételt földelés, alapföldelő) – az MSZ 447 vagy az engedélyesek szabályzata rögzíti? Melyik ponton?
+
+**Kérdés a lektorhoz (BEK-FOLDELES-TN-C).** (3., a cikk saját kérdése) A cikk szerint a szétválasztásnál a PEN előbb a PE-sínre kerül, és onnan híddal a nullasínre. Az 543.4 pont pontosan mit ír elő?
+
+**Kérdés a lektorhoz (BEK-FOLDELES-TN-C).** (4., a cikk saját kérdése) A szimuláció ideális vezetőkkel, minőségi alapon számol („veszélyes lehet a lekapcsolásig”, „tartósan”). Elegendő-e így, vagy a hibafeszültség nagyságrendjét is közölni kell jóváhagyott forrásból?
+
+**Kérdés a lektorhoz (BEK-FOLDELES-TN-C).** (5., a cikk saját kérdése) A régi „nullázás” és „védőföldelés” elnevezés zárójeles használata elfogadható-e?
+
+**Kérdés a lektorhoz (BEK-FOLDELES-TN-C).** (Földelési rendszerek és EPH – közös kérdés 1.) Lektor: elfogadható-e az új érintési kategória neve és szövege („veszélyes lehet, tartósan; a FI-relé legfeljebb a testen átfolyó áramra old ki”) a TT, szakadt földelővezető esetre? Kell-e konkrét kioldási áramértéket (30 mA vagy 300 mA) közölni forrással, vagy elég a mostani, szám nélküli „nagyobb kioldási áramú (például tűzvédelmi célú)” megfogalmazás?
+
+**Kérdés a lektorhoz (BEK-FOLDELES-TN-C).** (Földelési rendszerek és EPH – közös kérdés 2.) Lektor: a PEN szétválasztásának helyét most nyitva hagytam („mérőhely vagy az azt követő első elosztó”, az engedélyes előírása szerint). Melyik a hazai szabály (MSZ 447 vagy engedélyesi szabályzat), és mi a pontszám?
+
+**Kérdés a lektorhoz (BEK-FOLDELES-TN-C).** (Földelési rendszerek és EPH – közös kérdés 3.) Lektor: az IT-szakasz két állítása helytálló-e így: az első hiba után a többi fázis a földhöz képest vonali feszültségre kerülhet, és a szórt kapacitáson át kis áram folyik?
+
+**Kérdés a lektorhoz (BEK-FOLDELES-TN-C).** (Földelési rendszerek és EPH – közös kérdés 4.) Lektor: a csillagpont-eltolódásos túlfeszültség (háromfázisú hálózatban, nullavezető-szakadáskor) a TN-S szakaszban szerepel, holott minden TN-rendszerre igaz. Maradjon itt, vagy kerüljön egy külön „nullavezető-szakadás / feszültségfigyelő relé” cikkbe (a P2 témakatalógusban szerepel)?
+
+**Kérdés a lektorhoz (BEK-FOLDELES-TN-C).** (Földelési rendszerek és EPH – közös kérdés 5.) Lektor: a TN-C-S szakasz szerint közös hálózati PEN szakadásakor a saját főkapcsoló lekapcsolása sem szünteti meg biztosan a veszélyt. Megfelelő-e ez a laikusnak szóló „Mikor hívj szakembert?” tanácsokkal együtt (főkapcsoló, fémrészek kerülése, azonnali jelzés az engedélyesnek)?
+
+**Kérdés a lektorhoz (BEK-FOLDELES-TN-C).** (Földelési rendszerek és EPH – közös kérdés 6.) Lektor: a feszültségmentesítés-cikk „Villamos berendezésen dolgozni csak feszültségmentes állapotban szabad” mondata szigorúbb a valóságnál, mert a feszültség alatti munka külön képesítéssel engedélyezett. Maradjon a konzervatív megfogalmazás, vagy kapjon szűkítést? Szerepeljen-e kifejezetten, hogy a multiméter nem helyettesíti az MSZ EN 61243-3 szerinti kétpólusú feszültségvizsgálót?
+
+**Kérdés a lektorhoz (BEK-FOLDELES-TN-C).** (Földelési rendszerek és EPH – közös kérdés 7.) Lektor: az EPH-cikk figyelmeztet, hogy a fém cső átvágásakor vagy az EPH-vezető bontásakor a két vég között életveszélyes feszültség lehet. Ideiglenes áthidaló vezetékre vonatkozó eljárást szándékosan nem írtam le, mert munkautasítás lenne. Kell-e ennél több, vagy elég a „szakember vizsgálja meg előtte”?
+
+**Kérdés a lektorhoz (BEK-FOLDELES-TN-C).** (Földelési rendszerek és EPH – közös kérdés 8.) Fejlesztő vagy lektor: a szimulátor ideális csomópont-modellje a TN-S-ben az N-t és a PE-t egy csomópontnak veszi, ezért egy „nullakapocs érintése” pont túlzó eredményt adna (testzárlatkor is „veszélyes”). Ezért a TN-S N-szakadásos életveszélyt csak szöveg mondja ki, szimuláció nem igazolja. A 2. fázisban kell-e vezetőimpedanciás (potenciálszintes) modell?
+
+**Kérdés a lektorhoz (BEK-FOLDELES-TN-C).** (Földelési rendszerek és EPH – közös kérdés 9.) Szerkesztő: a foldelesi-rendszerek.md prózája 1490 szó, a felső korlát 1500. További biztonsági kiegészítéshez a cikket szét kell bontani; a témakatalógus a „(+ PEN-szétválasztás)” témát úgyis külön említi.
+
+**Kérdés a lektorhoz (BEK-FOLDELES-TN-C).** (Földelési rendszerek és EPH – közös kérdés 10.) Koordináció: egy párhuzamosan dolgozó (védelmek csoportos) ellenőr 10:37:48-kor módosította a sim.py-t (a védelmi táblák lábjegyzete: „A szerelt vezetékezésben (a jelképes hibahelyet és érintést nem számítva)…”). Emiatt az aram-vedokapcsolo-fi-rele.md fi-rele-hibahelyzetek sim-blokkja most eltér, és a check_articles HIBÁ-t jelez. A cikk nem az én csoportom, nem nyúltam hozzá; a csoport gazdájának kell frissítenie: python3 sim.py --update-article ../tudastar-r3/aram-vedokapcsolo-fi-rele.md.
+
+**Kérdés a lektorhoz (BEK-FOLDELES-TN-C).** (Földelési rendszerek és EPH – közös kérdés 11.) Lektor: a 2. ábra (TN-S) összehasonlító táblájában az N-szakadás sorában „érintés: nincs” áll, mert az érintés csak a fémházra vonatkozik. Ezt a táblázat bevezetője most kimondja. Elég-e ez, vagy a táblában is jelezni kell a nullavezető veszélyét?
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (foldeles-tn-c, ábra-ujjlenyomat a2c56b74).
+
+**Jelmagyarázat:** FV – földelővezető (zöld-sárga); L1 – L1 fázis (barna); PEN – PEN-vezető (védő- és nullavezető) (zöld-sárga); L – fázis (barna); N – nullavezető (kék); PE – védővezető (zöld-sárga); jelképes hibahely (nem szerelt ér).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | T1 elosztói transzformátor, kisfeszültségű tekercs: csillagpont (PEN) | RB üzemi földelő (a csillagpont földelése): földelőkapocs | földelővezető | zöld-sárga | a táppontnál |
+| 2 | T1 elosztói transzformátor, kisfeszültségű tekercs: L1 | F1 túláramvédelem (kismegszakító vagy olvadóbiztosító): 1 (be) | L1 | barna | Elosztói hálózat és csatlakozás (az engedélyes hatásköre) |
+| 3 | T1 elosztói transzformátor, kisfeszültségű tekercs: csillagpont (PEN) | PEN-kapocs az épület elosztójában: PEN | PEN | zöld-sárga | Elosztói hálózat és csatlakozás (az engedélyes hatásköre) |
+| 4 | F1 túláramvédelem (kismegszakító vagy olvadóbiztosító): 2 (ki) | M1 fémházas fogyasztó (I. érintésvédelmi osztály): L | L | barna | Fogyasztói áramkör |
+| 5 | PEN-kapocs az épület elosztójában: PEN | XK PEN-kapocs a fogyasztó csatlakozásánál (N és PE közös): PEN | PEN | zöld-sárga | Fogyasztói áramkör |
+| 6 | XK PEN-kapocs a fogyasztó csatlakozásánál (N és PE közös): N | M1 fémházas fogyasztó (I. érintésvédelmi osztály): N | N | kék | a fogyasztó csatlakozásánál |
+| 7 | XK PEN-kapocs a fogyasztó csatlakozásánál (N és PE közös): PE | M1 fémházas fogyasztó (I. érintésvédelmi osztály): fémház (PE) | PE | zöld-sárga | a fogyasztó csatlakozásánál |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztói hálózat és csatlakozás (az engedélyes hatásköre) | L1 (barna), PEN (zöld-sárga) | 2 |
+| Fogyasztói áramkör | L (barna), PEN (zöld-sárga) | 2 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: F1 – F1 túláramvédelem (kismegszakító vagy olvadóbiztosító); H1 – H1 testzárlat M1-ben (fázis → fémház); SZ – SZ PEN-szakadás a hálózatban.
+
+| F1 | H1 | SZ | Eredmény (a szimuláció szerint) |
+|---|---|---|---|
+| be (bekapcsolva) | nincs | ép | M1 fogyasztó: működik; H1: hibaáram útja: nincs hiba; F1 túláramvédelem: nem kapcsol le; Érintés – M1 fémháza és a föld: nincs veszély |
+| be (bekapcsolva) | nincs | szakadt | M1 fogyasztó: nem működik; H1: hibaáram útja: nincs hiba; F1 túláramvédelem: nem kapcsol le; Érintés – M1 fémháza és a föld: veszélyes lehet, tartósan |
+| be (bekapcsolva) | fennáll | ép | M1 fogyasztó: működik; H1: hibaáram útja: fémes hurok; F1 túláramvédelem: lekapcsolhat; Érintés – M1 fémháza és a föld: veszélyes lehet a lekapcsolásig |
+| be (bekapcsolva) | fennáll | szakadt | M1 fogyasztó: nem működik; H1: hibaáram útja: nincs zárt hurok; F1 túláramvédelem: nem kapcsol le; Érintés – M1 fémháza és a föld: veszélyes lehet, tartósan |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-FOLDELES-TN-C-NL | Netlista (a rajz és a táblák forrása) | foldelesi-rendszerek-tn-c.netlist.json · 742e564d | ☐ | ☐ | |
+| BEK-FOLDELES-TN-C-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · a2c56b74 | ☐ | ☐ | |
+| BEK-FOLDELES-TN-C-VEZ | Vezetéktábla (7 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-FOLDELES-TN-C-SZAK | Szakaszok és érszám (2 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-FOLDELES-TN-C-ALL | Kapcsolóállás-táblázat (4 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-FOLDELES-TN-C):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-FOLDELES-TN-C).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-FOLDELES-TN-S – TN-S rendszer: külön nulla- és védővezető a táppontól
+
+Forrás: content/tudastar/r3/foldelesi-rendszerek-tn-s.netlist.json (netlista), content/tudastar/diagramok/foldeles-tn-s.json (elrendezés); cikk: foldelesi-rendszerek, abra-2 („TN-S rendszer”)
+
+Ábra-azonosító: foldeles-tn-s. Netlista-ujjlenyomat: 816da23b; ábra-ujjlenyomat: 2f8e3995 (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Elvi rajz: a táppont az elosztói engedélyes transzformátora, a hálózat és a csatlakozás az elosztói engedélyes hatásköre; a rajz nem szerelési utasítás. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A keresztmetszet, a túláramvédelem névleges árama és a földelési ellenállás méretezés kérdése, ezért az ábra nem ad számot. A hibahely (testzárlat) és az érintési pont jelképes, nem szerelt vezeték. A táblázat a hiba fennállásának pillanatát mutatja, a lekapcsolás előtt.
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (foldeles-tn-s, ábra-ujjlenyomat 2f8e3995).
+
+**Jelmagyarázat:** FV – földelővezető (zöld-sárga); L1 – L1 fázis (barna); N – nullavezető (kék); PE – védővezető (zöld-sárga); L – fázis (barna); jelképes hibahely (nem szerelt ér).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | T1 elosztói transzformátor, kisfeszültségű tekercs: csillagpont (PE) | RB üzemi földelő (a csillagpont földelése): földelőkapocs | földelővezető | zöld-sárga | a táppontnál |
+| 2 | T1 elosztói transzformátor, kisfeszültségű tekercs: L1 | Q1 áram-védőkapcsoló (FI-relé), kétpólusú: 1 (fázis, táp oldal) | L1 | barna | Elosztói hálózat és csatlakozás (az engedélyes hatásköre) |
+| 3 | T1 elosztói transzformátor, kisfeszültségű tekercs: csillagpont (N) | N-sín (nullasín): N | N | kék | Elosztói hálózat és csatlakozás (az engedélyes hatásköre) |
+| 4 | T1 elosztói transzformátor, kisfeszültségű tekercs: csillagpont (PE) | PE-sín (főföldelő sín): PE | PE | zöld-sárga | Elosztói hálózat és csatlakozás (az engedélyes hatásköre) |
+| 5 | N-sín (nullasín): N | Q1 áram-védőkapcsoló (FI-relé), kétpólusú: N (táp oldal) | N | kék | elosztón belül |
+| 6 | Q1 áram-védőkapcsoló (FI-relé), kétpólusú: 2 (fázis, védett oldal) | F1 kismegszakító (túláramvédelem): 1 (be) | L | barna | elosztón belül |
+| 7 | F1 kismegszakító (túláramvédelem): 2 (ki) | M1 fémházas fogyasztó (I. érintésvédelmi osztály): L | L | barna | Fogyasztói áramkör |
+| 8 | Q1 áram-védőkapcsoló (FI-relé), kétpólusú: N (védett oldal) | M1 fémházas fogyasztó (I. érintésvédelmi osztály): N | N | kék | Fogyasztói áramkör |
+| 9 | PE-sín (főföldelő sín): PE | M1 fémházas fogyasztó (I. érintésvédelmi osztály): fémház (PE) | PE | zöld-sárga | Fogyasztói áramkör |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztói hálózat és csatlakozás (az engedélyes hatásköre) | L1 (barna), N (kék), PE (zöld-sárga) | 3 |
+| Fogyasztói áramkör | L (barna), N (kék), PE (zöld-sárga) | 3 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: Q1 – Q1 áram-védőkapcsoló (FI-relé), kétpólusú; F1 – F1 kismegszakító (túláramvédelem); H1 – H1 testzárlat M1-ben (fázis → fémház); SZ – SZ nullavezető-szakadás a hálózatban.
+
+| Q1 | F1 | H1 | SZ | Eredmény (a szimuláció szerint) |
+|---|---|---|---|---|
+| be (bekapcsolva) | be (bekapcsolva) | nincs | ép | M1 fogyasztó: működik; H1: hibaáram útja: nincs hiba; F1 túláramvédelem: nem kapcsol le; Q1 FI-relé: nem old ki; Érintés – M1 fémháza és a föld: nincs veszély |
+| be (bekapcsolva) | be (bekapcsolva) | nincs | szakadt | M1 fogyasztó: nem működik; H1: hibaáram útja: nincs hiba; F1 túláramvédelem: nem kapcsol le; Q1 FI-relé: nem old ki; Érintés – M1 fémháza és a föld: nincs veszély |
+| be (bekapcsolva) | be (bekapcsolva) | fennáll | ép | M1 fogyasztó: működik; H1: hibaáram útja: fémes hurok; F1 túláramvédelem: lekapcsolhat; Q1 FI-relé: kiold; Érintés – M1 fémháza és a föld: veszélyes lehet a lekapcsolásig |
+| be (bekapcsolva) | be (bekapcsolva) | fennáll | szakadt | M1 fogyasztó: nem működik; H1: hibaáram útja: fémes hurok; F1 túláramvédelem: lekapcsolhat; Q1 FI-relé: kiold; Érintés – M1 fémháza és a föld: veszélyes lehet a lekapcsolásig |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-FOLDELES-TN-S-NL | Netlista (a rajz és a táblák forrása) | foldelesi-rendszerek-tn-s.netlist.json · 816da23b | ☐ | ☐ | |
+| BEK-FOLDELES-TN-S-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · 2f8e3995 | ☐ | ☐ | |
+| BEK-FOLDELES-TN-S-VEZ | Vezetéktábla (9 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-FOLDELES-TN-S-SZAK | Szakaszok és érszám (2 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-FOLDELES-TN-S-ALL | Kapcsolóállás-táblázat (4 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-FOLDELES-TN-S):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-FOLDELES-TN-S).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-FOLDELES-TN-C-S – TN-C-S rendszer: PEN a szétválasztási pontig, utána külön N és PE
+
+Forrás: content/tudastar/r3/foldelesi-rendszerek-tn-c-s.netlist.json (netlista), content/tudastar/diagramok/foldeles-tn-c-s.json (elrendezés); cikk: foldelesi-rendszerek, abra-3 („TN-C-S rendszer és a PEN szétválasztása”)
+
+Ábra-azonosító: foldeles-tn-c-s. Netlista-ujjlenyomat: bff6a9cd; ábra-ujjlenyomat: f84a4546 (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Elvi rajz: a táppont az elosztói engedélyes transzformátora, a hálózat és a csatlakozás az elosztói engedélyes hatásköre; a rajz nem szerelési utasítás. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A keresztmetszet, a túláramvédelem névleges árama és a földelési ellenállás méretezés kérdése, ezért az ábra nem ad számot. A hibahely (testzárlat) és az érintési pont jelképes, nem szerelt vezeték. A táblázat a hiba fennállásának pillanatát mutatja, a lekapcsolás előtt. A szétválasztási pont helyét és kialakítását az elosztói engedélyes előírásai határozzák meg.
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (foldeles-tn-c-s, ábra-ujjlenyomat f84a4546).
+
+**Jelmagyarázat:** FV – földelővezető (zöld-sárga); L1 – L1 fázis (barna); PEN – PEN-vezető (védő- és nullavezető) (zöld-sárga); N – nullavezető (kék); L – fázis (barna); PE – védővezető (zöld-sárga); jelképes hibahely (nem szerelt ér).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | T1 elosztói transzformátor, kisfeszültségű tekercs: csillagpont (PEN) | RB üzemi földelő (a csillagpont földelése): földelőkapocs | földelővezető | zöld-sárga | a táppontnál |
+| 2 | T1 elosztói transzformátor, kisfeszültségű tekercs: L1 | Q1 áram-védőkapcsoló (FI-relé), kétpólusú: 1 (fázis, táp oldal) | L1 | barna | Elosztói hálózat és csatlakozás (az engedélyes hatásköre) |
+| 3 | T1 elosztói transzformátor, kisfeszültségű tekercs: csillagpont (PEN) | PSZ PEN-szétválasztási pont (PE-sín és N-sín, összekötő híddal): PEN (érkező) | PEN | zöld-sárga | Elosztói hálózat és csatlakozás (az engedélyes hatásköre) |
+| 4 | PSZ PEN-szétválasztási pont (PE-sín és N-sín, összekötő híddal): N-sín | Q1 áram-védőkapcsoló (FI-relé), kétpólusú: N (táp oldal) | N | kék | elosztón belül |
+| 5 | PSZ PEN-szétválasztási pont (PE-sín és N-sín, összekötő híddal): PE-sín | RA földelő az épületnél (alapföldelő vagy ismételt földelés): földelőkapocs | földelővezető | zöld-sárga | elosztón belül |
+| 6 | Q1 áram-védőkapcsoló (FI-relé), kétpólusú: 2 (fázis, védett oldal) | F1 kismegszakító (túláramvédelem): 1 (be) | L | barna | elosztón belül |
+| 7 | F1 kismegszakító (túláramvédelem): 2 (ki) | M1 fémházas fogyasztó (I. érintésvédelmi osztály): L | L | barna | Fogyasztói áramkör |
+| 8 | Q1 áram-védőkapcsoló (FI-relé), kétpólusú: N (védett oldal) | M1 fémházas fogyasztó (I. érintésvédelmi osztály): N | N | kék | Fogyasztói áramkör |
+| 9 | PSZ PEN-szétválasztási pont (PE-sín és N-sín, összekötő híddal): PE-sín | M1 fémházas fogyasztó (I. érintésvédelmi osztály): fémház (PE) | PE | zöld-sárga | Fogyasztói áramkör |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztói hálózat és csatlakozás (az engedélyes hatásköre) | L1 (barna), PEN (zöld-sárga) | 2 |
+| Fogyasztói áramkör | L (barna), N (kék), PE (zöld-sárga) | 3 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: Q1 – Q1 áram-védőkapcsoló (FI-relé), kétpólusú; F1 – F1 kismegszakító (túláramvédelem); H1 – H1 testzárlat M1-ben (fázis → fémház); SZ – SZ PEN-szakadás a hálózatban vagy a csatlakozó vezetékben.
+
+| Q1 | F1 | H1 | SZ | Eredmény (a szimuláció szerint) |
+|---|---|---|---|---|
+| be (bekapcsolva) | be (bekapcsolva) | nincs | ép | M1 fogyasztó: működik; H1: hibaáram útja: nincs hiba; F1 túláramvédelem: nem kapcsol le; Q1 FI-relé: nem old ki; Érintés – M1 fémháza és a föld: nincs veszély |
+| be (bekapcsolva) | be (bekapcsolva) | nincs | szakadt | M1 fogyasztó: rendellenesen (a földön át); H1: hibaáram útja: nincs hiba; F1 túláramvédelem: nem kapcsol le; Q1 FI-relé: nem old ki; Érintés – M1 fémháza és a föld: veszélyes lehet, tartósan |
+| be (bekapcsolva) | be (bekapcsolva) | fennáll | ép | M1 fogyasztó: működik; H1: hibaáram útja: fémes hurok; F1 túláramvédelem: lekapcsolhat; Q1 FI-relé: kiold; Érintés – M1 fémháza és a föld: veszélyes lehet a lekapcsolásig |
+| be (bekapcsolva) | be (bekapcsolva) | fennáll | szakadt | M1 fogyasztó: rendellenesen (a földön át); H1: hibaáram útja: a földön át; F1 túláramvédelem: nem kapcsol le; Q1 FI-relé: kiold; Érintés – M1 fémháza és a föld: veszélyes lehet a lekapcsolásig |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-FOLDELES-TN-C-S-NL | Netlista (a rajz és a táblák forrása) | foldelesi-rendszerek-tn-c-s.netlist.json · bff6a9cd | ☐ | ☐ | |
+| BEK-FOLDELES-TN-C-S-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · f84a4546 | ☐ | ☐ | |
+| BEK-FOLDELES-TN-C-S-VEZ | Vezetéktábla (9 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-FOLDELES-TN-C-S-SZAK | Szakaszok és érszám (2 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-FOLDELES-TN-C-S-ALL | Kapcsolóállás-táblázat (4 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-FOLDELES-TN-C-S):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-FOLDELES-TN-C-S).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-FOLDELES-TT – TT rendszer: a fémház a saját földelőn
+
+Forrás: content/tudastar/r3/foldelesi-rendszerek-tt.netlist.json (netlista), content/tudastar/diagramok/foldeles-tt.json (elrendezés); cikk: foldelesi-rendszerek, abra-4 („TT rendszer”)
+
+Ábra-azonosító: foldeles-tt. Netlista-ujjlenyomat: 553eca92; ábra-ujjlenyomat: 9a79c8ae (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Elvi rajz: a táppont az elosztói engedélyes transzformátora, a hálózat és a csatlakozás az elosztói engedélyes hatásköre; a rajz nem szerelési utasítás. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A keresztmetszet, a túláramvédelem névleges árama és a földelési ellenállás méretezés kérdése, ezért az ábra nem ad számot. A hibahely (testzárlat) és az érintési pont jelképes, nem szerelt vezeték. A táblázat a hiba fennállásának pillanatát mutatja, a lekapcsolás előtt.
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (foldeles-tt, ábra-ujjlenyomat 9a79c8ae).
+
+**Jelmagyarázat:** FV – földelővezető (zöld-sárga); L1 – L1 fázis (barna); N – nullavezető (kék); L – fázis (barna); PE – védővezető (zöld-sárga); jelképes hibahely (nem szerelt ér).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | T1 elosztói transzformátor, kisfeszültségű tekercs: csillagpont (N) | RB üzemi földelő (a csillagpont földelése): földelőkapocs | földelővezető | zöld-sárga | a táppontnál |
+| 2 | T1 elosztói transzformátor, kisfeszültségű tekercs: L1 | Q1 áram-védőkapcsoló (FI-relé), kétpólusú: 1 (fázis, táp oldal) | L1 | barna | Elosztói hálózat és csatlakozás (az engedélyes hatásköre) |
+| 3 | T1 elosztói transzformátor, kisfeszültségű tekercs: csillagpont (N) | Q1 áram-védőkapcsoló (FI-relé), kétpólusú: N (táp oldal) | N | kék | Elosztói hálózat és csatlakozás (az engedélyes hatásköre) |
+| 4 | PE-sín (főföldelő sín): PE | RA védőföldelő (az épület saját földelője): földelőkapocs | földelővezető | zöld-sárga | elosztón belül |
+| 5 | Q1 áram-védőkapcsoló (FI-relé), kétpólusú: 2 (fázis, védett oldal) | F1 kismegszakító (túláramvédelem): 1 (be) | L | barna | elosztón belül |
+| 6 | F1 kismegszakító (túláramvédelem): 2 (ki) | M1 fémházas fogyasztó (I. érintésvédelmi osztály): L | L | barna | Fogyasztói áramkör |
+| 7 | Q1 áram-védőkapcsoló (FI-relé), kétpólusú: N (védett oldal) | M1 fémházas fogyasztó (I. érintésvédelmi osztály): N | N | kék | Fogyasztói áramkör |
+| 8 | PE-sín (főföldelő sín): PE | M1 fémházas fogyasztó (I. érintésvédelmi osztály): fémház (PE) | PE | zöld-sárga | Fogyasztói áramkör |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztói hálózat és csatlakozás (az engedélyes hatásköre) | L1 (barna), N (kék) | 2 |
+| Fogyasztói áramkör | L (barna), N (kék), PE (zöld-sárga) | 3 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: Q1 – Q1 áram-védőkapcsoló (FI-relé), kétpólusú; F1 – F1 kismegszakító (túláramvédelem); H1 – H1 testzárlat M1-ben (fázis → fémház); SZ – SZ a védőföldelő vezetőjének szakadása.
+
+| Q1 | F1 | H1 | SZ | Eredmény (a szimuláció szerint) |
+|---|---|---|---|---|
+| be (bekapcsolva) | be (bekapcsolva) | nincs | ép | M1 fogyasztó: működik; H1: hibaáram útja: nincs hiba; F1 túláramvédelem: nem kapcsol le; Q1 FI-relé: nem old ki; Érintés – M1 fémháza és a föld: nincs veszély |
+| be (bekapcsolva) | be (bekapcsolva) | nincs | szakadt | M1 fogyasztó: működik; H1: hibaáram útja: nincs hiba; F1 túláramvédelem: nem kapcsol le; Q1 FI-relé: nem old ki; Érintés – M1 fémháza és a föld: nincs veszély |
+| be (bekapcsolva) | be (bekapcsolva) | fennáll | ép | M1 fogyasztó: működik; H1: hibaáram útja: a földön át; F1 túláramvédelem: nem kapcsol le; Q1 FI-relé: kiold; Érintés – M1 fémháza és a föld: veszélyes lehet a lekapcsolásig |
+| be (bekapcsolva) | be (bekapcsolva) | fennáll | szakadt | M1 fogyasztó: működik; H1: hibaáram útja: nincs zárt hurok; F1 túláramvédelem: nem kapcsol le; Q1 FI-relé: nem old ki; Érintés – M1 fémháza és a föld: veszélyes lehet, tartósan; a FI-relé legfeljebb a testen átfolyó áramra old ki |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-FOLDELES-TT-NL | Netlista (a rajz és a táblák forrása) | foldelesi-rendszerek-tt.netlist.json · 553eca92 | ☐ | ☐ | |
+| BEK-FOLDELES-TT-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · 9a79c8ae | ☐ | ☐ | |
+| BEK-FOLDELES-TT-VEZ | Vezetéktábla (8 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-FOLDELES-TT-SZAK | Szakaszok és érszám (2 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-FOLDELES-TT-ALL | Kapcsolóállás-táblázat (4 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-FOLDELES-TT):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-FOLDELES-TT).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-FOLDELES-IT – IT rendszer: földeletlen táppont, földelt fémházak
+
+Forrás: content/tudastar/r3/foldelesi-rendszerek-it.netlist.json (netlista), content/tudastar/diagramok/foldeles-it.json (elrendezés); cikk: foldelesi-rendszerek, abra-5 („IT rendszer”)
+
+Ábra-azonosító: foldeles-it. Netlista-ujjlenyomat: 60981084; ábra-ujjlenyomat: f1d3c3b2 (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Elvi rajz: a táppont az elosztói engedélyes transzformátora, a hálózat és a csatlakozás az elosztói engedélyes hatásköre; a rajz nem szerelési utasítás. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A keresztmetszet, a túláramvédelem névleges árama és a földelési ellenállás méretezés kérdése, ezért az ábra nem ad számot. A hibahely (testzárlat) és az érintési pont jelképes, nem szerelt vezeték. A táblázat a hiba fennállásának pillanatát mutatja, a lekapcsolás előtt. IT-rendszer jellemzően saját transzformátorral készül (például ipari üzemben vagy kórházi helyiségben); a nullavezetőt itt nem vezetik ki. A szigetelésfigyelő megfigyelő elem: a szimulációban nem vezet.
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (foldeles-it, ábra-ujjlenyomat f1d3c3b2).
+
+**Jelmagyarázat:** L1 – L1 fázis (barna); PE – védővezető (zöld-sárga); FV – földelővezető (zöld-sárga); L2 – L2 fázis (fekete); L3 – L3 fázis (szürke); jelképes hibahely (nem szerelt ér).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | T1 transzformátor (IT-táppont), kisfeszültségű tekercs: L1 | SZF szigetelésfigyelő: mérőkapocs a hálózaton | L1 | barna | a táppontnál |
+| 2 | SZF szigetelésfigyelő: PE | PE-sín: PE | PE | zöld-sárga | a táppontnál |
+| 3 | PE-sín: PE | RA védőföldelő (a fémházak közös földelője): földelőkapocs | földelővezető | zöld-sárga | a táppontnál |
+| 4 | T1 transzformátor (IT-táppont), kisfeszültségű tekercs: L1 | Q1 háromfázisú kismegszakító (M1): 1 (L1 be) | L1 | barna | a táppontnál |
+| 5 | T1 transzformátor (IT-táppont), kisfeszültségű tekercs: L2 | Q1 háromfázisú kismegszakító (M1): 3 (L2 be) | L2 | fekete | a táppontnál |
+| 6 | T1 transzformátor (IT-táppont), kisfeszültségű tekercs: L3 | Q1 háromfázisú kismegszakító (M1): 5 (L3 be) | L3 | szürke | a táppontnál |
+| 7 | T1 transzformátor (IT-táppont), kisfeszültségű tekercs: L1 | Q2 háromfázisú kismegszakító (M2): 1 (L1 be) | L1 | barna | a táppontnál |
+| 8 | T1 transzformátor (IT-táppont), kisfeszültségű tekercs: L2 | Q2 háromfázisú kismegszakító (M2): 3 (L2 be) | L2 | fekete | a táppontnál |
+| 9 | T1 transzformátor (IT-táppont), kisfeszültségű tekercs: L3 | Q2 háromfázisú kismegszakító (M2): 5 (L3 be) | L3 | szürke | a táppontnál |
+| 10 | Q1 háromfázisú kismegszakító (M1): 2 (L1 ki) | M1 háromfázisú fémházas fogyasztó: L1 | L1 | barna | Áramkör M1-hez |
+| 11 | Q1 háromfázisú kismegszakító (M1): 4 (L2 ki) | M1 háromfázisú fémházas fogyasztó: L2 | L2 | fekete | Áramkör M1-hez |
+| 12 | Q1 háromfázisú kismegszakító (M1): 6 (L3 ki) | M1 háromfázisú fémházas fogyasztó: L3 | L3 | szürke | Áramkör M1-hez |
+| 13 | PE-sín: PE | M1 háromfázisú fémházas fogyasztó: fémház (PE) | PE | zöld-sárga | Áramkör M1-hez |
+| 14 | Q2 háromfázisú kismegszakító (M2): 2 (L1 ki) | M2 háromfázisú fémházas fogyasztó: L1 | L1 | barna | Áramkör M2-höz |
+| 15 | Q2 háromfázisú kismegszakító (M2): 4 (L2 ki) | M2 háromfázisú fémházas fogyasztó: L2 | L2 | fekete | Áramkör M2-höz |
+| 16 | Q2 háromfázisú kismegszakító (M2): 6 (L3 ki) | M2 háromfázisú fémházas fogyasztó: L3 | L3 | szürke | Áramkör M2-höz |
+| 17 | PE-sín: PE | M2 háromfázisú fémházas fogyasztó: fémház (PE) | PE | zöld-sárga | Áramkör M2-höz |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Áramkör M1-hez | L1 (barna), L2 (fekete), L3 (szürke), PE (zöld-sárga) | 4 |
+| Áramkör M2-höz | L1 (barna), L2 (fekete), L3 (szürke), PE (zöld-sárga) | 4 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (4 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: Q1 – Q1 háromfázisú kismegszakító (M1); Q2 – Q2 háromfázisú kismegszakító (M2); H1 – H1 testzárlat M1-ben (L1 → fémház); H2 – H2 testzárlat M2-ben (L2 → fémház).
+
+| Q1 | Q2 | H1 | H2 | Eredmény (a szimuláció szerint) |
+|---|---|---|---|---|
+| be (bekapcsolva) | be (bekapcsolva) | nincs | nincs | M1 fogyasztó: működik; M2 fogyasztó: működik; H1: hibaáram útja: nincs hiba; H2: hibaáram útja: nincs hiba; Q1 túláramvédelem: nem kapcsol le; Q2 túláramvédelem: nem kapcsol le; SZF szigetelésfigyelő: nem jelez; Érintés – M1 fémháza és a föld: nincs veszély |
+| be (bekapcsolva) | be (bekapcsolva) | nincs | fennáll | M1 fogyasztó: működik; M2 fogyasztó: működik; H1: hibaáram útja: nincs hiba; H2: hibaáram útja: nincs zárt hurok; Q1 túláramvédelem: nem kapcsol le; Q2 túláramvédelem: nem kapcsol le; SZF szigetelésfigyelő: jelez; Érintés – M1 fémháza és a föld: nincs veszély |
+| be (bekapcsolva) | be (bekapcsolva) | fennáll | nincs | M1 fogyasztó: működik; M2 fogyasztó: működik; H1: hibaáram útja: nincs zárt hurok; H2: hibaáram útja: nincs hiba; Q1 túláramvédelem: nem kapcsol le; Q2 túláramvédelem: nem kapcsol le; SZF szigetelésfigyelő: jelez; Érintés – M1 fémháza és a föld: nincs veszély |
+| be (bekapcsolva) | be (bekapcsolva) | fennáll | fennáll | M1 fogyasztó: működik; M2 fogyasztó: működik; H1: hibaáram útja: fémes hurok; H2: hibaáram útja: fémes hurok; Q1 túláramvédelem: lekapcsolhat; Q2 túláramvédelem: lekapcsolhat; SZF szigetelésfigyelő: jelez; Érintés – M1 fémháza és a föld: veszélyes lehet a lekapcsolásig |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-FOLDELES-IT-NL | Netlista (a rajz és a táblák forrása) | foldelesi-rendszerek-it.netlist.json · 60981084 | ☐ | ☐ | |
+| BEK-FOLDELES-IT-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · f1d3c3b2 | ☐ | ☐ | |
+| BEK-FOLDELES-IT-VEZ | Vezetéktábla (17 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-FOLDELES-IT-SZAK | Szakaszok és érszám (2 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-FOLDELES-IT-ALL | Kapcsolóállás-táblázat (4 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-FOLDELES-IT):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-FOLDELES-IT).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
+
+### BEK-EPH-ALAPOK – Egyenpotenciálra hozás: a fő EPH-sín és a vízvezeték bekötése (TN-C-S)
+
+Forrás: content/tudastar/r3/egyenpotencialra-hozas-eph.netlist.json (netlista), content/tudastar/diagramok/eph-alapok.json (elrendezés); cikk: egyenpotencialra-hozas-eph, abra-1 („A fő EPH-sín és a vízvezeték bekötése”)
+
+Ábra-azonosító: eph-alapok. Netlista-ujjlenyomat: d0990558; ábra-ujjlenyomat: c6056099 (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: egyezik (8 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae).
+
+A netlista megjegyzése: Tervezet a szakmai lektornak (R3). Elvi rajz: a táppont az elosztói engedélyes transzformátora, a hálózat és a csatlakozás az elosztói engedélyes hatásköre; a rajz nem szerelési utasítás. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A keresztmetszet, a túláramvédelem névleges árama és a földelési ellenállás méretezés kérdése, ezért az ábra nem ad számot. A hibahely (testzárlat) és az érintési pont jelképes, nem szerelt vezeték. A táblázat a hiba fennállásának pillanatát mutatja, a lekapcsolás előtt. A fém vízvezeték az épületbe a talajból lép be, ezért a szimulációban a talajjal is érintkezik. A gázvezeték bekötését az elosztói és a gázszolgáltatói előírások szabályozzák; az ábra nem mutatja.
+
+**Kérdés a lektorhoz (BEK-EPH-ALAPOK).** (1., a cikk saját kérdése) A fürdőszobai kiegészítő EPH: a hatályos MSZ HD 60364-7-701 szerint mikor kötelező, és mikor hagyható el (például 30 mA-es áram-védőkapcsolóval védett áramköröknél)? A cikk most csak a tervezői döntésre utal.
+
+**Kérdés a lektorhoz (BEK-EPH-ALAPOK).** (2., a cikk saját kérdése) A gázvezeték EPH-bekötésének hazai szabályai (szigetelő közdarab, a bekötés helye, gázszolgáltatói előírás) – elegendő-e a puszta hivatkozás?
+
+**Kérdés a lektorhoz (BEK-EPH-ALAPOK).** (3., a cikk saját kérdése) A fő EPH-vezető és a kiegészítő EPH-vezető legkisebb keresztmetszete: a cikk szándékosan nem ad számot. Kell-e jóváhagyott táblázat?
+
+**Kérdés a lektorhoz (BEK-EPH-ALAPOK).** (4., a cikk saját kérdése) A szimuláció a fém vízvezetéket a talajjal érintkezőnek tekinti. Ez a mai, műanyag bekötővezetékes házakban gyakran nem igaz; elég-e ezt a cikkben megemlíteni?
+
+**Ábra.** A bekötési rajz (Bekötés nézet, alapállás) a PDF-változatban, vektorosan; a program a cikkben ugyanezt rajzolja (eph-alapok, ábra-ujjlenyomat c6056099).
+
+**Jelmagyarázat:** FV – földelővezető (zöld-sárga); L1 – L1 fázis (barna); PEN – PEN-vezető (védő- és nullavezető) (zöld-sárga); N – nullavezető (kék); PE – védővezető (zöld-sárga); EPH – EPH-vezető (egyenpotenciálra hozó) (zöld-sárga); L – fázis (barna); jelképes hibahely (nem szerelt ér).
+
+**1. táblázat – vezetéktábla.**
+
+| # | Honnan | Hová | Vezető | Szín | Szakasz |
+|---|---|---|---|---|---|
+| 1 | T1 elosztói transzformátor, kisfeszültségű tekercs: csillagpont (PEN) | RB üzemi földelő (a csillagpont földelése): földelőkapocs | földelővezető | zöld-sárga | a táppontnál |
+| 2 | T1 elosztói transzformátor, kisfeszültségű tekercs: L1 | Q1 áram-védőkapcsoló (FI-relé), kétpólusú: 1 (fázis, táp oldal) | L1 | barna | Elosztói hálózat és csatlakozás (az engedélyes hatásköre) |
+| 3 | T1 elosztói transzformátor, kisfeszültségű tekercs: csillagpont (PEN) | PSZ PEN-szétválasztási pont (PE-sín és N-sín, összekötő híddal): PEN (érkező) | PEN | zöld-sárga | Elosztói hálózat és csatlakozás (az engedélyes hatásköre) |
+| 4 | PSZ PEN-szétválasztási pont (PE-sín és N-sín, összekötő híddal): N-sín | Q1 áram-védőkapcsoló (FI-relé), kétpólusú: N (táp oldal) | N | kék | elosztón belül |
+| 5 | PSZ PEN-szétválasztási pont (PE-sín és N-sín, összekötő híddal): PE-sín | Fő EPH-sín (főföldelő sín): gyűjtőkapocs | PE (fő védővezető) | zöld-sárga | elosztón belül |
+| 6 | Fő EPH-sín (főföldelő sín): gyűjtőkapocs | RA alapföldelő: földelőkapocs | földelővezető | zöld-sárga | elosztón belül |
+| 7 | Fő EPH-sín (főföldelő sín): gyűjtőkapocs | VIZ fém vízvezeték (idegen vezetőképes rész): csőbilincs (EPH-kötés) | EPH-vezető | zöld-sárga | Fő EPH-vezető a vízvezetékhez |
+| 8 | Q1 áram-védőkapcsoló (FI-relé), kétpólusú: 2 (fázis, védett oldal) | F1 kismegszakító (túláramvédelem): 1 (be) | L | barna | elosztón belül |
+| 9 | F1 kismegszakító (túláramvédelem): 2 (ki) | M1 fémházas mosógép (I. érintésvédelmi osztály): L | L | barna | Fogyasztói áramkör |
+| 10 | Q1 áram-védőkapcsoló (FI-relé), kétpólusú: N (védett oldal) | M1 fémházas mosógép (I. érintésvédelmi osztály): N | N | kék | Fogyasztói áramkör |
+| 11 | Fő EPH-sín (főföldelő sín): gyűjtőkapocs | M1 fémházas mosógép (I. érintésvédelmi osztály): fémház (PE) | PE | zöld-sárga | Fogyasztói áramkör |
+
+**2. táblázat – szakaszok és érszám.**
+
+| Szakasz | Vezetők | Érszám |
+|---|---|---|
+| Elosztói hálózat és csatlakozás (az engedélyes hatásköre) | L1 (barna), PEN (zöld-sárga) | 2 |
+| Fogyasztói áramkör | L (barna), N (kék), PE (zöld-sárga) | 3 |
+| Fő EPH-vezető a vízvezetékhez | EPH-vezető (zöld-sárga) | 1 |
+
+**3. táblázat – kapcsolóállás-táblázat** (TS = Python: egyezik (8 állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: sim.py 7c3de997, foldeles_ext.py 1627bedd, vedelmek_biztonsag.py a32aafae)). Oszlopok: Q1 – Q1 áram-védőkapcsoló (FI-relé), kétpólusú; F1 – F1 kismegszakító (túláramvédelem); H1 – H1 testzárlat M1-ben (fázis → fémház); EPH1 – EPH1 a vízvezeték EPH-bekötése; SZ – SZ PEN-szakadás a hálózatban.
+
+| Q1 | F1 | H1 | EPH1 | SZ | Eredmény (a szimuláció szerint) |
+|---|---|---|---|---|---|
+| be (bekapcsolva) | be (bekapcsolva) | nincs | bekötve | ép | M1 fogyasztó: működik; H1: hibaáram útja: nincs hiba; F1 túláramvédelem: nem kapcsol le; Q1 FI-relé: nem old ki; Érintés – M1 fémháza és a vízcsap: nincs veszély; Érintés – M1 fémháza és a föld: nincs veszély |
+| be (bekapcsolva) | be (bekapcsolva) | nincs | bekötve | szakadt | M1 fogyasztó: rendellenesen (a földön át); H1: hibaáram útja: nincs hiba; F1 túláramvédelem: nem kapcsol le; Q1 FI-relé: nem old ki; Érintés – M1 fémháza és a vízcsap: nincs veszély; Érintés – M1 fémháza és a föld: veszélyes lehet, tartósan |
+| be (bekapcsolva) | be (bekapcsolva) | nincs | hiányzik | ép | M1 fogyasztó: működik; H1: hibaáram útja: nincs hiba; F1 túláramvédelem: nem kapcsol le; Q1 FI-relé: nem old ki; Érintés – M1 fémháza és a vízcsap: nincs veszély; Érintés – M1 fémháza és a föld: nincs veszély |
+| be (bekapcsolva) | be (bekapcsolva) | nincs | hiányzik | szakadt | M1 fogyasztó: rendellenesen (a földön át); H1: hibaáram útja: nincs hiba; F1 túláramvédelem: nem kapcsol le; Q1 FI-relé: nem old ki; Érintés – M1 fémháza és a vízcsap: veszélyes lehet, tartósan; Érintés – M1 fémháza és a föld: veszélyes lehet, tartósan |
+| be (bekapcsolva) | be (bekapcsolva) | fennáll | bekötve | ép | M1 fogyasztó: működik; H1: hibaáram útja: fémes hurok; F1 túláramvédelem: lekapcsolhat; Q1 FI-relé: kiold; Érintés – M1 fémháza és a vízcsap: veszélyes lehet a lekapcsolásig; Érintés – M1 fémháza és a föld: veszélyes lehet a lekapcsolásig |
+| be (bekapcsolva) | be (bekapcsolva) | fennáll | bekötve | szakadt | M1 fogyasztó: rendellenesen (a földön át); H1: hibaáram útja: a földön át; F1 túláramvédelem: nem kapcsol le; Q1 FI-relé: kiold; Érintés – M1 fémháza és a vízcsap: veszélyes lehet a lekapcsolásig; Érintés – M1 fémháza és a föld: veszélyes lehet a lekapcsolásig |
+| be (bekapcsolva) | be (bekapcsolva) | fennáll | hiányzik | ép | M1 fogyasztó: működik; H1: hibaáram útja: fémes hurok; F1 túláramvédelem: lekapcsolhat; Q1 FI-relé: kiold; Érintés – M1 fémháza és a vízcsap: veszélyes lehet a lekapcsolásig; Érintés – M1 fémháza és a föld: veszélyes lehet a lekapcsolásig |
+| be (bekapcsolva) | be (bekapcsolva) | fennáll | hiányzik | szakadt | M1 fogyasztó: rendellenesen (a földön át); H1: hibaáram útja: a földön át; F1 túláramvédelem: nem kapcsol le; Q1 FI-relé: kiold; Érintés – M1 fémháza és a vízcsap: veszélyes lehet a lekapcsolásig; Érintés – M1 fémháza és a föld: veszélyes lehet a lekapcsolásig |
+
+| Azonosító | Ellenőrizendő | Hol | ✓ | ✗ | Helyes érték / megjegyzés |
+|---|---|---|:-:|:-:|---|
+| BEK-EPH-ALAPOK-NL | Netlista (a rajz és a táblák forrása) | egyenpotencialra-hozas-eph.netlist.json · d0990558 | ☐ | ☐ | |
+| BEK-EPH-ALAPOK-RAJZ | Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok | az ábra fent · c6056099 | ☐ | ☐ | |
+| BEK-EPH-ALAPOK-VEZ | Vezetéktábla (11 ér): honnan, hová, vezető, szín, szakasz | lent, 1. táblázat | ☐ | ☐ | |
+| BEK-EPH-ALAPOK-SZAK | Szakaszok és érszám (3 szakasz) | lent, 2. táblázat | ☐ | ☐ | |
+| BEK-EPH-ALAPOK-ALL | Kapcsolóállás-táblázat (8 állás): kapcsolók, hibahelyzetek, eredmény | lent, 3. táblázat · TS = Python | ☐ | ☐ | |
+
+**Döntés (BEK-EPH-ALAPOK):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom
+
+☐ A blokk minden tétele egyezik (BEK-EPH-ALAPOK).
+
+Megjegyzés a blokkhoz (forrás, kiadás):
 
 ## 5. rész – Biztonsági cikkek (R3) (helyőrző)
 
@@ -1877,6 +3389,26 @@ Blokkösszesítő:
 | KAL-KISMEGSZAKITO | Kismegszakító-választás | 15 | ☐ | |
 | KAL-HUROKIMPEDANCIA | Hurokimpedancia és zárlati áram | 14 | ☐ | |
 | KAL-TERHELHETOSEG-TABLAZAT | Terhelhetőségi táblázat | 12 | ☐ | |
+| BEK-EGYPOLUSU-KAPCSOLO-101 | Egypólusú kapcsoló (101): egy lámpa egy helyről | 5 | ☐ | |
+| BEK-KETPOLUSU-KAPCSOLO-102 | Kétpólusú kapcsoló (102): a fázis- és a nullavezető együttes bontása | 5 | ☐ | |
+| BEK-CSILLARKAPCSOLO-105 | Csillárkapcsoló (105): két lámpakör egy helyről | 5 | ☐ | |
+| BEK-VALTOKAPCSOLO-106 | Váltókapcsolás (2 × 106): egy lámpa két helyről | 5 | ☐ | |
+| BEK-KETTOS-VALTOKAPCSOLO-106-6 | Kettős váltókapcsoló (106+6): két lámpa, mindkettő két helyről | 5 | ☐ | |
+| BEK-KERESZTKAPCSOLO-107 | Keresztkapcsolás (106 + 107 + 106): egy lámpa három helyről | 5 | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-2X107 | Keresztkapcsolás (106 + 2 × 107 + 106): egy lámpa 4 helyről | 5 | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-3X107 | Keresztkapcsolás (106 + 3 × 107 + 106): egy lámpa 5 helyről | 5 | ☐ | |
+| BEK-KERESZTKAPCSOLO-107-4X107 | Keresztkapcsolás (106 + 4 × 107 + 106): egy lámpa 6 helyről | 5 | ☐ | |
+| BEK-DUGALJ-ATHURKOLAS | Dugaljkör áthurkolással: két védőérintkezős dugalj FI-relé és kismegszakító után | 5 | ☐ | |
+| BEK-DUGALJ-LEAGAZTATAS | Dugaljkör leágaztatással: két dugalj a kötődobozból, FI-relé és kismegszakító után | 5 | ☐ | |
+| BEK-KISMEGSZAKITO-ARAMKOROK | Két dugaljkör saját kismegszakítóval, közös FI-relé után | 5 | ☐ | |
+| BEK-FI-RELE-BEKOTES | Áram-védőkapcsoló (FI-relé) bekötése dugaljkör elé, próbagombbal | 5 | ☐ | |
+| BEK-FI-RELE-HIBAHELYZETEK | Mikor old ki a FI-relé? Testzárlat, fázis–föld és fázis–nulla érintés | 5 | ☐ | |
+| BEK-FOLDELES-TN-C | TN-C rendszer: a PEN-vezető a fogyasztóig fut | 5 | ☐ | |
+| BEK-FOLDELES-TN-S | TN-S rendszer: külön nulla- és védővezető a táppontól | 5 | ☐ | |
+| BEK-FOLDELES-TN-C-S | TN-C-S rendszer: PEN a szétválasztási pontig, utána külön N és PE | 5 | ☐ | |
+| BEK-FOLDELES-TT | TT rendszer: a fémház a saját földelőn | 5 | ☐ | |
+| BEK-FOLDELES-IT | IT rendszer: földeletlen táppont, földelt fémházak | 5 | ☐ | |
+| BEK-EPH-ALAPOK | Egyenpotenciálra hozás: a fő EPH-sín és a vízvezeték bekötése (TN-C-S) | 5 | ☐ | |
 
 ### 3. rész – kalkulátoronkénti döntés
 
@@ -1893,6 +3425,43 @@ A 3. rész kalkulátoronként hagyható jóvá. „Jóváhagyom”: a kalkuláto
 | Hurokimpedancia és zárlati áram | KAL-HUROKIMPEDANCIA | 293f288b | b6d0b20e | igen | ☐ Jóváhagyom · ☐ Javítás után / nem |
 | Terhelhetőségi táblázat | KAL-TERHELHETOSEG-TABLAZAT | 135442b5 | 5f043d00 | igen | ☐ Jóváhagyom · ☐ Javítás után / nem |
 
+### 4. rész – ábránkénti döntés
+
+A 4. rész ábránként hagyható jóvá. „Jóváhagyom”: az ábra blokkja eltérés nélkül helyes (bekötés, érszínek, kapcsok, szakaszok, működés). „Javítással”: az ábra a megjegyzésben leírt javítás után, a javított kiadásban hagyható jóvá. „Elutasítom”: az ábra a cikkben nem jelenhet meg; az okot kérjük a megjegyzésbe írni. Jelöletlen sor: nem jóváhagyott. Az ábra csak a cikk szövegének jóváhagyásával együtt jelenhet meg.
+
+| Ábra | Blokk | Netlista (ujjlenyomat) | Ábra (ujjlenyomat) | Döntés |
+|---|---|---|---|---|
+| Egypólusú kapcsoló (101): egy lámpa egy helyről | BEK-EGYPOLUSU-KAPCSOLO-101 | 162c980a | 0b299afb | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| Kétpólusú kapcsoló (102): a fázis- és a nullavezető együttes bontása | BEK-KETPOLUSU-KAPCSOLO-102 | a253fd8a | 361fdb2a | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| Csillárkapcsoló (105): két lámpakör egy helyről | BEK-CSILLARKAPCSOLO-105 | 171c858b | f7930873 | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| Váltókapcsolás (2 × 106): egy lámpa két helyről | BEK-VALTOKAPCSOLO-106 | 909db559 | 79d7b08a | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| Kettős váltókapcsoló (106+6): két lámpa, mindkettő két helyről | BEK-KETTOS-VALTOKAPCSOLO-106-6 | 837cd200 | 7a0aa663 | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| Keresztkapcsolás (106 + 107 + 106): egy lámpa három helyről | BEK-KERESZTKAPCSOLO-107 | 835f0537 | 2902a14a | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| Keresztkapcsolás (106 + 2 × 107 + 106): egy lámpa 4 helyről | BEK-KERESZTKAPCSOLO-107-2X107 | 9566473c | 96217f1e | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| Keresztkapcsolás (106 + 3 × 107 + 106): egy lámpa 5 helyről | BEK-KERESZTKAPCSOLO-107-3X107 | f9fd89d8 | 5e3b5a40 | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| Keresztkapcsolás (106 + 4 × 107 + 106): egy lámpa 6 helyről | BEK-KERESZTKAPCSOLO-107-4X107 | e67cbcc6 | b7949588 | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| Dugaljkör áthurkolással: két védőérintkezős dugalj FI-relé és kismegszakító után | BEK-DUGALJ-ATHURKOLAS | 9bb3ff8e | f68b16a5 | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| Dugaljkör leágaztatással: két dugalj a kötődobozból, FI-relé és kismegszakító után | BEK-DUGALJ-LEAGAZTATAS | 143d7450 | ff622029 | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| Két dugaljkör saját kismegszakítóval, közös FI-relé után | BEK-KISMEGSZAKITO-ARAMKOROK | 3bf085c5 | 244ec1ac | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| Áram-védőkapcsoló (FI-relé) bekötése dugaljkör elé, próbagombbal | BEK-FI-RELE-BEKOTES | 8f0e1c8c | d8644f80 | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| Mikor old ki a FI-relé? Testzárlat, fázis–föld és fázis–nulla érintés | BEK-FI-RELE-HIBAHELYZETEK | 704b52c6 | bcf3e28d | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| TN-C rendszer: a PEN-vezető a fogyasztóig fut | BEK-FOLDELES-TN-C | 742e564d | a2c56b74 | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| TN-S rendszer: külön nulla- és védővezető a táppontól | BEK-FOLDELES-TN-S | 816da23b | 2f8e3995 | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| TN-C-S rendszer: PEN a szétválasztási pontig, utána külön N és PE | BEK-FOLDELES-TN-C-S | bff6a9cd | f84a4546 | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| TT rendszer: a fémház a saját földelőn | BEK-FOLDELES-TT | 553eca92 | 9a79c8ae | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| IT rendszer: földeletlen táppont, földelt fémházak | BEK-FOLDELES-IT | 60981084 | f1d3c3b2 | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+| Egyenpotenciálra hozás: a fő EPH-sín és a vízvezeték bekötése (TN-C-S) | BEK-EPH-ALAPOK | d0990558 | c6056099 | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |
+
+### 4. rész – második olvasó
+
+R3 (biztonságkritikus) tartalom: a 4. rész ábráit egy második, szintén jogosult olvasó is átnézi. Aláírásával azt igazolja, hogy a lektor „Jóváhagyom” jelölésű ábráival egyetért; eltérő véleményét a megjegyzésbe írja. A program a második olvasó nevét nem rögzíti, csak a jogosultságát.
+
+| Adat | Kitöltés |
+|---|---|
+| Második olvasó jogosultsága | |
+| Dátum | |
+| Aláírás | |
+
 ### Teendő eltérés esetén
 
 1. A lektor az eltérő tételt ✗-szel jelöli, és a „Helyes érték / megjegyzés” mezőbe beírja a helyes értéket; a forrást (szabvány, kiadás, pont vagy táblázat) a „Megjegyzés a blokkhoz (forrás, kiadás)” mezőben vagy a tételnél adja meg.
@@ -1908,12 +3477,13 @@ A jóváhagyott csomag:
 
 | Adat | Érték |
 |---|---|
-| Csomagverzió | LK-3 (2026. 10. 10.) |
-| Csomag-ujjlenyomat | 77cbe404 (a csomag teljes szövegéé: bevezető, tételek, jóváhagyó lap) |
+| Csomagverzió | LK-4 (2026. 10. 12.) |
+| Csomag-ujjlenyomat | 09c63bbe (a csomag teljes szövegéé: bevezető, tételek, jóváhagyó lap) |
 | Táblázatváltozat | 2026.10-1 |
 | 1. rész – táblázat-ujjlenyomat | c78b23ee (ehhez köti a program a jóváhagyást) |
 | 2. rész – képlet-ujjlenyomat | 25b6c94f (a fejlesztési folyamat automatikus tesztje ellenőrzi) |
 | 3. rész – kalkulátor-ujjlenyomat | e65e37f3 (a 3. rész egészéé; kalkulátoronként: a döntési táblázatban) |
+| 4. rész – ábra-ujjlenyomat | f2384506 (a 4. rész egészéé; ábránként: a döntési táblázatban) |
 
 Döntés:
 
@@ -1921,9 +3491,9 @@ Döntés:
 - ☐ Az 1–2. részt a jelölt eltérések javítása után hagyom jóvá; a javított kiadás változott tételeit ellenőrzöm.
 - ☐ Az 1–2. részt nem hagyom jóvá (indoklás a megjegyzésben).
 
-Alulírott kijelentem, hogy a Villanyrajz lektori csomag ezen a lapon megjelölt, 61 oldalas kiadásának 1. (méretezési táblázatok), 2. (képletek és programozott döntések) és 3. (szabványhoz kötött kalkulátorok) részét a hivatkozott szabványok hatályos kiadásával összevetettem, és a tételeket a fenti döntés, valamint a kalkulátoronkénti döntés szerint jelöltem. A 3. részből kizárólag a kalkulátoronkénti döntésben „Jóváhagyom” jelölésű kalkulátorokat hagyom jóvá. A jóváhagyás kizárólag a csomagban, a megjelölt ujjlenyomatokkal azonosított tartalomra vonatkozik; nem minősül a programmal készült egyes tervekért vagy a kalkulátorokkal végzett egyes számításokért vállalt tervezői felelősségnek, és nem terjed ki a csomag 4–6. részére.
+Alulírott kijelentem, hogy a Villanyrajz lektori csomag ezen a lapon megjelölt, 123 oldalas kiadásának 1. (méretezési táblázatok), 2. (képletek és programozott döntések), 3. (szabványhoz kötött kalkulátorok) és 4. (bekötési ábrák) részét a hivatkozott szabványok hatályos kiadásával összevetettem, és a tételeket a fenti döntés, valamint a kalkulátoronkénti és az ábránkénti döntés szerint jelöltem. A 3. és a 4. részből kizárólag a „Jóváhagyom” jelölésű kalkulátorokat és ábrákat hagyom jóvá; a 4. rész ábráinak jóváhagyásához a második olvasó egyetértése is szükséges. A jóváhagyás kizárólag a csomagban, a megjelölt ujjlenyomatokkal azonosított tartalomra vonatkozik; nem minősül a programmal készült egyes tervekért vagy a kalkulátorokkal végzett egyes számításokért vállalt tervezői felelősségnek, és nem terjed ki a csomag 5–6. részére.
 
-Az 1. rész ujjlenyomatát a program maga ellenőrzi: eltérésnél „ellenőrizendő” állapotra áll vissza. A 2. rész ujjlenyomatát a fejlesztési folyamat automatikus tesztje veti össze a jóváhagyottal. A 3. részben kalkulátoronként a tartalmi és a forrás-ujjlenyomat kerül a kiadási rekordba: tartalmi eltérésnél a program a kalkulátort nem teszi közzé, forráseltérésnél az automatikus teszt elbukik. Bármelyik eltérésénél új kiadás és új jóváhagyás kell.
+Az 1. rész ujjlenyomatát a program maga ellenőrzi: eltérésnél „ellenőrizendő” állapotra áll vissza. A 2. rész ujjlenyomatát a fejlesztési folyamat automatikus tesztje veti össze a jóváhagyottal. A 3. részben kalkulátoronként a tartalmi és a forrás-ujjlenyomat kerül a kiadási rekordba: tartalmi eltérésnél a program a kalkulátort nem teszi közzé, forráseltérésnél az automatikus teszt elbukik. A 4. részben ábránként a netlista és az ábra ujjlenyomata kerül a csomagkiadásba; a Tudástár cikkének lektori rekordja ehhez kötődik: ha a netlista, az elrendezés, egy szimbólum, a rajzoló kód vagy egy ábraszín változik, a cikk nem jelenik meg („újraellenőrzendő”). Bármelyik eltérésénél új kiadás és új jóváhagyás kell.
 
 A „Jogosultság megnevezése” a programban a lektorálás jelzésében szó szerint megjelenik (név nélkül is); például: épületvillamossági tervező (MMK-névjegyzék) vagy érintésvédelmi szabványossági felülvizsgáló.
 
@@ -1935,7 +3505,7 @@ A „Jogosultság megnevezése” a programban a lektorálás jelzésében szó 
 | Hely | |
 | Dátum | |
 | Aláírás | |
-| Jóváhagyott csomagverzió és ujjlenyomatok | LK-3 (2026. 10. 10.); csomag: 77cbe404; 1. rész: c78b23ee; 2. rész: 25b6c94f; 3. rész: e65e37f3 |
+| Jóváhagyott csomagverzió és ujjlenyomatok | LK-4 (2026. 10. 12.); csomag: 09c63bbe; 1. rész: c78b23ee; 2. rész: 25b6c94f; 3. rész: e65e37f3; 4. rész: f2384506 |
 | Megjegyzések | |
 
 ☐ Hozzájárulok, hogy nevem, névjegyzéki számom, jogosultságom és a jóváhagyás dátuma a tervező Méretezés fülén (Eszközök → Tervsegéd → Méretezés) minden felhasználónak; minden felhasználó exportált terv-PDF-jében, ha a méretezési táblákat bekapcsolja, az elosztóoldalak „méretezés indoklása” táblájának „Táblázatok – Állapot” sorában (ugyanennek a táblának az utolsó sora a terv tervezőjének „Tervezői ellenőrzés” aláírósora); a nyilvános, keresőkben is megtalálható kalkulátoroldalakon a táblázatokat használó kalkulátorok (Feszültségesés, Keresztmetszet-választás, Kismegszakító-választás, Hurokimpedancia és zárlati áram, Terhelhetőségi táblázat) „Táblázatok állapota” sorában és a Vezeték-ellenállás kalkulátor ρ1 szerinti tájékoztató sorában – ezzel a szöveggel megjelenjen: „A táblázatértékeket szakmailag lektorálta: [név], [jogosultság] ([névjegyzéki szám]), [dátum]. Táblázatváltozat: 2026.10-1, ujjlenyomat: c78b23ee.”; továbbá hogy a 3. részből általam jóváhagyott kalkulátorok saját oldalán (jelvény; lábléc-sor) nevem és jogosultságom így megjelenjen: „Szakmailag lektorálta: [név], [jogosultság] · [dátum]; Szakmai lektor: [név], [jogosultság]”. Tudomásul veszem, hogy ehhez nevem és névjegyzéki számom a program nyilvános oldalainak kódjába is bekerül. Hozzájárulás hiányában a program nevemet és névjegyzéki számomat nem rögzíti, és a lektorálást a jogosultságom megnevezésével jelzi: „A táblázatértékeket szakmailag lektorálta: [jogosultság], [dátum]. Táblázatváltozat: 2026.10-1, ujjlenyomat: c78b23ee.”, illetve „Szakmailag lektorálta: [jogosultság] · [dátum]; Szakmai lektor: [jogosultság]”. A kalkulátorlistán és a keresőben a jelvény név nélküli. A jóváhagyás érvénye a hozzájárulástól nem függ.

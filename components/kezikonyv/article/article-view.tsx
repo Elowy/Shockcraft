@@ -13,6 +13,7 @@ import {QUIZ_NOTICE} from '@/lib/quiz/topics';
 import {AppBar} from '../shell';
 import {PlannerCta} from '../planner-cta';
 import {ReportLink} from '../report-link';
+import type {DiagramSource} from '../diagram/diagram-figure';
 import {ArticleActions} from './article-actions';
 import {ArticleBlocks} from './blocks';
 
@@ -50,7 +51,8 @@ export function MetaLine({meta,info,draft,url}:{meta:KbMeta;info:KbReleaseInfo;d
  return <p className="kk-meta">Verzió: v{meta.version} · ujjlenyomat: {meta.fingerprint}{meta.figures?' · ábrák: '+meta.figures:''} · frissítve: {kbDate(meta.updated)} · {check}{meta.ai==='vázlat'?' · MI-segítséggel készült vázlatból, emberi szerkesztéssel':''} · <ReportLink kind="kb" id={meta.id} version={meta.version} fingerprint={meta.fingerprint} url={url}/></p>;
 }
 
-export function ArticleView({meta,body,info,preview,origin,glossary=false}:{meta:KbMeta;body:KbBody;info:KbReleaseInfo;preview:boolean;origin:string|null;glossary?:boolean}){
+/** `diagrams`: a netlistás bekötési ábrák (R3 – csak közzétett cikknél, lib/kb/content/registry.ts diagramsOf). */
+export function ArticleView({meta,body,info,preview,origin,glossary=false,diagrams}:{meta:KbMeta;body:KbBody;info:KbReleaseInfo;preview:boolean;origin:string|null;glossary?:boolean;diagrams?:Readonly<Record<string,readonly DiagramSource[]>>}){
  const draft=info.state!=='kozzeteve',cat=categoryById(meta.category),sec=sectionById(meta.section);
  const href=articleHref(meta),resolve=(id:string,anchor:string|null)=>resolveLink(id,anchor,preview);
  const siblings=categoryArticles(meta.category,preview),{prev,next}=prevNext(meta,preview),rel=relatedArticles(meta,preview);
@@ -75,7 +77,7 @@ export function ArticleView({meta,body,info,preview,origin,glossary=false}:{meta
     <ArticleActions id={meta.id} title={meta.title} href={href}/>
     {glossary?<nav className="kk-letters" aria-label="Betűk">{toc.map(([id,l])=><a key={id} href={'#'+id}>{l}</a>)}</nav>
      :<details className="kk-toc-inline"><summary>Tartalom</summary><ol>{toc.map(([id,l])=><li key={id}><a href={'#'+id}>{l}</a></li>)}</ol></details>}
-    <ArticleBlocks blocks={body.blocks} ctx={{slug:meta.slug,resolve}}/>
+    <ArticleBlocks blocks={body.blocks} ctx={{slug:meta.slug,resolve,...(diagrams?{diagrams}:{})}}/>
     {(!!calcs.length||!!rel.items.length||rel.pending>0||!!quiz.length)&&<section id="kapcsolodo" className="kk-related" aria-labelledby="kapcsolodo-cim">
      <h2 id="kapcsolodo-cim">Kapcsolódó</h2>
      {!!calcs.length&&<><h3>Kalkulátorok</h3><ul className="kk-related-grid">{calcs.map(c=><li key={c.slug}><a href={calcPath(c.slug)}><b>{c.title}</b><small>{c.short}</small></a></li>)}</ul>

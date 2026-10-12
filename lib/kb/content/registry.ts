@@ -7,8 +7,10 @@ import type {SearchItem} from '@/lib/kb/search';
 import {KB_CATEGORIES,byArticleOrder,categoryById,type KbCategory} from './categories';
 import {contentFingerprint} from './fingerprint';
 import {gateState,type KbState} from './gate';
+import type {DiagramSource} from '@/components/kezikonyv/diagram/diagram-figure';
 import {KB_ARTICLES,KB_PENDING} from './generated/articles';
 import {KB_BODIES} from './generated/bodies';
+import {KB_DIAGRAMS} from './generated/diagrams';
 import {GLOSSARY_ID,TERM_RANK,articleHref,searchItemsOf,termAliases,termsOf} from './search-items';
 import type {KbBody,KbMeta,KbPending,KbSectionId,KbTerm} from './types';
 
@@ -21,6 +23,13 @@ export const articleById=(id:string)=>KB_ARTICLES.find(a=>a.id===id);
 export const pendingById=(id:string):KbPending|undefined=>KB_PENDING.find(p=>p.id===id);
 export const bodyOf=(meta:KbMeta):KbBody=>{const b=KB_BODIES[meta.id];if(!b)throw new Error('Hiányzó cikktörzs: '+meta.id);return b};
 
+/** A cikk netlistás bekötési ábrái (ábra-id → a fő ábra és a változatai). Csak közzétett cikkhez van generált ábra
+ * (lib/kb/content/generated/diagrams.ts); ha hiányzik, az ábra helyén csak a felirat és a szöveges megfelelő hiánya jelzése marad. */
+export function diagramsOf(meta:KbMeta,source:Readonly<Record<string,DiagramSource>>=KB_DIAGRAMS):Record<string,DiagramSource[]>{
+ const out:Record<string,DiagramSource[]>={};
+ for(const d of meta.diagrams??[]){const xs=d.ids.map(id=>source[id]).filter((x):x is DiagramSource=>!!x);if(xs.length===d.ids.length)out[d.figure]=xs}
+ return out;
+}
 /** A tartalom mostani ujjlenyomata (futásidőben újraszámolva a törzsből is – a generált meta értékét a CI veti össze). */
 export const articleFingerprint=(meta:KbMeta)=>contentFingerprint(meta,bodyOf(meta));
 
@@ -36,6 +45,8 @@ export function releaseInfo(meta:KbMeta,records:Readonly<Record<string,KbRelease
  return {...g,badge:g.state==='kozzeteve'&&g.record?releaseBadge(g.record):''};
 }
 export const isPublished=(meta:KbMeta)=>releaseInfo(meta).state==='kozzeteve';
+/** A listák (kártyák, Sémák gyűjtőoldal) jelvénye: mindig név nélküli; nem közzétett (előnézeti) tételnél „Tervezet (előnézet)”. */
+export const listBadgeOf=(meta:KbMeta)=>{const info=releaseInfo(meta);return info.state==='kozzeteve'&&info.record?releaseBadge(info.record,false):'Tervezet (előnézet)'};
 const PUBLISHED_IDS:ReadonlySet<string>=new Set(KB_ARTICLES.filter(isPublished).map(a=>a.id));
 export const isPublishedId=(id:string)=>PUBLISHED_IDS.has(id);
 
@@ -57,7 +68,8 @@ export function resolveLink(id:string,anchor:string|null,preview=false):LinkTarg
 
 export const categoriesWithArticles=(section:KbSectionId,preview=false)=>KB_CATEGORIES.filter(c=>c.section===section&&visibleArticles(preview,section).some(a=>a.category===c.id));
 export const categoryArticles=(category:string,preview=false)=>visibleArticles(preview).filter(a=>a.category===category);
-export const categoryHref=(c:KbCategory)=>kbCategoryPath(c.section,c.id);
+/** A kategória oldala; a Sémák kategóriáinak nincs külön oldala: a gyűjtőoldal horgonya. */
+export const categoryHref=(c:KbCategory)=>c.section==='semak'?KB_HOME+'/semak#'+c.id:kbCategoryPath(c.section,c.id);
 /** Lektorra váró tételek száma kategóriánként (szöveg nélkül: csak a darabszám és a kategória saját felirata jelenik meg). */
 export const pendingCount=(section?:KbSectionId)=>KB_PENDING.filter(p=>!section||p.section===section).length+KB_ARTICLES.filter(a=>!PUBLISHED_IDS.has(a.id)&&(!section||a.section===section)).length;
 

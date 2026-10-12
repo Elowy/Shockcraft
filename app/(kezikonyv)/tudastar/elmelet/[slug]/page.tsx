@@ -2,7 +2,7 @@ import type {Metadata} from 'next';
 import {notFound} from 'next/navigation';
 import {ArticleView} from '@/components/kezikonyv/article/article-view';
 import {JsonLd,breadcrumbLd} from '@/components/kezikonyv/json-ld';
-import {articleHref,articlePages,bodyOf,categoryById,categoryHref,releaseInfo} from '@/lib/kb/content/registry';
+import {articleHref,articlePages,bodyOf,categoryById,categoryHref,diagramsOf,releaseInfo} from '@/lib/kb/content/registry';
 import {KB_HOME,OG_BASE,kbSeoTitle} from '@/lib/kb/categories';
 import {kbPreview,siteOrigin} from '@/lib/site-origin';
 
@@ -26,7 +26,7 @@ export default async function ArticlePage({params}:{params:Promise<{slug:string}
  if(!meta)notFound();
  const preview=kbPreview(),origin=siteOrigin(),info=releaseInfo(meta),url=articleHref(meta),cat=categoryById(meta.category);
  return <>
-  <ArticleView meta={meta} body={bodyOf(meta)} info={info} preview={preview} origin={origin}/>
+  <ArticleView meta={meta} body={bodyOf(meta)} info={info} preview={preview} origin={origin} diagrams={diagramsOf(meta)}/>
   <JsonLd data={breadcrumbLd(origin,[{name:'Tudástár',path:KB_HOME},{name:'Elmélet',path:KB_HOME+'/elmelet'},...(cat?[{name:cat.label,path:categoryHref(cat)}]:[]),{name:meta.navTitle,path:url}])}/>
   <JsonLd data={{'@context':'https://schema.org','@type':'TechArticle',headline:meta.title,description:meta.summary,url:(origin??'')+url,mainEntityOfPage:(origin??'')+url,inLanguage:'hu',
    datePublished:info.record?.date??meta.updated,dateModified:meta.updated,keywords:meta.keywords.join(', '),isAccessibleForFree:true,

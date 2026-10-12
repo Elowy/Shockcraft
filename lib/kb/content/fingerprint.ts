@@ -7,10 +7,12 @@
 import {fingerprint} from '@/lib/sizing-tables';
 import type {KbBody,KbMeta} from './types';
 
-export type KbContentMeta=Pick<KbMeta,'id'|'slug'|'section'|'category'|'title'|'navTitle'|'summary'|'risk'|'audience'|'keywords'|'synonyms'|'related'|'calculators'|'ai'|'version'|'updated'>;
+export type KbContentMeta=Pick<KbMeta,'id'|'slug'|'section'|'category'|'title'|'navTitle'|'summary'|'risk'|'audience'|'keywords'|'synonyms'|'related'|'calculators'|'ai'|'version'|'updated'|'safety'|'plannerKinds'|'diagrams'>;
 
 export function contentFingerprint(meta:KbContentMeta,body:KbBody):string{
- const {id,slug,section,category,title,navTitle,summary,risk,audience,keywords,synonyms,related,calculators,ai,version,updated}=meta;
- return fingerprint({meta:{id,slug,section,category,title,navTitle,summary,risk,audience,keywords,synonyms,related,calculators,ai,version,updated},
+ const {id,slug,section,category,title,navTitle,summary,risk,audience,keywords,synonyms,related,calculators,ai,version,updated,safety,plannerKinds,diagrams}=meta;
+ // Az R3 mezői (veszély-doboz, tervezői jelek, netlistás ábrák) csak akkor kerülnek bele, ha vannak: az R1/R2 ujjlenyomat változatlan.
+ const r3={...(safety!==undefined?{safety}:{}),...(plannerKinds!==undefined?{plannerKinds}:{}),...(diagrams!==undefined?{diagrams}:{})};
+ return fingerprint({meta:{id,slug,section,category,title,navTitle,summary,risk,audience,keywords,synonyms,related,calculators,ai,version,updated,...r3},
   blocks:body.blocks,sources:body.sources.map(s=>({standard:s.standard,kiadas:s.kiadas,pont:s.pont}))});
 }

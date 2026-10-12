@@ -38,7 +38,7 @@ function chromeData(preview:boolean):ChromeData{
  const hit=CHROME.get(preview);if(hit)return hit;
  const metas=calcMetas(preview);
  const quiz=quizPublishedCount(preview);
- const sections=visibleSections({elmelet:visibleArticles(preview,'elmelet').length,kalkulatorok:metas.filter(m=>m.href).length,tesztek:quiz});
+ const sections=visibleSections({elmelet:visibleArticles(preview,'elmelet').length,semak:visibleArticles(preview,'semak').length,kalkulatorok:metas.filter(m=>m.href).length,tesztek:quiz});
  // A Tesztek oldala egyetlen tételként (kérdésszöveg nem kerül a keresőbe).
  const quizItem:SearchItem[]=quiz?[{id:'tesztek',title:'Gyakorló tesztek',href:QUIZ_PATH,group:'Tesztek',keywords:['teszt','vizsga','gyakorlás','gyakorló feladat','számolós feladat','kérdések'],synonyms:['vizsgaszimuláció','kvíz','feladatsor'],summary:'Számolós gyakorló feladatok azonnali magyarázattal és levezetéssel.'}]:[];
  const items:SearchItem[]=[...(preview?kbSearchItems(true):[]),...metas.map(m=>({id:m.slug,title:m.title,href:m.href,group:'Kalkulátorok',keywords:m.keywords,synonyms:m.synonyms,summary:m.short,note:m.note})),...quizItem];

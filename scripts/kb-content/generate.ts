@@ -17,7 +17,11 @@ import {GLOSSARY_ID,searchItemsOf,termsOf} from '../../lib/kb/content/search-ite
 import type {KbBlock,KbBody,KbMeta,KbPending,KbSource} from '../../lib/kb/content/types';
 import {KB_RELEASES,KB_SUSPENDED,type KbRelease} from '../../lib/kb/release';
 import type {SearchItem} from '../../lib/kb/search';
+import {SAFETY} from '../../lib/kb/safety';
+import {fingerprint} from '../../lib/sizing-tables';
+import type {DiagramSource} from '../../components/kezikonyv/diagram/diagram-figure';
 import {checkReasons} from './checklist';
+import {diagramFiles,diagramSource} from './diagrams';
 import {figureSource} from './figures';
 import {parseDraft,pendingFields,type FrontMatter} from './parse';
 import {frontMatterSchema} from './schema';
@@ -27,7 +31,8 @@ export const R3_DIR='content/tudastar/r3';
 export const OUT_DIR='lib/kb/content/generated';
 
 export type GenArticle={file:string;meta:KbMeta;body:KbBody};
-export type Model={articles:GenArticle[];pending:(KbPending&{file:string})[];search:SearchItem[]};
+/** `diagrams`: a kapu szerint közzétett cikkek netlistás ábrái (netlista-id → netlista és elrendezés) – csak ezek kerülnek a buildbe. */
+export type Model={articles:GenArticle[];pending:(KbPending&{file:string})[];search:SearchItem[];diagrams:Record<string,DiagramSource>};
 
 const mdFiles=(root:string,dir:string)=>existsSync(join(root,dir))?readdirSync(join(root,dir)).filter(f=>f.endsWith('.md')).sort().map(f=>join(dir,f)):[];
 
@@ -44,6 +49,7 @@ export function blocksText(blocks:readonly KbBlock[]):string{
    case 'table':out.push(...b.head.map(inlinePlain),...b.rows.flat().map(inlinePlain));break;
    case 'example':out.push(blocksText(b.blocks));break;
    case 'terms':for(const t of b.items)out.push(t.term,t.note??'',inlinePlain(t.text));break;
+   case 'sim':out.push(blocksText(b.blocks));break;
    case 'figure':break;
   }
  }
@@ -53,9 +59,36 @@ export function blocksText(blocks:readonly KbBlock[]):string{
 /** A törzs ábra-helyőrzőinek azonosítói, sorrendben (a kidolgozott példákban állók is). */
 export function figureIds(blocks:readonly KbBlock[]):string[]{
  const out:string[]=[];
- const walk=(bs:readonly KbBlock[])=>{for(const b of bs){if(b.t==='figure')out.push(b.id);else if(b.t==='example')walk(b.blocks)}};
+ const walk=(bs:readonly KbBlock[])=>{for(const b of bs){if(b.t==='figure')out.push(b.id);else if(b.t==='example'||b.t==='sim')walk(b.blocks)}};
  walk(blocks);
  return out;
+}
+
+/** Az R3 cikk kötelező elemei (docs/tudastar-terv.md 2.4, 4.2, 8.1): az első blokk a nem zárható veszély-doboz, amely tartalmazza a
+ * figyelmeztetés-könyvtár (lib/kb/safety.ts) `safety` tételének mondatait; „Régi berendezésben”, „Gyakori hibák”, „Mikor hívj
+ * szakembert?” szakasz; a netlistás bekötési cikkben „Hogyan működik?” és a szerelés lépései a feszültségmentesítéssel kezdve; minden
+ * front matterbeli ábrához helyőrző. Hiba esetén a generálás megáll – félkész R3 oldal nem jöhet létre. */
+export function checkR3(file:string,f:FrontMatter,blocks:readonly KbBlock[]){
+ const lib=f.safety?SAFETY[f.safety as keyof typeof SAFETY]:undefined;
+ if(!lib)throw new Error(file+': ismeretlen figyelmeztetés-könyvtári tétel (safety): '+f.safety);
+ const first=blocks[0],norm=(x:string)=>inlinePlain(x).replace(/\s+/g,' ').toLowerCase();
+ if(!first||first.t!=='callout'||first.kind!=='veszely')throw new Error(file+': az R3 cikk első blokkja a „> **Veszély – …**” doboz kell legyen');
+ const box=norm(first.label+'. '+first.text);
+ for(const sentence of (lib.title+': '+lib.text).split(/(?<=[.!?])\s+/).map(x=>norm(x).replace(/[.!?]$/,'')))if(!box.includes(sentence.replace(/^életveszély: /,'')))throw new Error(file+': a veszély-doboz nem tartalmazza a könyvtári szöveget („'+sentence+'”) – lib/kb/safety.ts '+f.safety);
+ const h2=blocks.filter((b):b is Extract<KbBlock,{t:'h2'}>=>b.t==='h2').map(b=>inlinePlain(b.text));
+ const need=['Régi berendezésben','Gyakori hibák','Mikor hívj szakembert?'];
+ const diagrams=(f.figures??[]).filter(x=>x.netlist);
+ const wiring=f.section==='semak'&&f.category==='kapcsolasok'&&diagrams.length>0;
+ if(wiring)need.unshift('Hogyan működik?');
+ for(const h of need)if(!h2.includes(h))throw new Error(file+': hiányzó R3 szakasz: „'+h+'”');
+ if(wiring){
+  const i=blocks.findIndex(b=>b.t==='h2'&&/^(A szerelés menete|Bekötés lépésről lépésre)/.test(inlinePlain(b.text)));
+  if(i<0)throw new Error(file+': hiányzik a szerelés lépéseinek szakasza („A szerelés menete szakembernek” / „Bekötés lépésről lépésre”)');
+  const ol=blocks.slice(i+1).find(b=>b.t==='ol'||b.t==='h2');
+  if(!ol||ol.t!=='ol'||!/^\*\*Feszültségmentesítés\b/.test(ol.items[0]))throw new Error(file+': a szerelés lépései a feszültségmentesítéssel kezdődjenek');
+ }
+ const ids=figureIds(blocks);
+ for(const x of f.figures??[])if(!ids.includes(x.id))throw new Error(file+': a front matter ábrájának ('+x.id+') nincs helyőrzője');
 }
 
 /** Ismeretlen vagy más szekcióhoz tartozó kategória, illetve a kategória/szekció kockázati alsó korlátja (lib/kb/content/categories.ts
@@ -77,9 +110,18 @@ export function articleFromDraft(file:string,src:string,root:string):GenArticle{
  const body:KbBody={blocks,sources};
  const core={id:f.slug,slug:f.slug,section:f.section as KbMeta['section'],category:f.category,title:f.title,navTitle:f.navTitle,summary:f.summary,risk:f.risk as KbMeta['risk'],
   audience:f.audience as KbMeta['audience'],keywords:f.keywords,synonyms:f.synonyms,related:f.related,calculators:f.calculators,ai:f.ai,version:f.version,updated:f.updated};
+ if(f.risk==='R3')checkR3(file,f,blocks);
+ // Netlistás bekötési ábrák (R3): ábra-id → netlistafájlok (a fő ábra és a változatai); a cikk ábra-ujjlenyomatában a netlista, az
+ // elrendezés, a rajzoló modulok és a rajz stílusszabályai (scripts/kb-content/diagrams.ts) szerepelnek a FIGURES-bejegyzés helyett.
+ const dg=(f.figures??[]).filter(x=>x.netlist).map(x=>({figure:x.id,files:[x.netlist!,...(x.variants??[])]}));
+ const r3={...(f.safety?{safety:f.safety}:{}),...(f.plannerKinds?{plannerKinds:f.plannerKinds}:{}),
+  ...(dg.length?{diagrams:dg.map(d=>({figure:d.figure,ids:d.files.map(x=>diagramFiles(root,x).netlist.id)}))}:{})};
+ const coreR3={...core,...r3};
  const anchors=blocks.filter((b):b is Extract<KbBlock,{t:'h2'}>=>b.t==='h2').map(b=>({id:b.id,title:inlinePlain(b.text)}));
  const words=blocksText(blocks).split(/\s+/).filter(w=>/[\p{L}\p{N}]/u.test(w)).length;
- const meta:KbMeta={...core,anchors,words,fingerprint:contentFingerprint(core,body),figures:figureSource(root,f.slug,figureIds(blocks))};
+ const figIds=figureIds(blocks),plain=figIds.filter(id=>!dg.some(d=>d.figure===id));
+ const figures=dg.length?fingerprint({figures:figureSource(root,f.slug,plain),diagrams:dg.map(d=>({id:d.figure,src:diagramSource(root,d.files)}))}):figureSource(root,f.slug,plain);
+ const meta:KbMeta={...coreR3,anchors,words,fingerprint:contentFingerprint(coreR3,body),figures};
  return {file,meta,body};
 }
 
@@ -108,8 +150,15 @@ export function buildModel(root:string,releases:Readonly<Record<string,KbRelease
  const published=articles.filter(a=>gateState(a.meta,contentFingerprint(a.meta,a.body),releases,suspended).state==='kozzeteve');
  const glossary=published.find(a=>a.meta.id===GLOSSARY_ID);
  const search=searchItemsOf(published.map(a=>a.meta).sort(byArticleOrder),glossary?termsOf(glossary.body.blocks):[]);
- return {articles,pending,search};
+ // A netlistás ábrák (netlista + elrendezés) CSAK a közzétett cikkekhez kerülnek a generált modulba (és így a buildbe).
+ const diagrams:Record<string,DiagramSource>={};
+ for(const a of published)for(const d of a.meta.diagrams??[]){
+  const fig=readFigures(root,a.file).find(x=>x.id===d.figure)!;
+  for(const file of [fig.netlist!,...(fig.variants??[])]){const x=diagramFiles(root,file);diagrams[x.netlist.id]={netlist:x.netlist,layout:x.layout}}
+ }
+ return {articles,pending,search,diagrams};
 }
+const readFigures=(root:string,file:string)=>parseDraft(readFileSync(join(root,file),'utf8')).front.figures??[];
 
 const ident=(slug:string)=>'b_'+slug.replace(/-/g,'_');
 const HEADER=(src:string)=>'// GENERÁLT FÁJL – ne szerkeszd kézzel. Forrás: '+src+'; generátor: node_modules/.bin/tsx scripts/kb-content.ts build (docs/tudastar.md).\n';
@@ -136,6 +185,11 @@ export function renderFiles(model:Model):Record<string,string>{
   '// által átadott közzétett célokra szűri; így nem kerül minden oldal HTML-jébe. A kiadási rekord változása után újra kell generálni.\n'+
   "import type {SearchItem} from '../../search';\n\n"+
   'export const KB_SEARCH_ITEMS:readonly SearchItem[]='+list(model.search,'')+';\n';
+ files[OUT_DIR+'/diagrams.ts']=HEADER('content/tudastar/r3/*.netlist.json, content/tudastar/diagramok/*.json és lib/kb/release.ts')+
+  '// A netlistás bekötési ábrák (netlista + elrendezés) – CSAK a kapu szerint közzétett cikkekéi; a lektorra váró (R3) ábrák nem kerülnek\n'+
+  '// a buildbe. Csak szerveroldal (lib/kb/content/registry.ts) importálja; kliensszigetbe nem kerülhet (tests/kb-guards.ts).\n'+
+  "import type {DiagramSource} from '@/components/kezikonyv/diagram/diagram-figure';\n\n"+
+  'export const KB_DIAGRAMS:Readonly<Record<string,DiagramSource>>='+(Object.keys(model.diagrams).length?'{\n'+Object.entries(model.diagrams).sort(([a],[b])=>a<b?-1:1).map(([k,v])=>' '+JSON.stringify(k)+':'+JSON.stringify(v)+',').join('\n')+'\n}':'{}')+';\n';
  files[OUT_DIR+'/bodies/index.ts']=HEADER('content/tudastar/*')+
   '// A cikktörzsek – CSAK szerveroldal (lib/kb/content/registry.ts) importálja; kliensszigetbe nem kerülhet (tests/kb-guards.ts).\n'+
   "import type {KbBody} from '../../types';\n"+
