@@ -11,7 +11,8 @@ export function FenyhasznositasSavok(p:FigProps){
   {rows.map(([l,a,b],i)=>{const y=40+i*58,led=l==='LED';return <g key={l}>
    <T x={16} y={y-8} size={13.5} cls="t-halo">{l}</T>
    <rect x={x(a)} y={y} width={Math.max(x(b)-x(a),4)} height={24} rx={4} className={led?'f-primary':'f-muted'} fillOpacity={led?1:0.6}/>
-   {led?<T x={x(b)-8} y={y+17} size={12.5} anchor="end" cls="t-on-primary" bold>{a}–{b}</T>:<T x={x(b)+6} y={y+17} size={12.5} cls="t-halo">{a}–{b}</T>}
+   {/* A tartomány felirata nem keresztez rácsvonalat, ezért kontúr (t-halo) nélkül: a kontúr a gondolatjel előtti számjegyet csonkította. */}
+   {led?<T x={x(b)-8} y={y+17} size={12.5} anchor="end" cls="t-on-primary" bold>{a+'–'+b}</T>:<T x={x(b)+4} y={y+17} size={12.5}>{a+'–'+b}</T>}
   </g>})}
   <T x={x(100)} y={292} size={13} anchor="middle">lm/W</T>
  </Svg>;

@@ -42,3 +42,13 @@ A vázlatok: `content/tudastar/r3/*.md` és a bekötési netlisták `content/tud
 9. Szerkesztő: a foldelesi-rendszerek.md prózája 1490 szó, a felső korlát 1500. További biztonsági kiegészítéshez a cikket szét kell bontani; a témakatalógus a „(+ PEN-szétválasztás)” témát úgyis külön említi.
 10. Koordináció: egy párhuzamosan dolgozó (védelmek csoportos) ellenőr 10:37:48-kor módosította a sim.py-t (a védelmi táblák lábjegyzete: „A szerelt vezetékezésben (a jelképes hibahelyet és érintést nem számítva)…”). Emiatt az aram-vedokapcsolo-fi-rele.md fi-rele-hibahelyzetek sim-blokkja most eltér, és a check_articles HIBÁ-t jelez. A cikk nem az én csoportom, nem nyúltam hozzá; a csoport gazdájának kell frissítenie: python3 sim.py --update-article ../tudastar-r3/aram-vedokapcsolo-fi-rele.md.
 11. Lektor: a 2. ábra (TN-S) összehasonlító táblájában az N-szakadás sorában „érintés: nincs” áll, mert az érintés csak a fémházra vonatkozik. Ezt a táblázat bevezetője most kimondja. Elég-e ez, vagy a táblában is jelezni kell a nullavezető veszélyét?
+
+## A kérdésbank független ellenőrzése nyomán (2026-10-12)
+
+A kérdésbank (`content/tudastar/kerdesek`) független ellenőrzése négy olyan pontot talált, ahol az R3-vázlat pontatlan vagy önmagának ellentmond. A kérdéseket javítottuk; a vázlatokban a 2–4. pontot a legkisebb szükséges módosítással igazítottuk, az 1. pontot a lektorra bízzuk.
+
+1. **Lektorra bízva – feszültségmentesítés:** a „Miért kell öt lépés?” bekezdés szerint az öt lépés közül „egyik sem hagyható ki”, a 4. lépés viszont csak „ahol előírt vagy szükséges” kötelező (kisfeszültségen a munka irányítója dönt), az 5. pedig csak akkor, ha a közelben feszültség alatt maradó rész van. Javaslat: „…ezért a sorrend nem cserélhető fel; a földelés és rövidrezárás, illetve a letakarás ott kötelező, ahol előírt vagy a körülmények miatt szükséges.” (A q-mb-0001 magyarázata már így fogalmaz.)
+2. **Javítva – 106-os váltókapcsoló, gyakori hibák:** „a zöld-sárga ér csak védővezető lehet” → „csak védőfunkciójú vezető (védővezető, PEN-, potenciálkiegyenlítő vezető) lehet, fázis- vagy nullavezető soha” (összhangban a közzétett színjelölés-cikkel és a q-kap-0012-vel).
+3. **Javítva – földelési rendszerek, TT, szakadt földelővezető:** a nagyobb kioldási áramú FI-relé „egyáltalán nem” helyett „jellemzően nem” old ki: 230 V és kb. 1–2 kΩ test- és átmeneti ellenállás mellett 100–200 mA is folyhat, ami egy 100 mA-es készüléket kiold (q-fold-0011).
+4. **Javítva – „nullázott” dugalj a FI-relé után (dugalj- és FI-relé-vázlat):** „kioldást okoz” → „kioldást okozhat (ha a nullára kötött fémház földelt részhez ér)”; kéteres vezetékezésben a kioldás nem szükségszerű (q-fold-0019).
+

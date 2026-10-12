@@ -1,5 +1,8 @@
-// A számolós sablonok kalkulátordefinícióinak lusta betöltése a böngészőben: a tesztoldal csak a KÖZZÉTETT sablonok definícióit tölti le
-// (a szerver adja át a listát), így a T1-es, táblázatalapú definíciók és a méretezési táblák nem kerülnek a tesztoldal JS-ébe.
+// A számolós sablonok kalkulátordefinícióinak lusta betöltése a böngészőben: a tesztoldal csak a KÖZZÉTETT sablonok kalkulátorait tölti
+// be (a szerver adja át a listát), a teszt indításakor. A T1-kalkulátorok (feszültségesés, kismegszakító, hurokimpedancia) szigetei csak
+// hivatkozásként szerepelnek a dinamikus importok térképében, letöltés nélkül; a T1-sablonok szövege is külön, be nem töltött csomagban van
+// (lib/quiz/templates-t1.ts, tests/kb-dist.mjs). A méretezési táblák (lib/sizing-tables.ts) viszont a teszt indításakor betöltődnek, mert a
+// közzétett (T0) vezeték-ellenállás kalkulátor is használja őket (a ρ1 üzemi fajlagos ellenállás módjához) – docs/tudastar.md „Tesztek”.
 // A definíciót a kalkulátor saját kliensszigete exportálja (components/calc/islands/<slug>.tsx): így a Tesztek ugyanazt a csomagot tölti, mint
 // a kalkulátoroldal, és a közös modulok (lib/calc/number, constants, fields …) nem szakadnak ki külön csomagokba – a kalkulátoroldalak JS-e
 // nem nő (docs/tudastar.md „Tesztek – méretek”). Minden sablon kalkulátorának itt kell lennie (tests/quiz.ts ellenőrzi).

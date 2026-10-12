@@ -67,7 +67,7 @@
         "correct": false
       }
     ],
-    "explanation": "Egy lámpa két helyről két váltókapcsolóval (106) kapcsolható: a két kapcsoló kimeneteit két váltóvezeték köti össze, és bármelyik átváltása megfordítja a lámpa állapotát. Fordítva nem működik: két egypólusú kapcsolóval ez nem valósítható meg.",
+    "explanation": "Egy lámpa két helyről két váltókapcsolóval (106) kapcsolható: a két kapcsoló kimeneteit két váltóvezeték köti össze, és bármelyik átváltása megfordítja a lámpa állapotát. Két egypólusú kapcsolóval ez nem valósítható meg.",
     "ref": "valtokapcsolo-106-bekotese#hogyan-mukodik",
     "shuffle": true,
     "review": "lektorra-var",
@@ -357,7 +357,7 @@
     "topic": "kapcsolasok",
     "difficulty": 3,
     "type": "single",
-    "stem": "Egy szerelvénydobozból két lámpát kell kapcsolni, amelyeket két külön áramkör táplál. Melyik megoldás felel meg a cikkben leírt szabályoknak?",
+    "stem": "Egy szerelvénydobozból két lámpát kell kapcsolni, amelyeket két külön áramkör táplál. Melyik megoldás helyes?",
     "choices": [
       {
         "id": "a",
@@ -403,7 +403,7 @@
       },
       {
         "id": "b",
-        "text": "A zöld-sárga ér kizárólag védővezető lehet",
+        "text": "A zöld-sárga ér fázis- vagy nullavezetőként soha nem használható",
         "correct": true
       },
       {
@@ -424,7 +424,7 @@
         "why": "A hiányzó védővezetőt tilos a nullavezetőből pótolni."
       }
     ],
-    "explanation": "A védővezető soha nem kapcsolt, és minden fémtestű lámpatestig megszakítás nélkül fut; a zöld-sárga ér más szerepet nem kaphat. A hiányzó védővezetőt tilos a nullavezetőből pótolni, mert nullaszakadásnál vagy felcserélt vezetőknél a fémtest fázis alá kerülhet.",
+    "explanation": "A védővezető soha nem kapcsolt, és minden fémtestű lámpatestig megszakítás nélkül fut; a zöld-sárga ér csak védőfunkciójú vezető (védővezető, PEN, EPH-vezető) lehet, fázis- vagy nullavezető soha. A hiányzó védővezetőt tilos a nullavezetőből pótolni, mert nullaszakadásnál vagy felcserélt vezetőknél a fémtest fázis alá kerülhet.",
     "ref": "vilagitasi-kapcsolasok#kozos-szabalyok",
     "shuffle": true,
     "family": "vedovezeto-szabalyok",
@@ -500,7 +500,7 @@
     "topic": "kapcsolasok",
     "difficulty": 3,
     "type": "single",
-    "stem": "Váltókapcsolásnál (2 × 106) a betáp fázisa az első kapcsoló közös kapcsa helyett annak 1-es kapcsára került. Mi a jellemző tünet?",
+    "stem": "Váltókapcsolásnál (2 × 106) a betáp fázisa az első kapcsoló közös kapcsa helyett annak 1-es kapcsára került, az oda szánt váltóvezeték pedig a közös kapocsra (a két ér felcserélődött). Mi a jellemző tünet?",
     "choices": [
       {
         "id": "a",
@@ -707,7 +707,9 @@
     "ref": "vilagitasi-kapcsolasok#jeloles-a-tervezoben",
     "shuffle": true,
     "review": "lektorra-var",
-    "source": "AI-tervezet"
+    "source": "AI-tervezet",
+    "retired": true,
+    "note": "Visszavonva (2026-10-12, review): a Villanyrajz szerkesztőfelületének jelölését kérdezi, ami nem villanyszerelői tudás és a program változatától függ; a tervező súgójába való."
   },
   {
     "id": "q-kap-0021",

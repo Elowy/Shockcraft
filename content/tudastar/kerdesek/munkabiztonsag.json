@@ -31,7 +31,7 @@
         "why": "A visszakapcsolás elleni biztosítás közvetlenül a leválasztás után következik."
       }
     ],
-    "explanation": "A sorrend: leválasztás, visszakapcsolás elleni biztosítás, a feszültségmentesség megállapítása, földelés és rövidrezárás, majd a szomszédos feszültség alatti részek letakarása vagy elkerítése. Az első kettő megakadályozza, hogy feszültség érkezzen, a harmadik igazolja, hogy nincs, a negyedik és az ötödik a maradék veszélyek ellen véd; egyik lépés sem hagyható ki és nem cserélhető fel.",
+    "explanation": "A sorrend: leválasztás, visszakapcsolás elleni biztosítás, a feszültségmentesség megállapítása, földelés és rövidrezárás, majd a szomszédos feszültség alatti részek letakarása vagy elkerítése. Az első kettő megakadályozza, hogy feszültség érkezzen, a harmadik igazolja, hogy nincs, a negyedik és az ötödik a maradék veszélyek ellen véd. A sorrend nem cserélhető fel; a földelés és rövidrezárás ott kötelező, ahol előírt vagy a körülmények miatt szükséges (erről a munka irányítója dönt), a letakarás pedig ott, ahol a munkaterület közelében feszültség alatt maradó rész van.",
     "ref": "feszultsegmentesites-ot-szabalya#az-ot-lepes-egy-pillantasra",
     "shuffle": true,
     "review": "lektorra-var",

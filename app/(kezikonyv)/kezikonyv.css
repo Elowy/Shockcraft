@@ -7,15 +7,15 @@
  --kk-warn-bg:#fff7e8;--kk-warn-fg:#6d4c14;--kk-warn-line:#d49940;--kk-info-bg:#eef4f8;--kk-info-line:#7aa3bd;
  --kk-danger-bg:#fdeeee;--kk-danger-line:#c0392b;--kk-draft-bg:#fff4c2;--kk-draft-fg:#5d4a00;
  --kk-wire-l1:#8a4b22;--kk-wire-l2:#262626;--kk-wire-l3:#7c8790;--kk-wire-n:#2563b8;--kk-track:#e3eaee;
- /* Ábratokenek (Tudástár): zöld-sárga PE, színminta-fekete (sötét témában is fekete, világos körvonallal), réz vezető. */
- --kk-wire-pe:#2e8b3e;--kk-wire-pe-stripe:#f2c200;--kk-wire-l2-swatch:#1f1f1f;--kk-copper:#b87333;--kk-copper-end:#d69a63;
+ /* Ábratokenek (Tudástár): zöld-sárga PE, színminta-barna és -fekete (sötét témában is valódi barna, illetve fekete, világos körvonallal), réz vezető. */
+ --kk-wire-pe:#2e8b3e;--kk-wire-pe-stripe:#f2c200;--kk-wire-l1-swatch:#8a4b22;--kk-wire-l2-swatch:#1f1f1f;--kk-copper:#b87333;--kk-copper-end:#d69a63;
  --kk-bar-h:3.5rem;--kk-nav-h:4rem;--kk-radius:.75rem;
 }
 [data-theme=dark] .kk,[data-theme=dark] .kk-layer{
  --kk-surface:#1d2b36;--kk-surface-2:#203a35;--kk-focus:#f0b45e;--kk-ok-bg:#173d2a;--kk-ok-fg:#9fdcb9;--kk-bad-bg:#4a1f1b;--kk-bad-fg:#ffb4a8;
  --kk-warn-bg:#3a2f17;--kk-warn-fg:#f4d28b;--kk-warn-line:#c99a3e;--kk-info-bg:#1d2f3c;--kk-info-line:#5f8aa6;--kk-danger-bg:#3d1f1d;--kk-danger-line:#ef8a7d;
  --kk-draft-bg:#4a3f10;--kk-draft-fg:#ffe48a;--kk-wire-l1:#c98a5c;--kk-wire-l2:#d9dee2;--kk-wire-l3:#9aa7b1;--kk-wire-n:#6fa8f0;--kk-track:#2b3c48;
- --kk-wire-pe:#4fbf63;--kk-wire-pe-stripe:#e8c330;--kk-wire-l2-swatch:#141414;--kk-copper:#d9955c;--kk-copper-end:#e8b588;
+ --kk-wire-pe:#4fbf63;--kk-wire-pe-stripe:#e8c330;--kk-wire-l1-swatch:#8a4b22;--kk-wire-l2-swatch:#141414;--kk-copper:#d9955c;--kk-copper-end:#e8b588;
 }
 .kk{min-height:100dvh;background:var(--kk-bg);color:var(--kk-fg);font-size:1rem;line-height:1.6;padding-bottom:calc(var(--kk-nav-h) + env(safe-area-inset-bottom))}
 .kk a{color:inherit}
@@ -57,14 +57,16 @@
 .kk-desktop-head{display:none}
 
 /* Alsó navigáció (mobil) */
-.kk-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;justify-content:center;gap:.25rem;height:calc(var(--kk-nav-h) + env(safe-area-inset-bottom));padding:0 .5rem env(safe-area-inset-bottom);background:var(--kk-bg);border-top:1px solid var(--kk-border)}
+.kk-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;justify-content:center;gap:.25rem;height:calc(var(--kk-nav-h) + env(safe-area-inset-bottom));padding:0 .5rem env(safe-area-inset-bottom);background:var(--kk-bg);border-top:1px solid var(--kk-border);transition:visibility 0s .4s}
 .kk-bottom-nav a{flex:1;max-width:7.5rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;font-size:.75rem;font-weight:600;text-decoration:none;color:var(--kk-muted);border-top:3px solid transparent}
 .kk-bottom-nav a svg{width:1.5rem;height:1.5rem}
 .kk-bottom-nav a[aria-current]{color:var(--kk-primary);border-top-color:var(--kk-primary)}
 .kk-bottom-nav a[aria-current] svg{stroke-width:2.6}
-/* Csak szövegbevitelnél (a képernyő-billentyűzet miatt) rejtőzik; választógomb és jelölőnégyzet fókusza nem mozdítja (különben a gomb alól
-   „előugró” sáv elnyelné a következő koppintást, pl. a Tesztek „Következő” gombján). */
-.kk:has(input:not([type=radio]):not([type=checkbox]):focus,select:focus,textarea:focus) .kk-bottom-nav{display:none}
+/* Csak szövegbevitelnél és legördülő listánál (a képernyő-billentyűzet miatt) rejtőzik; választógomb és jelölőnégyzet fókusza nem mozdítja.
+   Visszajönni késleltetve (0,4 s) jön vissza: a fókusz a mezőből a sáv helyén álló gombra már lenyomáskor átkerül, és az azonnal
+   visszaugró sáv elnyelné a kattintást vagy koppintást (pl. tesztkód → „Megnyitás”, Idő → „Vizsga indítása”; tests/kb-figures.mjs).
+   A visibility:hidden sáv kattintást sem fogad. */
+.kk:has(input:not([type=radio]):not([type=checkbox]):focus,select:focus,textarea:focus) .kk-bottom-nav{visibility:hidden;transition-delay:0s}
 @media(max-width:949px){:root:has(.kk-bottom-nav) .cookie-notice{bottom:calc(var(--kk-nav-h, 4rem) + 10px)}}
 
 /* Oldalszerkezet */
@@ -218,6 +220,8 @@ a.kk-card:hover{border-color:var(--kk-primary);box-shadow:0 4px 16px #24414b14}
 .kk-method ul{list-style:none;padding:0;display:grid;gap:.75rem}
 .kk-method li{display:flex;gap:.6rem;align-items:flex-start}
 .kk-method li svg{width:1.25rem;height:1.25rem;color:var(--kk-primary);margin-top:.2rem}
+/* Folyó szövegbeli link (pl. a Tesztek „Hogyan működik?” e-mail-címe): a .kk-prose a mintájára színnel és aláhúzással (WCAG 1.4.1). */
+.kk-method a{color:var(--kk-primary);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;overflow-wrap:anywhere}
 .kk-notfound{padding:2rem 0}
 /* JS nélkül a csak szkripttel működő vezérlők rejtve (a <html> `js` osztályát a téma-indító teszi ki); a lista, a képletek és a kidolgozott példa SSR-ben olvasható. */
 html:not(.js) .kk-calc,html:not(.js) .kk-index-search,html:not(.js) [data-kb-open=search],html:not(.js) [data-kb-open=bookmarks],html:not(.js) .kk-actions{display:none}
@@ -310,7 +314,7 @@ html:not(.js) .kk-calc,html:not(.js) .kk-index-search,html:not(.js) [data-kb-ope
 .kk-fig-svg .t-muted{fill:var(--kk-muted)}.kk-fig-svg .t-halo{paint-order:stroke;stroke:var(--kk-bg);stroke-width:3px;stroke-linejoin:round}.kk-fig-svg .t-primary{fill:var(--kk-primary)}.kk-fig-svg .t-warn{fill:var(--kk-warn-fg)}.kk-fig-svg .t-danger{fill:var(--kk-bad-fg)}.kk-fig-svg .t-on-primary{fill:var(--kk-on-primary)}
 .kk-fig-svg .f-none{fill:none}.kk-fig-svg .f-fg{fill:var(--kk-fg)}.kk-fig-svg .f-bg{fill:var(--kk-bg)}.kk-fig-svg .f-muted{fill:var(--kk-muted)}.kk-fig-svg .f-primary{fill:var(--kk-primary)}.kk-fig-svg .f-warn{fill:var(--kk-warn-line)}.kk-fig-svg .f-danger{fill:var(--kk-danger-line)}
 .kk-fig-svg .f-surface{fill:var(--kk-surface)}.kk-fig-svg .f-surface2{fill:var(--kk-surface-2)}.kk-fig-svg .f-info{fill:var(--kk-info-bg)}.kk-fig-svg .f-track{fill:var(--kk-track)}
-.kk-fig-svg .f-l1{fill:var(--kk-wire-l1)}.kk-fig-svg .f-l2{fill:var(--kk-wire-l2)}.kk-fig-svg .f-l3{fill:var(--kk-wire-l3)}.kk-fig-svg .f-n{fill:var(--kk-wire-n)}.kk-fig-svg .f-pe{fill:var(--kk-wire-pe)}.kk-fig-svg .f-pe-stripe{fill:var(--kk-wire-pe-stripe)}.kk-fig-svg .f-l2-swatch{fill:var(--kk-wire-l2-swatch)}.kk-fig-svg .f-copper{fill:var(--kk-copper)}.kk-fig-svg .f-copper-end{fill:var(--kk-copper-end)}
+.kk-fig-svg .f-l1{fill:var(--kk-wire-l1)}.kk-fig-svg .f-l2{fill:var(--kk-wire-l2)}.kk-fig-svg .f-l3{fill:var(--kk-wire-l3)}.kk-fig-svg .f-n{fill:var(--kk-wire-n)}.kk-fig-svg .f-pe{fill:var(--kk-wire-pe)}.kk-fig-svg .f-pe-stripe{fill:var(--kk-wire-pe-stripe)}.kk-fig-svg .f-l1-swatch{fill:var(--kk-wire-l1-swatch)}.kk-fig-svg .f-l2-swatch{fill:var(--kk-wire-l2-swatch)}.kk-fig-svg .f-copper{fill:var(--kk-copper)}.kk-fig-svg .f-copper-end{fill:var(--kk-copper-end)}
 .kk-fig-svg .s-fg{stroke:var(--kk-fg)}.kk-fig-svg .s-muted{stroke:var(--kk-muted)}.kk-fig-svg .s-primary{stroke:var(--kk-primary)}.kk-fig-svg .s-warn{stroke:var(--kk-warn-line)}.kk-fig-svg .s-danger{stroke:var(--kk-danger-line)}.kk-fig-svg .s-border{stroke:var(--kk-border)}.kk-fig-svg .s-track{stroke:var(--kk-track)}.kk-fig-svg .s-info{stroke:var(--kk-info-line)}
 .kk-fig-svg .s-l1{stroke:var(--kk-wire-l1)}.kk-fig-svg .s-l2{stroke:var(--kk-wire-l2)}.kk-fig-svg .s-l3{stroke:var(--kk-wire-l3)}.kk-fig-svg .s-n{stroke:var(--kk-wire-n)}
 
@@ -458,7 +462,10 @@ html.js .kk-quiz-nojs{display:none}
 .kk-quiz-timer-actions{margin:-.5rem 0 0;font-size:.9375rem}
 .kk .kk-quiz-timer-actions .kk-link{min-height:2.75rem;display:inline-flex;align-items:center}
 .kk-quiz-alert{margin:0;min-height:0;font-weight:650;color:var(--kk-bad-fg)!important;display:flex;gap:.4rem;align-items:center}
-.kk-quiz-alert:empty{display:none}
+/* Üresen is az akadálymentességi fában marad (az élő régió csak így jelzi megbízhatóan az első figyelmeztetést): vizuálisan rejtve, a rács
+   térközét sem foglalja (abszolút pozíció). */
+.kk-quiz-alert:empty{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.kk-quiz-hint{margin:0;color:var(--kk-muted);font-size:.9375rem;font-weight:600}
 .kk-quiz-alert svg{width:1.15rem;height:1.15rem}
 .kk-quiz-card h2{font-size:1.125rem;line-height:1.45;margin:0;overflow-wrap:anywhere}
 /* A kérdés és az eredmény címe programból kap fókuszt (képernyőolvasó), nem kezelőelem: keret nélkül. */
@@ -486,7 +493,7 @@ html.js .kk-quiz-nojs{display:none}
 .kk-quiz-why{color:var(--kk-muted)!important;font-size:.9375rem!important}
 .kk-quiz-feedback .kk-derivation{margin:.25rem 0;background:var(--kk-bg)}
 .kk-quiz-links{display:flex;flex-wrap:wrap;gap:.25rem 1rem}
-.kk-quiz-links a{display:inline-flex;gap:.35rem;align-items:center;min-height:2.75rem;text-underline-offset:3px;overflow-wrap:anywhere}
+.kk-quiz-links a{display:inline-flex;gap:.35rem;align-items:center;min-height:2.75rem;color:var(--kk-primary);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;overflow-wrap:anywhere}
 .kk-quiz-links a svg{width:1.1rem;height:1.1rem}
 .kk-quiz-links .kk-report{color:var(--kk-muted);font-size:.875rem}
 .kk-quiz-map ol{list-style:none!important;padding:0!important;margin:.5rem 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(2.75rem,1fr));gap:.35rem}
@@ -520,7 +527,7 @@ html.js .kk-quiz-nojs{display:none}
 .kk-quiz-type{display:grid;gap:.15rem;height:100%;padding:.75rem;border:1px solid var(--kk-border);border-radius:.5rem;min-width:0}
 .kk-quiz-type small{color:var(--kk-muted);font-size:.875rem}
 .kk-quiz-type-links{display:flex;flex-wrap:wrap;gap:0 .9rem;font-size:.9375rem}
-.kk-quiz-type-links a{display:inline-flex;gap:.3rem;align-items:center;min-height:2.75rem;text-underline-offset:3px;overflow-wrap:anywhere}
+.kk-quiz-type-links a{display:inline-flex;gap:.3rem;align-items:center;min-height:2.75rem;color:var(--kk-primary);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;overflow-wrap:anywhere}
 .kk-quiz-type-links a svg{width:1rem;height:1rem}
 .kk-quiz-types-list h3{margin-top:1.25rem}
 .kk-quiz-types-list .kk-related-grid{list-style:none;padding:0}
@@ -573,7 +580,7 @@ html.js .kk-quiz-nojs{display:none}
 @media print{
  .kk,[data-theme=dark] .kk{--kk-bg:#fff;--kk-fg:#111;--kk-muted:#444;--kk-border:#999;--kk-surface:#fff;--kk-surface-2:#fff;--kk-primary:#1d5048;background:#fff!important;color:#111!important;padding:0}
  /* Sötét módból is világos papírra: az állapot- és értokenek is a világos értékükre állnak. */
- [data-theme=dark] .kk{color-scheme:light;--kk-ok-bg:#e7f4ec;--kk-ok-fg:#1d5c37;--kk-bad-bg:#fbe9e7;--kk-bad-fg:#9b2a1c;--kk-warn-bg:#fff7e8;--kk-warn-fg:#6d4c14;--kk-warn-line:#d49940;--kk-info-bg:#eef4f8;--kk-info-line:#7aa3bd;--kk-danger-bg:#fdeeee;--kk-danger-line:#c0392b;--kk-draft-bg:#fff4c2;--kk-draft-fg:#5d4a00;--kk-wire-l1:#8a4b22;--kk-wire-l2:#262626;--kk-wire-l3:#7c8790;--kk-wire-n:#2563b8;--kk-track:#e3eaee;--kk-wire-pe:#2e8b3e;--kk-wire-pe-stripe:#f2c200;--kk-wire-l2-swatch:#1f1f1f;--kk-copper:#b87333;--kk-copper-end:#d69a63}
+ [data-theme=dark] .kk{color-scheme:light;--kk-ok-bg:#e7f4ec;--kk-ok-fg:#1d5c37;--kk-bad-bg:#fbe9e7;--kk-bad-fg:#9b2a1c;--kk-warn-bg:#fff7e8;--kk-warn-fg:#6d4c14;--kk-warn-line:#d49940;--kk-info-bg:#eef4f8;--kk-info-line:#7aa3bd;--kk-danger-bg:#fdeeee;--kk-danger-line:#c0392b;--kk-draft-bg:#fff4c2;--kk-draft-fg:#5d4a00;--kk-wire-l1:#8a4b22;--kk-wire-l2:#262626;--kk-wire-l3:#7c8790;--kk-wire-n:#2563b8;--kk-track:#e3eaee;--kk-wire-pe:#2e8b3e;--kk-wire-pe-stripe:#f2c200;--kk-wire-l1-swatch:#8a4b22;--kk-wire-l2-swatch:#1f1f1f;--kk-copper:#b87333;--kk-copper-end:#d69a63}
  .kk-appbar,.kk-bottom-nav,.kk-desktop-head,.kk-side,.kk-toc,.kk-actions,.kk-cta,.public-footer,.cookie-notice,.kk-toast-region,.kk-skip,.kk-reset,.kk-index-search,.kk-rows .kk-button,.kk-rows .kk-icon-btn{display:none!important}
  .kk-page{display:block;padding:0;max-width:none}
  .kk-main{max-width:none}

@@ -45,8 +45,9 @@ export function IpProbatestek(p:FigProps){
 /** vezetek-es-kabeljelolesek / abra-1: a H05VV-F 3G1,5 jelölés felbontása és a vezetők felépítése (tömör, sodrott, finomhuzalos).
  * A feliratok három szinten (fent, lent, a 3G1,5-é lejjebb), hogy 12,5 egységes betűvel se fedjék egymást. */
 export function KabelJeloles(p:FigProps){
- const tok=[{x:44,t:'H',l:['harmonizált'],y:58},{x:84,t:'05',l:['300/500 V'],y:140},{x:122,t:'V',l:['PVC','szigetelés'],y:34},{x:158,t:'V',l:['PVC köpeny'],y:140},{x:198,t:'-F',l:['finomhuzalos,','hajlékony'],y:34},{x:268,t:'3G1,5',l:['3 ér, ebből 1 zöld-sárga,','egyenként 1,5 mm²'],y:164}];
- const seps=[61,103,140,177,226];
+ // A tagok egyenletes, kb. 20 egységes közzel (a 22 egységes félkövér betű mért szélességével), az elválasztók a közök felezőpontjában.
+ const tok=[{x:44,t:'H',l:['harmonizált'],y:58},{x:87,t:'05',l:['300/500 V'],y:140},{x:129,t:'V',l:['PVC','szigetelés'],y:34},{x:166,t:'V',l:['PVC köpeny'],y:140},{x:206,t:'-F',l:['finomhuzalos,','hajlékony'],y:34},{x:268,t:'3G1,5',l:['3 ér, ebből 1 zöld-sárga,','egyenként 1,5 mm²'],y:164}];
+ const seps=[62,111,147.5,184.5,227.5];
  const fine:[number,number][]=[];for(let r=0;r<=17;r+=5.2)for(let a=0;a<(r?Math.round(2*Math.PI*r/5.4):1);a++){const ang=a*2*Math.PI/Math.max(1,Math.round(2*Math.PI*r/5.4));fine.push([r*Math.cos(ang),r*Math.sin(ang)])}
  const hex:[number,number][]=[[0,0],...Array.from({length:6},(_,i)=>[14.4*Math.cos(i*Math.PI/3),14.4*Math.sin(i*Math.PI/3)] as [number,number])];
  const cy=232;
@@ -75,12 +76,12 @@ function PePattern({id}:{id:string}){
 /** vezetekek-szinjelolese / abra-1: a mai színjelölés – L1 barna, L2 fekete, L3 szürke, N kék, PE zöld-sárga. */
 export function SzinjelolesMa(p:FigProps){
  const pe=p.uid+'-pe';
- const rows=[['L1','barna','f-l1'],['L2','fekete','f-l2-swatch'],['L3','szürke','f-l3'],['N','kék','f-n'],['PE','zöld-sárga','pe']] as const;
+ const rows=[['L1','barna','f-l1-swatch'],['L2','fekete','f-l2-swatch'],['L3','szürke','f-l3'],['N','kék','f-n'],['PE','zöld-sárga','pe']] as const;
  return <Svg {...p} viewBox="0 0 320 236">
   <defs><PePattern id={pe}/></defs>
   {rows.map(([l,c,cls],i)=>{const y=12+i*42;return <g key={l}>
    <T x={56} y={y+19} size={14} anchor="end" bold>{l}</T>
-   <rect x={70} y={y} width={160} height={28} rx={14} className={cls==='pe'?'s-fg':cls+' s-fg'} fill={cls==='pe'?`url(#${pe})`:undefined} strokeWidth={cls==='f-l2-swatch'?1.5:0.8}/>
+   <rect x={70} y={y} width={160} height={28} rx={14} className={cls==='pe'?'s-fg':cls+' s-fg'} fill={cls==='pe'?`url(#${pe})`:undefined} strokeWidth={/-swatch$/.test(cls)?1.5:0.8}/>
    <T x={240} y={y+19} size={13}>{c}</T>
   </g>})}
   <T x={10} y={230} size={11.5} cls="t-muted">Így látod a tervezőben: a PE egyszínű zöld.</T>
@@ -93,7 +94,7 @@ const ang=(k:number)=>(-90+72*k)*Math.PI/180;
 const Cable=({pe,cx,title,cores}:{pe:string;cx:number;title:string;cores:readonly (readonly [string,string])[]})=><g>
   <circle cx={cx} cy={95} r={68} className="f-surface2 s-border" strokeWidth={1.5}/>
   {cores.map(([cls,l],k)=>{const x=cx+38*Math.cos(ang(k)),y=95+38*Math.sin(ang(k));return <g key={k}>
-   <circle cx={x} cy={y} r={18} className={cls==='pe'?'s-fg':cls+' s-fg'} fill={cls==='pe'?`url(#${pe})`:undefined} strokeWidth={cls==='f-l2-swatch'?1.5:0.8}/>
+   <circle cx={x} cy={y} r={18} className={cls==='pe'?'s-fg':cls+' s-fg'} fill={cls==='pe'?`url(#${pe})`:undefined} strokeWidth={/-swatch$/.test(cls)?1.5:0.8}/>
    <T x={cx+80*Math.cos(ang(k))} y={95+80*Math.sin(ang(k))+5} size={14} anchor="middle" bold>{l}</T>
   </g>})}
   <T x={cx} y={198} size={13} anchor="middle" bold>{title}</T>
@@ -104,8 +105,8 @@ export function OtosKabel(p:FigProps){
  const pe=p.uid+'-pe';
  return <Svg {...p} viewBox="0 0 360 246">
   <defs><PePattern id={pe}/></defs>
-  <Cable pe={pe} cx={92} title="Ma (5G)" cores={[['pe','PE'],['f-n','N'],['f-l1','L1'],['f-l2-swatch','L2'],['f-l3','L3']]}/>
-  <Cable pe={pe} cx={268} title="Régebbi kábel (példa)" cores={[['pe','PE'],['f-n','N'],['f-l2-swatch','?'],['f-l1','?'],['f-l2-swatch','?']]}/>
+  <Cable pe={pe} cx={92} title="Ma (5G)" cores={[['pe','PE'],['f-n','N'],['f-l1-swatch','L1'],['f-l2-swatch','L2'],['f-l3','L3']]}/>
+  <Cable pe={pe} cx={268} title="Régebbi kábel (példa)" cores={[['pe','PE'],['f-n','N'],['f-l2-swatch','?'],['f-l1-swatch','?'],['f-l2-swatch','?']]}/>
   <T x={180} y={222} size={12} anchor="middle" cls="t-muted">Két fekete ér: a fázisok a színből</T>
   <T x={180} y={238} size={12} anchor="middle" cls="t-muted">nem különböztethetők meg.</T>
  </Svg>;

@@ -37,6 +37,19 @@ assert.deepEqual(qHits,[],'kiadatlan kérdésbank-szöveg a build kimenetében')
 const tplProbe='ellenállású ohmos fogyasztóra';
 assert.ok(files.filter(f=>/[\\/]client[\\/]/.test(f)&&/\.m?js$/.test(f)).some(f=>forms(tplProbe).some(v=>texts.get(f).includes(v))),'a számolós sablon szövege a kliens-JS-ben ('+tplProbe+')');
 
+// A T1-kalkulátorra épülő (lektorra váró) számolós sablonok szövege a kliens-JS-ben csak a saját, külön csomagjukban lehet
+// (lib/quiz/templates-t1.ts – a böngésző csak akkor tölti be, ha a szerver valamelyiket közzétettként adja át), a tesztoldal kezdeti és
+// futtató csomagjában nem. Minták: a három sablon kérdésének egy-egy jellemző részlete.
+const t1Probes=['legnagyobb hurokimpedancia (Zs,max) TN-rendszerben','legkisebb választható','Mekkora a feszültségesés voltban'];
+const clientJs=files.filter(f=>/[\\/]client[\\/]/.test(f)&&/\.m?js$/.test(f));
+const t1Files=clientJs.filter(f=>t1Probes.some(p=>forms(p).some(v=>texts.get(f).includes(v))));
+assert.ok(t1Files.length>=1,'a T1-sablonok külön csomagja megvan (különben a minta elavult)');
+for(const f of t1Files){
+ const s=texts.get(f);
+ assert.ok(t1Probes.every(p=>forms(p).some(v=>s.includes(v))),f+': a T1-sablonok szövege egy csomagban együtt');
+ assert.ok(!forms(tplProbe).some(v=>s.includes(v))&&!/RunView|ResultView|loadPool/.test(s),f+': a T1-sablonok szövege a T0-sablonok vagy a futtató csomagjában');
+}
+
 // Pozitív kontroll: egy közzétett cikk („Ohm törvénye”) Röviden-mondata a szervercsomagban megvan, a kliens-JS-ben nincs.
 const ohm=readFileSync('content/tudastar/elmelet/ohm-torvenye.md','utf8');
 // Az első 40–80 karakter, amelyben nincs szám, írásjel vagy szorzópont (a tipográfiai igazítás ezeket nem érinti).
@@ -46,4 +59,4 @@ const has=(f)=>{const s=readFileSync(f,'utf8');return forms(probe).some(v=>s.inc
 const server=files.filter(f=>!/[\\/]client[\\/]/.test(f)),client=files.filter(f=>/[\\/]client[\\/]/.test(f)&&/\.m?js$/.test(f));
 assert.ok(server.some(has),'a közzétett cikk szövege a szervercsomagban ('+probe+')');
 assert.ok(!client.some(has),'cikktörzs nem kerül a kliens-JS-be: '+client.filter(has).join(', '));
-console.log('PASS: '+DIST+' ('+files.length+' fájl, '+(bytes/1048576).toFixed(1)+' MB): '+needles.length+' R3-szövegminta és '+qNeedles.length+' kérdésbank-szövegminta ('+qCount+' kiadatlan kérdés) egyike sincs benne; a közzétett cikk szövege csak a szervercsomagban, a számolós sablon szövege a kliens-JS-ben.');
+console.log('PASS: '+DIST+' ('+files.length+' fájl, '+(bytes/1048576).toFixed(1)+' MB): '+needles.length+' R3-szövegminta és '+qNeedles.length+' kérdésbank-szövegminta ('+qCount+' kiadatlan kérdés) egyike sincs benne; a közzétett cikk szövege csak a szervercsomagban, a számolós sablon szövege a kliens-JS-ben, a T1-sablonoké csak a saját, külön csomagjukban ('+t1Files.length+' fájl).');

@@ -391,7 +391,7 @@
         "correct": true
       }
     ],
-    "explanation": "A 100 vagy 300 mA-es készülékek tűzvédelmi célúak vagy csoportvédelemre szolgálnak; a személyvédelmi kiegészítő védelemhez 30 mA-es (különleges helyen még érzékenyebb) készülék kell. Hogy melyik áramkörre milyen érzékenységű védelem kell, azt a tervező a hatályos előírások alapján határozza meg.",
+    "explanation": "A 100 vagy 300 mA-es készülékek tűzvédelmi célúak vagy csoportvédelemre szolgálnak; a személyvédelmi kiegészítő védelemhez legfeljebb 30 mA névleges különbözeti áramú készülék kell (különleges helyeken esetenként ennél érzékenyebbet is alkalmaznak). Hogy melyik áramkörre milyen érzékenységű védelem kell, azt a tervező a hatályos előírások alapján határozza meg.",
     "ref": "aram-vedokapcsolo-fi-rele#a-30-ma-es-a-tobbi-erzekenyseg",
     "shuffle": false,
     "family": "fi-erzekenyseg",
@@ -404,7 +404,7 @@
     "topic": "vedelmi-eszkozok",
     "difficulty": 3,
     "type": "single",
-    "stem": "Egy 30 mA névleges különbözeti áramú (IΔn) áram-védőkapcsoló kioldási határairól melyik állítás helyes?",
+    "stem": "Egy 30 mA névleges különbözeti áramú (IΔn) áram-védőkapcsoló kioldási határairól, szinuszos váltakozó különbözeti áramnál, melyik állítás helyes?",
     "choices": [
       {
         "id": "a",
@@ -619,7 +619,8 @@
     "ref": "kismegszakito#b-c-es-d-jelleggorbe",
     "shuffle": true,
     "review": "lektorra-var",
-    "source": "AI-tervezet"
+    "source": "AI-tervezet",
+    "family": "jelleggorbe-hurok"
   },
   {
     "id": "q-ved-0018",

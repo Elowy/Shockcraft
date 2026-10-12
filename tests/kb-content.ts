@@ -193,9 +193,10 @@ for(const p of KB_PENDING){
   const restore=(f:string)=>cpSync(f,join(tmp,f));
   const gone=(label:string)=>{const fig=figureSource(tmp,szin.slug,ids);assert.notEqual(fig,szin.figures,label+': új ábra-ujjlenyomat');
    const info=releaseInfo({...szin,figures:fig});assert.equal(info.state,'ujraellenorzendo',label+': '+info.reason);assert.match(info.reason,/ábrák/)};
-  mutate(FIG_DIR+'/vezetekek-ip.tsx',"['L1','barna','f-l1']","['L1','kék','f-n']");gone('L1 ↔ N színcsere a komponensben');restore(FIG_DIR+'/vezetekek-ip.tsx');
+  mutate(FIG_DIR+'/vezetekek-ip.tsx',"['L1','barna','f-l1-swatch']","['L1','kék','f-n']");gone('L1 ↔ N színcsere a komponensben');restore(FIG_DIR+'/vezetekek-ip.tsx');
   mutate(FIG_INDEX,'L1 barna, L2 fekete','L1 kék, L2 fekete');gone('a FIGURES szöveges megfelelője');restore(FIG_INDEX);
   mutate(FIG_CSS,'--kk-wire-l1:#8a4b22','--kk-wire-l1:#2563b8');gone('az L1 színtoken');restore(FIG_CSS);
+  mutate(FIG_CSS,'--kk-wire-l1-swatch:#8a4b22','--kk-wire-l1-swatch:#2563b8');gone('az L1 színminta-token');restore(FIG_CSS);
   mutate(FIG_DIR+'/kit.tsx','role="img"','role="img" data-x="1"');gone('a közös kit.tsx');restore(FIG_DIR+'/kit.tsx');
   assert.equal(figureSource(tmp,szin.slug,ids),szin.figures,'visszaállítva azonos');
   // (b) Kockázati alsó korlát: R2 vázlat biztonságkritikus kategóriában, illetve a Sémák szekcióban.

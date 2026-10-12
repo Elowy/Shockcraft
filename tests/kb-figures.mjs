@@ -6,6 +6,8 @@
 //  4. JS nélkül a csak szkripttel működő cikkműveletek (Kedvenc, Megosztás, Nyomtatás) rejtve vannak,
 //  5. az érintési célok (belső tartalomjegyzék, kategórialisták, morzsamenü, összecsukható szakaszok) 390 px-en legalább 44 px magasak,
 //  6. a Tesztek (ha közzétett) 320 px-en: beállítás, gyakorló és vizsga, visszajelzés, eredmény görgetés nélkül, 44 px-es érintési célok;
+//     390 px-en a fókuszban levő mező mellett a sáv helyén álló gomb koppintásra és kattintásra is működik (az alsó sáv nem nyeli el);
+//     billentyűzettel a fókusz a megerősítéseknél és a műveletek után sem esik a dokumentum elejére; élő régiók; linkek jelölése;
 //     JS nélkül a sziget rejtve, a mintafeladat látszik.
 // Használat (build vagy dev szerver után): BASE=http://127.0.0.1:8787 node tests/kb-figures.mjs
 // Playwright: a helyi node_modules-ból, különben a globális telepítésből (npm root -g); böngészőt nem telepít.
@@ -126,6 +128,68 @@ try{
   }
   await ctx.close();
   assert.deepEqual(errors,[],'Tesztek: oldalhiba');assert.deepEqual(bad,[],'Tesztek: vízszintes görgetés 320 px-en');assert.deepEqual(small,[],'Tesztek: 44 px-nél kisebb érintési cél');
+  // 6b. Az alsó sáv nem nyeli el a kattintást (review): szövegmező vagy legördülő lista fókuszában a sáv rejtve van, és a helyén álló
+  //     gombra koppintva (érintéssel és egérrel is) a művelet lefut – a sáv csak késleltetve tér vissza.
+  for(const touch of [true,false]){
+   const c2=await browser.newContext({viewport:{width:390,height:844},isMobile:touch,hasTouch:touch}),pg=await c2.newPage();
+   await pg.addInitScript(()=>{try{localStorage.setItem('shockcraft-cookie-notice-v1',String(Date.now()))}catch{}});
+   const tapAtBottom=async(loc)=>{
+    // A gomb közepe a nézet alsó 64 px-ébe (a sáv helyére) kerül.
+    await pg.evaluate(()=>window.scrollTo(0,0));
+    const b0=await loc.boundingBox(),vh=pg.viewportSize().height,target=vh-30;
+    await pg.evaluate(dy=>window.scrollBy(0,dy),b0.y+b0.height/2-target);
+    const b=await loc.boundingBox(),y=b.y+b.height/2;
+    assert.ok(y>vh-64&&y<vh,'a gomb a sáv helyén: '+y.toFixed(0)+' / '+vh);
+    const hidden=await pg.evaluate(()=>{const st=getComputedStyle(document.querySelector('.kk-bottom-nav'));return st.visibility==='hidden'||st.display==='none'});
+    assert.ok(hidden,'fókuszban levő mezőnél a sáv rejtve');
+    if(touch)await pg.touchscreen.tap(b.x+b.width/2,y);else await pg.mouse.click(b.x+b.width/2,y);
+   };
+   await pg.goto(BASE+'/tudastar/tesztek?mod=vizsga&hossz=5',{waitUntil:'load'});
+   await pg.locator('.kk-quiz-setup').waitFor();
+   const sel=pg.locator('.kk-quiz-minutes select');await sel.focus();await sel.selectOption({index:1});await sel.focus();
+   await tapAtBottom(pg.locator('.kk-quiz-setup button[type=submit]'));
+   await pg.locator('#kerdes-cim').waitFor({timeout:5000});
+   await pg.evaluate(()=>sessionStorage.clear());await pg.goto(BASE+'/tudastar/tesztek',{waitUntil:'load'});
+   const code=pg.locator('.kk-quiz-code input');await code.waitFor();await code.fill('g5-s1-1-0123abcd');await code.focus();
+   await tapAtBottom(pg.locator('.kk-quiz-code button[type=submit]'));
+   await pg.locator('#kodpanel-cim').waitFor({timeout:5000});
+   await c2.close();
+  }
+  out.push('Tesztek 390 px: fókuszban levő mező mellett a sáv helyén álló gomb koppintásra és kattintásra is működik');
+  // 6c. Billentyűzet és fókusz: a megerősítéseknél és a műveletek után a fókusz nem esik a dokumentum elejére; az élő régió üresen sem
+  //     display:none; a linkek (feladattípusok, „Hogyan működik?”, visszajelzés) színnel és aláhúzással jelöltek.
+  {
+   const c3=await browser.newContext({viewport:{width:1000,height:900}}),pg=await c3.newPage();
+   await pg.addInitScript(()=>{try{localStorage.setItem('shockcraft-cookie-notice-v1',String(Date.now()))}catch{}});
+   const active=()=>pg.evaluate(()=>{const a=document.activeElement;return a?a.tagName+':'+(a.textContent||'').trim().slice(0,40):'-'});
+   const press=async(loc)=>{await loc.focus();await pg.keyboard.press('Enter')};
+   await pg.goto(BASE+'/tudastar/tesztek?mod=vizsga&hossz=5',{waitUntil:'load'});
+   const linkLook=await pg.evaluate(()=>[...document.querySelectorAll('.kk-method a,.kk-quiz-type-links a')].map(a=>{const s=getComputedStyle(a),p=getComputedStyle(a.closest('li,span,div').parentElement);return {t:(a.textContent||'').trim().slice(0,20),under:s.textDecorationLine.includes('underline'),color:s.color!==p.color}}));
+   assert.ok(linkLook.length>=10&&linkLook.every(l=>l.under&&l.color),'Tesztek: a linkek színnel és aláhúzással jelöltek '+JSON.stringify(linkLook.filter(l=>!l.under||!l.color)));
+   await press(pg.locator('.kk-quiz-setup button[type=submit]'));await pg.locator('#kerdes-cim').waitFor();
+   assert.notEqual(await pg.evaluate(()=>getComputedStyle(document.querySelector('.kk-quiz-alert')).display),'none','az időkorlát élő régiója üresen sem display:none');
+   await press(pg.getByRole('button',{name:'Teszt megszakítása'}));assert.match(await active(),/^BUTTON:Folytatom/,'megszakítás: a fókusz a „Folytatom” gombon');
+   await pg.keyboard.press('Enter');assert.match(await active(),/^BUTTON:Teszt megszakítása/,'„Folytatom” után vissza a kiváltó gombra');
+   await press(pg.getByRole('button',{name:'Időkorlát kikapcsolása'}));assert.match(await active(),/^P:Időkorlát nélkül/,'időkorlát kikapcsolása után a jelzésen');
+   await press(pg.locator('.kk-quiz-map').getByRole('button',{name:'Teszt beadása'}));assert.match(await active(),/^BUTTON:Igen, beadom/,'beadás: a fókusz a megerősítésen');
+   await press(pg.getByRole('button',{name:'Vissza a kérdésekhez'}));assert.match(await active(),/^BUTTON:Teszt beadása/,'mégse: vissza a kiváltó gombra');
+   await press(pg.locator('.kk-quiz-map').getByRole('button',{name:'Teszt beadása'}));await pg.keyboard.press('Enter');
+   await pg.locator('#eredmeny-cim').waitFor();assert.match(await active(),/^H2:Eredmény/,'eredmény: a fókusz a címen');
+   await press(pg.getByRole('button',{name:'Új teszt'}));await pg.locator('.kk-quiz-setup').waitFor();assert.match(await active(),/^H2:Új teszt/,'új teszt: a fókusz a beállítás címén');
+   await press(pg.getByRole('button',{name:'Eredmények törlése'}));assert.match(await active(),/^BUTTON:Mégse/,'törlés: a fókusz a „Mégse” gombon');
+   await pg.keyboard.press('Enter');assert.match(await active(),/^BUTTON:Eredmények törlése/,'mégse: vissza a kiváltó gombra');
+   await press(pg.getByRole('button',{name:'Eredmények törlése'}));await press(pg.getByRole('button',{name:'Igen, törlöm'}));assert.match(await active(),/^H2:Új teszt/,'törlés után a beállítás címén');
+   // Gyakorló: a visszajelzés linkjei linkként jelöltek; az élő régió csak az ítéletet mondja.
+   await pg.goto(BASE+'/tudastar/tesztek?hossz=5',{waitUntil:'load'});
+   await press(pg.locator('.kk-quiz-setup button[type=submit]'));await pg.locator('#kerdes-cim').waitFor();
+   await pg.locator('.kk-quiz-choice').first().click();await pg.getByRole('button',{name:'Ellenőrzés'}).click();await pg.locator('.kk-quiz-feedback').waitFor();
+   const fb=await pg.evaluate(()=>({links:[...document.querySelectorAll('.kk-quiz-links a')].map(a=>{const s=getComputedStyle(a);return s.textDecorationLine.includes('underline')}),
+    live:[...document.querySelectorAll('.kk-quiz-card [aria-live]')].map(e=>(e.textContent||'').length)}));
+   assert.ok(fb.links.length>=2&&fb.links.every(Boolean),'a visszajelzés linkjei aláhúzottak');
+   assert.ok(fb.live.length===1&&fb.live[0]>0&&fb.live[0]<200,'az élő régió csak az ítéletet és a helyes választ mondja ('+fb.live.join(',')+' karakter)');
+   await c3.close();
+   out.push('Tesztek: fókusz a megerősítéseknél, mégse után, időkorlát kikapcsolása, eredmény, új teszt és törlés után; élő régiók; linkek jelölése');
+  }
   const nojs=await browser.newContext({viewport:{width:320,height:700},javaScriptEnabled:false}),np=await nojs.newPage();
   await np.goto(BASE+'/tudastar/tesztek',{waitUntil:'load'});
   const r=await np.evaluate(()=>({island:getComputedStyle(document.querySelector('.kk-quiz-island')).display,sample:getComputedStyle(document.querySelector('.kk-quiz-sample')).display,sw:document.documentElement.scrollWidth,cw:document.documentElement.clientWidth}));

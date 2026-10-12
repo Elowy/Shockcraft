@@ -30,6 +30,10 @@ if(cmd==='build'){
  console.log('Kiadás: '+model.manifest.total+' jóváhagyott kérdés; a bank '+(model.live?'ÉL':'nem él (legalább '+BANK_MIN_TOTAL+' és témakörönként '+BANK_MIN_PER_TOPIC+' kell)')+'. Azonosítójegyzék: +'+reg.added.length+' új.');
 }else if(cmd==='check'){
  const problems=[...bank.errors,...reg.errors,...staleRelease(ROOT,model.files).map(s=>'elavult kiadás: '+s+' – futtasd: node_modules/.bin/tsx scripts/quiz-release.ts build'),...registryShrinks(prev,reg.registry)];
+ // Elavult jóváhagyás: van review-objektum, de a kérdés azóta változott (más az ujjlenyomat), vagy a forrás nem közzétehető – a kérdés így
+ // nem kerül ki, de a szerkesztőnek látnia kell (a tests/quiz.ts is megbukik rajta).
+ for(const q of allQuestions(bank))if(typeof q.review==='object'&&!q.retired&&!approvedQuestion(q))
+  problems.push(q.id+': '+(q.review.fingerprint!==questionFingerprint(q)?'a jóváhagyás nem a mostani tartalomra szól – újra kell lektorálni (node_modules/.bin/tsx scripts/quiz-release.ts fingerprint '+q.id+')':'jóváhagyott, de a forrás („'+q.source+'”) nem közzétehető (saját / AI-tervezet, lektorált / licencelt)'));
  const released=Object.values(model.approved).flat().filter(q=>!prev.ids[q.id]).map(q=>q.id);
  if(released.length)problems.push('a jegyzékből hiányzó jóváhagyott azonosító(k): '+released.join(', ')+' – futtasd a build-et');
  if(problems.length){console.error(problems.join('\n'));process.exit(1)}

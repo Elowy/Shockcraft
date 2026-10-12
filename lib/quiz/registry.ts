@@ -12,7 +12,8 @@ import {buildTemplateQuestion,type Question} from './engine';
 import {QUIZ_SUSPENDED,TEMPLATE_CHECKS,bankLive,templateState,type TemplateCheck,type TemplateState} from './gate';
 import {BANK_MANIFEST} from './release/index';
 import {mulberry32,nextSeed} from './rng';
-import {TEMPLATES,pickParams,type Template} from './templates';
+import {TEMPLATES} from './all-templates';
+import {pickParams,type Template} from './templates';
 import {TOPICS,TOPIC_IDS,topicLabel} from './topics';
 
 export {TEMPLATES};
@@ -96,8 +97,9 @@ export function staticSample(preview=false):{title:string;q:Question}|null{
  for(const t of visibleTemplates(preview)){const def=bySlug(t.calc),q=def?templateSamples(t,def,1)[0]:undefined;if(q)return {title:t.title,q}}
  return null;
 }
-/** A tesztoldal linkje előválasztással (a sziget olvassa): ?mod=gyakorlo|vizsga|hibaim, ?feladat=<sablon>,…, ?hossz=5|10|20. */
+/** A tesztoldal linkje előválasztással (a sziget olvassa): ?mod=gyakorlo|vizsga|hibaim, ?feladat=<sablon>,…, ?hossz=5|10|20. Előválasztásnál
+ * a #teszt horgonnyal az előválasztott űrlapra visz (telefonon is a hajtás felett; a .kk-quiz-host scroll-margin-topja a fejléc alá igazít). */
 export const quizHref=(params:{feladat?:readonly string[];mod?:string;hossz?:number}={})=>{
  const q=[...(params.mod?['mod='+params.mod]:[]),...(params.feladat?.length?['feladat='+params.feladat.join(',')]:[]),...(params.hossz?['hossz='+params.hossz]:[])];
- return QUIZ_PATH+(q.length?'?'+q.join('&'):'');
+ return QUIZ_PATH+(q.length?'?'+q.join('&')+'#teszt':'');
 };

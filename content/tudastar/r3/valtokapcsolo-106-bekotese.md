@@ -132,7 +132,7 @@ A kapcsolókhoz menő szakaszokban nincs nullavezető. Ha ide háromeres kábel 
 ## Gyakori hibák
 
 - **A betáp nem a közös kapocsra került.** A szimuláció szerint, ha a fázis az első kapcsoló 1-es kapcsára jut a közös helyett, a négy állás-kombinációból csak egyben ég a lámpa: az első kapcsoló egyszerű be-ki kapcsolóként viselkedik, a második pedig csak akkor működik, ha az első egy bizonyos állásban van. Ugyanez a tünet, ha a második kapcsolón a kapcsolt fázis nem a közös kapocsról indul.
-- **Zöld-sárga ér váltóvezetékként.** Tilos; a zöld-sárga ér csak védővezető lehet.
+- **Zöld-sárga ér váltóvezetékként.** Tilos; a zöld-sárga ér csak védőfunkciójú vezető (védővezető, PEN-, potenciálkiegyenlítő vezető) lehet, fázis- vagy nullavezető soha.
 - **Jelöletlen kék ér váltóvezetékként.** A következő szerelő nullavezetőnek nézheti.
 - **A lámpa fázisa a kötődobozban a betáp fázisára kerül** a K2 közös kapcsáról visszatérő kapcsolt fázis helyett: a lámpa folyamatosan ég, egyik kapcsoló sem hat rá.
 - **Kikapcsolva derengő LED-lámpa.** Hosszú, egymás mellett futó váltóvezetékeknél a kapacitív csatolás kis áramot juttathat a lámpára; jelzőfényes kapcsoló is okozhatja. Az okot szakember méréssel keresi meg.

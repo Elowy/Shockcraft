@@ -39,8 +39,9 @@ export function KirchhoffCsomopont(p:FigProps){
 }
 
 /** kirchhoff-torvenyei / abra-2: hurok – 230 V = 227,42 V (vízforraló) + 2,58 V (a vezeték két fele együtt). Fogyasztói pozitív
- * irányrendszer: az I áram az óramutató járásával egyező körbejárás irányában folyik; a fogyasztón (vízforraló) a feszültségnyíl az áram
- * irányába, a magasabb potenciálú L felől az N felé mutat. */
+ * irányrendszer: az I áram az óramutató járásával egyező körbejárás irányában folyik; minden ellenálláson a feszültségnyíl az áram
+ * irányába mutat – a vízforralón az L felől az N felé, a két vezetékfélen (Rv/2) vízszintesen: fent balról jobbra, lent jobbról balra,
+ * egyenként 1,29 V. (Közös, függőleges kapcsos jelölés nincs: az L és az N között azon a helyen 227,42 V van, nem 2,58 V.) */
 export function KirchhoffHurok(p:FigProps){
  return <Svg {...p} viewBox="0 0 360 220">
   <line x1={70} y1={44} x2={120} y2={44} className="s-l1" strokeWidth={2.5}/><line x1={160} y1={44} x2={250} y2={44} className="s-l1" strokeWidth={2.5}/>
@@ -54,8 +55,9 @@ export function KirchhoffHurok(p:FigProps){
   <rect x={120} y={156} width={40} height={16} className="f-bg s-fg" strokeWidth={1.5}/><T x={140} y={190} anchor="middle" size={12}>R<Sub>v</Sub>/2</T>
   <T x={86} y={36} bold size={13}>L</T><T x={86} y={184} bold size={13}>N</T>
   <Arrow x1={194} y1={30} x2={234} y2={30} cls="s-fg" head="f-fg" w={2} size={8}/><T x={214} y={22} size={13} anchor="middle" bold>I</T>
-  <path d="M168 50 Q174 50 174 60 V96 Q174 104 180 104 Q174 104 174 112 V148 Q174 158 168 158" className="s-primary f-none" strokeWidth={1.5}/>
-  <T x={184} y={96} size={13} cls="t-primary" bold>2,58 V</T>
+  <Arrow x1={118} y1={62} x2={162} y2={62} cls="s-primary" head="f-primary" w={1.5} size={7}/><T x={140} y={78} size={12} anchor="middle" cls="t-primary" bold>1,29 V</T>
+  <Arrow x1={162} y1={146} x2={118} y2={146} cls="s-primary" head="f-primary" w={1.5} size={7}/><T x={140} y={138} size={12} anchor="middle" cls="t-primary" bold>1,29 V</T>
+  <T x={186} y={102} size={12} anchor="middle" cls="t-primary">a vezeték</T><T x={186} y={117} size={12} anchor="middle" cls="t-primary" bold>együtt 2,58 V</T>
   <rect x={238} y={74} width={24} height={60} className="f-surface s-fg" strokeWidth={1.5}/>
   <T x={274} y={154} size={12}>vízforraló</T><T x={274} y={169} size={12}>R<Sub>t</Sub> = 26,45 Ω</T>
   <Arrow x1={272} y1={76} x2={272} y2={132} cls="s-primary" head="f-primary" w={1.5} size={7}/>
@@ -97,7 +99,7 @@ export function SorosParhuzamos(p:FigProps){
    <Arrow x1={62} y1={40} x2={112} y2={40} cls="s-primary" head="f-primary" w={3} size={10}/><T x={86} y={32} anchor="middle" size={13} bold>I</T>
    <Arrow x1={150} y1={46} x2={150} y2={70} cls="s-primary" head="f-primary" w={2} size={8}/><T x={140} y={62} anchor="end" size={12}>I1</T>
    <Arrow x1={230} y1={46} x2={230} y2={70} cls="s-primary" head="f-primary" w={2} size={8}/><T x={220} y={62} anchor="end" size={12}>I2</T>
-   <Arrow x1={260} y1={50} x2={260} y2={150} cls="s-warn" head="f-warn" w={1.5} size={7}/><T x={268} y={104} size={13} bold>U</T>
+   <Arrow x1={268} y1={50} x2={268} y2={150} cls="s-warn" head="f-warn" w={1.5} size={7}/><T x={276} y={104} size={13} bold>U</T>
    <T x={150} y={190} anchor="middle" size={12}>U közös, I = I1 + I2</T>
   </Svg>
  </div>;
@@ -109,7 +111,7 @@ const Panel=({uid,title,k,name,desc,children,arrowCls,arrowW,label}:{uid:string;
    <line x1={30} y1={30} x2={205} y2={30} className="s-l1" strokeWidth={2.5}/><line x1={30} y1={130} x2={205} y2={130} className="s-n" strokeWidth={2.5}/>
    <line x1={30} y1={30} x2={30} y2={66} className="s-fg" strokeWidth={2}/><line x1={30} y1={94} x2={30} y2={130} className="s-fg" strokeWidth={2}/>
    <circle cx={30} cy={80} r={14} className="f-bg s-fg" strokeWidth={2}/><path d={curve(t=>[22+t*16,80-5*Math.sin(t*2*Math.PI)],0,1,20)} className="s-fg f-none" strokeWidth={1.4}/>
-   <T x={14} y={34} bold size={11}>L</T><T x={14} y={134} bold size={11}>N</T><T x={50} y={84} size={10} cls="t-muted">230 V</T>
+   <T x={13} y={35} bold size={13}>L</T><T x={13} y={135} bold size={13}>N</T><T x={50} y={85} size={12} cls="t-muted">230 V</T>
    <Arrow x1={52} y1={20} x2={104} y2={20} cls={'s-'+arrowCls} head={'f-'+arrowCls} w={arrowW} size={6+arrowW*1.4}/>
    <T x={112} y={24} size={12} bold>{label}</T>
    {children}

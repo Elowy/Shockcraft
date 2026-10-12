@@ -9,8 +9,8 @@
 // újraépíthető (csak a seedtől, a beállításoktól és a kiadástól függ), ezért ott nincs személyes súlyozás.
 import {runCalc,type CalcDef,type Raw,type Step} from '@/lib/calc/core';
 import {BLUEPRINT,PASS_THRESHOLD} from './gate';
-import {mulberry32,nextSeed,shuffle,type Rng} from './rng';
-import {paramKey,pickParams,shownValue,templateById,validParams,type Params,type Template} from './templates';
+import {mulberry32,nextSeed,randInt,shuffle,type Rng} from './rng';
+import {paramKey,pickParams,shownValue,validParams,type Params,type Template} from './templates';
 import type {TopicId} from './topics';
 
 export type QuestionType='single'|'multi'|'truefalse';
@@ -29,12 +29,35 @@ export type BankQuestion={id:string;version:number;topic:TopicId;difficulty:1|2|
 
 /** Két érték legalább `rel` arányban eltér (a nagyobbikhoz mérve). */
 export const apart=(a:number,b:number,rel=0.05)=>Math.abs(a-b)>=rel*Math.max(Math.abs(a),Math.abs(b));
+/** „Ikerpár”: ugyanazok a számjegyek más előtaggal vagy helyiértékkel – a hányados 10 egész hatványa (±2 %), pl. „3,833 A” és „3,833 mA”. */
+export function twins(a:number,b:number){
+ const r=Math.log10(a/b),k=Math.round(r);
+ return k!==0&&Math.abs(r-k)<Math.log10(1.02);
+}
+/** Az ikerpárok szerkezete a négy válaszban: vagy nincs ikerpár, vagy két diszjunkt ikerpár van (2 × 2: képlet jó/rossz × előtag
+ * jó/rossz). Így egy ikerpár jelenléte nem árulja el, melyik a helyes válasz (egyedüli ikerpár mindig a helyes válaszra utalna). */
+export function twinShape(pairs:readonly (readonly [number,number])[]){
+ if(!pairs.length)return true;
+ return pairs.length===2&&new Set(pairs.flat()).size===4;
+}
 export const DISTRACTORS=3;
 export const tplItem=(id:string)=>'tpl:'+id;
+/** Valószerűtlenségi költség (a helyestől való eltérés aránya szerint): 30-szoros felett 0,75, 100-szoros felett 1,6 – több, mint
+ * a tervezett helytől való egy lépés eltérés (1,5), így a 100-szoros tévesztő csak végső tartalék (lásd buildTemplateQuestion). */
+const farCost=(v:number,ok:number)=>{const r=Math.max(v/ok,ok/v);return r>100?1.6:r>30?0.75:0};
 
 /** Kérdés egy sablonból: a helyes érték és a levezetés runCalc-ból; három tévesztő a sablon hibamodelljeiből (a kérdés saját seedjével
  * kiválasztva), mind formázva, egyedi, egymástól és a helyestől legalább 5 %-ban eltérő (a kiírt értéken is), növekvő sorrendben.
- * Ha a paraméterekkel ez nem teljesíthető (vagy a kalkulátor nem számol), null – a hívó másik paraméterkészletet választ. */
+ * Ha a paraméterekkel ez nem teljesíthető (vagy a kalkulátor nem számol), null – a hívó másik paraméterkészletet választ.
+ *
+ * Pozíció: a válaszok növekvő sorrendben jelennek meg (docs/tudastar-terv.md 7. pont), ezért a helyes válasz helyét a tévesztők
+ * választása dönti el. A kérdés seedjéből előbb a helyes válasz TERVEZETT helye jön (egyenletesen A–D: ennyi tévesztő legyen
+ * alatta), majd a motor az összes megengedett hármas közül a legkisebb költségűt választja: tartalék (helyiérték-hiba) modell 3,
+ * a tervezett helytől való eltérés helyenként 1,5, valószerűtlen (30-/100-szoros) tévesztő 0,75/1,6, előtaghibás ikerpár 0,9 (főleg akkor kerül
+ * sorra, ha a tervezett hely másként nem érhető el);
+ * egyenlőségnél a seedből kevert sorrend dönt. Így a helyes válasz helye nem a hibamodellek irányától függ (tests/quiz.ts méri).
+ * Ikerpár (előtaghiba, Model.prefix): csak 2 × 2 szerkezetben kerülhet a válaszok közé – a helyes válasz ikre mellett egy tévesztőé is
+ * (ugyanaz a hiba és az előtaghiba együtt) –, egyedüli ikerpár soha (twinShape). */
 export function buildTemplateQuestion(t:Template,def:CalcDef,p:Params,seed:number):Question|null{
  if(def.slug!==t.calc||!validParams(t,p))return null;
  const raw=t.raw(p),run=runCalc(def,raw);
@@ -43,22 +66,49 @@ export function buildTemplateQuestion(t:Template,def:CalcDef,p:Params,seed:numbe
  const ok=res[t.result];
  if(!(ok>0)||!Number.isFinite(ok))return null;
  const shown=(text:string)=>t.shown?t.shown(text):shownValue(text,t.unit);
- const okText=t.fmt(ok,p),picked:{id:string;why:string;value:number;text:string}[]=[];
- if(!(shown(okText)>0))return null;
- // A tévesztők sorrendje a kérdés seedjéből; előbb a valószerű nagyságrendűek (legfeljebb 30-szoros eltérés, vagy azonos számjegyek más
- // előtaggal: „2,841 W” a „2,841 kW” mellett), utána a többi saját hibamodell, végül a helyiérték-hiba tartaléka.
- const rng=mulberry32(seed),mant=(s:string)=>s.slice(0,s.lastIndexOf('\u00a0'));
- const cands=shuffle(t.models.filter(m=>!m.when||m.when(p,res)),rng).map(m=>({m,v:m.value(p,ok,res)}))
-  .filter(c=>Number.isFinite(c.v)&&c.v>0&&(t.min===undefined||c.v>=t.min)).map(c=>({...c,text:t.fmt(c.v,p)}));
- const plausible=(c:{v:number;text:string})=>Math.max(c.v/ok,ok/c.v)<=30||mant(c.text)===mant(okText);
- for(const c of [...cands.filter(c=>!c.m.fallback&&plausible(c)),...cands.filter(c=>!c.m.fallback&&!plausible(c)),...cands.filter(c=>c.m.fallback)]){
-  if(picked.length>=DISTRACTORS)break;
-  const sv=shown(c.text);
-  if(!(sv>0)||[{value:ok,text:okText},...picked].some(x=>x.text===c.text||!apart(x.value,c.v)||!apart(shown(x.text),sv)))continue;
-  picked.push({id:c.m.id,why:c.m.why,value:c.v,text:c.text});
+ const okText=t.fmt(ok,p),okShown=shown(okText);
+ if(!(okShown>0))return null;
+ const rng=mulberry32(seed),target=randInt(rng,DISTRACTORS+1);
+ // `pair`: az előtaghibás ikerpár tagja – a helyes válasz ikre („ok”) vagy egy tévesztő előtaghibás párja (a tévesztő azonosítója);
+ // `via`: az előtaghiba-modell azonosítója (egy kérdésben csak egyféle előtaghiba szerepelhet).
+ type Cand={id:string;why:string;v:number;text:string;sv:number;cost:number;pair?:string;via?:string};
+ const active=t.models.filter(m=>!m.when||m.when(p,res));
+ const usable=(v:number)=>Number.isFinite(v)&&v>0&&(t.min===undefined||v>=t.min);
+ const base=active.filter(m=>!m.prefix).map(m=>({m,v:m.value(p,ok,res)})).filter(c=>usable(c.v));
+ const pres=active.filter(m=>m.prefix);
+ const raws:Omit<Cand,'text'|'sv'>[]=base.map(({m,v})=>({id:m.id,why:m.why,v,cost:(m.fallback?3:0)+farCost(v,ok)}));
+ // Előtaghiba: a helyes válasz ikre, és minden (nem tartalék, nem „solo”) tévesztőnek az előtaghibás párja. Csak együtt, 2 × 2
+ // szerkezetben választhatók: {a helyes válasz ikre, egy tévesztő, ugyanennek a tévesztőnek az előtaghibás párja}.
+ for(const pre of pres){
+  const f=pre.prefix!;
+  raws.push({id:pre.id,why:pre.why,v:ok*f,cost:0.9,pair:'ok',via:pre.id});
+  for(const {m,v} of base)if(!m.fallback&&!m.solo)raws.push({id:m.id+'+'+pre.id,why:m.why+', és '+pre.why,v:v*f,cost:0,pair:m.id,via:pre.id});
  }
- if(picked.length<DISTRACTORS)return null;
- const choices:Choice[]=[{id:'ok',text:okText,correct:true,value:ok},...picked.map(c=>({id:c.id,text:c.text,correct:false,why:'Ez az eredmény jön ki, ha '+c.why+'.',value:c.value}))].sort((a,b)=>a.value!-b.value!);
+ const cands:Cand[]=shuffle(raws.filter(c=>usable(c.v)),rng).map(c=>{const text=t.fmt(c.v,p);return {...c,text,sv:shown(text)}})
+  .filter(c=>c.sv>0&&c.text!==okText&&apart(ok,c.v)&&apart(okShown,c.sv));
+ const n=cands.length;
+ if(n<DISTRACTORS)return null;
+ const fits=(a:Cand,b:Cand)=>a.text!==b.text&&apart(a.v,b.v)&&apart(a.sv,b.sv);
+ const twin=(a:{v:number;sv:number},b:{v:number;sv:number})=>twins(a.v,b.v)||twins(a.sv,b.sv);
+ const okC={v:ok,sv:okShown};
+ let best:Cand[]|null=null,bestCost=Infinity;
+ for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){
+  if(!fits(cands[i],cands[j]))continue;
+  for(let k=j+1;k<n;k++){
+   const set=[cands[i],cands[j],cands[k]];
+   if(!fits(set[0],set[2])||!fits(set[1],set[2]))continue;
+   const pp=set.filter(c=>c.pair);
+   if(pp.length&&!(pp.length===2&&pp[0].via===pp[1].via&&pp.some(c=>c.pair==='ok')&&pp.some(c=>c.pair!=='ok'&&set.some(b=>b.id===c.pair))))continue;
+   const all=[okC,...set],pairs:[number,number][]=[];
+   for(let a=0;a<4;a++)for(let b=a+1;b<4;b++)if(twin(all[a],all[b]))pairs.push([a,b]);
+   if(!twinShape(pairs))continue;
+   const below=set.filter(c=>c.v<ok).length;
+   const cost=1.5*Math.abs(below-target)+set.reduce((s,c)=>s+c.cost,0)+(i+j+k)*1e-6;
+   if(cost<bestCost){bestCost=cost;best=set}
+  }
+ }
+ if(!best)return null;
+ const choices:Choice[]=[{id:'ok',text:okText,correct:true,value:ok},...best.map(c=>({id:c.id,text:c.text,correct:false,why:'Ez az eredmény jön ki, ha '+c.why+'.',value:c.v}))].sort((a,b)=>a.value!-b.value!);
  return {key:t.id+':'+paramKey(p),item:tplItem(t.id),version:t.version,topic:t.topic,type:'single',difficulty:t.difficulty,
   stem:t.stem(p,res),choices,explanation:t.explain(p,okText,res),steps:run.out.steps,source:{kind:'tpl',template:t.id,calc:t.calc,raw}};
 }
@@ -198,5 +248,3 @@ export function score(qs:readonly Question[],answers:readonly (readonly string[]
  const ok=qs.filter((q,i)=>isCorrect(q,answers[i])).length,n=qs.length,ratio=n?ok/n:0;
  return {ok,n,ratio,pct:Math.round(ratio*100),pass:n>0&&ratio>=PASS_THRESHOLD-1e-9};
 }
-/** Egy sablon – a kliens a kiadott sablonok közül választ (a szerver adja át a listát), ez csak a tárolóból visszaolvasott hivatkozás ellenőrzése. */
-export const knownTemplate=(id:string)=>!!templateById(id);

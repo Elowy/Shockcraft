@@ -211,7 +211,8 @@
     "ref": "kismegszakito#b-c-es-d-jelleggorbe",
     "shuffle": true,
     "review": "lektorra-var",
-    "source": "AI-tervezet"
+    "source": "AI-tervezet",
+    "family": "jelleggorbe-hurok"
   },
   {
     "id": "q-ev-0007",
@@ -401,7 +402,8 @@
     "ref": "egyenpotencialra-hozas-eph#hogyan-mukodik",
     "shuffle": true,
     "review": "lektorra-var",
-    "source": "AI-tervezet"
+    "source": "AI-tervezet",
+    "family": "pen-szakadas-fi"
   },
   {
     "id": "q-ev-0012",
@@ -536,7 +538,7 @@
         "why": "A leállás mellett a ház fázisfeszültségre kerülhet, ami életveszélyes."
       }
     ],
-    "explanation": "A „nullázott” dugaljnál a készülék háza a nullavezetőn van; ha a nullavezető megszakad, a ház a bekapcsolt készüléken át fázisfeszültséget kap, és ezt semmilyen védelem nem kapcsolja le. Ezért tilos a hiányzó védővezetőt a nullavezetőből „pótolni”; a korszerűsítéshez külön védővezető kell, amelyről szakember dönt.",
+    "explanation": "A „nullázott” dugaljnál a készülék háza a nullavezetőn van; ha a nullavezető megszakad, a ház a bekapcsolt készüléken át fázisfeszültséget kap, és ezt a túláramvédelem nem kapcsolja le; FI-relé, ha van, legfeljebb az érintés közben old ki. Ezért tilos a hiányzó védővezetőt a nullavezetőből „pótolni”; a korszerűsítéshez külön védővezető kell, amelyről szakember dönt.",
     "ref": "dugalj-bekotese#regi-berendezesben",
     "shuffle": true,
     "family": "nullazott-dugalj",

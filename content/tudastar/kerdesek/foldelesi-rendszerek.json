@@ -221,7 +221,7 @@
     "topic": "foldelesi-rendszerek",
     "difficulty": 3,
     "type": "single",
-    "stem": "TN-C-S rendszerű házban a szétválasztási pont előtt, a csatlakozó vezetékben megszakad a PEN-vezető. Melyik állítás igaz?",
+    "stem": "TN-C-S rendszerű házban a szétválasztási pont előtt – a hálózatban vagy a ház csatlakozó vezetékében – megszakad a PEN-vezető. Melyik állítás igaz?",
     "choices": [
       {
         "id": "a",
@@ -247,11 +247,12 @@
         "why": "A védővezető a szétválasztási ponton a PEN-hez kapcsolódik, így annak szakadása a PE-re is hat."
       }
     ],
-    "explanation": "A szétválasztás előtti PEN-szakadáskor a fogyasztók árama az épület földelőjén és a talajon át keres utat, ezért minden fémház és az EPH-ba kötött cső potenciálja megemelkedhet. A FI-relé ezt nem érzékeli, mert a fázis- és a nullavezető árama egyenlő; ilyenkor a saját főkapcsoló lekapcsolása sem szünteti meg biztosan a veszélyt, mert a többi, ugyanarra a PEN-re kötött fogyasztó is megemelheti a potenciált.",
+    "explanation": "A szétválasztás előtti PEN-szakadáskor a fogyasztók árama az épület földelőjén és a talajon át keres utat, ezért minden fémház és az EPH-ba kötött cső potenciálja megemelkedhet. A FI-relé ezt nem érzékeli, mert a fázis- és a nullavezető árama egyenlő. Közös hálózati PEN szakadásakor a saját főkapcsoló lekapcsolása sem szünteti meg biztosan a veszélyt, mert a többi, ugyanarra a PEN-szakaszra kötött fogyasztó is megemelheti a potenciált.",
     "ref": "foldelesi-rendszerek#tn-c-s-a-pen-szetvalasztasa",
     "shuffle": true,
     "review": "lektorra-var",
-    "source": "AI-tervezet"
+    "source": "AI-tervezet",
+    "family": "pen-szakadas-fi"
   },
   {
     "id": "q-fold-0008",
@@ -403,7 +404,7 @@
         "why": "A földelővezető szakadásával a fémház elveszíti a kapcsolatát a földelővel."
       }
     ],
-    "explanation": "A védőföldelő vezetőjének szakadásakor testzárlatkor nincs zárt hurok, ezért egyik védelem sem kapcsol le, és a fémház tartósan fázisfeszültségre kerülhet. A FI-relé csak az áramütés közben, a testen átfolyó áramra old ki, nagyobb kioldási áramú készülék pedig egyáltalán nem; ezért a földelés folytonosságát, ellenállását és a FI-relé működését időszakos felülvizsgálat ellenőrzi.",
+    "explanation": "A védőföldelő vezetőjének szakadásakor testzárlatkor nincs zárt hurok, ezért egyik védelem sem kapcsol le, és a fémház tartósan fázisfeszültségre kerülhet. A FI-relé csak az áramütés közben, a testen átfolyó áramra old ki, egy nagyobb kioldási áramú (például 300 mA-es, tűzvédelmi) készülék pedig jellemzően nem; ezért a földelés folytonosságát, ellenállását és a FI-relé működését időszakos felülvizsgálat ellenőrzi.",
     "ref": "foldelesi-rendszerek#tt-sajat-foldelo-a-fogyasztonal",
     "shuffle": true,
     "review": "lektorra-var",
@@ -670,7 +671,7 @@
         "id": "b",
         "text": "Egy áram-védőkapcsoló beépítése önmagában megoldja a problémát",
         "correct": false,
-        "why": "A fémház testzárlatát a FI-relé ilyenkor nem érzékeli, és a nullázott kötés a FI-relé után kioldást is okoz."
+        "why": "A fémház testzárlatát a FI-relé ilyenkor nem érzékeli, és a nullázott kötés a FI-relé után kioldást is okozhat (ha a nullára kötött fémház földelt részhez ér)."
       },
       {
         "id": "c",

@@ -21,8 +21,10 @@ import {BANK_LOADERS,BANK_MANIFEST} from '../lib/quiz/release/index';
 import {QUIZ_PATH,TEMPLATES,bankState,pendingTemplates,publishedTemplates,quizClientData,quizHref,quizLastModified,quizPublishedCount,quizRelease,staticSample,templateFingerprint,templateInfo,templateSamples,templatesForArticle} from '../lib/quiz/registry';
 import {mulberry32,nextSeed,shuffle} from '../lib/quiz/rng';
 import {FORBIDDEN,approvedQuestion,forbiddenIn,parseBankFile,questionFingerprint,questionRules,releasedQuestion,type DraftQuestion} from '../lib/quiz/schema';
-import {RESULT_MAX,clearSession,readSession,validResult,validSession,validStat,writeSession,type Session} from '../lib/quiz/storage';
-import {pickParams,shownValue,templateById,validParams,type Template} from '../lib/quiz/templates';
+import {RESULT_MAX,clearSession,quizStorageBlocked,readSession,validResult,validSession,validStat,writeSession,type Session} from '../lib/quiz/storage';
+import {T0_TEMPLATES,T1_TEMPLATE_IDS,pickParams,shownValue,validParams,type Template} from '../lib/quiz/templates';
+import {T1_TEMPLATES as T1_DEFS} from '../lib/quiz/templates-t1';
+import {templateById} from '../lib/quiz/all-templates';
 import {QUIZ_NOTICE,TOPICS,TOPIC_IDS,type TopicId} from '../lib/quiz/topics';
 import {KB_KEYS,KB_SESSION_KEYS,clearAll,type StorageLike} from '../lib/kb/storage';
 import {KB_ARTICLES} from '../lib/kb/content/generated/articles';
@@ -41,9 +43,15 @@ const HU_NUM=/^(?:\d{1,4}|\d{1,3}(?:\u00a0\d{3})+)(?:,\d+)?\u00a0\S+$/;
 const BAD_TEXT=/NaN|Infinity|undefined|null|\[object/;
 const SEEDS=10_000;
 const models=new Map<string,Set<string>>();
+/** A kiírt szám jegyei (vezető és záró nullák, tizedesvessző és ezres tagolás nélkül): „3,833 mA” és „3,833 A” → „3833”. */
+const digitsOf=(text:string)=>text.slice(0,text.lastIndexOf(NB)>0?text.lastIndexOf(NB):undefined).replace(/\D/g,'').replace(/^0+/,'').replace(/0+$/,'');
+/** Ikerpár a tanuló szemével (a motortól függetlenül): azonos számjegyek, vagy a hányados 10 egész hatványa. */
+const twinLike=(a:{text:string;value?:number},b:{text:string;value?:number})=>{const r=Math.log10(a.value!/b.value!),k=Math.round(r);return digitsOf(a.text)===digitsOf(b.text)||(k!==0&&Math.abs(r-k)<Math.log10(1.02))};
 for(const t of TEMPLATES){
  const d=def(t);let built=0;
  const used=new Set<string>();models.set(t.id,used);
+ // Pozíciós árulkodás (számolás nélküli stratégiák): a helyes válasz helye, és két „tesztírói” stratégia várható találata.
+ const pos=[0,0,0,0];let pairGuess=0,outlierGuess=0;
  ok(t.models.length>=DISTRACTORS,t.id+': legalább három hibamodell');
  ok(new Set(t.models.map(m=>m.id)).size===t.models.length&&!t.models.some(m=>m.id==='ok'),t.id+': egyedi hibamodell-azonosítók');
  for(let s=0;s<SEEDS;s++){
@@ -72,6 +80,15 @@ for(const t of TEMPLATES){
    assert.ok(apart(shown[i],shown[j]),t.id+': a kiírt értékek is legalább 5 %-ban eltérnek '+texts[i]+' – '+texts[j]);
   }
   for(let i=1;i<vals.length;i++){assert.ok(vals[i]>vals[i-1],t.id+': növekvő sorrend');assert.ok(shown[i]>shown[i-1],t.id+': a kiírt értékek is növekvők')}
+  // Ikerpár (előtaghiba) csak 2 × 2 szerkezetben: vagy nincs, vagy két diszjunkt pár – egyedüli ikerpár a helyes válaszra utalna.
+  const k=q.choices.findIndex(c=>c.correct),pairs:[number,number][]=[];pos[k]++;
+  for(let i=0;i<4;i++)for(let j=i+1;j<4;j++)if(twinLike(q.choices[i],q.choices[j]))pairs.push([i,j]);
+  assert.ok(!pairs.length||(pairs.length===2&&new Set(pairs.flat()).size===4),t.id+': egyedüli ikerpár '+texts.join(' | '));
+  // 1. stratégia (a review mérése): ha van ikerpár, a pár(ok) középső (B/C) tagja, egyébként B vagy C.
+  const mid=[...new Set(pairs.flat().filter(x=>x===1||x===2))],g1=mid.length?mid:[1,2];pairGuess+=g1.includes(k)?1/g1.length:0;
+  // 2. stratégia: a középértéktől legalább 30-szor távolabbi („kilógó”) válaszok elhagyása, a maradékból véletlen.
+  const lg=vals.map(v=>Math.log10(v)),sorted=[...lg].sort((a,b)=>a-b),m=(sorted[1]+sorted[2])/2,keep=[0,1,2,3].filter(i=>Math.abs(lg[i]-m)<Math.log10(30));
+  outlierGuess+=keep.includes(k)?1/keep.length:0;
   for(const c of q.choices){
    assert.ok(!BAD_TEXT.test(c.text)&&!/\d\.\d/.test(c.text),t.id+': számformátum '+c.text);
    if(t.unit!=='A'||!t.shown)assert.match(c.text,HU_NUM,t.id+': magyar számformátum '+JSON.stringify(c.text));
@@ -83,16 +100,32 @@ for(const t of TEMPLATES){
  }
  // A paraméterhalmazból a kérdések túlnyomó része felépül (a kismegszakítónál a Ib–Iz közé eső névleges áram nem mindig létezik).
  ok(built>=SEEDS*(t.id==='kismegszakito-valasztas'?0.6:0.98),t.id+': elég érvényes kérdés ('+built+'/'+SEEDS+')');
+ // A helyes válasz minden helyen (A–D) legalább 10 %-ban és legfeljebb 50 %-ban áll; a számolás nélküli stratégiák legfeljebb 40 %-ot
+ // érnek (vak tippelés: 25 %; a review előtti motorral az ohm-aram 98 %, a parhuzamos-eredo helyes válasza 83 %-ban A volt).
+ const share=pos.map(x=>x/built);
+ ok(share.every(x=>x>=0.1&&x<=0.5),t.id+': a helyes válasz helye A–D: '+share.map(x=>(100*x).toFixed(0)+' %').join(' / '));
+ ok(pairGuess/built<=0.4,t.id+': „ikerpár középső tagja, egyébként B vagy C” stratégia: '+(100*pairGuess/built).toFixed(0)+' %');
+ ok(outlierGuess/built<=0.4,t.id+': „a kilógó válasz elhagyása” stratégia: '+(100*outlierGuess/built).toFixed(0)+' %');
  ok(used.size>=DISTRACTORS,t.id+': több hibamodell is sorra kerül ('+[...used].join(', ')+')');
 }
 // Érvénytelen paraméter: nincs kérdés (tárolóból vagy linkből visszaolvasva sem).
 {const t=templateById('ohm-aram')!;assert.equal(buildTemplateQuestion(t,def(t),{U:231,R:10},1),null);assert.equal(buildTemplateQuestion(t,def(t),{U:230,R:10,x:1},1),null);assert.equal(buildTemplateQuestion(t,bySlug('teljesitmeny')!,{U:230,R:10},1),null);
- const s=templateById('soros-eredo')!;assert.equal(buildTemplateQuestion(s,def(s),{R:[10,10]},1),null,'ismétlődő ellenállás');assert.equal(buildTemplateQuestion(s,def(s),{R:[10,11]},1),null,'nem E-sorbeli');}
+ const s=templateById('soros-eredo')!;assert.equal(buildTemplateQuestion(s,def(s),{R:[10,10]},1),null,'ismétlődő ellenállás');assert.equal(buildTemplateQuestion(s,def(s),{R:[10,11]},1),null,'nem E-sorbeli');
+ // Valószerű paramétertér (review): 230 V-on legfeljebb 10 A; egész napos üzem csak kis teljesítménnyel; 1,5 mm²-en legfeljebb 16 A.
+ for(const [id,p] of [['ohm-aram',{U:230,R:4}],['ohm-aram',{U:230,R:10}],['fogyasztas-koltseg',{P:2200,h:24,c:50}],['fogyasztas-koltseg',{P:2000,h:8,c:50}],['feszultseges-1f',{I:20,L:10,A:1.5}]] as const){
+  const tt=templateById(id)!;ok(!validParams(tt,p),id+': valószerűtlen paraméter elutasítva '+JSON.stringify(p));
+ }
+ ok(validParams(templateById('fogyasztas-koltseg')!,{P:150,h:24,c:50})&&validParams(templateById('feszultseges-1f')!,{I:16,L:10,A:1.5}),'valószerű paraméter elfogadva');}
 assert.equal(shownValue('2,07'+NB+'kW','W'),2070);assert.equal(shownValue('6570'+NB+'Ft','Ft'),6570);assert.ok(Number.isNaN(shownValue('2,07 kW','W')));
 
 // ---------------------------------------------------------------------------------------------------- 2. Kapu: sablonok
 const T1_TEMPLATES=TEMPLATES.filter(t=>def(t).tier!=='T0').map(t=>t.id);
 assert.deepEqual(T1_TEMPLATES.sort(),['feszultseges-1f','kismegszakito-valasztas','zs-max'],'a T1-kalkulátorra épülő sablonok');
+// A T1-sablonok külön, lustán töltött modulban (lib/quiz/templates-t1.ts): a T0-modulban csak T0-kalkulátorra épülő sablon van.
+assert.deepEqual(T1_DEFS.map(t=>t.id).sort(),[...T1_TEMPLATE_IDS].sort(),'templates-t1.ts = T1_TEMPLATE_IDS');
+assert.deepEqual([...T1_TEMPLATE_IDS].sort(),[...T1_TEMPLATES].sort(),'T1_TEMPLATE_IDS = a T1-kalkulátorra épülő sablonok');
+ok(T0_TEMPLATES.every(t=>def(t).tier==='T0'),'a T0-modulban csak T0-kalkulátorra épülő sablon');
+assert.equal(TEMPLATES.length,T0_TEMPLATES.length+T1_DEFS.length,'minden sablon pontosan egyszer a tesztkód sorrendjében');
 // Az elvárt állapot a kalkulátorok kapujából vezetve (nincs beégetett lista): közzétett, ha a kalkulátor közzétett, táblázatosnál
 // tablesApproved(), és van egyező belső ellenőrzési rekord.
 const expected=TEMPLATES.filter(t=>{const d=def(t);return calcReleaseInfo(d).state==='kozzeteve'&&(!d.tables||tablesApproved())&&TEMPLATE_CHECKS[t.id]?.fingerprint===templateFingerprint(t)&&!QUIZ_SUSPENDED.has(t.id)}).map(t=>t.id);
@@ -219,7 +252,7 @@ for(let s=0;s<200;s++){
 
 // ---------------------------------------------------------------------------------------------------- 5. Pontozás, súlyozás, „Hibáim”
 {
- const q=buildTemplateQuestion(templateById('ohm-aram')!,def(templateById('ohm-aram')!),{U:230,R:10},1)!;
+ const q=buildTemplateQuestion(templateById('ohm-aram')!,def(templateById('ohm-aram')!),{U:230,R:46},1)!;
  assert.ok(isCorrect(q,['ok']));assert.ok(!isCorrect(q,[q.choices.find(c=>!c.correct)!.id]));assert.ok(!isCorrect(q,null));assert.ok(!isCorrect(q,[]));assert.ok(!isCorrect(q,['ok','x']));
  const qs=Array.from({length:10},()=>q);
  assert.equal(PASS_THRESHOLD,0.6);
@@ -284,8 +317,11 @@ if(!model.live){
    for(const t of TOPIC_IDS){
     const f=join(tmp,BANK_DIR,t+'.json'),existing=existsSync(f)?JSON.parse(readFileSync(f,'utf8')):[];
     const drafts=(Array.isArray(existing)?existing:existing.questions) as DraftQuestion[];
+    // A valódi kérdések a másolatban vázlatként szerepelnek: a darabszámokat csak a szintetikus jóváhagyottak adják, így a próba a
+    // valódi bank lektori jóváhagyásai után is ugyanazt méri (különben az első valódi jóváhagyás hamis bukást okozna).
+    const real=drafts.filter(q=>!q.id.startsWith('q-zz-')).map(q=>({...q,review:'lektorra-var',source:'AI-tervezet'}) as DraftQuestion);
     const extra=Array.from({length:perTopic[t]??0},(_,i)=>{const b=mkQ(t,9000+i);return approve({...b,id:'q-zz-'+String(1000*TOPIC_IDS.indexOf(t)+i).padStart(4,'0'),choices:b.choices.map(c=>({...c})),review:'lektorra-var',source:'AI-tervezet'} as unknown as DraftQuestion)});
-    writeFileSync(f,JSON.stringify([...drafts.filter(q=>!q.id.startsWith('q-zz-')),...extra],null,1));
+    writeFileSync(f,JSON.stringify([...real,...extra],null,1));
    }
   };
   write(Object.fromEntries(TOPIC_IDS.map(t=>[t,t==='meres'?9:20])));
@@ -420,6 +456,13 @@ class Throwing implements StorageLike{getItem():string|null{throw new DOMExcepti
  const f=new Fake();writeSession(sess,()=>f);assert.deepEqual(readSession(()=>f),sess);
  f.setItem(KB_SESSION_KEYS.quizSession,'{sérült');assert.equal(readSession(()=>f),null,'sérült JSON → nincs futó teszt');
  clearSession(()=>f);assert.equal(f.getItem(KB_SESSION_KEYS.quizSession),null);
+ // Lejárt idő: a befejezett teszt jelzője oda-vissza; hibás típus elutasítva.
+ assert.deepEqual(validSession(JSON.parse(JSON.stringify({...sess,done:true,expired:true}))),{...sess,done:true,expired:true},'lejárt idő jelzője');
+ assert.equal(validSession({...sess,expired:'igen'}),null);
+ // Próbaírás (privát mód már induláskor): tiltott tárolónál igaz; működőnél hamis, és nem hagy új kulcsot, a meglévő értéket nem írja át.
+ ok(quizStorageBlocked(()=>new Throwing(),()=>new Fake())&&quizStorageBlocked(()=>new Fake(),()=>new Throwing())&&quizStorageBlocked(()=>null,()=>new Fake()),'próbaírás: tiltott tároló');
+ {const l=new Fake(),ss=new Fake();ss.setItem(KB_SESSION_KEYS.quizSession,'{"x":1}');ok(!quizStorageBlocked(()=>l,()=>ss),'próbaírás: működő tároló');
+  assert.equal(l.getItem(KB_KEYS.quiz),null,'a próba nem hagy új kulcsot');assert.equal(ss.getItem(KB_SESSION_KEYS.quizSession),'{"x":1}','a meglévő értéket megőrzi');}
  // Privát mód: nem dob, a lap memóriájában él tovább.
  assert.doesNotThrow(()=>writeSession(sess,()=>new Throwing()));assert.deepEqual(readSession(()=>new Throwing()),sess);clearSession(()=>new Throwing());assert.equal(readSession(()=>new Throwing()),null);
  // „Minden Tudástár-adat törlése”: a teszteredmények és a futó teszt is.
@@ -446,7 +489,7 @@ class Throwing implements StorageLike{getItem():string|null{throw new DOMExcepti
  assert.deepEqual(templatesForArticle('kismegszakito'),[],'R3/T1: nincs „Teszteld magad”');
  // „Teszteld magad” csak közzétett cikkre és csak közzétett sablonnal; a link a sziget előválasztása.
  for(const a of KB_ARTICLES)for(const t of templatesForArticle(a.id))ok(publishedTemplates().includes(t),a.id+': csak közzétett sablon');
- assert.equal(quizHref({feladat:['ohm-aram','ohm-ellenallas'],hossz:5}),QUIZ_PATH+'?feladat=ohm-aram,ohm-ellenallas&hossz=5');
+ assert.equal(quizHref({feladat:['ohm-aram','ohm-ellenallas'],hossz:5}),QUIZ_PATH+'?feladat=ohm-aram,ohm-ellenallas&hossz=5#teszt','előválasztásnál az űrlapra visz (#teszt)');
  assert.equal(quizHref(),QUIZ_PATH);
  // A JS nélküli mintafeladat: közzétett sablonból, determinisztikus; a sitemap dátuma a rekordokból.
  const sample=staticSample();
@@ -471,4 +514,4 @@ class Throwing implements StorageLike{getItem():string|null{throw new DOMExcepti
  ok(FORBIDDEN.length>=10,'tiltólista');
  assert.deepEqual(TOPICS.map(t=>t.id),[...TOPIC_IDS]);
 }
-console.log('PASS: '+TEMPLATES.length+' számolós sablon × '+SEEDS.toLocaleString('hu-HU')+' seed (helyes = runCalc, levezetés a kalkulátorból, 3 tévesztő megnevezett hibamodellből, egyedi, ≥ 5 % eltérés a pontos és a kiírt értéken, növekvő sorrend, magyar számformátum), kapu ('+publishedTemplates().length+' közzétett, rejtve: '+T1_TEMPLATES.join(', ')+'; mutációs próbák), motor (determinizmus, kvóta, ismétlésmentesség, szomszédos sablon, Hibáim, w = h · r), tesztkód oda-vissza (10 000, URL), bank-kapu (150 / 10, ideiglenes másolaton), forrás: '+allQuestions(bank).length+' kérdés, 0 hiba, '+allQuestions(bank).filter(approvedQuestion).length+' jóváhagyott; azonosítójegyzék, lektori CSV (UTF-8, Windows-1250, UTF-16LE), tárolás, tiltott kifejezések ('+checks+' további ellenőrzés).');
+console.log('PASS: '+TEMPLATES.length+' számolós sablon × '+SEEDS.toLocaleString('hu-HU')+' seed (helyes = runCalc, levezetés a kalkulátorból, 3 tévesztő megnevezett hibamodellből, egyedi, ≥ 5 % eltérés a pontos és a kiírt értéken, növekvő sorrend, magyar számformátum; a helyes válasz helye A–D egyenként 10–50 %, számolás nélküli stratégia ≤ 40 %, ikerpár csak 2 × 2), kapu ('+publishedTemplates().length+' közzétett, rejtve: '+T1_TEMPLATES.join(', ')+'; mutációs próbák), motor (determinizmus, kvóta, ismétlésmentesség, szomszédos sablon, Hibáim, w = h · r), tesztkód oda-vissza (10 000, URL), bank-kapu (150 / 10, ideiglenes másolaton), forrás: '+allQuestions(bank).length+' kérdés, 0 hiba, '+allQuestions(bank).filter(approvedQuestion).length+' jóváhagyott; azonosítójegyzék, lektori CSV (UTF-8, Windows-1250, UTF-16LE), tárolás, tiltott kifejezések ('+checks+' további ellenőrzés).');

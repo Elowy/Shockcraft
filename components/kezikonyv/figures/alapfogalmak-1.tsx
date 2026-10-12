@@ -33,21 +33,25 @@ const Cyl=({x0,len,d,cy}:{x0:number;len:number;d:number;cy:number})=><g>
   <ellipse cx={x0+len} cy={cy} rx={d/4} ry={d/2} className="f-copper-end s-fg" strokeWidth={1.5}/>
  </g>;
 /** Méretvonal felirattal. */
-const Dim=({x0,len,y,label}:{x0:number;len:number;y:number;label:string})=><g>
+const Dim=({x0,len,y,label}:{x0:number;len:number;y:number;label:React.ReactNode})=><g>
   <Arrow x1={x0} y1={y} x2={x0+len} y2={y} both size={6} w={1} cls="s-muted" head="f-muted"/>
   <line x1={x0} y1={y-5} x2={x0} y2={y+5} className="s-muted"/><line x1={x0+len} y1={y-5} x2={x0+len} y2={y+5} className="s-muted"/>
   <T x={x0+len/2} y={y+14} size={11} anchor="middle" cls="t-muted">{label}</T>
  </g>;
 
+/** Képletbetű a cikk képleteivel (.kk-formula) azonos, talpas dőlt betűvel: a hossz jele (kis l) így nem téveszthető össze az áram
+ * jelével (nagy I), amely a talp nélküli ábrabetűben ugyanolyan függőleges vonal. */
+const V=({children}:{children:React.ReactNode})=><tspan fontFamily="ui-serif, Georgia, 'Times New Roman', serif" fontStyle="italic">{children}</tspan>;
+
 /** elektromos-ellenallas / abra-1: kétszeres hossz → kétszeres ellenállás, kétszeres keresztmetszet → fele ellenállás. */
 export function EllenallasHenger(p:FigProps){
  return <Svg {...p} viewBox="0 0 320 222">
-  <Cyl x0={20} len={100} d={16} cy={30}/><Dim x0={20} len={100} y={52} label="l"/>
-  <T x={136} y={35} size={13}>l, A → R</T>
-  <Cyl x0={20} len={200} d={16} cy={98}/><Dim x0={20} len={200} y={120} label="2 · l"/>
-  <T x={230} y={103} size={13}>2 · l → 2 · R</T>
-  <Cyl x0={20} len={100} d={22.6} cy={175}/><Dim x0={20} len={100} y={200} label="l"/>
-  <T x={136} y={172} size={13}>2 · A → R / 2</T>
+  <Cyl x0={20} len={100} d={16} cy={30}/><Dim x0={20} len={100} y={52} label={<V>l</V>}/>
+  <T x={136} y={35} size={13}><V>l</V>, <V>A</V> → <V>R</V></T>
+  <Cyl x0={20} len={200} d={16} cy={98}/><Dim x0={20} len={200} y={120} label={<>2 · <V>l</V></>}/>
+  <T x={230} y={103} size={13}>2 · <V>l</V> → 2 · <V>R</V></T>
+  <Cyl x0={20} len={100} d={22.6} cy={175}/><Dim x0={20} len={100} y={200} label={<V>l</V>}/>
+  <T x={136} y={172} size={13}>2 · <V>A</V> → <V>R</V> / 2</T>
   <T x={136} y={188} size={11} cls="t-muted">(kétszeres keresztmetszet)</T>
  </Svg>;
 }

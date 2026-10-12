@@ -86,7 +86,7 @@ for(const f of walk('components/calc/islands').filter(f=>!f.endsWith('index.ts')
  const c=closure([resolve(f)]),defs=[...c.files].map(rel).filter(r=>r.startsWith('lib/calc/defs/'));
  assert.equal(defs.length,1,rel(f)+': egy sziget pontosan egy definíciót húz be ('+defs.join(', ')+')');
 }
-// A Tesztek kliensszigete: a kezdeti csomagja (dinamikus importok nélkül) szerverkód nélküli – nincs benne kalkulátordefiníció,
+// A Tesztek kliensszigete: a kezdeti csomagja (dinamikus importok nélkül) szerverkód nélküli – nincs benne kalkulátordefiníció, sablon,
 // méretezési tábla, a Tesztek regisztere vagy kérdésbank-sémája (zod), a kalkulátor- és a Tudástár-regiszter; a kalkulátordefiníciókat
 // (a kalkulátorok saját szigetén át, közös csomaggal) és (élesedés után) a kérdésbank témaköreit csak dinamikus importtal, a közzétett
 // sablonokhoz tölti be (components/quiz/calc-defs.ts, lib/quiz/release/index.ts).
@@ -96,13 +96,33 @@ for(const f of walk('components/calc/islands').filter(f=>!f.endsWith('index.ts')
  // A kezdeti csomag (beállítás, tesztkód, eredmények) a motor, a sablonok és a kalkulátorkód nélkül: a futtatót (quiz-runner.tsx) csak
  // a teszt indításakor tölti be, dinamikus importtal.
  const init=closure([island],{dynamic:false}),files=[...init.files].map(rel);
- for(const r of files)assert.ok(!/^(lib\/(calc\/|sizing|quiz\/(registry|schema|engine|templates)\.ts$|kb\/content\/|kb\/release\.ts$|site-origin\.ts$)|components\/calc\/|components\/quiz\/(quiz-runner|calc-defs))/.test(r),'a Tesztek szigetének kezdeti csomagjában: '+init.chain(resolve(r)));
+ for(const r of files)assert.ok(!/^(lib\/(calc\/|sizing|quiz\/(registry|schema|engine|templates|templates-t1|all-templates)\.ts$|kb\/content\/|kb\/release\.ts$|site-origin\.ts$)|components\/calc\/|components\/quiz\/(quiz-runner|calc-defs))/.test(r),'a Tesztek szigetének kezdeti csomagjában: '+init.chain(resolve(r)));
  for(const p of init.packages)assert.ok(!forbiddenPackage(p)&&p!=='cloudflare:workers','a Tesztek szigetében tiltott csomag: '+p);
  assert.deepEqual(imports(island).filter(i=>!i.typeOnly&&/quiz-runner/.test(i.spec)).map(i=>i.spec),['./quiz-runner'],'a futtató egyszer, dinamikusan');
  assert.match(readFileSync(island,'utf8'),/import\('\.\/quiz-runner'\)/,'a futtató dinamikus importtal');
  // A futtató sem húz be szerverkódot: a kalkulátordefiníciókat a kalkulátorszigeteken át, lustán tölti.
  const run=closure([resolve('components/quiz/quiz-runner.tsx')],{dynamic:false});
- for(const r of [...run.files].map(rel))assert.ok(!/^lib\/(calc\/defs\/|calc\/registry\.ts$|sizing|quiz\/(registry|schema)\.ts$|kb\/content\/|kb\/release\.ts$|site-origin\.ts$)/.test(r),'a Tesztek futtatójában: '+run.chain(resolve(r)));
+ for(const r of [...run.files].map(rel))assert.ok(!/^lib\/(calc\/defs\/|calc\/registry\.ts$|sizing|quiz\/(registry|schema|templates-t1|all-templates)\.ts$|kb\/content\/|kb\/release\.ts$|site-origin\.ts$)/.test(r),'a Tesztek futtatójában: '+run.chain(resolve(r)));
+ // A T1-kalkulátorra épülő (lektorra váró) sablonok csak külön, lustán töltött csomagban: a futtató dinamikusan, és csak akkor tölti be,
+ // ha a szerver valamelyiket közzétettként adja át; statikusan csak a szerveroldali összes-sablon lista (lib/quiz/all-templates.ts) húzza be.
+ assert.deepEqual(imports(resolve('components/quiz/quiz-runner.tsx')).filter(i=>/templates-t1/.test(i.spec)).map(i=>i.spec),['@/lib/quiz/templates-t1'],'quiz-runner: a T1-sablonok egyszer, dinamikusan');
+ assert.match(readFileSync('components/quiz/quiz-runner.tsx','utf8'),/import\('@\/lib\/quiz\/templates-t1'\)/,'quiz-runner: a T1-sablonok dinamikus importtal');
+ for(const f of [...walk('app'),...walk('components'),...walk('lib')]){
+  const r=rel(f);
+  for(const i of imports(f,false).filter(i=>!i.typeOnly)){
+   const t=resolveSpec(f,i.spec),tr=t?rel(t):'';
+   if(tr==='lib/quiz/templates-t1.ts')assert.equal(r,'lib/quiz/all-templates.ts',r+': a T1-sablonokat statikusan csak a lib/quiz/all-templates.ts importálhatja');
+   if(tr==='lib/quiz/all-templates.ts')assert.ok(!r.startsWith('components/'),r+': a lib/quiz/all-templates.ts szerveroldali (a kliens a T0-sablonokat és lustán a T1-et tölti)');
+  }
+ }
+ // A Tesztek szigetét (components/quiz/*) a components/quiz-on kívül csak a tesztoldal importálhatja – így más oldal csomagjába nem kerül.
+ for(const f of [...walk('app'),...walk('components'),...walk('lib')]){
+  const r=rel(f);if(r.startsWith('components/quiz/'))continue;
+  for(const i of imports(f)){
+   const t=resolveSpec(f,i.spec);
+   if(t&&rel(t).startsWith('components/quiz/'))assert.equal(r,'app/(kezikonyv)/tudastar/tesztek/page.tsx',r+' importálja: '+i.spec+' (a Tesztek szigete csak a tesztoldalon töltődhet)');
+  }
+ }
  for(const p of run.packages)assert.ok(!forbiddenPackage(p)&&p!=='cloudflare:workers','a Tesztek futtatójában tiltott csomag: '+p);
  // A sziget csak a components/quiz/calc-defs.ts-en át tölt kalkulátordefiníciót: a kalkulátorok saját szigeteiből (dinamikusan), amelyek
  // pontosan egy definíciót húznak be (fent), és azt exportálják is.

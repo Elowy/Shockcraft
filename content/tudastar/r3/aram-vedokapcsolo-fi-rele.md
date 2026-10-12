@@ -177,7 +177,7 @@ A kétpólusú készülék kapcsai jellemzően 1–2 (fázis) és N–N (nulla),
 ## Régi berendezésben
 
 - **Nincs áram-védőkapcsoló** a dugaljáramkörök előtt.
-- **Közös nulla- és védővezető (PEN, TN-C).** Ilyen szakaszon a FI-relé nem alkalmazható; előtte a PEN-vezetőt N- és PE-vezetőre kell szétválasztani (lásd: [[foldelesi-rendszerek|Földelési rendszerek]]). A szétválasztási pont után a nulla- és a védővezető sehol nem köthető újra össze; a szétválasztás helyéről szakember dönt, a mérőhelynél az elosztói engedélyes szabályai szerint. A „nullázott” dugalj a FI-relé után kioldást okoz.
+- **Közös nulla- és védővezető (PEN, TN-C).** Ilyen szakaszon a FI-relé nem alkalmazható; előtte a PEN-vezetőt N- és PE-vezetőre kell szétválasztani (lásd: [[foldelesi-rendszerek|Földelési rendszerek]]). A szétválasztási pont után a nulla- és a védővezető sehol nem köthető újra össze; a szétválasztás helyéről szakember dönt, a mérőhelynél az elosztói engedélyes szabályai szerint. A „nullázott” dugalj a FI-relé után kioldást okozhat (ha a nullára kötött fémház földelt részhez ér).
 - **AC típusú, régóta nem működtetett készülék,** amelynek a szerkezete beragadhatott.
 - **Közös nullavezetőjű áramkörök,** amelyeket nem lehet szétválasztani a FI-relék között.
 

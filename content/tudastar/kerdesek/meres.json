@@ -492,7 +492,7 @@
     "topic": "meres",
     "difficulty": 1,
     "type": "single",
-    "stem": "Az áramot a vezetőn átfolyó mennyiségként, a feszültséget két pont között mérjük. Melyik bekötés helyes egy fogyasztó áramának és feszültségének méréséhez?",
+    "stem": "Melyik bekötés helyes egy fogyasztó áramának és feszültségének méréséhez?",
     "choices": [
       {
         "id": "a",

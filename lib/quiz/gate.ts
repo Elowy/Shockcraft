@@ -1,7 +1,7 @@
 // TESZTEK KIADÁSI KAPUJA – az EGYETLEN konfigurációs pont, amely eldönti, mi látszik élesben a /tudastar/tesztek oldalon
 // (a cikkeknél ugyanez a lib/kb/release.ts, a kalkulátoroknál a lib/calc/release.ts). Tiszta adat és tiszta szabály (kliensen is futhat).
 //
-// 1. Számolós sablonok (lib/quiz/templates.ts). Egy sablon akkor KÖZZÉTETT (tesztoldal, „Tesztek” fül, „Teszteld magad” linkek, sitemap),
+// 1. Számolós sablonok (lib/quiz/templates.ts, a T1-kalkulátorra épülők: lib/quiz/templates-t1.ts). Egy sablon akkor KÖZZÉTETT (tesztoldal, „Tesztek” fül, „Teszteld magad” linkek, sitemap),
 //    ha (lib/quiz/registry.ts templateInfo → templateState):
 //    - a kalkulátora közzétett a lib/calc/release.ts kapuja szerint (rekord, egyező ujjlenyomat, T1-nél „lektoralt”), és ha a definíció
 //      táblázatalapú (def.tables), tablesApproved() is igaz – ezt a kalkulátor kapujából vezetjük le, sablonlista nincs beégetve;
@@ -34,20 +34,20 @@ export const BLUEPRINT:Readonly<Record<TopicId,number>>={
 
 /** Belső ellenőrzés (a T0-kalkulátoroké mintájára): a helyes válasz runCalc-ból, a tévesztők és a szöveg ellenőrzése a tests/quiz.ts-ben. */
 export type TemplateCheck={kind:'belso';by:string;date:string;fingerprint:string;note:string};
-const NOTE='Belső ellenőrzés: a helyes válasz és a levezetés a közzétett (belsőleg ellenőrzött) kalkulátorból jön (runCalc); a tévesztők megnevezett hibamodellek. Sablononként 10 000 seedes tulajdonságteszt (helyes = runCalc, a válaszok egyediek, legalább 5 %-ban eltérnek, növekvő sorrend, magyar számformátum) és a mintakérdések szövegének átolvasása. Második személy általi ellenőrzés még nem történt.';
-const check=(fingerprint:string):TemplateCheck=>({kind:'belso',by:'Villanyrajz szerkesztőség',date:'2026-10-11',fingerprint,note:NOTE});
+const NOTE='Belső ellenőrzés: a helyes válasz és a levezetés a közzétett (belsőleg ellenőrzött) kalkulátorból jön (runCalc); a tévesztők megnevezett hibamodellek. Sablononként 10 000 seedes tulajdonságteszt (helyes = runCalc, a válaszok egyediek, legalább 5 %-ban eltérnek, növekvő sorrend, magyar számformátum; a helyes válasz helye A–D között egyenként 10–50 %, a számolás nélküli stratégiák legfeljebb 40 %-ot érnek, ikerpár csak 2 × 2 szerkezetben) és a mintakérdések szövegének átolvasása. 2026-10-12: újrarögzítve a független review (pozíciós árulkodás, tévesztő-indoklás, paramétertér, nem törő szóköz) javítása után. Második személy általi ellenőrzés még nem történt.';
+const check=(fingerprint:string):TemplateCheck=>({kind:'belso',by:'Villanyrajz szerkesztőség',date:'2026-10-12',fingerprint,note:NOTE});
 
 export const TEMPLATE_CHECKS:Readonly<Record<string,TemplateCheck>>={
  // A T0 (belsőleg ellenőrzött) kalkulátorokra épülő sablonok.
- 'ohm-aram':check('dda240d1'),
- 'ohm-ellenallas':check('cceeb62a'),
- 'teljesitmeny-1f':check('9d0b635e'),
- 'aram-1f-cosfi':check('2b652fce'),
- 'aram-3f':check('f8b75370'),
- 'vezetek-ellenallas':check('d646e1c8'),
- 'soros-eredo':check('58f6902e'),
- 'parhuzamos-eredo':check('26628a22'),
- 'fogyasztas-koltseg':check('c4b182c7'),
+ 'ohm-aram':check('41a14982'),
+ 'ohm-ellenallas':check('c215153d'),
+ 'teljesitmeny-1f':check('643e884e'),
+ 'aram-1f-cosfi':check('56d2e89b'),
+ 'aram-3f':check('3fb91d7a'),
+ 'vezetek-ellenallas':check('3eaf0298'),
+ 'soros-eredo':check('a6dead3b'),
+ 'parhuzamos-eredo':check('6f2f8d24'),
+ 'fogyasztas-koltseg':check('bdb39967'),
  // T1-kalkulátorra épülő sablonok – rekord csak a kalkulátor lektori kiadása (és táblázatosnál tablesApproved()) után:
  // feszultseges-1f, kismegszakito-valasztas, zs-max.
 };

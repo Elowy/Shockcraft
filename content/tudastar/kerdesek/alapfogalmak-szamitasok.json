@@ -73,7 +73,7 @@
         "why": "A teljesítmény P = U · I, illetve P = U² / R."
       }
     ],
-    "explanation": "Ohm törvénye U = R · I, ebből R = U / I és I = U / R. A teljesítménybe (P = U · I) behelyettesítve P = I² · R és P = U² / R adódik; az U · R és az U · I alakú „ellenállás” mértékegységben sem jön ki (V / A = Ω).",
+    "explanation": "Ohm törvénye U = R · I, ebből R = U / I és I = U / R. A teljesítménybe (P = U · I) behelyettesítve P = I² · R és P = U² / R adódik. Az R = U · I (V · A = W, nem Ω) és a P = U · R (V · Ω, nem W) mértékegységben sem jön ki.",
     "ref": "ohm-torvenye#ohm-torvenye-es-a-teljesitmeny",
     "shuffle": true,
     "review": "lektorra-var",
@@ -695,7 +695,7 @@
         "id": "d",
         "text": "Az eredő 69 Ω, az ellenállások összege",
         "correct": false,
-        "why": "Összeadódni soros kapcsolásban adódnak az ellenállások."
+        "why": "Az ellenállások soros kapcsolásban adódnak össze."
       },
       {
         "id": "e",

@@ -2,7 +2,8 @@
 // validálás, minden hozzáférés try/catch-ben, sérült JSON → alaphelyzet, kivételt dobó tároló → memóriabeli tartalék és jelzés).
 //  - shockcraft-kb-quiz-v1 (localStorage): `results` – legfeljebb 50 teszteredmény; `stats` – kérdésenkénti (sablonnál sablononkénti)
 //    statisztika a „Hibáim” módhoz és a súlyozáshoz (w = h · r).
-//  - shockcraft-kb-quiz-session (sessionStorage): a futó teszt (újratöltés-álló; a lap bezárásával törlődik).
+//  - shockcraft-kb-quiz-session (sessionStorage): a futó vagy befejezett teszt (újratöltés-álló; az „Új teszt”, a megszakítás, egy másik
+//    tesztet kérő link vagy a lap bezárása törli).
 // A „Minden Tudástár-adat törlése” (lib/kb/storage.ts clearAll) mindkettőt törli. Személyes adat nincs benne: csak kérdés-
 // azonosítók, válaszok, pontszámok és időpontok.
 import {KB_KEYS,KB_SESSION_KEYS,createStore,type StorageLike} from '@/lib/kb/storage';
@@ -64,8 +65,9 @@ export type Session={
  cur:number;startedAt:number;
  /** Vizsga: a határidő (ms) vagy null, ha nincs (kikapcsolt) időkorlát; `extended`: hány perccel hosszabbították. */
  deadline:number|null;extended:number;
- /** Befejezett teszt (az eredményoldal is újratöltés-álló); `saved`: az eredmény már a statisztikában van. */
- done:boolean;saved:boolean;
+ /** Befejezett teszt (az eredményoldal is újratöltés-álló); `saved`: az eredmény már a statisztikában van; `expired`: a vizsga ideje
+  * lejárt, a tesztet a program adta be. */
+ done:boolean;saved:boolean;expired?:boolean;
 };
 const MAX_Q=50;
 function validParamsShape(p:unknown):p is Params{
@@ -95,11 +97,13 @@ export function validSession(x:unknown):Session|null{
  if(!(o.checked as unknown[]).every(b=>typeof b==='boolean')||!(o.flagged as unknown[]).every(b=>typeof b==='boolean'))return null;
  if(!int(o.cur,0,n-1)||typeof o.startedAt!=='number'||!Number.isFinite(o.startedAt)||!(o.deadline===null||typeof o.deadline==='number'&&Number.isFinite(o.deadline))||!int(o.extended,0,600)||typeof o.done!=='boolean'||typeof o.saved!=='boolean')return null;
  if(o.code!==undefined&&(typeof o.code!=='string'||!CODE_RE.test(o.code)))return null;
+ if(o.expired!==undefined&&typeof o.expired!=='boolean')return null;
  return {v:1,release:o.release,...(o.code?{code:o.code as string}:{}),mode:o.mode as ResultMode,label:o.label,refs:refs as Ref[],answers:answers as (string[]|null)[],
-  checked:[...o.checked as boolean[]],flagged:[...o.flagged as boolean[]],cur:o.cur as number,startedAt:o.startedAt,deadline:o.deadline as number|null,extended:o.extended as number,done:o.done,saved:o.saved};
+  checked:[...o.checked as boolean[]],flagged:[...o.flagged as boolean[]],cur:o.cur as number,startedAt:o.startedAt,deadline:o.deadline as number|null,extended:o.extended as number,done:o.done,saved:o.saved,...(o.expired?{expired:true}:{})};
 }
 
 const session=():StorageLike|null=>{try{return typeof window!=='undefined'?window.sessionStorage:null}catch{return null}};
+const localStore=():StorageLike|null=>{try{return typeof window!=='undefined'?window.localStorage:null}catch{return null}};
 /** Memóriabeli tartalék, ha a böngésző nem engedi a sessionStorage-et (a teszt így is fut, csak újratöltés után nem folytatható). */
 let memory:string|null=null,sessionBlocked=false;
 export const sessionStorageBlocked=()=>sessionBlocked;
@@ -113,6 +117,13 @@ export function writeSession(s:Session,storage:()=>StorageLike|null=session){
  const raw=JSON.stringify(s);
  try{const st=storage();if(!st)throw new Error('nincs tároló');st.setItem(KB_SESSION_KEYS.quizSession,raw);memory=null;sessionBlocked=false}
  catch{memory=raw;sessionBlocked=true}
+}
+/** Próbaírás a Tesztek saját kulcsaival (a meglévő érték visszaírásával, illetve azonnali törlésével – új kulcs nem jön létre): igaz, ha a
+ * böngésző a localStorage-et vagy a sessionStorage-et nem engedi (privát mód, tiltott tárhely). Így a figyelmeztetés már a beállító
+ * képernyőn látszik, nem csak az első sikertelen mentés után. */
+export function quizStorageBlocked(local:()=>StorageLike|null=localStore,sess:()=>StorageLike|null=session):boolean{
+ const probe=(get:()=>StorageLike|null,key:string)=>{try{const st=get();if(!st)return true;const old=st.getItem(key);st.setItem(key,old??'{}');if(old===null)st.removeItem(key);return false}catch{return true}};
+ return probe(local,KB_KEYS.quiz)||probe(sess,KB_SESSION_KEYS.quizSession);
 }
 export function clearSession(storage:()=>StorageLike|null=session){
  memory=null;

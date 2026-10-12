@@ -13,7 +13,7 @@ import {Sub} from '@/components/calc/sub';
 import {QuizApp} from '@/components/quiz/quiz-app';
 import {CALC_HUB,KB_HOME,OG_BASE,kbSeoTitle} from '@/lib/kb/categories';
 import {PASS_THRESHOLD} from '@/lib/quiz/gate';
-import {QUIZ_PATH,bankState,pendingTemplates,quizClientData,quizPublishedCount,staticSample,templateMeta,visibleTemplates} from '@/lib/quiz/registry';
+import {QUIZ_PATH,bankState,pendingTemplates,quizClientData,quizHref,quizPublishedCount,staticSample,templateMeta,visibleTemplates} from '@/lib/quiz/registry';
 import {QUIZ_NOTICE,TOPICS} from '@/lib/quiz/topics';
 import {kbPreview,siteOrigin} from '@/lib/site-origin';
 
@@ -67,7 +67,7 @@ export default function TesztekPage(){
       <h3 id={'tema-'+g.id}>{g.label}</h3>
       <ul className="kk-related-grid">{g.items.map(m=><li key={m.id}><div className="kk-quiz-type">
        <b>{m.title}{m.draft&&<span className="kk-badge draft">Tervezet</span>}</b><small>{m.short}</small>
-       <span className="kk-quiz-type-links"><a href={QUIZ_PATH+'?feladat='+m.id}>Gyakorlás</a><a href={m.calcHref}><Calculator aria-hidden="true"/>{m.calcTitle}</a>{m.article&&<a href={m.article.href}><BookOpen aria-hidden="true"/>{m.article.title}</a>}</span>
+       <span className="kk-quiz-type-links"><a href={quizHref({feladat:[m.id]})}>Gyakorlás</a><a href={m.calcHref}><Calculator aria-hidden="true"/>{m.calcTitle}</a>{m.article&&<a href={m.article.href}><BookOpen aria-hidden="true"/>{m.article.title}</a>}</span>
       </div></li>)}</ul>
      </section>)}
      {(!!pending.length||!bank.live)&&<p className="kk-muted">Hamarosan – szakmai lektorálás alatt: {pending.length?'számolós feladat a szabványhoz kötött számításokból ('+pending.map(t=>t.title.replace(/ \(.*\)$/,'').toLocaleLowerCase('hu')).join(', ')+'), a kalkulátoruk lektori kiadása után':''}{pending.length&&!bank.live?'; ':''}{!bank.live?'témakörönkénti elméleti kérdések (kapcsolások, védelmi eszközök, érintésvédelem, mérés és a többi), a kérdésbank lektorálása után':''}.</p>}
@@ -79,7 +79,7 @@ export default function TesztekPage(){
       <li><Timer aria-hidden="true"/><span><b>Vizsga:</b> időre megy (kérdésenként másfél perc, kikapcsolható vagy hosszabbítható; 5 és 1 perccel a vége előtt jelzünk), a kérdéstérképen szabadon lépkedhetsz és megjelölhetsz kérdéseket; a válaszokat a végén értékeljük. A lap frissítése után is folytatható.</span></li>
       <li><RotateCcw aria-hidden="true"/><span><b>Hibáim:</b> azok a feladattípusok, amelyeknél korábban hibáztál – új számokkal, a gyakrabban elrontottak nagyobb eséllyel.</span></li>
       <li><Share2 aria-hidden="true"/><span><b>Tesztkód:</b> a teszt linkjét elküldheted; aki megnyitja, ugyanazt a kérdéssort kapja.</span></li>
-      <li><Flag aria-hidden="true"/><span>Saját, nem hivatalos gyakorlási küszöb: {pct} %. Ranglista, tanúsítvány és pontgyűjtés nincs; az eredmény nem igazolás. Az eredményeidet csak ez a böngésző tárolja (legfeljebb 50-et), fiók és süti nélkül; a Menü „Minden Tudástár-adat törlése” gombja ezeket is törli.</span></li>
+      <li><Flag aria-hidden="true"/><span>Saját, nem hivatalos gyakorlási küszöb: {pct+'\u00a0%'}. Ranglista, tanúsítvány és pontgyűjtés nincs; az eredmény nem igazolás. Az eredményeidet csak ez a böngésző tárolja (legfeljebb 50-et), fiók és süti nélkül; a „Kedvencek és előzmények” panel (a fejléc Kedvencek gombjával vagy a Menüből nyílik) „Minden Tudástár-adat törlése” gombja ezeket is törli.</span></li>
       <li><span>Hibás feladatot találtál? Minden kérdés magyarázata alatt előre kitöltött e-mailben jelezheted, vagy írj az <a href="mailto:info@luiz-tech.hu?subject=Tud%C3%A1st%C3%A1r%20teszt%20hiba">info@luiz-tech.hu</a> címre.</span></li>
      </ul>
     </section>

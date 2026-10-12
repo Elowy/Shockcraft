@@ -69,7 +69,7 @@
         "why": "A kék a nullavezető, a zöld-sárga a védővezető színe."
       }
     ],
-    "explanation": "A mai hazai gyakorlatban a fázisvezetők barnák, feketék és szürkék, a bevett sorrend L1 barna, L2 fekete, L3 szürke; a Villanyrajz elosztótervezője is ezt használja. Egyfázisú áramkörben a fázis többnyire barna, akkor is, ha az áramkör az L2-ről vagy az L3-ról kap táplálást.",
+    "explanation": "A mai hazai gyakorlatban a fázisvezetők barnák, feketék és szürkék, a bevett sorrend L1 barna, L2 fekete, L3 szürke. Egyfázisú áramkörben a fázis többnyire barna, akkor is, ha az áramkör az L2-ről vagy az L3-ról kap táplálást.",
     "ref": "vezetekek-szinjelolese#fazisvezetok-barna-fekete-szurke",
     "shuffle": true,
     "review": "lektorra-var",

@@ -11,7 +11,7 @@ import {PASS_THRESHOLD} from '@/lib/quiz/gate';
 import type {QuizClientData,QuizTemplateMeta} from '@/lib/quiz/registry';
 import {BANK_LOADERS} from '@/lib/quiz/release/index';
 import {addResult,mergeStats,statStore,type Session} from '@/lib/quiz/storage';
-import {TEMPLATES} from '@/lib/quiz/templates';
+import {T0_TEMPLATES,T1_TEMPLATE_IDS} from '@/lib/quiz/templates';
 import {QUIZ_NOTICE} from '@/lib/quiz/topics';
 // A levezetés a kalkulátor saját komponense: így a futtató a kalkulátoroldalak meglévő „calculator” csomagját használja, és nem darabolja szét
 // a közös modulokat (lib/calc/core, number, url, sub) külön csomagokra – a kalkulátoroldalak JS-e nem nő (docs/tudastar.md „Tesztek”).
@@ -27,7 +27,9 @@ import {MIN,MODE_LABEL,PATH,randomSeed,toTop} from './quiz-shared';
 let defsLoaded:Record<string,CalcDef>={};
 /** A kérdéskészlet: a szerver által átadott (közzétett) sablonok, a definícióik és a kiadott kérdésbank. Hiba esetén a Promise elutasul. */
 export async function loadPool(data:QuizClientData):Promise<Pool>{
- const templates=TEMPLATES.filter(t=>data.templates.some(m=>m.id===t.id));
+ // A T1-kalkulátorra épülő sablonok külön csomagban: csak akkor töltődnek be, ha a szerver valamelyiket közzétettként adja át.
+ const t1=data.templates.some(m=>(T1_TEMPLATE_IDS as readonly string[]).includes(m.id))?(await import('@/lib/quiz/templates-t1')).T1_TEMPLATES:[];
+ const templates=[...T0_TEMPLATES,...t1].filter(t=>data.templates.some(m=>m.id===t.id));
  const [defs,bank]=await Promise.all([loadDefs([...new Set(templates.map(t=>t.calc))]),
   Promise.all(data.bank.topics.map(t=>t.id).filter(t=>BANK_LOADERS[t]).map(t=>BANK_LOADERS[t]()))]);
  defsLoaded=defs;
@@ -47,15 +49,16 @@ export function mistakesSession(n:number,release:string,pool:Pool):Session|null{
  const refs=buildMistakes(n,statStore.get(),pool,randomSeed());if(!refs.length)return null;
  return {v:1,release,mode:'hibaim',label:'Hibáim · '+refs.length+' kérdés',refs,...blank(refs),startedAt:Date.now(),deadline:null};
 }
-/** A teszt lezárása: kérdésenkénti (sablonnál sablononkénti) statisztika és az eredmény a böngészőbe; a lezárt teszt. */
-export function finishedSession(s:Session,qs:readonly Question[]):Session{
+/** A teszt lezárása: kérdésenkénti (sablonnál sablononkénti) statisztika és az eredmény a böngészőbe; a lezárt teszt. `expired`: az
+ * időkorlát lejárt, a tesztet a program adta be (az eredményoldal jelzi). */
+export function finishedSession(s:Session,qs:readonly Question[],expired=false):Session{
  if(s.done)return s;
  const sc=score(qs,s.answers),now=Date.now();
  const prev=new Map(statStore.get().map(x=>[x.id,x])),next=new Map<string,Stat>();
  qs.forEach((q,i)=>{const st=updateStat(next.get(q.item)??prev.get(q.item),q.item,q.version,isCorrect(q,s.answers[i]),now);next.set(q.item,st)});
  mergeStats([...next.values()]);
  addResult({at:now,mode:s.mode,n:sc.n,ok:sc.ok,pct:sc.pct,pass:sc.pass,label:s.label,...(s.code?{code:s.code}:{})});
- return {...s,done:true,saved:true,cur:0};
+ return {...s,done:true,saved:true,cur:0,...(expired?{expired:true}:{})};
 }
 export const hasMistakes=(pool:Pool)=>mistakeCount(statStore.get(),pool)>0;
 
@@ -70,25 +73,35 @@ const getClock=()=>{if(!clockNow)clockNow=Date.now();return clockNow};
 const noSubscribe=()=>()=>{};
 const pad=(n:number)=>String(n).padStart(2,'0');
 const clock=(ms:number)=>{const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+':'+pad(s%60)};
+/** Szám és százalékjel nem törő szóközzel („60 %”). */
+export const pctText=(n:number)=>n+'\u00a0%';
 
 // ---------------------------------------------------------------------------------------------------- Futó teszt
-export function RunView({sess,qs,metaOf,update,finish,onAbort}:{sess:Session;qs:readonly Question[];metaOf:ReadonlyMap<string,QuizTemplateMeta>;update:(s:Session)=>void;finish:()=>void;onAbort:()=>void}){
+export function RunView({sess,qs,metaOf,update,finish,expire,onAbort}:{sess:Session;qs:readonly Question[];metaOf:ReadonlyMap<string,QuizTemplateMeta>;update:(s:Session)=>void;finish:()=>void;expire:()=>void;onAbort:()=>void}){
  const exam=sess.mode==='vizsga',i=sess.cur,q=qs[i],n=qs.length,answer=sess.answers[i],checked=sess.checked[i];
  const timed=exam&&sess.deadline!==null;
  const now=useSyncExternalStore(timed?subscribeClock:noSubscribe,timed?getClock:()=>0,()=>0);
  const left=timed&&now?sess.deadline!-now:null;
  const [confirm,setConfirm]=useState<'submit'|'abort'|null>(null);
- // A beadás megerősítése a kérdéskártyában jelenik meg; a fókusz (és így a görgetés) az „Igen, beadom” gombra kerül.
- const confirmRef=useRef<HTMLButtonElement>(null);
- useEffect(()=>{if(confirm==='submit')confirmRef.current?.focus()},[confirm]);
+ // Fókuszkezelés (billentyűzet és képernyőolvasó, WCAG 2.4.3): a megerősítés megnyitásakor a fókusz a gombjára kerül (a beadásnál az
+ // „Igen, beadom”, a megszakításnál a biztonságos „Folytatom”), mégsénél vissza a kiváltó gombra; az időkorlát kikapcsolása után az
+ // „Időkorlát nélkül” szövegre. A fókusz így sosem esik vissza a dokumentum elejére (BODY).
+ const confirmRef=useRef<HTMLButtonElement>(null),keepRef=useRef<HTMLButtonElement>(null),abortRef=useRef<HTMLButtonElement>(null),noTimerRef=useRef<HTMLParagraphElement>(null);
+ const returnTo=useRef<HTMLElement|null>(null);
+ // A visszaadandó fókusz célja a következő renderelés után (a kiváltó művelet maga renderel újra; ref, nem állapot).
+ const refocus=useRef<'abort'|'timer'|null>(null);
+ useEffect(()=>{if(confirm==='submit')confirmRef.current?.focus();else if(confirm==='abort')keepRef.current?.focus()},[confirm]);
+ useEffect(()=>{const r=refocus.current;if(!r)return;refocus.current=null;(r==='abort'?abortRef:noTimerRef).current?.focus()});
+ const askSubmit=(e:React.MouseEvent<HTMLElement>)=>{if(!unanswered){finish();return}returnTo.current=e.currentTarget;setConfirm('submit')};
+ const cancelSubmit=()=>{setConfirm(null);const r=returnTo.current;(r?.isConnected?r:headRef.current)?.focus()};
  const headRef=useRef<HTMLHeadingElement>(null);
- const finishRef=useRef(finish);
- useEffect(()=>{finishRef.current=finish});
- // Lejárt idő: automatikus beadás (újratöltés után is, a tárolt határidő szerint).
+ const expireRef=useRef(expire);
+ useEffect(()=>{expireRef.current=expire});
+ // Lejárt idő: automatikus beadás (újratöltés után is, a tárolt határidő szerint); az eredményoldal jelzi, hogy lejárt az idő.
  useEffect(()=>{
   if(!timed)return;
   const deadline=sess.deadline!;
-  const id=setInterval(()=>{if(Date.now()>=deadline)finishRef.current()},1000);
+  const id=setInterval(()=>{if(Date.now()>=deadline)expireRef.current()},1000);
   return ()=>clearInterval(id);
  },[timed,sess.deadline]);
  // Induláskor és kérdésváltáskor a teszt teteje a képernyő tetejére, a fókusz a kérdés címére kerül (képernyőolvasó és billentyűzet).
@@ -109,14 +122,17 @@ export function RunView({sess,qs,metaOf,update,finish,onAbort}:{sess:Session;qs:
    <progress max={n} value={exam?n-unanswered:sess.checked.filter(Boolean).length} aria-label={exam?'Megválaszolt kérdések':'Ellenőrzött kérdések'}/>
    {timed&&<p className={'kk-quiz-timer'+(left!==null&&left<=5*MIN?' low':'')}><Timer aria-hidden="true"/><span><span className="sr-only">Hátralévő idő: </span>{left===null?'–':clock(left)}</span></p>}
   </div>
-  {exam&&sess.deadline!==null&&<p className="kk-quiz-timer-actions"><button type="button" className="kk-link" onClick={()=>set({deadline:sess.deadline!+5*MIN,extended:sess.extended+5})}>Időkorlát +5 perc</button> · <button type="button" className="kk-link" onClick={()=>set({deadline:null})}>Időkorlát kikapcsolása</button></p>}
-  {exam&&sess.deadline===null&&<p className="kk-quiz-timer-actions kk-muted">Időkorlát nélkül{sess.extended?' (hosszabbítva)':''}.</p>}
-  <p className="kk-quiz-alert" aria-live="assertive">{warn&&<><Clock aria-hidden="true"/>{warn}</>}</p>
+  {exam&&sess.deadline!==null&&<p className="kk-quiz-timer-actions"><button type="button" className="kk-link" onClick={()=>set({deadline:sess.deadline!+5*MIN,extended:sess.extended+5})}>Időkorlát +5 perc</button> · <button type="button" className="kk-link" onClick={()=>{refocus.current='timer';set({deadline:null})}}>Időkorlát kikapcsolása</button></p>}
+  {exam&&sess.deadline===null&&<p className="kk-quiz-timer-actions kk-muted" ref={noTimerRef} tabIndex={-1}>Időkorlát nélkül{sess.extended?' (hosszabbítva)':''}.</p>}
+  {/* Élő régió: üresen is az akadálymentességi fában van (CSS: vizuálisan rejtve, nem display:none), így az első jelzés is elhangzik. */}
+  <p className="kk-quiz-alert" aria-live="assertive" aria-atomic="true">{warn&&<><Clock aria-hidden="true"/>{warn}</>}</p>
   <p className="kk-quiz-notice-inline"><ClipboardCheck aria-hidden="true"/>{QUIZ_NOTICE}</p>
   <div className="kk-quiz-card">
    <h2 id="kerdes-cim" ref={headRef} tabIndex={-1}><span className="kk-quiz-num">{i+1}.</span> {q.stem}</h2>
-   <fieldset className="kk-quiz-choices" aria-labelledby="kerdes-cim" aria-describedby={checked?'visszajelzes':undefined}>
-    <legend className="sr-only">Válaszlehetőségek{q.type==='multi'?' (több is jó lehet)':''}</legend>
+   {q.type==='multi'&&<p className="kk-quiz-hint" id="kerdes-tipus">Több válasz is helyes lehet – jelöld meg mindet.</p>}
+   {/* A csoport neve a kérdés (aria-labelledby); a többválaszos jelzés és a visszajelzés leírásként kapcsolódik (a legend itt nem számít). */}
+   <fieldset className="kk-quiz-choices" aria-labelledby="kerdes-cim" aria-describedby={[q.type==='multi'?'kerdes-tipus':'',checked?'visszajelzes':''].filter(Boolean).join(' ')||undefined}>
+    <legend className="sr-only">Válaszlehetőségek</legend>
     {q.choices.map((c,k)=>{
      const picked=!!answer?.includes(c.id),mark=checked?(c.correct?'ok':picked?'bad':''):'';
      return <label key={c.id} className={'kk-quiz-choice'+(picked?' picked':'')+(mark?' '+mark:'')}>
@@ -127,27 +143,29 @@ export function RunView({sess,qs,metaOf,update,finish,onAbort}:{sess:Session;qs:
      </label>;
     })}
    </fieldset>
-   <div aria-live="polite">{checked&&<Feedback q={q} answer={answer} correct={correct} meta={q.source.kind==='tpl'?metaOf.get(q.source.template):undefined} code={sess.code}/>}</div>
+   {/* Udvarias élő régió: csak az ítélet és a helyes válasz hangzik el; a magyarázat, a levezetés és a linkek olvasási sorrendben következnek. */}
+   <p className="sr-only" aria-live="polite" aria-atomic="true">{checked?(correct?'Helyes!':(answer?.length?'Nem helyes.':'Nem válaszoltál.')+' A helyes válasz: '+q.choices.filter(c=>c.correct).map(c=>c.text).join(', ')+'.'):''}</p>
+   {checked&&<Feedback q={q} answer={answer} correct={correct} meta={q.source.kind==='tpl'?metaOf.get(q.source.template):undefined} code={sess.code}/>}
    <div className="kk-quiz-actions">
     {exam?<>
      <button type="button" className="kk-button" onClick={()=>go(i-1)} disabled={i===0}><ArrowLeft aria-hidden="true"/> Előző</button>
      <button type="button" className={'kk-button'+(sess.flagged[i]?' on':'')} aria-pressed={sess.flagged[i]} onClick={()=>set({flagged:sess.flagged.map((f,k)=>k===i?!f:f)})}><Flag aria-hidden="true"/> {sess.flagged[i]?'Megjelölve':'Megjelölés későbbre'}</button>
      {i<n-1?<button type="button" className="kk-button primary" onClick={()=>go(i+1)}>Következő <ArrowRight aria-hidden="true"/></button>
-      :<button type="button" className="kk-button primary" onClick={()=>unanswered?setConfirm('submit'):finish()}>Teszt beadása</button>}
+      :<button type="button" className="kk-button primary" onClick={askSubmit}>Teszt beadása</button>}
     </>:!checked?<button type="button" className="kk-button primary" disabled={!answer?.length} onClick={()=>set({checked:sess.checked.map((c,k)=>k===i||c)})}>Ellenőrzés</button>
      :i<n-1?<button type="button" className="kk-button primary" onClick={()=>go(i+1)}>Következő kérdés <ArrowRight aria-hidden="true"/></button>
-     :<button type="button" className="kk-button primary" onClick={finish}>Eredmény</button>}
+     :<button type="button" className="kk-button primary" onClick={()=>finish()}>Eredmény</button>}
    </div>
-   {confirm==='submit'&&<div className="kk-confirm" role="alertdialog" aria-label="Beadás megerősítése"><span>Még {unanswered} kérdés megválaszolatlan (ezek hibásnak számítanak). Beadod a tesztet?</span><button type="button" className="kk-button primary" ref={confirmRef} onClick={finish}>Igen, beadom</button><button type="button" className="kk-button" onClick={()=>setConfirm(null)}>Vissza a kérdésekhez</button></div>}
+   {confirm==='submit'&&<div className="kk-confirm" role="alertdialog" aria-label="Beadás megerősítése" aria-describedby="beadas-kerdes"><span id="beadas-kerdes">Még {unanswered} kérdés megválaszolatlan (ezek hibásnak számítanak). Beadod a tesztet?</span><button type="button" className="kk-button primary" ref={confirmRef} onClick={()=>finish()}>Igen, beadom</button><button type="button" className="kk-button" onClick={cancelSubmit}>Vissza a kérdésekhez</button></div>}
   </div>
   {exam&&<nav className="kk-quiz-map" aria-label="Kérdéstérkép">
    <p className="kk-muted">Kérdéstérkép · {n-unanswered}/{n} megválaszolva{sess.flagged.some(Boolean)?' · zászló: megjelölve':''}</p>
    <ol>{qs.map((_,k)=>{const done=!!sess.answers[k]?.length,flag=sess.flagged[k];
     return <li key={k}><button type="button" className={(done?'done':'')+(flag?' flag':'')} aria-current={k===i?'step':undefined} onClick={()=>go(k)} aria-label={(k+1)+'. kérdés: '+(done?'megválaszolva':'megválaszolatlan')+(flag?', megjelölve':'')}>{k+1}{flag&&<Flag aria-hidden="true"/>}</button></li>})}</ol>
-   <p><button type="button" className="kk-button" onClick={()=>unanswered?setConfirm('submit'):finish()}>Teszt beadása</button></p>
+   <p><button type="button" className="kk-button" onClick={askSubmit}>Teszt beadása</button></p>
   </nav>}
-  <p className="kk-quiz-abort">{confirm==='abort'?<span className="kk-confirm" role="group" aria-label="Megszakítás megerősítése"><span>Megszakítod a tesztet? Az eddigi válaszok nem kerülnek az eredmények közé.</span><button type="button" className="kk-button danger" onClick={onAbort}>Igen, megszakítom</button><button type="button" className="kk-button" onClick={()=>setConfirm(null)}>Folytatom</button></span>
-   :<button type="button" className="kk-link" onClick={()=>setConfirm('abort')}>Teszt megszakítása</button>}</p>
+  <p className="kk-quiz-abort">{confirm==='abort'?<span className="kk-confirm" role="alertdialog" aria-label="Megszakítás megerősítése" aria-describedby="megszakitas-kerdes"><span id="megszakitas-kerdes">Megszakítod a tesztet? Az eddigi válaszok nem kerülnek az eredmények közé.</span><button type="button" className="kk-button danger" onClick={onAbort}>Igen, megszakítom</button><button type="button" className="kk-button" ref={keepRef} onClick={()=>{refocus.current='abort';setConfirm(null)}}>Folytatom</button></span>
+   :<button type="button" className="kk-link" ref={abortRef} onClick={()=>setConfirm('abort')}>Teszt megszakítása</button>}</p>
  </section>;
 }
 
@@ -184,8 +202,9 @@ export function ResultView({sess,qs,metaOf,onNew,onRepeat,onMistakes,hasMistakes
   catch{showToast('A böngésző nem engedte a másolást. A tesztkód: '+sess.code)}
  }
  return <section className="kk-quiz kk-quiz-result" aria-labelledby="eredmeny-cim">
-  <h2 id="eredmeny-cim" ref={headRef} tabIndex={-1}>Eredmény: {sc.ok}/{sc.n} helyes ({sc.pct} %)</h2>
-  <p className={'kk-verdict '+(sc.pass?'ok':'bad')}>{sc.pass?'Elérted a saját gyakorlási küszöböt ('+Math.round(PASS_THRESHOLD*100)+' %).':'Még nem érted el a saját gyakorlási küszöböt ('+Math.round(PASS_THRESHOLD*100)+' %) – nézd át a magyarázatokat, és próbáld újra!'}</p>
+  <h2 id="eredmeny-cim" ref={headRef} tabIndex={-1}>Eredmény: {sc.ok}/{sc.n} helyes ({pctText(sc.pct)})</h2>
+  {sess.expired&&<p className="kk-callout kk-callout-warn" role="alert"><Clock aria-hidden="true"/>Lejárt az idő – a tesztet automatikusan beadtuk. A megválaszolatlan kérdések hibásnak számítanak.</p>}
+  <p className={'kk-verdict '+(sc.pass?'ok':'bad')}>{sc.pass?'Elérted a saját gyakorlási küszöböt ('+pctText(Math.round(PASS_THRESHOLD*100))+').':'Még nem érted el a saját gyakorlási küszöböt ('+pctText(Math.round(PASS_THRESHOLD*100))+') – nézd át a magyarázatokat, és próbáld újra!'}</p>
   <p className="kk-quiz-notice-inline"><ClipboardCheck aria-hidden="true"/>{QUIZ_NOTICE} A küszöb saját, nem hivatalos érték.</p>
   <p className="kk-muted">{sess.label}{sess.code?' · tesztkód: '+sess.code:''}</p>
   <p className="kk-quiz-actions">

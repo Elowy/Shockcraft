@@ -7,8 +7,8 @@ Az 1. kör (vázlat, 2026-10-11) kérdésbankjához: `content/tudastar/kerdesek/
 1. **R3-függőség.** A 204 kérdésből 103 hivatkozása (`ref`) még nem közzétett R3-vázlatra mutat (feszültségmentesítés, FI-relé, kismegszakító, földelési rendszerek, EPH, dugalj, világítási kapcsolások). Témakörönként: kapcsolások 21/21, munkabiztonság 20/20, földelési rendszerek 19/20, védelmi eszközök 17/22, érintésvédelem 15/20, mérés 7/20, gépek 3/20, kábelek 1/21. Dönteni kell: kiadható-e ilyen kérdés a hivatkozott R3 cikk közzététele előtt (szöveges, link nélküli hivatkozással), vagy csak utána. Az utóbbi esetben a bank-kapu (≥ 150 jóváhagyott, témakörönként ≥ 10) a kapcsolások és a munkabiztonság miatt csak az R3 lektorálása után teljesülhet.
 2. **Biztonsági témakörök.** Az érintésvédelem, a munkabiztonság, a kapcsolások, a földelési rendszerek és a védelmi eszközök kérdései a biztonságos gyakorlatot erősítik (feszültségmentesítés öt szabálya, a fáziskereső nem igazol, a FI-relé csak kiegészítő védelem). A lektor erősítse meg, hogy egyik válasz vagy magyarázat sem olvasható laikusnak szóló szerelési útmutatásként.
 3. **Rögzített sorrendű (számos) kérdések.** A 35 `shuffle: false` egyválasztós kérdésből 27-ben a helyes válasz középső helyen áll, sem az első, sem az utolsó helyen (növekvő számsorrend). Elfogadható-e így, vagy a szerkesztő egyensúlyozza a tévesztőket (több szélső helyes érték)?
-4. **Családok (`family`) témakörök között.** Azonos tudást mérő változatok, amelyek egy tesztben nem fordulhatnak elő együtt: `faziskereso` (q-mer-0001, q-mer-0004, q-mb-0003), `fi-nem-old-ki` (q-ved-0009, q-ev-0008, q-ev-0017), `fi-idotartam` (q-ev-0007, q-mb-0019), `nullazott-dugalj` (q-kap-0019, q-ev-0015, q-fold-0019), `kismegszakito-nem-mentesit` (q-kap-0018, q-mb-0004), `falikapcsolo-nem-levalaszt` (q-kap-0006, q-mb-0005), `pen-nem-bonthato` (q-kap-0014, q-fold-0004), `vedovezeto-szabalyok` (q-kap-0012, q-kab-0004), `fi-b-tipus` (q-ved-0013, q-gep-0017), `fi-probagomb` (q-ved-0014, q-mer-0011), `csucsertek` (q-alap-0005, q-mer-0005), `p-cosfi` (q-alap-0010, q-gep-0012), `aram-3f` (q-alap-0011, q-gep-0013), `nulla-aram` (q-alap-0015, q-kab-0021), `nulla-egyfazis` (q-alap-0016, q-kab-0005). A q-alap-0001 `ohm-aram` családja egyelőre egytagú (a név a számolós sablonéval egyezik). A lektor jelezze, ha két kérdést ennél szorosabban vagy lazábban kell összekötni.
-5. **Termékfüggő kérdés.** A q-kap-0020 a Villanyrajz tervezőjének jelölését kérdezi; a tervező jelölésének változásakor a kérdést is frissíteni kell.
+4. **Családok (`family`) témakörök között.** Azonos tudást mérő változatok, amelyek egy tesztben nem fordulhatnak elő együtt: `faziskereso` (q-mer-0001, q-mer-0004, q-mb-0003), `fi-nem-old-ki` (q-ved-0009, q-ev-0008, q-ev-0017), `fi-idotartam` (q-ev-0007, q-mb-0019), `nullazott-dugalj` (q-kap-0019, q-ev-0015, q-fold-0019), `kismegszakito-nem-mentesit` (q-kap-0018, q-mb-0004), `falikapcsolo-nem-levalaszt` (q-kap-0006, q-mb-0005), `pen-nem-bonthato` (q-kap-0014, q-fold-0004), `vedovezeto-szabalyok` (q-kap-0012, q-kab-0004), `fi-b-tipus` (q-ved-0013, q-gep-0017), `fi-probagomb` (q-ved-0014, q-mer-0011), `jelleggorbe-hurok` (q-ved-0017, q-ev-0006, q-gep-0016), `pen-szakadas-fi` (q-ev-0011, q-fold-0007), `csucsertek` (q-alap-0005, q-mer-0005), `p-cosfi` (q-alap-0010, q-gep-0012), `aram-3f` (q-alap-0011, q-gep-0013), `nulla-aram` (q-alap-0015, q-kab-0021), `nulla-egyfazis` (q-alap-0016, q-kab-0005). A q-alap-0001 `ohm-aram` családja egyelőre egytagú (a név a számolós sablonéval egyezik). A lektor jelezze, ha két kérdést ennél szorosabban vagy lazábban kell összekötni.
+5. **Termékfüggő kérdés – visszavonva.** A q-kap-0020 a Villanyrajz tervezőjének jelölését kérdezte; ez nem villanyszerelői tudás, és a program változatától függ (a szám a PDF-exportban nem is látszik). `retired: true`, a lektori csomagokba nem kerül; a tartalma a tervező súgójába való.
 
 ## Védelmi eszközök
 
@@ -59,3 +59,30 @@ Az 1. kör (vázlat, 2026-10-11) kérdésbankjához: `content/tudastar/kerdesek/
 - **q-mb-0006** – A földelő-rövidzáró eszköz fel- és leszerelési sorrendje, illetve az, hogy kisfeszültségen mikor szükséges (a munka irányítója dönt).
 - **q-mb-0009** – A szomszédos feszültség alatti részek letakarása: a hazai munkabiztonsági szabályzat fogalmaival (feszültség közelében végzett munka) egyezik-e a megfogalmazás.
 - **q-mb-0011** – Elsősegély-jellegű kérdés (112, érintés nélkül, áramtalanítás). A terv 8. pontja szerint az elsősegély-tartalomhoz a hivatalos útmutatóra is hivatkozni kell; jogi és lektori jóváhagyás kell.
+
+## Független ellenőrzés (2026-10-12)
+
+A kérdésbank független ellenőrzése 19 észrevételt tett. Mindegyiket a kérdés szövegével, a Tudástár cikkeivel és az R3-vázlatokkal összevetve igazoltuk.
+
+**Javítva** (a kérdés tartalmi ujjlenyomata megváltozott, jóváhagyás egyiken sem volt):
+
+- **q-mb-0001** – a magyarázat szerint az öt lépés közül „egyik sem hagyható ki”, holott a földelés és rövidrezárás csak ott kötelező, ahol előírt vagy szükséges, a letakarás pedig csak akkor, ha a közelben feszültség alatt maradó rész van. A magyarázat most ezt mondja; a válaszok a sorrendet kérdezik, és változatlanok, mert ha csak a helyes válaszba kerülne „(ahol előírt)”, az elárulná. Az R3-vázlat ellentmondása: `lektori-kerdesek-r3.md`, utolsó szakasz, 1. pont.
+- **q-kap-0012** – a „zöld-sárga ér kizárólag védővezető lehet” állítás ellentmondott a színjelölés-cikknek (védővezető, PEN, EPH). Az új szöveg: „A zöld-sárga ér fázis- vagy nullavezetőként soha nem használható”.
+- **q-ved-0011** – a magyarázat a 10 mA-t követelményként állította be. Most: legfeljebb 30 mA, különleges helyeken esetenként érzékenyebb.
+- **q-fold-0007** – a kérdés a csatlakozó vezeték PEN-szakadásáról szólt, a magyarázat a közös hálózati PEN-ről. A kérdés most mindkét esetet említi, a magyarázat a főkapcsolós mondatot a közös hálózati szakadásra szűkíti.
+- **q-ved-0012** – a 15/30 mA-es kioldási határ szinuszos különbözeti áramra igaz; a kérdés ezt most kimondja.
+- **q-kap-0015** – nem volt egyértelmű, hová került a közös kapocsra szánt ér (ha üresen marad, a tünet más). A kérdés most a két ér felcserélését írja le.
+- **q-fold-0011** – a nagyobb kioldási áramú FI-relé „egyáltalán nem” helyett „jellemzően nem” old ki.
+- **q-fold-0019** – a nullázott kötés a FI-relé után kioldást „okozhat” (ha a fémház földelt részhez ér), nem szükségszerűen.
+- **q-ev-0015** – a nullaszakadás veszélyét a túláramvédelem nem kapcsolja le; az utólag beépített FI-relé legfeljebb az érintés közben old ki.
+- **q-kap-0011** – a kérdés „a cikkben leírt szabályokra” hivatkozott; most önmagában érthető („Melyik megoldás helyes?”).
+- **q-kap-0020** – visszavonva (termékfüggő, lásd az 5. általános pontot).
+- **q-kab-0002** – a magyarázatból kikerült a program elosztótervezőjére utaló, kiadásfüggő tagmondat.
+- **q-alap-0002, q-alap-0020, q-kap-0002** – nyelvi és tartalmi pontosítás a magyarázatban, illetve az indoklásban (mértékegység-érvelés, értelmetlen mondat, „Fordítva nem működik”).
+- **q-mer-0014** – a kérdés első mondata kimondta a választ; törölve.
+- **Családok** – `jelleggorbe-hurok` (q-ved-0017, q-ev-0006, q-gep-0016) és `pen-szakadas-fi` (q-ev-0011, q-fold-0007): a párok egymás válaszát adták meg, így egy teszten belül nem fordulhatnak elő együtt.
+
+**Lektorra bízva:**
+
+- **R3-vázlatok összhangja** – a fenti javítások négy R3-vázlatot is érintenek (feszültségmentesítés, 106-os váltókapcsoló, földelési rendszerek, dugalj és FI-relé). A három egyértelmű pontot a vázlatban is igazítottuk, a feszültségmentesítés „egyik sem hagyható ki” mondatát a lektorra bíztuk: `lektori-kerdesek-r3.md`, utolsó szakasz.
+

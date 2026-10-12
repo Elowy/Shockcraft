@@ -33,7 +33,7 @@ export function quizNeedles(root='.'){
  }
  // Összevetés jelölés nélkül: a vázlat kiemelése (_…_, **…**), a belső link ([[id|szöveg]]) és az alsó index (P_felvett) nem számít.
  const plain=(t)=>t.replace(/\[\[[^\]|]+\|([^\]]+)\]\]/g,'$1').replace(/[*_`]/g,'').replace(/\s+/g,' ');
- const own=plain([...list(join(root,'content/tudastar/elmelet'),/\.md$/),...list(join(root,'lib/calc/defs'),/\.ts$/),join(root,'lib/quiz/templates.ts')]
+ const own=plain([...list(join(root,'content/tudastar/elmelet'),/\.md$/),...list(join(root,'lib/calc/defs'),/\.ts$/),join(root,'lib/quiz/templates.ts'),join(root,'lib/quiz/templates-t1.ts')]
   .filter(existsSync).map(f=>readFileSync(f,'utf8')).join('\n'));
  return [...out].filter(n=>!own.includes(plain(n)));
 }
