@@ -94,10 +94,33 @@
    "at": "EL",
    "terminals": [
     {
-     "id": "PE",
+     "id": "PE-be",
      "role": "PE",
-     "label": "gyűjtőkapocs"
+     "label": "fő védővezető (érkező)"
+    },
+    {
+     "id": "RA",
+     "role": "PE",
+     "label": "földelővezető az RA-hoz"
+    },
+    {
+     "id": "EPH",
+     "role": "PE",
+     "label": "EPH-vezető a vízvezetékhez"
+    },
+    {
+     "id": "PE-ki",
+     "role": "PE",
+     "label": "védővezető a fogyasztóhoz"
     }
+   ],
+   "bridges": [
+    [
+     "PE-be",
+     "RA",
+     "EPH",
+     "PE-ki"
+    ]
    ]
   },
   {
@@ -346,7 +369,7 @@
   {
    "id": "w5",
    "from": "PSZ.PE",
-   "to": "MET.PE",
+   "to": "MET.PE-be",
    "conductor": "PE",
    "role": "PE",
    "color": "zöld-sárga",
@@ -354,7 +377,7 @@
   },
   {
    "id": "w6",
-   "from": "MET.PE",
+   "from": "MET.RA",
    "to": "RA.K",
    "conductor": "földelővezető",
    "role": "PE",
@@ -362,7 +385,7 @@
   },
   {
    "id": "w7",
-   "from": "MET.PE",
+   "from": "MET.EPH",
    "to": "VIZ.K",
    "conductor": "EPH-vezető",
    "role": "PE",
@@ -397,7 +420,7 @@
   },
   {
    "id": "w11",
-   "from": "MET.PE",
+   "from": "MET.PE-ki",
    "to": "M1.PE",
    "conductor": "PE",
    "role": "PE",

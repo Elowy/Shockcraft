@@ -32,18 +32,37 @@ export function r3Needles(root='.'){
  return [...out].filter(n=>!own.includes(n)&&!lib.includes(n));
 }
 
-/** A lektorra váró netlisták feliratai (content/tudastar/r3/*.netlist.json): címek, alkatrész- és kapocsfeliratok a vezetéktábla
- * „alkatrész: kapocs” alakjában – legalább 20 karakter, és nem fordul elő a közzétett vázlatokban. A bekötési ábra (SVG, vezetéktábla)
- * ezekből készül, így a kiszolgált oldalakon és a build kimenetében sem lehetnek (tests/kb-dist.mjs, tests/kb-routes.mjs). */
+/** A lektorra váró netlisták és elrendezések (content/tudastar/r3/*.netlist.json, content/tudastar/diagramok/*.json) minden emberi szövege:
+ * címek, megjegyzések (note, megjegyzes – mondatonként), alkatrész-, kapocs-, szakasz-, állás-, hely- és vezetékfeliratok, az elrendezés
+ * feliratai – legalább 12 karakter, és nem fordul elő a közzétett vázlatokban –, valamint az alkatrész: kapocs alak (a vezetéktábla
+ * sora). A bekötési ábra (SVG, vezetéktábla, jelmagyarázat, állapotszöveg) ezekből készül, így a kiszolgált oldalakon és a build
+ * kimenetében sem lehetnek (tests/kb-dist.mjs, tests/kb-routes.mjs, tests/kb-content.ts). */
+const SKIP_KEYS=new Set(['id','format','netlist','fingerprint','figure','article','color','conductor','role','type','kind','from','to','at','wire','a','b','comp','section','sections_id','version','system','class','unit']);
+function collect(v,out){
+ if(typeof v==='string')out.push(v);
+ else if(Array.isArray(v))for(const x of v)collect(x,out);
+ else if(v&&typeof v==='object')for(const [k,x] of Object.entries(v)){if(!SKIP_KEYS.has(k))collect(x,out)}
+}
+/** Közös szakmai és termékszókincs: a tervező, a katalógus-mintakészlet, az ábramotor és a szimulátor kódjában is előforduló rövid kifejezések
+ * (nem R3 szöveg, kódból nem származtathatók le). A lista csak bővülhet indoklással; egy új netlistafelirat nem kerülhet ide. */
+const COMMON_VOCABULARY=new Set(['elosztón belül','földelőkapocs','érintésvédelmi osztály)','lekapcsolasig','a fogyasztó csatlakozásánál','keresztezett','Csillárkapcsoló']);
 export function netlistNeedles(root='.'){
- const out=new Set();
+ const out=new Set(),add=(t)=>{const x=String(t).replace(/\s+/g,' ').trim();if(x.length>=12&&/[\p{L}]{3}/u.test(x))out.add(x.slice(0,120))};
  for(const f of readdirSync(join(root,'content/tudastar/r3')).filter(f=>f.endsWith('.netlist.json')).sort()){
   const n=JSON.parse(readFileSync(join(root,'content/tudastar/r3',f),'utf8'));
-  out.add(n.title);
-  for(const c of n.components){if(c.label)out.add(c.label);for(const t of c.terminals)out.add((c.label??c.id)+': '+(t.label??t.id))}
+  const all=[];collect(n,all);
+  for(const t of all)for(const sent of t.split(/(?<=[.!?])\s+/))add(sent);
+  for(const c of n.components)for(const t of c.terminals)add((c.label??c.id)+': '+(t.label??t.id));
+ }
+ const ld=join(root,'content/tudastar/diagramok');
+ for(const f of readdirSync(ld).filter(f=>f.endsWith('.json')).sort()){
+  const l=JSON.parse(readFileSync(join(ld,f),'utf8')),all=[];
+  for(const p of Object.values(l.parts??{})){collect(p.label??{},all);collect(p.tt??{},all);collect(p.tl&&Object.fromEntries(Object.entries(p.tl).map(([k,v])=>[k,typeof v==='object'&&!Array.isArray(v)?'':v])),all)}
+  collect(l.places??[],all);collect(l.notes??[],all);
+  for(const t of all)add(t);
  }
  const own=md(join(root,'content/tudastar/elmelet')).map(f=>readFileSync(f,'utf8')).join('\n');
- return [...out].filter(x=>x&&x.length>=20&&!own.includes(x));
+ return [...out].filter(x=>!own.includes(x)&&!COMMON_VOCABULARY.has(x));
 }
 /** A bekötési ábra jelölői a kirajzolt HTML-ben (csak a renderelt SVG-ben fordulnak elő, a kódban nem). */
 export const DIAGRAM_MARKERS=['data-diagram="','data-wire="','data-diagram-figure="'];

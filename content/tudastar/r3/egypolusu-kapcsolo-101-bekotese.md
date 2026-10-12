@@ -16,7 +16,7 @@ calculators: [aram-teljesitmenybol]
 figures:
   - id: abra-1
     netlist: egypolusu-kapcsolo-101-bekotese.netlist.json
-    views: [bekotes, szerelesi-rajz, mukodes]
+    views: [bekotes, mukodes]
 sources:
   - standard: "MSZ HD 60364-5-537 (leválasztás és kapcsolás)"
     kiadás: "2017 (HD 60364-5-537:2016)" # lektor ellenőrizze a honosítás évét és a hatályos kiadást
@@ -46,7 +46,7 @@ updated: 2026-10-10
 
 **Röviden:** Az egypólusú kapcsoló (101) egy lámpát vagy lámpacsoportot kapcsol egy helyről. A fázisvezetőt bontja: a betáp fázisa a kapcsoló egyik kapcsára, a lámpához menő kapcsolt fázis a másikra kerül, a nulla- és a védővezető pedig a kapcsolót elkerülve, a kötődobozban jut a lámpához. Így kikapcsolt állásban a lámpa foglalata nem kap fázist, de ettől még nem feszültségmentes: lámpacseréhez és szereléshez az áramkört az elosztóban kell leválasztani.
 
-[ÁBRA: abra-1 „Egypólusú kapcsoló (101) bekötése kötődobozzal”. Forrás: egypolusu-kapcsolo-101-bekotese.netlist.json (id: egypolusu-kapcsolo-101); a rajz, a vezetéktábla, az ábra desc-je és a Működés nézet is ebből készül, kézzel nem rajzolható át. viewBox 0 0 360 240, elhelyezés a netlista layout mezője szerint. Bekötés nézet: balra fent a betáp (L, N, PE), középen fent a kötődoboz négy vezetékösszekötővel (L, N, PE, kapcsolt fázis), alatta a 101-es kapcsoló két kapoccsal (L, 1), jobbra fent a lámpa (L, N, PE). Minden éren felirat és szín: L barna, kapcsolt fázis fekete, N kék, PE zöld alapon sárga csíkkal; a kapcsolt áramút vastagabb. Szerelési rajz nézet: alaprajzi elrendezés a tervező jeleivel (lámpakiállás, kötődoboz, switch1 jel „1” felirattal), szakaszonként érszám-vonalkákkal (3 / 2 / 3, a szakasztáblázat szerint). Működés nézet: egy billentyűgomb (aria-pressed), kiemelt áramút, szöveges állapot („A lámpa ég” / „A lámpa nem ég”), alatta a kapcsolóállás-táblázat. Alsó sor (.fig-small): „Így látod a tervezőben: a PE egyszínű zöld.” title: „Egypólusú kapcsoló bekötése”; desc: a netlistából generált leírás.]
+[ÁBRA: abra-1 „Egypólusú kapcsoló (101) bekötése kötődobozzal”. Forrás: egypolusu-kapcsolo-101-bekotese.netlist.json (id: egypolusu-kapcsolo-101); a rajz, a vezetéktábla, az ábra desc-je és a Működés nézet is ebből készül, kézzel nem rajzolható át. viewBox 0 0 360 240, elhelyezés a netlista layout mezője szerint. Bekötés nézet: balra fent a betáp (L, N, PE), középen fent a kötődoboz négy vezetékösszekötővel (L, N, PE, kapcsolt fázis), alatta a 101-es kapcsoló két kapoccsal (L, 1), jobbra fent a lámpa (L, N, PE). Minden éren felirat és szín: L barna, kapcsolt fázis fekete, N kék, PE zöld alapon sárga csíkkal; a kapcsolt áramút vastagabb. Működés nézet: egy billentyűgomb (aria-pressed), kiemelt áramút, szöveges állapot („A lámpa ég” / „A lámpa nem ég”), alatta a kapcsolóállás-táblázat. Alsó sor (.fig-small): „Így látod a tervezőben: a PE egyszínű zöld.” title: „Egypólusú kapcsoló bekötése”; desc: a netlistából generált leírás.]
 
 ## Vezetékek táblázatban
 
@@ -102,7 +102,7 @@ A sorrend szakembernek szól, és feszültségmentes állapotot feltételez. Ha 
 
 ## Jelölés az alaprajzon
 
-A Villanyrajz tervezőjében a kapcsoló jele kör egy ferde vonallal, alatta az 1-es számmal. A szám a típusszám utolsó jegye (101 → 1; a 102 → 2, a 105 → 5, a 106 → 6, a 107 → 7). A szerelési rajz a kábel- vagy védőcsőszakaszonként szükséges erek számát mutatja:
+A Villanyrajz tervezőjében a kapcsoló jele kör egy ferde vonallal, alatta az 1-es számmal. A szám a típusszám utolsó jegye (101 → 1; a 102 → 2, a 105 → 5, a 106 → 6, a 107 → 7). A tervező szerelési rajza a kábel- vagy védőcsőszakaszonként szükséges erek számát mutatja:
 
 <!-- sim:szakaszok src=egypolusu-kapcsolo-101-bekotese.netlist.json -->
 | Szakasz | Vezetők | Érszám |

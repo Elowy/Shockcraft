@@ -165,3 +165,18 @@ for(const code of ['I1','I2','I3','I4','I5','I6','I7','I8','I10','I11','I12','I1
  assert.ok(cited>=20,'a cikkek ujjlenyomat-hivatkozásai: '+cited);
 }
 console.log('PASS: TS = Python-szimulátor – 20 netlista ('+states+' állapotkombináció: kimenetek, hálózatok, energizált hálózatok, invariánsok, vezetéktábla), '+ref.mutants.length+' mutáns ('+failing+' FAIL, '+codes.size+' hibakód; PASS/FAIL, kódok, üzenetek és kimenetek azonosak)'+(pyChecked?', a Python-referencia --check-je zöld':', a rögzített referenciával')+'; áramot vivő erek (zsákutca-ág nem: TN-S védővezető hibátlanul, szigetelésfigyelő, földérintés a föld felé).');
+
+// A bekötési ábrák szimulátorának biztonsági szabályai (lib/kb/circuit-rules.ts – a lektori csomag 4. részének „Biztonsági szabályok”
+// blokkja): pontosan azok a kódok szerepelnek a táblában, amelyeket a circuit.ts használ (az S0–S9 egy sorban); minden szabálynak
+// van szövege, hatóköre, és a kódok egyediek.
+{
+ const {CIRCUIT_RULES}=await import('../lib/kb/circuit-rules');
+ const src=readFileSync('lib/kb/circuit.ts','utf8'),used=new Set<string>();
+ for(const m of src.matchAll(/(?:viol|err)\('([ISE]\d{1,2})'|\['(I\d{1,2})'/g)){const c=m[1]??m[2];used.add(/^S\d/.test(c)?'S':c)}
+ for(const m of src.matchAll(/'(I\d{1,2})'/g))used.add(m[1]);
+ const listed=CIRCUIT_RULES.map(r=>r.code);
+ assert.equal(new Set(listed).size,listed.length,'a szabálykódok egyediek');
+ assert.deepEqual([...used].sort(),[...listed].sort(),'a circuit.ts kódjai = a szabálytábla kódjai: '+[...used].filter(x=>!listed.includes(x)).concat(listed.filter(x=>!used.has(x))).join(', '));
+ for(const r of CIRCUIT_RULES)assert.ok(r.text.length>=40&&r.title&&r.applies,r.code+': a szabálynak van szövege');
+ console.log('PASS: '+CIRCUIT_RULES.length+' biztonsági szabály a lektori csomag számára (a szimulátor kódjaival egyezik)');
+}

@@ -16,7 +16,7 @@ calculators: [aram-teljesitmenybol]
 figures:
   - id: abra-1
     netlist: kettos-valtokapcsolo-106-6-bekotese.netlist.json
-    views: [bekotes, szerelesi-rajz, mukodes]
+    views: [bekotes, mukodes]
 sources:
   - standard: "MSZ HD 60364-5-537 (leválasztás és kapcsolás)"
     kiadás: "2017 (HD 60364-5-537:2016)" # lektor ellenőrizze a honosítás évét és a hatályos kiadást
@@ -43,7 +43,7 @@ updated: 2026-10-10
 
 **Röviden:** A kettős váltókapcsoló (106+6) két egymástól független váltókapcsoló egy szerelvényben, két billentyűvel. Két ilyen kapcsolóval két lámpa kapcsolható, mindkettő két helyről, például a lépcső és a folyosó világítása a lépcső aljáról és tetejéről. Mindkét lámpakörhöz saját váltóvezeték-pár tartozik, a két kör csak a betápon osztozik.
 
-[ÁBRA: abra-1 „Két lámpa két helyről, kettős váltókapcsolókkal”. Forrás: kettos-valtokapcsolo-106-6-bekotese.netlist.json (id: kettos-valtokapcsolo-106-6); a rajz, a vezetéktábla, az ábra desc-je és a Működés nézet is ebből készül. viewBox 0 0 380 240. Bekötés nézet: balra fent a betáp (L, N, PE), középen fent a kötődoboz kilenc vezetékösszekötővel (L, N, PE, 1a, 2a, 1b, 2b, 1. lámpa, 2. lámpa), alul balra K1 (A hely), alul jobbra K2 (B hely), mindkettőn C1, 1a, 2a és C2, 1b, 2b kapocs, a két billentyű halványan elválasztva; K1-en a C1–C2 áthidaló külön kiemelve „áthidaló” felirattal; jobbra fent az 1. és a 2. lámpa (L, N, PE). Erek: L és áthidaló barna, váltóvezetékek szürkék („1a”, „2a”, „1b”, „2b” felirattal), kapcsolt fázisok feketék („1”, „2”), N kék, PE zöld alapon sárga csíkkal. Szerelési rajz nézet: a tervező két switch6 jele („6” felirat), egy kötődoboz és két lámpakiállás, érszám 3 / 5 / 6 / 3 / 3. Működés nézet: négy billentyűgomb (K1 és K2, billentyűnként; aria-pressed), lámpánként kiemelt áramút és szöveges állapot. Alsó sor: „Így látod a tervezőben: a PE egyszínű zöld.”]
+[ÁBRA: abra-1 „Két lámpa két helyről, kettős váltókapcsolókkal”. Forrás: kettos-valtokapcsolo-106-6-bekotese.netlist.json (id: kettos-valtokapcsolo-106-6); a rajz, a vezetéktábla, az ábra desc-je és a Működés nézet is ebből készül. viewBox 0 0 380 240. Bekötés nézet: balra fent a betáp (L, N, PE), középen fent a kötődoboz kilenc vezetékösszekötővel (L, N, PE, 1a, 2a, 1b, 2b, 1. lámpa, 2. lámpa), alul balra K1 (A hely), alul jobbra K2 (B hely), mindkettőn C1, 1a, 2a és C2, 1b, 2b kapocs, a két billentyű halványan elválasztva; K1-en a C1–C2 áthidaló külön kiemelve „áthidaló” felirattal; jobbra fent az 1. és a 2. lámpa (L, N, PE). Erek: L és áthidaló barna, váltóvezetékek szürkék („1a”, „2a”, „1b”, „2b” felirattal), kapcsolt fázisok feketék („1”, „2”), N kék, PE zöld alapon sárga csíkkal. Működés nézet: négy billentyűgomb (K1 és K2, billentyűnként; aria-pressed), lámpánként kiemelt áramút és szöveges állapot. Alsó sor: „Így látod a tervezőben: a PE egyszínű zöld.”]
 
 ## Vezetékek táblázatban
 
@@ -123,7 +123,7 @@ A sorrend szakembernek szól, és feszültségmentes állapotot feltételez. Ha 
 
 ## Jelölés az alaprajzon
 
-A tervezőben a kettős váltókapcsoló is a váltókapcsoló jelét kapja (kör két ferde vonallal, alatta a 6-os szám); hogy kettős kivitelű, azt a szerelvény neve vagy megjegyzése rögzíti. A szerelési rajz szakaszonként mutatja az erek számát:
+A tervezőben a kettős váltókapcsoló is a váltókapcsoló jelét kapja (kör két ferde vonallal, alatta a 6-os szám); hogy kettős kivitelű, azt a szerelvény neve vagy megjegyzése rögzíti. A tervező szerelési rajza szakaszonként mutatja az erek számát:
 
 <!-- sim:szakaszok src=kettos-valtokapcsolo-106-6-bekotese.netlist.json -->
 | Szakasz | Vezetők | Érszám |

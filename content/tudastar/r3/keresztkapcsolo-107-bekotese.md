@@ -16,7 +16,7 @@ calculators: [aram-teljesitmenybol]
 figures:
   - id: abra-1
     netlist: keresztkapcsolo-107-bekotese.netlist.json
-    views: [bekotes, szerelesi-rajz, mukodes]
+    views: [bekotes, mukodes]
     variants:
       - keresztkapcsolo-107-bekotese-2x107.netlist.json
       - keresztkapcsolo-107-bekotese-3x107.netlist.json
@@ -47,7 +47,7 @@ updated: 2026-10-10
 
 **Röviden:** Három vagy több helyről úgy kapcsolható egy lámpa, hogy a két szélső helyre váltókapcsoló (106), minden közbenső helyre egy keresztkapcsoló (107) kerül. A keresztkapcsoló a két váltóvezetéket egyenesen vagy keresztezve vezeti tovább, ezért bármelyik kapcsoló átváltása megfordítja a lámpa állapotát. Három helyhez tehát két 106-os és egy 107-es kapcsoló kell, minden további helyhez még egy 107-es.
 
-[ÁBRA: abra-1 „Keresztkapcsolás: 106 + 107 + 106”. Forrás: keresztkapcsolo-107-bekotese.netlist.json (id: keresztkapcsolo-107); a változatválasztó (1–4 db 107) a -2x107, -3x107 és -4x107 netlistát tölti be. Mindegyikből készül a rajz, a vezetéktábla, az ábra desc-je és a Működés nézet. viewBox 0 0 380 240. Bekötés nézet: balra fent a betáp (L, N, PE), középen fent a kötődoboz (L, N, PE, 1a–2a, 1b–2b, kapcsolt fázis), alul balról jobbra K1 (106: C, 1, 2), X1 (107: A1, A2 felül, B1, B2 alul, a két belső állást két vékony segédvonal jelzi), K2 (106); jobbra fent a lámpa. Erek: L barna, váltóvezetékek szürkék („1a”, „2a”, „1b”, „2b” felirattal), kapcsolt fázis fekete, N kék, PE zöld alapon sárga csíkkal; az aktuális áramút vastagabb. Szerelési rajz nézet: két switch6 és egy switch7 jel („6”, „7”, „6” felirat), kötődoboz, lámpakiállás; érszám 3 / 3 / 4 / 3 / 3. Működés nézet: gombonként egy kapcsoló (aria-pressed; a 107-esnél „egyenes” / „keresztezett” felirat), kiemelt áramút, szöveges állapot, alatta a kapcsolóállás-táblázat. Alsó sor: „Így látod a tervezőben: a PE egyszínű zöld.”]
+[ÁBRA: abra-1 „Keresztkapcsolás: 106 + 107 + 106”. Forrás: keresztkapcsolo-107-bekotese.netlist.json (id: keresztkapcsolo-107); a -2x107, -3x107 és -4x107 netlista (2–4 db 107) változatként, az első ábra alatt, saját nézetváltóval jelenik meg („1. ábra, 2. változat” stb.; változatválasztó nincs – mind a négy változat látszik). Mindegyikből készül a rajz, a vezetéktábla, az ábra desc-je és a Működés nézet. viewBox 0 0 380 240. Bekötés nézet: balra fent a betáp (L, N, PE), középen fent a kötődoboz (L, N, PE, 1a–2a, 1b–2b, kapcsolt fázis), alul balról jobbra K1 (106: C, 1, 2), X1 (107: A1, A2 felül, B1, B2 alul, a két belső állást két vékony segédvonal jelzi), K2 (106); jobbra fent a lámpa. Erek: L barna, váltóvezetékek szürkék („1a”, „2a”, „1b”, „2b” felirattal), kapcsolt fázis fekete, N kék, PE zöld alapon sárga csíkkal; az aktuális áramút vastagabb. Működés nézet: gombonként egy kapcsoló (aria-pressed; a 107-esnél „egyenes” / „keresztezett” felirat), kiemelt áramút, szöveges állapot, alatta a kapcsolóállás-táblázat. Alsó sor: „Így látod a tervezőben: a PE egyszínű zöld.”]
 
 ## Vezetékek táblázatban
 
@@ -129,7 +129,7 @@ A sorrend szakembernek szól, és feszültségmentes állapotot feltételez. Ha 
 
 ## Jelölés az alaprajzon
 
-A tervezőben a keresztkapcsoló jele kör két ferde vonallal, alatta a 7-es számmal (107 → 7); a két szélső helyen a váltókapcsoló 6-os jele áll. A szerelési rajz szakaszonként mutatja az erek számát:
+A tervezőben a keresztkapcsoló jele kör két ferde vonallal, alatta a 7-es számmal (107 → 7); a két szélső helyen a váltókapcsoló 6-os jele áll. A tervező szerelési rajza szakaszonként mutatja az erek számát:
 
 <!-- sim:szakaszok src=keresztkapcsolo-107-bekotese.netlist.json -->
 | Szakasz | Vezetők | Érszám |

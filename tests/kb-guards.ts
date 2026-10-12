@@ -197,6 +197,15 @@ for(const f of ['app/(kezikonyv)/kalkulatorok/[slug]/page.tsx','app/(kezikonyv)/
  const readers=[...walk('scripts'),...walk('tests')].filter(f=>/\.netlist\.json/.test(readFileSync(f,'utf8'))).map(rel).sort();
  assert.ok(readers.every(f=>/^(scripts|tests)\//.test(f))&&readers.includes('scripts/kb-content/diagrams.ts'),'a netlistát a generátor olvassa: '+readers.join(', '));
 }
+// Az éles build előfeltétele a Tudástár kapuja és a lektori csomag (scripts/build-guard.mjs): a generált ábra-ujjlenyomat elavulása
+// (pl. módosított symbols.tsx újragenerálás nélkül) így nem jut ki lektorált jelvénnyel; mindkét build-belépő hívja.
+{
+ const guard=readFileSync('scripts/build-guard.mjs','utf8');
+ assert.ok(/scripts\/kb-content\.ts['"],\s*['"]check/.test(guard)&&/scripts\/lektori-csomag\.ts['"],\s*['"]--check/.test(guard),'a build-őr a kb-content check-et és a lektori-csomag --check-et futtatja');
+ assert.ok(/process\.exit\(r\.status\?\?1\)/.test(guard),'hibakóddal áll meg');
+ assert.match(readFileSync('scripts/run-framework.mjs','utf8'),/command === "build"[\s\S]{0,160}runBuildGuard\(\)/,'a Sites build a build-őrt hívja');
+ assert.match(readFileSync('scripts/build-node.mjs','utf8'),/import \{runBuildGuard\} from '\.\/build-guard\.mjs';[\s\S]*runBuildGuard\(\);/,'a Node build a build-őrt hívja');
+}
 // A Tudástár minden útvonala a kézikönyv-csoportban van (közös keret, CSP-fejlécek, nincs fiók-/adatbázis-hívás).
 assert.ok(!existsSync('app/tudastar'),'a Tudástár-útvonalak az app/(kezikonyv) csoportban vannak');
 for(const f of walk('app/(kezikonyv)/tudastar'))assert.ok(!/['"]use client['"]/.test(readFileSync(f,'utf8').slice(0,40)),rel(f)+': a Tudástár-oldal szerverkomponens');

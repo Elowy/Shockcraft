@@ -16,7 +16,7 @@ calculators: [aram-teljesitmenybol]
 figures:
   - id: abra-1
     netlist: csillarkapcsolo-105-bekotese.netlist.json
-    views: [bekotes, szerelesi-rajz, mukodes]
+    views: [bekotes, mukodes]
 sources:
   - standard: "MSZ HD 60364-5-537 (leválasztás és kapcsolás)"
     kiadás: "2017 (HD 60364-5-537:2016)" # lektor ellenőrizze a honosítás évét és a hatályos kiadást
@@ -43,7 +43,7 @@ updated: 2026-10-10
 
 **Röviden:** A csillárkapcsoló (105) egy szerelvényben, két billentyűvel két lámpakört kapcsol egy helyről, közös betáppal: egy fázis megy be, két kapcsolt fázis jön ki. Jellemzően egy több fényforrásos csillár két csoportját vagy egy helyiség két lámpáját kapcsolja. A lámpáig négy ér kell: két kapcsolt fázis, a nullavezető és a védővezető.
 
-[ÁBRA: abra-1 „Csillárkapcsoló (105) bekötése”. Forrás: csillarkapcsolo-105-bekotese.netlist.json (id: csillarkapcsolo-105); a rajz, a vezetéktábla, az ábra desc-je és a Működés nézet is ebből készül. viewBox 0 0 380 240. Bekötés nézet: balra fent a betáp (L, N, PE), középen fent a kötődoboz öt vezetékösszekötővel (L, N, PE, 1. kör, 2. kör), alatta a 105-ös kapcsoló három kapoccsal (L, 1, 2), jobbra fent a csillár sorkapcsa (1, 2, N, PE), alatta két kis lámpajel „1. csoport” és „2. csoport” felirattal, a csillár belső vezetékeivel. Erek: L barna, 1. kör kapcsolt fázisa fekete „1” felirattal, 2. kör szürke „2” felirattal, N kék, PE zöld alapon sárga csíkkal. Szerelési rajz nézet: a tervező switch5 jele („5” felirat), kötődoboz és lámpakiállás; érszám 3 / 3 / 4. Működés nézet: két billentyűgomb (aria-pressed), csoportonként kiemelt áramút és szöveges állapot. Alsó sor: „Így látod a tervezőben: a PE egyszínű zöld.”]
+[ÁBRA: abra-1 „Csillárkapcsoló (105) bekötése”. Forrás: csillarkapcsolo-105-bekotese.netlist.json (id: csillarkapcsolo-105); a rajz, a vezetéktábla, az ábra desc-je és a Működés nézet is ebből készül. viewBox 0 0 380 240. Bekötés nézet: balra fent a betáp (L, N, PE), középen fent a kötődoboz öt vezetékösszekötővel (L, N, PE, 1. kör, 2. kör), alatta a 105-ös kapcsoló három kapoccsal (L, 1, 2), jobbra fent a csillár sorkapcsa (1, 2, N, PE), alatta két kis lámpajel „1. csoport” és „2. csoport” felirattal, a csillár belső vezetékeivel. Erek: L barna, 1. kör kapcsolt fázisa fekete „1” felirattal, 2. kör szürke „2” felirattal, N kék, PE zöld alapon sárga csíkkal. Működés nézet: két billentyűgomb (aria-pressed), csoportonként kiemelt áramút és szöveges állapot. Alsó sor: „Így látod a tervezőben: a PE egyszínű zöld.”]
 
 ## Vezetékek táblázatban
 
@@ -107,7 +107,7 @@ A sorrend szakembernek szól, és feszültségmentes állapotot feltételez. Ha 
 
 ## Jelölés az alaprajzon
 
-A tervezőben a csillárkapcsoló jele kör két ferde vonallal, alatta az 5-ös számmal (105 → 5). A szerelési rajz szakaszonként mutatja az erek számát:
+A tervezőben a csillárkapcsoló jele kör két ferde vonallal, alatta az 5-ös számmal (105 → 5). A tervező szerelési rajza szakaszonként mutatja az erek számát:
 
 <!-- sim:szakaszok src=csillarkapcsolo-105-bekotese.netlist.json -->
 | Szakasz | Vezetők | Érszám |

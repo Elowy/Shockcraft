@@ -38,7 +38,7 @@
    "y":250,
    "w":548,
    "h":8,
-   "terms":{"E":[490,250]},
+   "terms":{"E":[526,250]},
    "tt":{"E":""},
    "label":{"at":[550,272],"anchor":"end","lines":["Föld (talaj)"]}
   },
@@ -50,7 +50,7 @@
    "side":"left",
    "terms":{"N":[440,36],"L":[440,56],"PE":[440,84]},
    "opt":{"bx":508},
-   "label":{"at":[490,118],"lines":["M1 fémházas","fogyasztó"]}
+   "label":{"at":[444,118],"anchor":"start","lines":["M1 fémházas","fogyasztó"]}
   },
   "H1":{
    "x":456,
@@ -124,9 +124,9 @@
   "w8":[360,150],
   "w9":[320,168]
  },
- "touch":{"U1":{"pts":[[490,104],[490,250]],"at":[496,190]}},
+ "touch":{"U1":{"pts":[[526,104],[526,250]],"at":[532,190]}},
  "places":[
-  {"x":6,"y":22,"w":124,"h":222,"label":"Transzformátorállomás","at":[8,15]},
-  {"x":150,"y":22,"w":262,"h":222,"label":"Épület – csatlakozás és elosztó","at":[152,15]}
+  {"x":6,"y":18,"w":124,"h":226,"label":"Transzformátorállomás","at":[8,12]},
+  {"x":150,"y":18,"w":262,"h":226,"label":"Épület – csatlakozás és elosztó","at":[152,12]}
  ]
 }

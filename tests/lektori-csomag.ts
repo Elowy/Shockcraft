@@ -12,10 +12,14 @@ import {mainResults,parseInputs,runCalc,type Raw} from '../lib/calc/core';
 import {CALCULATORS,bySlug,calcFingerprint} from '../lib/calc/registry';
 import {T1_SLUGS,TABLE_GATED,type ExpertReview} from '../lib/calc/release';
 import {sourceFingerprint} from '../scripts/calc-source';
-import {DIAGRAM_ORDER,EDITION,EDITIONS,ID_PREFIXES,articleDiagrams,bekId,calcBadgeTexts,cssColor,diagramPairs,diagramRefProblems,ID_REF,NAME_PLACES,PARTS,PATHS,PDF_PLACEHOLDERS,T1_ORDER,allIds,allItems,approvedFingerprints,approvedTexts,assumptionsText,buildPackage,pdfDiagramStyles,pdfInline,calcPairs,checkOutputs,committedEditions,contentFingerprint,declaration,editionLabel,editionProblems,eol,exact,formulasText,kalId,leafPaths,notCoveredFrom,packageProblems,packageTexts,parseEditions,partFingerprint,pdfText,r3Questions,readFont,releaseRefProblems,render,reviewRefProblems,selectCombos,verifiedText,type CalcExpect,type CommittedEdition,type Edition,type Expect,type Package,type ProgramCheck,type RuleItem,type Scenario} from '../scripts/lektori-csomag';
+import {DIAGRAM_ORDER,EDITION,EDITIONS,ID_PREFIXES,articleDiagrams,bekId,calcBadgeTexts,cssColor,diagramPairs,diagramRefProblems,ID_REF,NAME_PLACES,PARTS,PATHS,PDF_PLACEHOLDERS,T1_ORDER,allIds,allItems,approvedFingerprints,approvedTexts,assumptionsText,buildPackage,pdfDiagramStyles,pdfInline,calcPairs,checkOutputs,committedEditions,contentFingerprint,declaration,editionLabel,editionProblems,eol,exact,formulasText,kalId,leafPaths,notCoveredFrom,packageProblems,packageTexts,parseEditions,partFingerprint,pdfText,r3Questions,r3QuestionSections,INTERNAL_NOTES,questionProblems,ARTICLES_FROM,PDF_MIN_LABEL_PT,articlePairs,articleRefProblems,figureRef,pdfProblems,renderPdf,readFont,releaseRefProblems,render,reviewRefProblems,selectCombos,verifiedText,type CalcExpect,type CommittedEdition,type Edition,type Expect,type Package,type ProgramCheck,type RuleItem,type Scenario} from '../scripts/lektori-csomag';
 import {loadNetlist,netlistFingerprint,runNetlist,wireTable,type Netlist} from '../lib/kb/circuit';
 import {diagramSource,netlistFiles} from '../scripts/kb-content/diagrams';
 import type {KbRelease} from '../lib/kb/release';
+import {CIRCUIT_RULES} from '../lib/kb/circuit-rules';
+import {articleFromDraft} from '../scripts/kb-content/generate';
+import {BLOCKED,articleId,flatten,r3Articles} from '../scripts/lektori-csomag-cikkek';
+import {r3RecordGaps} from '../lib/kb/content/gate';
 
 const pkg=buildPackage(),font=readFont(),out=render(pkg,font),md=out.md;
 const T=SIZING_TABLES;
@@ -27,11 +31,15 @@ assert.equal(EDITION.content,pkg.fingerprints.content,'tartalmi változásnál �
 assert.deepEqual(editionProblems(pkg,null),[],'az EDITIONS előzménylista érvényes');
 // A nem tervezet kiadás bejegyzése részenként rögzíti a jóváhagyható ujjlenyomatokat (a jóváhagyások ehhez kötődnek).
 assert.ok(!EDITION.draft,'az aktuális kiadás kiküldhető (nem tervezet)');
-assert.deepEqual([EDITION.tables,EDITION.formulas,EDITION.calcs,EDITION.diagrams],[pkg.fingerprints.tables,pkg.fingerprints.formulas,calcPairs(pkg),diagramPairs(pkg)]);
+assert.deepEqual([EDITION.tables,EDITION.formulas,EDITION.calcs,EDITION.diagrams,EDITION.articles],[pkg.fingerprints.tables,pkg.fingerprints.formulas,calcPairs(pkg),diagramPairs(pkg),articlePairs(pkg)]);
 // Az LK-4 az 1–3. részt változatlanul hozza (a 3. rész kalkulátoronkénti ujjlenyomat-párjai és az 1–2. rész ujjlenyomata azonos az LK-3-éval).
 {const lk3=EDITIONS.find(e=>e.number===3)!;assert.ok(EDITION.number>=4&&lk3.tables===EDITION.tables&&lk3.formulas===EDITION.formulas&&JSON.stringify(lk3.calcs)===JSON.stringify(EDITION.calcs),'az 1–3. rész változatlan')}
 assert.ok(editionProblems(pkg,null,[...EDITIONS.slice(0,-1),{...EDITION,diagrams:undefined}]).some(p=>p.includes('ábránkénti ujjlenyomat-pár')),'az LK-4-től kötelező a diagrams');
 assert.ok(editionProblems(pkg,null,[...EDITIONS.slice(0,-1),{...EDITION,diagrams:{...EDITION.diagrams,'valtokapcsolo-106':'00000000/00000000'}}]).some(p=>p.includes('eltérnek az LK-')),'az ábra ujjlenyomat-párja is a bejegyzés része');
+assert.ok(ARTICLES_FROM===4&&EDITION.number>=ARTICLES_FROM);
+assert.ok(editionProblems(pkg,null,[...EDITIONS.slice(0,-1),{...EDITION,articles:undefined}]).some(p=>p.includes('cikkenkénti tartalmi ujjlenyomat')),'az LK-4-től kötelező az articles');
+assert.ok(editionProblems(pkg,null,[...EDITIONS.slice(0,-1),{...EDITION,articles:{...EDITION.articles,kismegszakito:'00000000'}}]).some(p=>p.includes('eltérnek az LK-')),'a cikk ujjlenyomata is a bejegyzés része');
+assert.ok(editionProblems(pkg,null,[...EDITIONS.slice(0,-1),{...EDITION,articles:{...EDITION.articles,kismegszakito:'xyz'}}]).some(p=>p.includes('cikkenkénti tartalmi ujjlenyomat')),'érvénytelen cikk-ujjlenyomat');
 assert.ok(EDITIONS.filter(e=>e.number<=2).every(e=>e.draft&&e.sent===undefined),'az LK-1 és az LK-2 belső tervezet');
 // A git HEAD-ben lévő EDITIONS: a korábbi és a kiküldött (sent) kiadás nem írható át, a kiadásszám nem mehet vissza; csak a még ki
 // nem küldött utolsó kiadás tartalma változhat (pl. a commitolt, de lektornak még nem küldött LK-3).
@@ -68,7 +76,7 @@ const matrixChanged=structuredClone(pkg) as Package;
 matrixChanged.parts[0].blocks.find(b=>b.matrix)!.matrix!.rows[0].cells[0]='999';
 assert.notEqual(contentFingerprint(matrixChanged.parts),pkg.fingerprints.content,'mátrix → csomag-ujjlenyomat');
 const texts=packageTexts();
-assert.notEqual(contentFingerprint(pkg.parts,{...texts,approval:{...texts.approval,declaration:texts.approval.declaration.replace('nem terjed ki a csomag 5–6. részére','kiterjed a csomag 5–6. részére is')}}),pkg.fingerprints.content,'nyilatkozat → csomag-ujjlenyomat');
+assert.notEqual(contentFingerprint(pkg.parts,{...texts,approval:{...texts.approval,declaration:texts.approval.declaration.replace('nem terjed ki a csomag 6. részére','kiterjed a csomag 6. részére is')}}),pkg.fingerprints.content,'nyilatkozat → csomag-ujjlenyomat');
 assert.notEqual(contentFingerprint(pkg.parts,{...texts,approval:{...texts.approval,calcNote:texts.approval.calcNote+' '}}),pkg.fingerprints.content,'kalkulátoronkénti döntés szövege → csomag-ujjlenyomat');
 assert.notEqual(contentFingerprint(pkg.parts,{...texts,intro:texts.intro.slice(1)}),pkg.fingerprints.content,'bevezető → csomag-ujjlenyomat');
 // CRLF-es klónban sem jelez hamisan elavultat.
@@ -123,7 +131,7 @@ assert.ok(md.includes(`| Csomagverzió | ${editionLabel()} |`));
 
 // (e) A PDF legenerálható, determinisztikus, ésszerű terjedelmű, és minden kiírt karakter szerepel a betűkészletben.
 assert.ok(out.pdf.length>20000,'PDF mérete: '+out.pdf.length);
-assert.ok(out.pages>=80&&out.pages<=160,'PDF oldalszáma: '+out.pages);
+assert.ok(out.pages>=120&&out.pages<=260,'PDF oldalszáma: '+out.pages);
 assert.ok(out.pdf.equals(render(pkg,font).pdf),'a PDF determinisztikus');
 assert.ok(out.pdf.subarray(0,5).toString()==='%PDF-');
 assert.ok(md.includes(declaration(out.pages))&&declaration(out.pages).includes(`${out.pages} oldalas`),'a nyilatkozat a PDF oldalszámát rögzíti');
@@ -310,8 +318,8 @@ assert.deepEqual(releaseRefProblems({'ohm-torveny':rec('')}),[],'T0 rekordot a c
 
 // (h) Szerkezet: helyőrzők, jóváhagyó lap, szóhasználat, a név megjelenésének leírása.
 assert.deepEqual(pkg.parts.map(p=>p.no),[1,2,3,4,5,6]);assert.equal(PARTS.length,6);
-for(const p of pkg.parts.filter(p=>p.no<=4))assert.ok(!p.placeholder&&p.blocks.length,p.no+'. rész kész');
-for(const p of pkg.parts.filter(p=>p.no>=5))assert.ok(p.placeholder&&!p.blocks.length,p.no+'. rész helyőrző');
+for(const p of pkg.parts.filter(p=>p.no<=5))assert.ok(!p.placeholder&&p.blocks.length,p.no+'. rész kész');
+for(const p of pkg.parts.filter(p=>p.no>=6))assert.ok(p.placeholder&&!p.blocks.length,p.no+'. rész helyőrző');
 assert.ok(!md.includes('A Sémák ábráinak elkészülte után kerül be'),'a 4. rész már nem helyőrző');
 for(const t of ['## Jóváhagyó lap','### 3. rész – kalkulátoronkénti döntés','### Döntés és aláírás','Jóváhagyó neve','Kamarai / névjegyzéki szám','Jogosultság megnevezése','| Hely |','| Dátum |','| Aláírás |','### Teendő eltérés esetén','Mit jelent a jóváhagyás – és mit nem?','### Becsült ráfordítás','### Hogyan kell kitölteni?','a többi, pipálatlanul hagyott tétel egyezőnek számít','Megjegyzés a blokkhoz (forrás, kiadás)','külön mellékletben'])assert.ok(md.includes(t),'hiányzik: '+t);
 assert.ok(!/szakmailag ellenőrzött|MSZ szerint megfelel|megfelel a szabványnak|szabványos méretezés/i.test(md),'tiltott kifejezés');
@@ -414,33 +422,54 @@ assert.ok(near(scenario({circuit:'c1',set:{load:3680}}).drop!,voltageDropPercent
 const part4=pkg.parts[3];
 assert.equal(part4.no,4);
 const nlById=new Map(netlistFiles('.').map(f=>{const n=JSON.parse(readFileSync('content/tudastar/r3/'+f,'utf8')) as Netlist;return [n.id,{f,n}]}));
-assert.deepEqual(part4.blocks.map(b=>b.id),DIAGRAM_ORDER.map(bekId),'a 20 ábra a megadott sorrendben');
-assert.equal(part4.blocks.length,20);
-for(const b of part4.blocks){
+const diagramBlocks=part4.blocks.filter(b=>b.diagram);
+assert.deepEqual(diagramBlocks.map(b=>b.id),DIAGRAM_ORDER.map(bekId),'a 20 ábra a megadott sorrendben');
+assert.equal(diagramBlocks.length,20);
+// A 4. rész rendje: a biztonsági szabályok blokkja, majd csoportonként a közös kérdések blokkja és a csoport ábrái.
+assert.deepEqual(part4.blocks.map(b=>b.id),['BEK-SZABALYOK','BEK-VIL-KERDESEK',...DIAGRAM_ORDER.slice(0,9).map(bekId),'BEK-VED-KERDESEK',...DIAGRAM_ORDER.slice(9,14).map(bekId),'BEK-FOLD-KERDESEK',...DIAGRAM_ORDER.slice(14).map(bekId)]);
+for(const b of diagramBlocks){
  const d=b.diagram!;assert.ok(d,b.id+': ábra');
  const {f,n}=nlById.get(d.netlistId)!,c=loadNetlist(n),rep=runNetlist(c);
  assert.equal(d.netlistFp,netlistFingerprint(n),b.id+': netlista-ujjlenyomat');
  assert.equal(d.diagramFp,diagramSource('.',[f]),b.id+': ábra-ujjlenyomat (a cikk rekordjáé is ebből áll)');
  assert.deepEqual(d.wires,wireTable(c).map(w=>[String(w.no),w.fromLabel,w.toLabel,w.conductor,w.color,w.section]),b.id+': vezetéktábla');
  assert.equal(d.truth.rows.length,rep.combinations,b.id+': minden állás');
- assert.ok(d.python.startsWith('egyezik ('+rep.combinations+' állás'),b.id+': TS = Python');
+ assert.ok(d.python.includes('azonos eredményt ad ('+rep.combinations+' állás')&&d.python.includes('a modell és a bekötés szakmai helyességét nem'),b.id+': TS = Python, és a gépi egyezés nem szakmai igazolás');
  assert.ok(d.prims.some(p=>p.k==='poly'&&p.data?.wire),b.id+': a rajz vezetékei');
  assert.ok(!d.prims.some(p=>(p.cls??'').includes('is-off')),b.id+': csak az alapállás érintkezői');
- assert.deepEqual(b.items.map(i=>i.id),[b.id+'-NL',b.id+'-RAJZ',b.id+'-VEZ',...(d.sections.length?[b.id+'-SZAK']:[]),b.id+'-ALL'],b.id+': tételek');
+ assert.deepEqual(b.items.map(i=>i.id),[b.id+'-RAJZ',b.id+'-VEZ',...(d.sections.length?[b.id+'-SZAK']:[]),b.id+'-ALL'],b.id+': tételek');
  const row=pkg.diagrams.find(x=>x.block===b.id)!;assert.deepEqual([row.netlistFp,row.diagramFp],[d.netlistFp,d.diagramFp]);
  assert.ok(md.includes(`| ${b.title} | ${b.id} | ${d.netlistFp} | ${d.diagramFp} | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |`),b.id+': ábránkénti döntés sora');
  assert.ok(md.includes(`**Döntés (${b.id}):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom`),b.id+': döntés a blokk végén');
  assert.ok(md.includes('Netlista-ujjlenyomat: '+d.netlistFp),b.id+': a netlista ujjlenyomata a blokk elején');
 }
-// Kérdések: a témakör közös kérdései (content/tudastar/lektori-kerdesek-r3.md) a csoport első ábrájánál, a cikk sajátjai a cikk első ábrájánál.
-for(const [first,sec] of [['BEK-EGYPOLUSU-KAPCSOLO-101','Világítási kapcsolások (101–107)'],['BEK-DUGALJ-ATHURKOLAS','Dugalj, kismegszakító, FI-relé'],['BEK-FOLDELES-TN-C','Földelési rendszerek, EPH, feszültségmentesítés']] as const){
+// Kérdések: a témakör közös kérdései (content/tudastar/lektori-kerdesek-r3.md) külön blokkban (BEK-<csoport>-KERDESEK), egyedi azonosítóval
+// (BEK-<csoport>-Q<n>) és válaszmezővel; a cikk saját kérdései az 5. rész cikkblokkjában (CIK-<CIKK>-Q<n>). A belső jegyzetek szakasza kimarad.
+for(const [gid,sec] of [['VIL','Világítási kapcsolások (101–107)'],['VED','Dugalj, kismegszakító, FI-relé'],['FOLD','Földelési rendszerek, EPH, feszültségmentesítés']] as const){
  const qs=r3Questions(sec);assert.ok(qs.length>=5,sec);
- const b=part4.blocks.find(x=>x.id===first)!;for(const q of qs)assert.ok(b.questions!.some(x=>x.text.endsWith(q)),first+': közös kérdés: '+q.slice(0,40));
+ const b=part4.blocks.find(x=>x.id===`BEK-${gid}-KERDESEK`)!;assert.ok(b&&!b.items.length&&!b.diagram,gid+': közös kérdések blokkja');
+ assert.deepEqual(b.questions!.map(q=>q.text),qs,gid+': a kérdések szó szerint a lektori kérdéslistából');
+ assert.deepEqual(b.questions!.map(q=>q.id),qs.map((_,n)=>`BEK-${gid}-Q${n+1}`),gid+': egyedi azonosítók');
 }
-assert.equal(part4.blocks.filter(b=>b.questions?.some(q=>q.text.includes('saját kérdése')&&q.text.includes('PEN szétválasztásának helye'))).length,1,'a cikk saját kérdései egyszer (a cikk első ábrájánál)');
+{
+ const all=pkg.parts.flatMap(pt=>pt.blocks.flatMap(b=>b.questions??[]));
+ assert.equal(new Set(all.map(q=>q.id)).size,all.length,'minden kérdésnek egyedi azonosítója van');
+ assert.ok(all.length>=40,'a kérdések száma: '+all.length);
+ for(const q of all){assert.deepEqual(questionProblems(q.id,q.text),[],q.id);assert.ok(md.includes(`**Kérdés a lektorhoz (${q.id}).** ${q.text}`)&&md.includes(`Válasz (${q.id}):`),q.id+': kérdés és válaszmező a Markdownban');if(/-Q\d+$/.test(q.id))assert.ok(allIds(pkg).includes(q.id),q.id+': szerepel az azonosítók között')}
+ // A kérdés lektori nyelven szól: belső szerep, fájlnév, útvonal, kódjelölés, terv-hivatkozás, üzleti döntés nem lehet benne.
+ for(const bad of ['Koordináció: a lektor ne lássa','a check_foo.py ellenőrzi','lásd lib/kb/circuit.ts','a `sim` azt mondja','a terv 3.4 szerint','a tulajdonos dönti el','Szerkesztői: x','I12 szabály és a front matter'])assert.ok(questionProblems('X-Q1',bad).length>=1,'a tiltólista elkapja: '+bad);
+ assert.deepEqual(questionProblems('X-Q1','A kék ér kapcsolt fázisként használható-e a nullavezető nélküli szakaszban?'),[]);
+ // A lektori kérdéslista szakaszai: három csoport és a belső jegyzetek; a belső jegyzetek szövege a csomagba nem kerül.
+ assert.deepEqual(r3QuestionSections(),['Világítási kapcsolások (101–107)','Dugalj, kismegszakító, FI-relé','Földelési rendszerek, EPH, feszültségmentesítés',INTERNAL_NOTES]);
+ const notes=readFileSync('content/tudastar/lektori-kerdesek-r3.md','utf8').split('## '+INTERNAL_NOTES)[1].split('\n').map(l=>l.replace(/^\s*(?:[-*]|\d+\.)\s+/,'').trim()).filter(l=>l.length>=30);
+ assert.ok(notes.length>=3,'a belső jegyzetek szakasza nem üres');
+ for(const n of notes)assert.ok(!md.includes(n.slice(0,60)),'belső jegyzet került a csomagba: '+n.slice(0,60));
+ assert.ok(!md.includes(INTERNAL_NOTES),'a belső jegyzetek szakaszának címe sincs a csomagban');
+}
 // A jóváhagyó lap: ábránkénti döntés és a második olvasó (R3).
-for(const t of ['### 4. rész – ábránkénti döntés','### 4. rész – második olvasó','| Második olvasó jogosultsága |'])assert.ok(md.includes(t),'hiányzik: '+t);
-assert.ok(declaration(out.pages).includes('4. (bekötési ábrák)')&&declaration(out.pages).includes('második olvasó'));
+for(const t of ['### 4. rész – ábránkénti döntés','### 5. rész – cikkenkénti döntés','### 4–5. rész – második olvasó','| Második olvasó jogosultsága |','| Függetlenségi nyilatkozat: a program szerzőitől, fejlesztőitől és a csomag összeállítóitól független vagyok (igen / nem) |'])assert.ok(md.includes(t),'hiányzik: '+t);
+assert.ok(declaration(out.pages).includes('4. (bekötési ábrák és biztonsági szabályok)')&&declaration(out.pages).includes('5. (R3 cikkvázlatok)')&&declaration(out.pages).includes('második olvasó'));
+assert.ok(declaration(out.pages).includes('nem terjed ki a csomag 6. részére'),'a nyilatkozat a 6. részt (helyőrző) kizárja');
 // PDF: a rajz a stíluslap színeivel (világos téma), és a rajz feliratai is a betűkészletből (a glyph-ellenőrzés fedi őket).
 {
  const st=pdfDiagramStyles();
@@ -465,5 +494,104 @@ assert.ok(declaration(out.pages).includes('4. (bekötési ábrák)')&&declaratio
  assert.deepEqual(diagramRefProblems({},arts,pairs),[],'most nincs R3 rekord');
 }
 
+
+// (k) 4. rész eleje: a szimulátor biztonsági szabályai (lib/kb/circuit-rules.ts) tételenként jóváhagyhatók; az ábra csak velük együtt.
+{
+ const rb=part4.blocks.find(b=>b.id==='BEK-SZABALYOK')!;
+ assert.deepEqual(rb.items.map(i=>i.id),CIRCUIT_RULES.map(r=>'BEK-SZAB-'+r.code),'minden szabály tétel, a kódok sorrendjében');
+ assert.ok(CIRCUIT_RULES.length>=24&&new Set(CIRCUIT_RULES.map(r=>r.code)).size===CIRCUIT_RULES.length);
+ for(const r of CIRCUIT_RULES){const it=rb.items.find(i=>i.id==='BEK-SZAB-'+r.code)!;assert.ok(it.kind==='value'&&it.label.startsWith(r.code+' – ')&&it.value.startsWith(r.text),r.code+': a szabály szövege szó szerint');assert.ok(md.includes(r.text),r.code+': a Markdownban')}
+ assert.ok(md.includes('a szimuláció ideális vezetőkkel, igen/nem alapon számol: áramerősséget, feszültséget és lekapcsolási időt nem'),'a szimuláció korlátja kimondva');
+}
+
+// (l) 5. rész: az R3 cikkvázlatok szövege. A lektor a SZÖVEGET is jóváhagyja: minden vázlat saját CIK-blokkot kap a teljes szöveggel, a tartalmi
+// ujjlenyomattal (ez kerül az EDITIONS-be és a Tudástár kiadási rekordjába), a kérdésekkel és a döntési sorral; a kiadást még akadályozó
+// hiányt a csomag megnevezi.
+const part5=pkg.parts[4],arts=r3Articles();
+assert.equal(part5.no,5);
+assert.equal(arts.length,13,'13 R3 vázlat');
+assert.deepEqual(readdirSync('content/tudastar/r3').filter(f=>f.endsWith('.md')).sort(),arts.map(a=>a.file.split('/').pop()!).sort(),'minden R3 vázlat benne van');
+assert.deepEqual(part5.blocks.map(b=>b.id),arts.map(a=>articleId(a.slug)),'minden vázlat saját blokkot kap, azonosító szerint rendezve');
+assert.deepEqual(pkg.articles.map(a=>a.slug),arts.map(a=>a.slug));
+// A BLOCKED lista pontosan azokat a vázlatokat nevezi meg, amelyekből a generátor (ábra-ujjlenyomattal) még nem tud cikket készíteni.
+{
+ const notBuildable=arts.filter(a=>{try{articleFromDraft(a.file,readFileSync(a.file,'utf8'),'.');return false}catch{return true}}).map(a=>a.slug).sort();
+ assert.deepEqual(notBuildable,Object.keys(BLOCKED).sort(),'a BLOCKED lista nem az éppen nem kiadható vázlatokat nevezi meg');
+ assert.equal(Object.keys(BLOCKED).length,4);
+}
+for(const a of arts){
+ const id=articleId(a.slug),b=part5.blocks.find(x=>x.id===id)!,row=pkg.articles.find(x=>x.slug===a.slug)!;
+ const full=articleFromDraft(a.file,readFileSync(a.file,'utf8'),'.',{figures:false});
+ assert.equal(a.fingerprint,full.meta.fingerprint,id+': a tartalmi ujjlenyomat a Tudástár-motoré');
+ assert.deepEqual([row.block,row.fingerprint,row.blocked],[id,a.fingerprint,BLOCKED[a.slug]],id+': a cikksor');
+ assert.ok(b.article&&b.title===a.title&&b.intro.join(' ').includes('Tartalmi ujjlenyomat: '+a.fingerprint),id+': blokk és ujjlenyomat');
+ assert.ok(md.includes(`| ${a.title} | ${id} | ${a.fingerprint} | ${BLOCKED[a.slug]??'–'} | ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom |`),id+': cikkenkénti döntés sora');
+ assert.ok(md.includes(`**Döntés (${id}):** ☐ Jóváhagyom · ☐ Javítással · ☐ Elutasítom`),id+': döntés a blokk végén');
+ assert.deepEqual(b.items.map(i=>i.id),[id+'-SZOVEG',id+'-FORRAS',...(a.figures.some(f=>f.netlist)?[id+'-ABRA']:[])],id+': tételek');
+ // A teljes szöveg a csomagban van: minden bekezdés, lista- és táblázatsor, a veszély-doboz szövege, a források.
+ let n=0;
+ for(const x of flatten(a.blocks)){
+  const texts=x.k==='callout'?[x.label,x.text]:x.k==='p'?[x.text]:x.k==='h2'?[x.text]:x.k==='list'?x.items:x.k==='table'?[...x.head,...x.rows.flat()]:[x.caption];
+  for(const t of texts){n++;assert.ok(md.includes(t.replace(/\|/g,'\\|')),id+': a cikk szövege hiányzik a csomagból: '+t.slice(0,60))}
+ }
+ assert.ok(n>=8,id+': a cikknek van szövege');
+ for(const src of a.sources)assert.ok(md.includes(`| ${src.standard} | ${src.kiadas} | ${src.pont} |`),id+': forrás: '+src.standard);
+ assert.ok(flatten(a.blocks).some(x=>x.k==='callout'),id+': van veszély-doboz');
+ // A cikk saját kérdései egyedi azonosítóval és válaszmezővel; az ábrahelyőrző a 4. rész blokkjára vagy a hiányra mutat.
+ assert.deepEqual((b.questions??[]).map(q=>q.text),a.questions,id+': saját kérdések');
+ a.questions.forEach((q,k)=>assert.ok((b.questions??[])[k].id===`${id}-Q${k+1}`&&md.includes(`Válasz (${id}-Q${k+1}):`),id+': kérdés-azonosító'));
+ // A 4. részre csak valódi BEK-blokkal mutathat (a netlista nélküli ábra nincs a csomagban: az csak kiadást akadályozó hiány lehet).
+ for(const f of flatten(a.blocks).filter(x=>x.k==='figure')){
+  const fid=(f as {id:string}).id,ref=figureRef(a,fid),fm=a.figures.find(x=>x.id===fid);
+  if(fm?.netlist)assert.ok(/^a rajz a 4\. részben: BEK-[A-Z0-9-]+(, BEK-[A-Z0-9-]+)*$/.test(ref)&&ref.split(', ').every(r=>md.includes('### '+r.replace(/^a rajz a 4\. részben: /,'')+' – ')),id+': ábrahivatkozás a 4. rész létező blokkjára ('+ref+')');
+  else assert.ok(!!a.blocked&&ref==='ez az ábra még nincs kész (a cikk kiadását akadályozza)',id+': a netlista nélküli '+fid+' ábra nincs a csomagban – csak kiadást akadályozó hiány lehet ('+ref+')');
+ }
+ const hasBlock=md.includes(`### ${id} – ${a.title}`);assert.ok(hasBlock,id+': blokkcím');
+}
+// A blokkolt cikkeknél a hiány a blokk bevezetőjében és az 5. rész állapotsorában is szerepel.
+for(const [slug,why] of Object.entries(BLOCKED)){
+ const b=part5.blocks.find(x=>x.id===articleId(slug))!;
+ assert.ok(b.intro.join(' ').includes(why)&&md.includes(`${slug} – ${why}`),slug+': a hiány a bevezetőben és az 5. rész állapotsorában');
+}
+assert.equal(part5.blocks.filter(b=>b.intro.join(' ').includes('kiadásához a szöveg jóváhagyásán túl még hiányzik')).length,4);
+// Becsült idő: a szöveg szó szerinti átolvasása (110 szó/perc) + kérdésenként 4 perc + döntés 5 perc.
+for(const a of arts)assert.equal(part5.blocks.find(x=>x.id===articleId(a.slug))!.minutes,Math.ceil(a.words/110)+4*a.questions.length+5);
+// Az 5. rész a lektor ráfordításában is szerepel.
+assert.ok(md.includes('a lektori kérdésekre kérdésenként 4 percet, az 5. részben a cikkvázlatok gondos átolvasását'),'a ráfordítás-becslés leírja az 5. részt');
+
+// A cikkek a Tudástár lektori rekordjához kötődnek (R3: csak lektor után; a rekord teljes és a kiadott csomag ujjlenyomatára hivatkozik).
+{
+ const sent=[...EDITIONS.slice(0,-1),{...EDITION,sent:'2026-10-13'}],ap=articlePairs(pkg),fp=ap['kismegszakito'];
+ const rec=(over:Partial<Extract<KbRelease,{kind:'lektoralt'}>>={}):KbRelease=>({kind:'lektoralt',section:'semak',risk:'R3',qualification:'villamos tervező',date:'2026-10-14',fingerprint:fp,approvalRef:`LK-${EDITION.number} (${EDITION.content}); kismegszakito: ${fp}`,secondReader:'második olvasó',...over});
+ assert.deepEqual(articleRefProblems({kismegszakito:rec()},ap,sent),[],'érvényes, teljes rekord');
+ assert.deepEqual(articleRefProblems({},ap,sent),[],'most nincs R3 rekord');
+ assert.ok(articleRefProblems({kismegszakito:rec()},ap,EDITIONS)[0].includes('kiküldöttként'),'ki nem küldött kiadásra nem hivatkozhat');
+ assert.ok(articleRefProblems({kismegszakito:rec({fingerprint:'00000000'})},ap,sent).some(p=>p.includes('nem ezt a szöveget')),'a szöveg azóta változott: a rekord ujjlenyomata nem az LK-é');
+ assert.ok(articleRefProblems({kismegszakito:rec({approvalRef:`LK-${EDITION.number} (${EDITION.content})`})},ap,sent).some(p=>p.includes('approvalRef')),'az approvalRef nevezze meg a cikk ujjlenyomatát');
+ assert.ok(articleRefProblems({'ismeretlen-cikk':rec()},ap,sent).some(p=>p.includes('nincs a csomag 5. részében')),'a csomagban nem szereplő cikk nem hagyható jóvá');
+ assert.ok(articleRefProblems({kismegszakito:rec({secondReader:undefined})},ap,sent).some(p=>p.includes('hiányos')&&p.includes('secondReader')),'R3-nál második olvasó kell');
+ assert.ok(articleRefProblems({kismegszakito:rec({qualification:''})},ap,sent).some(p=>p.includes('hiányos')),'jogosultság nélkül hiányos');
+ assert.deepEqual(r3RecordGaps(rec()),[]);
+ assert.ok(r3RecordGaps(rec({date:''})).some(g=>g.includes('(date)'))&&r3RecordGaps(rec({approvalRef:' '})).some(g=>g.includes('(approvalRef)'))&&r3RecordGaps(rec({secondReader:''})).some(g=>g.includes('(secondReader)')));
+}
+
+// (m) A KIRAJZOLT PDF ellenőrzése a modellel szemben (pdfProblems): minden blokk, tábla, ábra, kérdés és válaszmező kirajzolódott; mutációs
+// próbák: szándékosan hibás kirajzolás (PdfFaults) esetén az ellenőrzés elbukik.
+{
+ assert.deepEqual(pdfProblems(pkg,out.info,out.texts),[],'a PDF teljes');
+ const m=out.info.margins;assert.ok(m.left>=10&&m.right<=200&&m.top>=10&&m.bottom<=290,'margók');
+ for(const b of pkg.parts.flatMap(pt=>pt.blocks)){const bi=out.info.blocks[b.id];assert.ok(bi&&bi.pages[0]>=1&&bi.pages[1]<=out.pages,b.id+': oldaltartomány');if(b.diagram)assert.ok(bi.diagram!.minPt>=PDF_MIN_LABEL_PT,b.id+': ábrafelirat ≥ '+PDF_MIN_LABEL_PT+' pt: '+bi.diagram!.minPt.toFixed(2))}
+ const probe=(faults:Parameters<typeof renderPdf>[2],expect:RegExp,what:string)=>{const r=renderPdf(pkg,font,faults);assert.ok(pdfProblems(pkg,r.info,r.texts).some(p=>expect.test(p)),'a PDF-ellenőrzés nem veszi észre: '+what)};
+ const nid='valtokapcsolo-106';
+ probe({skipDiagram:nid},/az ábra nem rajzolódott ki/,'a hiányzó ábrát');
+ probe({skipTruth:nid},/kapcsolóállás-táblázat 0 sora/,'a hiányzó kapcsolóállás-táblázatot');
+ probe({truncateWires:{id:nid,rows:1}},/vezetéktábla 1 sora/,'a csonkolt vezetéktáblát');
+ probe({diagramScale:{id:nid,scale:1.5}},/kilóg a lap margójáról/,'a margóról kilógó ábrát');
+ probe({diagramScale:{id:nid,scale:0.15}},/legkisebb ábrafelirat/,'a túl kicsi ábrafeliratot');
+ // A hiányzó kérdés-azonosító vagy cikkcím a kirajzolt szövegben is észrevehető.
+ const missing=out.texts.filter(t=>!t.includes('BEK-VIL-Q1'));
+ assert.ok(pdfProblems(pkg,out.info,missing).some(p=>p.includes('BEK-VIL-Q1')),'a PDF szövegéből hiányzó kérdés-azonosítót jelzi');
+}
+
 const counts=pkg.parts.map(p=>p.blocks.reduce((s,b)=>s+b.items.length,0));
-console.log(`PASS: lektori csomag – ${editionLabel()}, ${counts[0]+counts[1]+counts[2]+counts[3]} tétel (1. rész ${counts[0]}, 2. rész ${counts[1]}, 3. rész ${counts[2]}, 4. rész ${counts[3]} – 20 bekötési ábra), ${checks.length} programmal összevetett eset, ${out.pages} PDF-oldal; naprakész, ujjlenyomatok: 1. rész ${pkg.fingerprints.tables}, 2. rész ${pkg.fingerprints.formulas}, 3. rész ${pkg.fingerprints.calculators}, 4. rész ${pkg.fingerprints.diagrams}.`);
+console.log(`PASS: lektori csomag – ${editionLabel()}, ${counts[0]+counts[1]+counts[2]+counts[3]+counts[4]} tétel (1. rész ${counts[0]}, 2. rész ${counts[1]}, 3. rész ${counts[2]}, 4. rész ${counts[3]} – 20 bekötési ábra, 5. rész ${counts[4]} – ${arts.length} cikkvázlat), ${checks.length} programmal összevetett eset, ${out.pages} PDF-oldal; naprakész, ujjlenyomatok: 1. rész ${pkg.fingerprints.tables}, 2. rész ${pkg.fingerprints.formulas}, 3. rész ${pkg.fingerprints.calculators}, 4. rész ${pkg.fingerprints.diagrams}, 5. rész ${pkg.fingerprints.articles}.`);

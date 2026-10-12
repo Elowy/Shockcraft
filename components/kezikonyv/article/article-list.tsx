@@ -1,4 +1,5 @@
 // Cikk-kártyák és kategórialista a Tudástár listaoldalaihoz (szerverkomponens; JS nélkül is teljes).
+import {NoWrap} from './nowrap';
 import {BadgeCheck} from 'lucide-react';
 import {articleHref,categoryArticles,categoryHref,releaseBadge,releaseInfo} from '@/lib/kb/content/registry';
 import type {KbCategory} from '@/lib/kb/content/categories';
@@ -8,7 +9,7 @@ import type {KbMeta} from '@/lib/kb/content/types';
 export function ArticleCard({a}:{a:KbMeta}){
  const info=releaseInfo(a),draft=info.state!=='kozzeteve'||!info.record;
  return <a className={'kk-card'+(draft?' draft':'')} href={articleHref(a)}>
-  <b>{a.title}</b><p>{a.summary}</p>
+  <b><NoWrap text={a.title}/></b><p>{a.summary}</p>
   <span className={'kk-badge'+(draft?' draft':'')}>{draft?'Tervezet (előnézet)':<><BadgeCheck aria-hidden="true"/>{releaseBadge(info.record!,false)}</>}</span>
  </a>;
 }

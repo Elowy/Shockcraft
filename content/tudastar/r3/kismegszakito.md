@@ -16,7 +16,7 @@ calculators: [aram-teljesitmenybol, fazisterheles, vezetek-ellenallas]
 figures:
   - id: abra-2
     netlist: kismegszakito.netlist.json
-    views: [bekotes, szerelesi-rajz, mukodes]
+    views: [bekotes, mukodes]
 sources:
   - standard: "MSZ EN 60898-1 (kismegszakítók háztartási és hasonló berendezések túláramvédelmére)"
     kiadás: "2019" # lektor ellenőrizze a honosítás évét és a hatályos kiadást
@@ -26,7 +26,7 @@ sources:
     pont: "433.1 (Ib ≤ In ≤ Iz és I2 ≤ 1,45 · Iz), 434 (zárlat elleni védelem), 434.5.1 (megszakítóképesség)" # a 434.5.1-et lektor ellenőrizze
   - standard: "MSZ HD 60364-5-52 (kábel- és vezetékrendszerek)"
     kiadás: "2011" # lektor ellenőrizze
-    pont: "B melléklet (terhelhetőség, helyesbítő tényezők) – a számértékek kizárólag a lib/sizing-tables.ts-ben, jóváhagyásra várva"
+    pont: "B melléklet (terhelhetőség, helyesbítő tényezők) – a számértékek kizárólag a tervezőprogram méretezési táblázataiban (a lektori csomag 1. része), jóváhagyásra várva"
   - standard: "MSZ HD 60364-4-41 (áramütés elleni védelem)"
     kiadás: "2007" # lektor ellenőrizze
     pont: "411.3.2 (önműködő lekapcsolás), 411.4.4 (Zs · Ia ≤ U0, TN-rendszer)"
@@ -37,7 +37,7 @@ sources:
     kiadás: "2013" # lektor ellenőrizze
     pont: "általános követelmények; a B, C, D jelleggörbe az MSZ EN 60898-1-gyel azonos értelmű" # lektor ellenőrizze
 lektorKerdesek:
-  - "A B, C, D pillanatkioldási tartományok (3–5, 5–10, 10–20 · In) és az 1,13 / 1,45 · In egyezményes áramok egyeznek-e a hatályos MSZ EN 60898-1-gyel? A felső határokat a lib/sizing-tables.ts is használja (ellenőrizendő)."
+  - "A B, C, D pillanatkioldási tartományok (3–5, 5–10, 10–20 · In) és az 1,13 / 1,45 · In egyezményes áramok egyeznek-e a hatályos MSZ EN 60898-1-gyel? A felső határokat a tervezőprogram méretezési segédszámítása is használja (a lektori csomag 1. része)."
   - "Szükséges-e a cikkben a megszakítóképesség hazai minimumára (elosztói előírás) utalni, vagy elég a „tervezői döntés” megfogalmazás?"
   - "A „Jellemző alkalmazás” oszlop (B: lakás általános áramkörei, C: nagy bekapcsolási áram, D: nagyon nagy bekapcsolási áram) elfogadható-e így, számok nélkül?"
   - "A TT-rendszerre tett állítás („a testzárlati áram jellemzően a kismegszakító kioldásához is kicsi; ott az önműködő lekapcsolást is áram-védőkapcsoló végzi”) elfogadható-e így, számok nélkül?"
@@ -105,7 +105,7 @@ A teljes ellenőrzéshez a túlterhelés elleni védelmen túl a feszültséges�
 
 Minden áramkör saját kismegszakítót kap. A 2. ábrán két dugaljkör egy közös áram-védőkapcsoló után kapcsolódik; a kismegszakítókat fésűs sín táplálja.
 
-[ÁBRA: abra-2 „Két dugaljkör saját kismegszakítóval, közös FI-relé után”. Forrás: kismegszakito.netlist.json (id: kismegszakito-aramkorok); a rajz, a vezetéktábla, a desc és a Működés nézet ebből készül, kézzel nem rajzolható át. viewBox 0 0 460 240, elhelyezés a netlista layout mezője szerint. Bekötés nézet: balra a lakáselosztó (betáp-gyűjtősín, Q1 kétpólusú áram-védőkapcsoló, nullasín, PE-sín, F1 és F2 kismegszakító „fésűs sín” felirattal összekötve), jobbra az X1 (nappali) és az X2 (konyha) dugalj saját háromeres vezetékkel. Színek: L barna, N kék, PE zöld-sárga. Szerelési rajz nézet: a tervező MCB- és RCD-moduljai az elosztósorban, két socket jel, érszám-vonalkák (3 / 3). Működés nézet: Q1, F1, F2 gomb (aria-pressed), kiemelt áramút, szöveges állapot dugaljanként, alatta az állapottáblázat. Alsó sor (.fig-small): „Így látod a tervezőben: a PE egyszínű zöld.” title: „Két áramkör az elosztóban”; desc: a netlistából generált leírás.]
+[ÁBRA: abra-2 „Két dugaljkör saját kismegszakítóval, közös FI-relé után”. Forrás: kismegszakito.netlist.json (id: kismegszakito-aramkorok); a rajz, a vezetéktábla, a desc és a Működés nézet ebből készül, kézzel nem rajzolható át. viewBox 0 0 460 240, elhelyezés a netlista layout mezője szerint. Bekötés nézet: balra a lakáselosztó (betáp-gyűjtősín, Q1 kétpólusú áram-védőkapcsoló, nullasín, PE-sín, F1 és F2 kismegszakító „fésűs sín” felirattal összekötve), jobbra az X1 (nappali) és az X2 (konyha) dugalj saját háromeres vezetékkel. Színek: L barna, N kék, PE zöld-sárga. Működés nézet: Q1, F1, F2 gomb (aria-pressed), kiemelt áramút, szöveges állapot dugaljanként, alatta az állapottáblázat. Alsó sor (.fig-small): „Így látod a tervezőben: a PE egyszínű zöld.” title: „Két áramkör az elosztóban”; desc: a netlistából generált leírás.]
 
 <!-- sim:allapotok src=kismegszakito.netlist.json -->
 | Q1 áram-védőkapcsoló (FI-relé) | F1 kismegszakító (nappali dugaljak) | F2 kismegszakító (konyhai dugaljak) | X1 dugalj (nappali) | X2 dugalj (konyha) |

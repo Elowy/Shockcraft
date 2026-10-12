@@ -6,13 +6,13 @@
 import {Prims} from './symbols';
 import {scenePrims,type DiagramState,type Scene} from './scene';
 
-/** Az ábra SVG-je: role="img", név a <title>, leírás a netlistából generált <desc>. `minWidth`: keskeny képernyőn a keret görget. */
-export function BekotesSvg({scene,uid,title,state,view='bekotes'}:{scene:Scene;uid:string;title:string;state?:DiagramState;view?:'bekotes'|'mukodes'}){
+/** Az ábra SVG-je: role="img", név a <title>, leírás a netlistából generált <desc>. `minWidth`: a rajz ennél keskenyebbre nem kicsinyedik (a keret görget). `bare`: felirat nélküli (kártya-miniábra). */
+export function BekotesSvg({scene,uid,title,state,view='bekotes',bare=false}:{scene:Scene;uid:string;title:string;state?:DiagramState;view?:'bekotes'|'mukodes';bare?:boolean}){
  const [x,y,w,h]=scene.viewBox;
  return <svg viewBox={[x,y,w,h].join(' ')} role="img" aria-labelledby={uid+'-t'} aria-describedby={uid+'-d'} className="kk-dg-svg" data-diagram={scene.id} data-view={view}
   style={{minWidth:scene.minWidth+'px'}} xmlns="http://www.w3.org/2000/svg">
   <title id={uid+'-t'}>{title}</title>
   <desc id={uid+'-d'}>{scene.desc}</desc>
-  <Prims prims={scenePrims(scene,state?{state}:{})}/>
+  <Prims prims={scenePrims(scene,state?{state}:{}).filter(p=>!bare||p.k!=='text')}/>
  </svg>;
 }

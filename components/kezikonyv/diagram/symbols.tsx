@@ -154,6 +154,8 @@ function rcdSymbol(ctx:SymCtx):SymbolOut{
   const mx=xl+(ex-4.5-xl)*0.55;
   prims.push(line(P(mx,y0+5),P(mx,y1-5),'sym-link'),text(P(part.x+part.w/2-3,cy+4),'IΔn','middle',10,'t-muted'));
  }
+ // Kioldás: a Működés nézetben a kioldó FI-relé doboza vastag, veszélyszínű kerettel kiemelt (a szöveges állapot: „FI-relé: kiold”).
+ prims.push(rect(part.x-3,part.y-3,part.w+6,part.h+6,'trip',6,{out:comp.id+':kiold'}));
  return {prims,contacts:levers(ctx,into,into,-22)};
 }
 
@@ -163,7 +165,9 @@ function lampSymbol(ctx:SymCtx):SymbolOut{
  const l=comp.terminals.find(t=>t.role==='L'),n=comp.terminals.find(t=>t.role==='N'),pe=comp.terminals.find(t=>t.role==='PE');
  if(!l||!n)return {prims,contacts:[]};
  const tl=ctx.term(l.id),tn=ctx.term(n.id),vert=sideOf(part,l.id)==='top'||sideOf(part,l.id)==='bottom';
- const cross=(c:Pt,r:number)=>[circle(c,r,'lamp',{out:comp.id}),line(add(c,-r*0.7,-r*0.7),add(c,r*0.7,r*0.7),'sym'),line(add(c,-r*0.7,r*0.7),add(c,r*0.7,-r*0.7),'sym')];
+ // A „ég” állapot nem csak színváltás: az X vonalai vastagodnak (.kk-dg-sym.is-on), és sugárkoszorú jelenik meg a lámpa körül (.kk-dg-ray.is-on).
+ const rays=(c:Pt,r:number)=>[45,135,225,315].map(a=>{const t=a*Math.PI/180,ux=Math.cos(t),uy=Math.sin(t);return line(add(c,ux*(r+2.5),uy*(r+2.5)),add(c,ux*(r+7),uy*(r+7)),'ray',{out:comp.id})});
+ const cross=(c:Pt,r:number)=>[circle(c,r,'lamp',{out:comp.id}),line(add(c,-r*0.7,-r*0.7),add(c,r*0.7,r*0.7),'sym',{out:comp.id}),line(add(c,-r*0.7,r*0.7),add(c,r*0.7,-r*0.7),'sym',{out:comp.id}),...rays(c,r)];
  if(vert){
   // A kapcsok felül (vagy alul): a lámpa a két kapocs között, a kapcsok alatt.
   const r=Number(part.opt?.r??Math.min(10,Math.abs(tn[0]-tl[0])/2-4)),down=sideOf(part,l.id)==='top'?1:-1;
@@ -205,7 +209,8 @@ function socketSymbol(ctx:SymCtx):SymbolOut{
  prims.push(line(P(cx,cy+2),P(cx,cy+6),'sym-pe'));
  return {prims,contacts:[]};
 }
-/** Fogyasztó (fémház): a ház (I. osztálynál szaggatott fémház-keret), benne a fogyasztó (téglalap) a fázis- és nullakapocs között, a PE a házhoz. */
+/** Fogyasztó (fémház): a ház (I. osztálynál szaggatott fémház-keret), benne a fogyasztó (téglalap) a fázis- és nullakapocs között, a PE a házhoz
+ * (opt.pe = 'none': a PE-kapocs a ház szélén áll, belső csonk és földjel nélkül – a ház maga a fémtest; pl. a testzárlatot a PE-kapocs mellett mutató IT-ábrán). */
 function loadSymbol(ctx:SymCtx):SymbolOut{
  const {comp,part}=ctx,prims:Prim[]=[box(part,comp.class==='II'?'sym-body':'sym-housing',4)];
  const act=comp.terminals.filter(t=>t.role!=='PE'),pe=comp.terminals.find(t=>t.role==='PE');
@@ -214,7 +219,7 @@ function loadSymbol(ctx:SymCtx):SymbolOut{
  prims.push(rect(bx,y0,bw,y1-y0,'sym-load',2,{out:comp.id}));
  if(part.opt?.letter)prims.push(text(P(bx+bw/2,(y0+y1)/2+4),String(part.opt.letter),'middle',10,'t-muted'));
  for(const t of act){const p=ctx.term(t.id);prims.push(line(p,P(bx,p[1]),'sym',{stub:comp.id+'.'+t.id}))}
- if(pe)prims.push(...peMark(ctx,ctx.term(pe.id)));
+ if(pe&&part.opt?.pe!=='none')prims.push(...peMark(ctx,ctx.term(pe.id)));
  return {prims,contacts:[]};
 }
 /** Betáp (az áramkör betápja az elosztóból) vagy gyűjtősín: keret a kapocsfeliratokkal. */

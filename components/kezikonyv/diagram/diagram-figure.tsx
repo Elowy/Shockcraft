@@ -10,7 +10,8 @@ import {DiagramViews,type RunData} from './diagram-run';
 import {buildScene,type DgLayout,type Scene} from './scene';
 
 /** Egy ábra forrása: a netlista (content/tudastar/r3/*.netlist.json) és az elrendezés (content/tudastar/diagramok/<id>.json). */
-export type DiagramSource={netlist:Netlist;layout:DgLayout};
+/** `file`: a netlistafájl neve (a cikk sim-blokkjainak `src`-jéhez; a generátor tölti). */
+export type DiagramSource={netlist:Netlist;layout:DgLayout;file?:string};
 
 export function Legend({scene}:{scene:Scene}){
  return <ul className="kk-dg-legend" aria-label="Jelmagyarázat">{scene.legend.map((l,i)=><li key={i}><span className={'kk-dg-sw '+l.cls} aria-hidden="true"/>{l.tag&&<b>{l.tag}</b>}<span>{l.text}{l.color?' ('+l.color+')':''}</span></li>)}</ul>;
@@ -34,22 +35,28 @@ export function TruthTable({scene}:{scene:Scene}){
  return <div className="kk-dg-truth">{n>12?<details><summary>Kapcsolóállás-táblázat ({n} állás)</summary>{table}</details>:<><p className="kk-dg-truth-title">Kapcsolóállás-táblázat ({n} állás)</p>{table}</>}</div>;
 }
 
-/** Az ábra (a cikk `figure` blokkja helyén). `n`: az ábra sorszáma a cikkben; `variant`: változat felirata (pl. „2 × 107”). */
-export function DiagramFigure({src,figId,n,caption,variant}:{src:DiagramSource;figId:string;n:number|string;caption:string;variant?:string}){
+/**
+ * Az ábra (a cikk `figure` blokkja helyén). `n`: az ábra sorszáma a cikkben; `variant`: több változatot (pl. 2 × 107) mutató ábránál a
+ * változat sorszáma és felirata („1. ábra, 2. változat.” + a változat címe, a főcím ismétlése nélkül). `wires: false`: a „Vezetékek
+ * táblázatban” részt nem rendereli (a cikk saját, azonos táblázata következik – ne szerepeljen kétszer).
+ */
+export function DiagramFigure({src,figId,n,caption,variant,wires=true}:{src:DiagramSource;figId:string;n:number|string;caption:string;variant?:{no:number;text:string};wires?:boolean}){
  const scene=buildScene(src.netlist,src.layout),uid='dg-'+scene.id;
- const title=caption+(variant?' – '+variant:'');
+ const title=variant?variant.text:caption;
  const init=scene.states.find(s=>Object.entries(scene.initial).every(([k,v])=>s.states[k]===v))!;
  const data:RunData={uid,selectors:scene.selectors,initial:scene.initial,states:scene.states.map(s=>({key:s.key,cur:s.cur,live:s.live,broken:s.broken,on:s.on,text:s.text}))};
  const pe=scene.wires.some(w=>w.color==='zöld-sárga');
- const frame=(view:'bekotes'|'mukodes')=><div className="kk-dg-frame" role="region" aria-label={(view==='bekotes'?'Bekötési rajz':'Működés')+': '+title+' (keskeny képernyőn vízszintesen görgethető)'} tabIndex={0}>
-  <BekotesSvg scene={scene} uid={uid+'-'+view} title={(view==='bekotes'?'Bekötési rajz: ':'Működés, alapállás: ')+title} view={view} {...(view==='mukodes'?{state:init}:{})}/>
+ // A keret görgethető régió: a tabindex és a címke szerveroldalon (JS nélkül és nyomtatásban is érvényes) kerül rá; a sziget (diagram-run)
+ // elveszi, ha a rajz nem csordul túl a kereten.
+ const frame=(view:'bekotes'|'mukodes')=><div className="kk-dg-frame" data-scroll-label={(view==='bekotes'?'Bekötési rajz':'Működés')+': '+title+' (vízszintesen görgethető)'} role="region" aria-label={(view==='bekotes'?'Bekötési rajz':'Működés')+': '+title+' (vízszintesen görgethető)'} tabIndex={0}>
+  <BekotesSvg scene={scene} uid={uid+'-'+view} title={(view==='bekotes'?'Bekötési rajz: ':'Működés: ')+title} view={view} {...(view==='mukodes'?{state:init}:{})}/>
  </div>;
  return <figure className="kk-dg" id={figId} aria-labelledby={uid+'-cap'} data-diagram-figure={scene.id}>
   <DiagramViews data={data}
    bekotes={<>{frame('bekotes')}<Legend scene={scene}/>{pe&&<p className="kk-dg-planner">Így látod a tervezőben: a védővezető (PE) a tervező alaprajzán egyszínű zöld; itt, a bekötési rajzon zöld alapon sárga csíkos, ahogy a valódi ér.</p>}</>}
    mukodes={<>{frame('mukodes')}<p className="kk-dg-nojs">A kapcsolók és a hibahelyzetek gombjai JavaScripttel működnek; nélküle az alapállás és a teljes kapcsolóállás-táblázat látszik.</p></>}
    truth={<TruthTable scene={scene}/>}/>
-  <figcaption id={uid+'-cap'}><span className="kk-dg-no">{n}. ábra.</span> {title} <small>Ábra: {scene.id} · netlista-ujjlenyomat: {netlistFingerprint(src.netlist)}</small></figcaption>
-  <WireTable src={src} scene={scene}/>
+  <figcaption id={uid+'-cap'}><span className="kk-dg-no">{n}. ábra{variant?', '+variant.no+'. változat':''}.</span> {title} <small>Ábra: {scene.id} · netlista-ujjlenyomat: {netlistFingerprint(src.netlist)}</small></figcaption>
+  {wires&&<WireTable src={src} scene={scene}/>}
  </figure>;
 }

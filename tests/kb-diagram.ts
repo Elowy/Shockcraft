@@ -73,7 +73,9 @@ for(const d of all){
   const curDrawn=els.filter(e=>e.attrs['data-wire']&&/\bis-cur\b/.test(e.attrs.class??'')).map(e=>e.attrs['data-wire']).sort();
   assert.deepEqual(curDrawn,[...st.cur].sort(),d.file+' '+st.key+': a kiemelt áramút a rajzon');
   for(const e of els.filter(x=>x.attrs['data-sel']))assert.equal(/\bis-off\b/.test(e.attrs.class??''),st.states[e.attrs['data-sel']]!==e.attrs['data-state'],d.file+' '+st.key+': az érintkező állása');
-  for(const e of els.filter(x=>x.attrs['data-out']))assert.equal(/\bis-on\b/.test(e.attrs.class??''),want.has(e.attrs['data-out']),d.file+' '+st.key+': a fogyasztó jelzése');
+  const tripped=new Set(Object.entries(out.trips??{}).filter(([,v])=>v).map(([k])=>k+':kiold'));
+  for(const e of els.filter(x=>x.attrs['data-out']))assert.equal(/\bis-on\b/.test(e.attrs.class??''),want.has(e.attrs['data-out'])||tripped.has(e.attrs['data-out']),d.file+' '+st.key+': a fogyasztó / kioldás jelzése');
+  assert.deepEqual(st.on.filter(x=>x.includes(':')).sort(),[...tripped].sort(),d.file+' '+st.key+': a kioldott FI-relék');
   stateCount++;
  }
 }
@@ -170,6 +172,28 @@ for(const {d} of scenes.values()){
  for(const m of muts){mutants++;const k=m.kill();if(k)kills++;else assert.fail(d.file+': a mutáció nem bukott meg: '+m.name);kinds.set(m.name,(kinds.get(m.name)??0)+1)}
 }
 assert.equal(kills,mutants);
+// (i–m) Félreolvasást okozó rajzhibák – a szigorított geometriai őrök: mindegyik mutáns a megnevezett üzenettel bukik.
+{
+ const byId=(id:string)=>all.find(x=>x.netlist.id===id)!;
+ type Loose={parts:Record<string,{terms:Record<string,unknown>;tl:Record<string,unknown>;label:unknown}>;wires:Record<string,unknown>;labels:Record<string,unknown>};
+ const must=(id:string,re:RegExp,edit:(l:Loose)=>void,name:string)=>{
+  const d=byId(id),l=clone(d.layout) as unknown as Loose;edit(l);
+  const p=check(d.netlist,l as unknown as DgLayout,d.file);
+  assert.ok(p.some(x=>re.test(x)),name+': nem a várt üzenettel bukott: '+p.slice(0,4).join(' | '));
+ };
+ // a testzárlat jele idegen fáziscsonkot keresztez (az IT-ábra H2 hibahelye a felső, L1 sorból indul, az L2 és L3 csonkon át ér a PE-hez)
+ must('foldeles-it',/hibajel/,l=>{l.parts.H2.terms.a=[356,56];l.wires.w20=[[356,56],[344,56],[344,88],[330,88]]},'hibajel keresztezi az idegen csonkot');
+ // az EPH-vezető rááll a védővezetőre (toldásnak látszik)
+ must('eph-alapok',/együtt futnak/,l=>{l.wires.w7=[[250,200],[336,200],[336,222]]},'különböző vezetőtípusok együtt futnak');
+ // a PE-felirat egy idegen (N) vezetéken ül
+ must('foldeles-tn-c',/idegen hálózat vagy más típusú vezeték/,l=>{l.labels.w7=[432,84]},'érfelirat idegen vezetéken');
+ // a 2b kapocsfelirat a szomszédos kapocs mellé került
+ must('keresztkapcsolo-107-4x107',/közelebb áll/,l=>{l.parts.KD.tl.K2b={at:[268,128],anchor:'end'}},'kapocsfelirat a szomszéd kapocs mellett');
+ // az alkatrészfelirat az érintési nyíl fölé került
+ must('foldeles-tn-c',/érintési nyíl fölött/,l=>{l.parts.M1.label={at:[520,118],lines:['M1 fémházas','fogyasztó']}},'felirat az érintési nyíl fölött');
+ // az áthidaló a betápvezetékkel együtt fut (106+6)
+ must('kettos-valtokapcsolo-106-6',/együtt futnak/,l=>{l.wires.w5=[[148,230],[148,222],[166,222],[166,230]]},'áthidaló együtt fut a betáppal');
+}
 assert.ok(mutants>=400,'mutánsok: '+mutants);
 
 // ------------------------------------------------------------------ 6. Az ábra ujjlenyomata
@@ -186,7 +210,7 @@ assert.ok(mutants>=400,'mutánsok: '+mutants);
  assert.notEqual(mut('components/kezikonyv/diagram/symbols.tsx',s=>s.replace('depthC=Number(part.opt?.contact??11)','depthC=Number(part.opt?.contact??12)')),base,'egy szimbólum változása');
  assert.notEqual(mut('lib/kb/circuit.ts',s=>s+'\n'),base,'a szimulátor változása');
  assert.notEqual(mut(FIG_CSS,s=>s.replace('--kk-wire-n:#2563b8','--kk-wire-n:#8a4b22')),base,'az N ér színtokenje');
- assert.notEqual(mut(FIG_CSS,s=>s.replace('.kk-dg-w-l1{stroke:var(--kk-wire-l1)}','.kk-dg-w-l1{stroke:var(--kk-wire-n)}')),base,'az ér-osztály színe');
+ assert.notEqual(mut(FIG_CSS,s=>s.replace('.kk-dg-w-l1{stroke:var(--kk-wire-l1-swatch)}','.kk-dg-w-l1{stroke:var(--kk-wire-n)}')),base,'az ér-osztály színe');
  assert.ok(diagramCss(readFileSync(FIG_CSS,'utf8')).some(x=>x.includes('.kk-dg-w-pes')));
  // elavult elrendezés: a netlista változott, az elrendezés ujjlenyomata nem
  assert.throws(()=>diagramFiles(ROOT,f,(root,p)=>p===NETLIST_DIR+'/'+f?disk(root,p).replace(/"title":\s*"/,'"title":"X'):disk(root,p)),/elavult elrendezés/);
@@ -202,12 +226,18 @@ assert.ok(mutants>=400,'mutánsok: '+mutants);
  const lum=(h:string)=>{const c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255).map(v=>v<=0.03928?v/12.92:((v+0.055)/1.055)**2.4);return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2]};
  const ratio=(a:string,b:string)=>{const x=lum(a),y=lum(b);return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05)};
  for(const [name,block,bg] of [['világos',light,bgL],['sötét',dark,bgD]] as const){
-  for(const t of ['kk-wire-l1','kk-wire-l3','kk-wire-n','kk-wire-pe'])assert.ok(ratio(tok(block,t),bg)>=3,name+' téma: '+t+' kontrasztja '+ratio(tok(block,t),bg).toFixed(2));
-  // fekete ér: a mag (l2-swatch) világos témában a háttérhez, sötétben a halóhoz (--kk-wire-l2) legalább 3:1, a haló a háttérhez is
-  const core=tok(block,'kk-wire-l2-swatch');
-  if(name==='világos')assert.ok(ratio(core,bg)>=3);else{const halo=tok(block,'kk-wire-l2');assert.ok(ratio(halo,bg)>=3&&ratio(core,halo)>=3,'sötét téma: fekete ér halóval')}
+  for(const t of ['kk-wire-l3','kk-wire-n','kk-wire-pe'])assert.ok(ratio(tok(block,t),bg)>=3,name+' téma: '+t+' kontrasztja '+ratio(tok(block,t),bg).toFixed(2));
+  // fekete és barna ér: a mag (l2-swatch, l1-swatch – a valódi szín) világos témában a háttérhez, sötétben a halóhoz (--kk-wire-l2) legalább 3:1, a haló a háttérhez is
+  for(const t of ['kk-wire-l2-swatch','kk-wire-l1-swatch']){
+   const core=tok(block,t);
+   if(name==='világos')assert.ok(ratio(core,bg)>=3,name+' téma: '+t);else{const halo=tok(block,'kk-wire-l2');assert.ok(ratio(halo,bg)>=3&&ratio(core,halo)>=3,'sötét téma: '+t+' halóval')}
+  }
  }
- assert.ok(css.includes('[data-theme=dark] .kk .kk-dg-w-halo{stroke:var(--kk-wire-l2)}'),'sötét témában a fekete ér halója világos');
+ assert.ok(css.includes('[data-theme=dark] .kk .kk-dg-w-halo{stroke:var(--kk-wire-l2)}'),'sötét témában a fekete és a barna ér halója világos');
+ assert.ok(css.includes('.kk-dg-w-l1{stroke:var(--kk-wire-l1-swatch)}'),'a barna ér a valódi barna színnel rajzolódik (sötét témában is)');
+ assert.match(css,/\[data-theme=dark\] \.kk \.kk-dg-sw\.w-l1,\[data-theme=dark\] \.kk \.kk-dg-sw\.w-l2\{outline:2px solid var\(--kk-wire-l2\)\}/,'sötét témában a jelmagyarázat fekete és barna mintája világos körvonalat kap');
+ assert.match(css,/\.kk-dg-sw,\.kk-dg-truth tr\.is-current td\{print-color-adjust:exact/,'a jelmagyarázat színmintái nyomtatáskor (háttérgrafika nélkül is) megmaradnak');
+ assert.ok(!/@media\s*\(min-width:48rem\)\{\.kk-dg-svg\{min-width:0!important\}\}/.test(css),'asztali nézetben sem kicsinyedhet a rajz a minWidth alá (a legkisebb felirat ≥ 10 px)');
 }
 
 console.log('PASS: rajz = netlista – 20 ábra ('+wires+' vezeték, '+terms+' kapocs, '+dots+' csomópontpötty, '+crossings+' keresztezés, '+contacts+' érintkező; a Python-vezetéktáblával is), Működés '+stateCount+' állásban a szimuláció szerint, figura (nézetváltó, aria-pressed, aria-live, táblák), mutációs próba: '+kills+'/'+mutants+' kiszűrve ('+[...kinds].map(([k,v])=>k+' '+v).join(', ')+'), ábra-ujjlenyomat, kontraszt.');

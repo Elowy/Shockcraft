@@ -43,9 +43,50 @@ export function diagramFiles(root:string,file:string,read:Reader=disk):DiagramFi
 export const netlistFiles=(root:string)=>readdirSync(join(root,NETLIST_DIR)).filter(f=>f.endsWith('.netlist.json')).sort();
 /** A rajzoló modulok (a renderelő és helyi importjainak zárása, a kivételekkel). */
 export const rendererFiles=(root:string)=>localClosure(root,DIAGRAM_RENDERER).filter(f=>!EXCLUDED.has(f));
-/** A rajz színszerződése a stíluslapból: az ér-tokenek (figureCss) és a .kk-dg* szabályok. */
+/** A stíluslap szabályai környezettel (a @media/@supports/@layer fejlécek láncával) – az at-rule fejléc a szabály része (a
+ * `@media (min-width:48rem)` módosítása más rajzot ad). Megjegyzések nélkül. */
+export type CssRule={ctx:readonly string[];sel:string;body:string};
+export function cssRules(css:string):CssRule[]{
+ const out:CssRule[]=[];
+ const walk=(src:string,ctx:readonly string[])=>{
+  let i=0;
+  while(i<src.length){
+   const open=src.indexOf('{',i);if(open<0)break;
+   const head=src.slice(i,open).trim();
+   let depth=1,j=open+1;
+   while(j<src.length&&depth>0){const c=src[j];if(c==='{')depth++;else if(c==='}')depth--;j++}
+   const inner=src.slice(open+1,j-1);
+   if(/^@(media|supports|layer)\b/.test(head))walk(inner,[...ctx,head.replace(/\s+/g,' ')]);
+   else out.push({ctx,sel:head.replace(/\s+/g,' '),body:inner.trim()});
+   i=j;
+  }
+ };
+ walk(css.replace(/\/\*[\s\S]*?\*\//g,''),[]);
+ return out;
+}
+const ruleText=(r:CssRule)=>(r.ctx.length?r.ctx.join(' ')+' ':'')+r.sel+'{'+r.body+'}';
+/** A szabályok által hivatkozott minden --kk-* token minden deklarációja (világos, sötét, nyomtatás – a környezetével), a tokenértékekben
+ * hivatkozott további tokenekkel együtt (zárás). */
+export function tokenDeclarations(rules:readonly CssRule[],used:readonly CssRule[]):string[]{
+ const decls=rules.flatMap(r=>[...r.body.matchAll(/(--kk-[a-z0-9-]+)\s*:\s*([^;}]+)/g)].map(m=>({name:m[1],value:m[2].trim(),at:(r.ctx.length?r.ctx.join(' ')+' ':'')+r.sel})));
+ const need=new Set<string>(),stack:string[]=[];
+ const refs=(text:string)=>{for(const m of text.matchAll(/var\((--kk-[a-z0-9-]+)/g))if(!need.has(m[1])){need.add(m[1]);stack.push(m[1])}};
+ for(const r of used)refs(r.body);
+ while(stack.length){const n=stack.pop()!;for(const d of decls)if(d.name===n)refs(d.value)}
+ return decls.filter(d=>need.has(d.name)).map(d=>d.at+'|'+d.name+':'+d.value);
+}
+/** A rajz színszerződése a stíluslapból: az ér-tokenek (figureCss), az ábra .kk-dg* szabályai a @media/@supports fejlécükkel, és az
+ * általuk használt minden --kk-* token értéke (világos, sötét, nyomtatás). */
 export function diagramCss(css:string):string[]{
- return [...figureCss(css).filter(x=>x.startsWith('--')),...[...css.matchAll(/[^{}]*\.kk-dg[^{}]*\{[^}]*\}/g)].map(m=>m[0].trim())];
+ const rules=cssRules(css),mine=rules.filter(r=>r.sel.split(',').some(x=>x.includes('.kk-dg')));
+ return [...figureCss(css).filter(x=>x.startsWith('--')),...mine.map(ruleText),...tokenDeclarations(rules,mine)];
+}
+/** A veszély-doboz és a cikk megjelenítése (R3): a doboz és a cikktörzs renderelő moduljai és a doboz (.kk-callout*) szabályai a használt
+ * tokenekkel – az R3 cikk `figures` ujjlenyomatának része (a lektor azt a megjelenítést hagyja jóvá, amelyben a veszély-doboz látszik). */
+export const RISK_VIEW_FILES=['components/kezikonyv/article/blocks.tsx','components/kezikonyv/article/article-view.tsx','components/kezikonyv/article/inline.tsx'] as const;
+export function riskViewSource(root:string,read:Reader=disk):string{
+ const rules=cssRules(read(root,FIG_CSS)),mine=rules.filter(r=>r.sel.split(',').some(x=>x.includes('.kk-callout')));
+ return fingerprint({files:RISK_VIEW_FILES.map(f=>({file:f,src:read(root,f)})),css:mine.map(ruleText),tokens:tokenDeclarations(rules,mine)});
 }
 /** Netlistás ábrák forrás-ujjlenyomata (a cikkhez tartozó ábrák netlistafájljai, sorrendben). `read`: a fájlolvasó (a tesztek
  * mutációs próbájához cserélhető). */

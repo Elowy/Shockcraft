@@ -16,7 +16,7 @@ calculators: [aram-teljesitmenybol]
 figures:
   - id: abra-1
     netlist: ketpolusu-kapcsolo-102-bekotese.netlist.json
-    views: [bekotes, szerelesi-rajz, mukodes]
+    views: [bekotes, mukodes]
 sources:
   - standard: "MSZ HD 60364-5-537 (leválasztás és kapcsolás)"
     kiadás: "2017 (HD 60364-5-537:2016)" # lektor ellenőrizze a honosítás évét és a hatályos kiadást
@@ -46,7 +46,7 @@ updated: 2026-10-10
 
 **Röviden:** A kétpólusú kapcsoló (102) egyetlen billentyűvel, két együtt mozgó érintkezővel egyszerre bontja a fázis- és a nullavezetőt. Ott használják, ahol a terv vagy a készülék gyártója a fogyasztó mindkét aktív vezetőjének bontását kéri. A védővezetőt a 102-es kapcsoló sem bonthatja, és a nullázásos berendezések közös PEN-vezetőjét sem.
 
-[ÁBRA: abra-1 „Kétpólusú kapcsoló (102) bekötése”. Forrás: ketpolusu-kapcsolo-102-bekotese.netlist.json (id: ketpolusu-kapcsolo-102); a rajz, a vezetéktábla, az ábra desc-je és a Működés nézet is ebből készül. viewBox 0 0 360 240. Bekötés nézet: balra a betáp (L, N, PE), alul középen a kapcsolódoboz a 102-es kapcsolóval (bemenő L és N, kimenő L és N kapocs; a két érintkezőt szaggatott vonal köti össze, jelezve, hogy együtt mozognak) és mellette, a kapcsolón kívül, a PE-összekötő; jobbra fent a lámpa (L, N, PE). Erek: L és kapcsolt fázis barna, N és kapcsolt nulla kék (feliratuk eltér: „N” és „N kapcsolt”), PE zöld alapon sárga csíkkal. Szerelési rajz nézet: betáp – kapcsolódoboz – lámpa, a tervező switch2 jelével („2” felirat), szakaszonként 3 / 3 ér. Működés nézet: egy billentyű; bekapcsolva kiemelt fázis- és nullaút, kikapcsolva a lámpa mindkét kapcsa „leválasztva” felirattal. Alsó sor: „Így látod a tervezőben: a PE egyszínű zöld.”]
+[ÁBRA: abra-1 „Kétpólusú kapcsoló (102) bekötése”. Forrás: ketpolusu-kapcsolo-102-bekotese.netlist.json (id: ketpolusu-kapcsolo-102); a rajz, a vezetéktábla, az ábra desc-je és a Működés nézet is ebből készül. viewBox 0 0 360 240. Bekötés nézet: balra a betáp (L, N, PE), alul középen a kapcsolódoboz a 102-es kapcsolóval (bemenő L és N, kimenő L és N kapocs; a két érintkezőt szaggatott vonal köti össze, jelezve, hogy együtt mozognak) és mellette, a kapcsolón kívül, a PE-összekötő; jobbra fent a lámpa (L, N, PE). Erek: L és kapcsolt fázis barna, N és kapcsolt nulla kék (feliratuk eltér: „N” és „N kapcsolt”), PE zöld alapon sárga csíkkal. Működés nézet: egy billentyű; bekapcsolva kiemelt fázis- és nullaút, kikapcsolva a lámpa mindkét kapcsa „leválasztva” felirattal. Alsó sor: „Így látod a tervezőben: a PE egyszínű zöld.”]
 
 ## Vezetékek táblázatban
 
@@ -100,7 +100,7 @@ A sorrend szakembernek szól, és feszültségmentes állapotot feltételez. Ha 
 
 ## Jelölés az alaprajzon
 
-A tervezőben a kétpólusú kapcsoló jele kör két ferde vonallal, alatta a 2-es számmal (102 → 2). A szerelési rajz szakaszonként mutatja az erek számát:
+A tervezőben a kétpólusú kapcsoló jele kör két ferde vonallal, alatta a 2-es számmal (102 → 2). A tervező szerelési rajza szakaszonként mutatja az erek számát:
 
 <!-- sim:szakaszok src=ketpolusu-kapcsolo-102-bekotese.netlist.json -->
 | Szakasz | Vezetők | Érszám |

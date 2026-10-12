@@ -5,6 +5,14 @@ import type {KbRelease} from '@/lib/kb/release';
 import {meetsRiskFloor,riskFloor} from './categories';
 import type {KbMeta} from './types';
 
+/** Az R3 lektori rekord hiányai: jogosultság, dátum, jóváhagyási hivatkozás (approvalRef) és a szerzőtől független második olvasó kötelező
+ * (nem üres szöveg; docs/tudastar-terv.md 4.2, docs/lektoralas.md). R3 rekord hiányosan nem tesz közzé semmit. */
+export function r3RecordGaps(r:KbRelease):string[]{
+ if(r.kind!=='lektoralt')return ['szakmai lektori rekord (lektoralt)'];
+ const need:[string,string|undefined][]=[['jogosultság (qualification)',r.qualification],['dátum (date)',r.date],['jóváhagyási hivatkozás (approvalRef)',r.approvalRef],['második olvasó (secondReader)',r.secondReader]];
+ return need.filter(([,v])=>!(v??'').trim()).map(([k])=>k);
+}
+
 export type KbState='kozzeteve'|'vazlat'|'lektorra-var'|'ujraellenorzendo'|'felfuggesztve';
 export type KbGate={state:KbState;record?:KbRelease;reason:string};
 
@@ -16,7 +24,8 @@ export type KbGate={state:KbState;record?:KbRelease;reason:string};
  *  - a rekord tartalmi ujjlenyomata egyezik a generált és az újraszámolt ujjlenyomattal,
  *  - a rekord ábra-ujjlenyomata (`figures`) egyezik a generálttal (az ábrák forrása: komponens, kit.tsx, FIGURES-bejegyzés, ábraszínek),
  *  - a rekord szekciója és kockázata egyezik a tartaloméval,
- *  - R3-nál a rekord szakmai lektori („lektoralt”).
+ *  - R3-nál a rekord szakmai lektori („lektoralt”), és teljes: nem üres jogosultság, dátum, jóváhagyási hivatkozás ÉS második olvasó
+ *    (r3RecordGaps; a lektori csomag oldalán az approvalRef kiküldött kiadáshoz és ujjlenyomatokhoz kötése: scripts/lektori-csomag.ts).
  */
 export function gateState(meta:KbMeta,recomputed:string,records:Readonly<Record<string,KbRelease>>,suspended:ReadonlySet<string>):KbGate{
  const record=Object.prototype.hasOwnProperty.call(records,meta.id)?records[meta.id]:undefined;
@@ -27,5 +36,6 @@ export function gateState(meta:KbMeta,recomputed:string,records:Readonly<Record<
  if((record.figures??'')!==meta.figures)return {state:'ujraellenorzendo',record,reason:'Az ábrák az ellenőrzés óta megváltoztak; újra ellenőrizni kell.'};
  if(record.section!==meta.section||record.risk!==meta.risk)return {state:'ujraellenorzendo',record,reason:'A rekord szekciója vagy kockázati osztálya eltér a tartalométól.'};
  if(meta.risk==='R3'&&record.kind!=='lektoralt')return {state:'lektorra-var',record,reason:'R3 tartalom csak szakmai lektor jóváhagyásával jelenhet meg.'};
+ if(meta.risk==='R3'){const gaps=r3RecordGaps(record);if(gaps.length)return {state:'lektorra-var',record,reason:'A lektori rekord hiányos (kötelező: '+gaps.join(', ')+'); R3 tartalom csak teljes rekorddal, a második olvasó egyetértésével jelenhet meg.'}}
  return {state:'kozzeteve',record,reason:''};
 }

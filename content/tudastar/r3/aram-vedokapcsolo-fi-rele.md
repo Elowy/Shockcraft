@@ -16,7 +16,7 @@ calculators: []
 figures:
   - id: abra-2
     netlist: aram-vedokapcsolo-fi-rele.netlist.json
-    views: [bekotes, szerelesi-rajz, mukodes]
+    views: [bekotes, mukodes]
   - id: abra-3
     netlist: aram-vedokapcsolo-fi-rele-hibahelyzetek.netlist.json
     views: [bekotes, mukodes]
@@ -78,7 +78,7 @@ A névleges különbözeti áram (IΔn) az érzékenységet adja meg: minél kis
 
 A lakáselosztóban a kétpólusú áram-védőkapcsoló táp oldalára a betáp fázis- és nullavezetője kerül. A védett oldali fázisról indulnak a kismegszakítók, a védett oldali nullavezető pedig egy külön nullasínre kerül. Erre a sínre **csak** az általa védett áramkörök nullavezetője köthető. A védővezető nem halad át a készüléken. A védett oldalon a nullavezető sehol nem érintkezhet a védővezetővel vagy a földdel: az ilyen kötés terheléskor kioldást okoz, és amíg nem old ki, a hibaáram egy része a nullavezetőn, a vasmagon át tér vissza, vagyis a védelem érzékenysége romlik.
 
-[ÁBRA: abra-2 „Áram-védőkapcsoló bekötése dugaljkör elé, próbagombbal”. Forrás: aram-vedokapcsolo-fi-rele.netlist.json (id: fi-rele-bekotes); a rajz, a vezetéktábla, a desc és a Működés nézet ebből készül, kézzel nem rajzolható át. viewBox 0 0 500 220. Bekötés nézet: balra a betáp-gyűjtősín (L, N, PE), mellette a Q1 kétpólusú áram-védőkapcsoló táp és védett oldali kapcsokkal; a házán belül a T próbagomb és a próbaellenállás vékony, szürke, „belső” jelölésű vonallal (nem szerelt ér); a védett oldalon a nullasín és az F1 kismegszakító, külön PE-sín; jobbra az X1 dugalj és a dugóval csatlakozó M1 mosógép (fémház, PE). Színek: L barna, N kék, PE zöld-sárga. Szerelési rajz nézet: a tervező RCD- és MCB-modulja, socket jel. Működés nézet: Q1, T, F1 gomb (aria-pressed), kiemelt áramút; a próbagomb megnyomásakor a próbaáram útja kiemelve, szöveges állapot („Q1 kiold”). Alsó sor (.fig-small): „Így látod a tervezőben: a PE egyszínű zöld.” title: „FI-relé bekötése”; desc: a netlistából generált leírás.]
+[ÁBRA: abra-2 „Áram-védőkapcsoló bekötése dugaljkör elé, próbagombbal”. Forrás: aram-vedokapcsolo-fi-rele.netlist.json (id: fi-rele-bekotes); a rajz, a vezetéktábla, a desc és a Működés nézet ebből készül, kézzel nem rajzolható át. viewBox 0 0 500 220. Bekötés nézet: balra a betáp-gyűjtősín (L, N, PE), mellette a Q1 kétpólusú áram-védőkapcsoló táp és védett oldali kapcsokkal; a házán belül a T próbagomb és a próbaellenállás vékony, szürke, „belső” jelölésű vonallal (nem szerelt ér); a védett oldalon a nullasín és az F1 kismegszakító, külön PE-sín; jobbra az X1 dugalj és a dugóval csatlakozó M1 mosógép (fémház, PE). Színek: L barna, N kék, PE zöld-sárga. Működés nézet: Q1, T, F1 gomb (aria-pressed), kiemelt áramút; a próbagomb megnyomásakor a próbaáram útja kiemelve, szöveges állapot („Q1 kiold”). Alsó sor (.fig-small): „Így látod a tervezőben: a PE egyszínű zöld.” title: „FI-relé bekötése”; desc: a netlistából generált leírás.]
 
 <!-- sim:vezetekek src=aram-vedokapcsolo-fi-rele.netlist.json -->
 | # | Honnan | Hová | Vezető | Szín | Szakasz |

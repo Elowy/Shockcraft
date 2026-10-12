@@ -328,7 +328,7 @@ def it():
              electrode("RA", "RA védőföldelő (a fémházak közös földelője)", "TR", "vedo"),
              mcb3("Q1", "TR", "Q1 háromfázisú kismegszakító (M1)"), mcb3("Q2", "TR", "Q2 háromfázisú kismegszakító (M2)"),
              consumer3("M1", "M1 háromfázisú fémházas fogyasztó"), consumer3("M2", "M2 háromfázisú fémházas fogyasztó"),
-             fault("H1", "M1", "L1", "H1 testzárlat M1-ben (L1 → fémház)"), fault("H2", "M2", "L2", "H2 testzárlat M2-ben (L2 → fémház)"),
+             fault("H1", "M1", "L1", "H1 testzárlat M1-ben (L1 → fémház)"), fault("H2", "M2", "L3", "H2 testzárlat M2-ben (L3 → fémház)"),
              SOIL]
     wires = [wire("w1", "TR.L1", "SZF.A", "L1", "barna"),
              wire("w2", "SZF.PE", "XPE.PE", "PE", "zöld-sárga"),
@@ -340,7 +340,7 @@ def it():
              wire("w14", "Q2.2", "M2.L1", "L1", "barna", "S2"), wire("w15", "Q2.4", "M2.L2", "L2", "fekete", "S2"),
              wire("w16", "Q2.6", "M2.L3", "L3", "szürke", "S2"), wire("w17", "XPE.PE", "M2.PE", "PE", "zöld-sárga", "S2"),
              wire("w18", "H1.a", "M1.L1", "hibahely"), wire("w19", "H1.b", "M1.PE", "hibahely"),
-             wire("w20", "H2.a", "M2.L2", "hibahely"), wire("w21", "H2.b", "M2.PE", "hibahely")]
+             wire("w20", "H2.a", "M2.L3", "hibahely"), wire("w21", "H2.b", "M2.PE", "hibahely")]
     sel = [("Q1", ["be"]), ("Q2", ["be"]), ("H1", ["nincs", "fennáll"]), ("H2", ["nincs", "fennáll"])]
     places = {"TR": {"label": "IT-táppont és elosztó", "inner": "a táppontnál"}, "M1": {"label": "M1 fogyasztó"},
               "M2": {"label": "M2 fogyasztó"}, "FOLD": {"label": "Föld (talaj)"}}
@@ -389,7 +389,9 @@ def eph():
               "terminals": [term("PEN", "PEN", "PEN (érkező)"), term("N", "N", "N-sín"), term("PE", "PE", "PE-sín")],
               "bridges": [["PEN", "N", "PE"]]},
              {"id": "MET", "type": "fofoldelo-sin", "label": "Fő EPH-sín (főföldelő sín)", "short": "fő EPH-sín", "at": "EL",
-              "terminals": [term("PE", "PE", "gyűjtőkapocs")]},
+              "terminals": [term("PE-be", "PE", "fő védővezető (érkező)"), term("RA", "PE", "földelővezető az RA-hoz"),
+                            term("EPH", "PE", "EPH-vezető a vízvezetékhez"), term("PE-ki", "PE", "védővezető a fogyasztóhoz")],
+              "bridges": [["PE-be", "RA", "EPH", "PE-ki"]]},
              electrode("RA", "RA alapföldelő", "EL", "vedo"),
              {"id": "VIZ", "type": "idegen", "label": "VIZ fém vízvezeték (idegen vezetőképes rész)", "short": "vízvezeték", "at": "VIZ",
               "earthContact": True, "bonded": True, "terminals": [term("K", "idegen", "csőbilincs (EPH-kötés)")]},
@@ -398,13 +400,13 @@ def eph():
              wire("w2", "TR.L1", "Q1.1", "L1", "barna", "S1"),
              wire("w3", "TR.PEN", "PSZ.PEN", "PEN", "zöld-sárga", "S1"),
              wire("w4", "PSZ.N", "Q1.N-be", "N", "kék"),
-             wire("w5", "PSZ.PE", "MET.PE", "PE", "zöld-sárga", label="(fő védővezető)"),
-             wire("w6", "MET.PE", "RA.K", "földelővezető", "zöld-sárga"),
-             wire("w7", "MET.PE", "VIZ.K", "EPH-vezető", "zöld-sárga", "S3"),
+             wire("w5", "PSZ.PE", "MET.PE-be", "PE", "zöld-sárga", label="(fő védővezető)"),
+             wire("w6", "MET.RA", "RA.K", "földelővezető", "zöld-sárga"),
+             wire("w7", "MET.EPH", "VIZ.K", "EPH-vezető", "zöld-sárga", "S3"),
              wire("w8", "Q1.2", "F1.1", "L", "barna"),
              wire("w9", "F1.2", "M1.L", "L", "barna", "S2"),
              wire("w10", "Q1.N-ki", "M1.N", "N", "kék", "S2"),
-             wire("w11", "MET.PE", "M1.PE", "PE", "zöld-sárga", "S2")] + fault_wires(12)
+             wire("w11", "MET.PE-ki", "M1.PE", "PE", "zöld-sárga", "S2")] + fault_wires(12)
     sel = [("Q1", ["be"]), ("F1", ["be"]), ("H1", ["nincs", "fennáll"]), ("EPH1", ["bekötve", "hiányzik"]), ("SZ", ["ép", "szakadt"])]
     places = dict(PLACES)
     places["EL"] = {"label": "Épület: csatlakozás, PEN-szétválasztás, fő EPH-sín, elosztó", "inner": "elosztón belül"}

@@ -254,7 +254,7 @@ function capsOf(w:SceneWire):Prim[]{
  return [primLine(a0,a1,'w-cap',{cap:w.id}),primLine(b0,b1,'w-cap',{cap:w.id})];
 }
 /**
- * Az ábra rajzelemei egy listában (az SVG, a PDF és a teszt ezt használja), rétegsorrendben: alkatrészek, vezetékek (a fekete ér alatt
+ * Az ábra rajzelemei egy listában (az SVG, a PDF és a teszt ezt használja), rétegsorrendben: alkatrészek, vezetékek (a fekete és a barna ér alatt
  * sötét témában világos halo, a zöld-sárga ér fölött sárga csíkozás, a PEN végein kék jelölés), hidak, érintkezők, érintési nyilak,
  * kapcsok, csomópontpöttyök, feliratok. `contacts`: 'all' – minden állás érintkezője (a nem aktív „is-off” osztállyal, a Működés nézet
  * váltja); 'state' – csak a megadott állásé (PDF).
@@ -271,7 +271,7 @@ export function scenePrims(s:Scene,{contacts='all',combo=s.initial,state}:{conta
   const data={wire:w.id,net:w.net,from:w.from,to:w.to,role:w.role,color:w.color,kind:w.kind},m=mark(w.id);
   // Minden valódi ér alatt háttérszínű sáv: a később rajzolt ér így megszakítja a korábbit a keresztezésnél (nem csomópont).
   if(w.kind==='er')out.push(primPoly(w.pts,'w-gap',false,{gap:w.id}));
-  if(w.cls==='w-l2')out.push(primPoly(w.pts,'w-halo'+m,false,{halo:w.id}));
+  if(w.cls==='w-l2'||w.cls==='w-l1')out.push(primPoly(w.pts,'w-halo'+m,false,{halo:w.id}));
   out.push(primPoly(w.pts,'w '+w.cls+m,false,data));
   if(w.cls==='w-pe')out.push(primPoly(w.pts,'w-pes'+m,false,{stripe:w.id}));
   out.push(...capsOf(w));

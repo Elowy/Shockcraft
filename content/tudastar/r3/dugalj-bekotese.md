@@ -16,10 +16,10 @@ calculators: [aram-teljesitmenybol, fazisterheles]
 figures:
   - id: abra-1
     netlist: dugalj-bekotese.netlist.json
-    views: [bekotes, szerelesi-rajz, mukodes]
+    views: [bekotes, mukodes]
   - id: abra-2
     netlist: dugalj-bekotese-leagaztatas.netlist.json
-    views: [bekotes, szerelesi-rajz, mukodes]
+    views: [bekotes, mukodes]
 sources:
   - standard: "MSZ HD 60364-4-41 (áramütés elleni védelem)"
     kiadás: "2007 (HD 60364-4-41:2007)" # lektor ellenőrizze; újabb kiadás (HD 60364-4-41:2017) honosítása és hatálya kérdéses
@@ -46,9 +46,7 @@ lektorKerdesek:
   - "Van-e kötelező hazai előírás arra, hogy a védővezetőt ne a dugalj kapcsán hurkolják át, hanem kötőelemmel ágaztassák le? A cikk jelenleg csak szakmai megfontolásként tárgyalja."
   - "Van-e kialakult hazai szabály arra, hogy jelöletlen kapcsú dugaljnál szemből nézve melyik oldalra kerüljön a fázis? A cikk most csak az egységes bekötést javasolja."
   - "A CEE 7/3 aljzat hazai termékszabványa (MSZ 9871 sorozat vagy más) és kiadása."
-  - "Elegendő-e a háromfázisú (CEE-rendszerű, ötpólusú) dugalj puszta említése, vagy külön cikk kell (P2)?"
-  - "A kikapcsolt dugalj állapotát a táblázat „nem ad feszültséget” szóval jelöli (nem „feszültségmentes”), mert lekapcsolt kismegszakító mellett a nullavezető a nullasínen marad. Elfogadható-e ez a szóhasználat (a független biztonsági ellenőr javaslata)?"
-  - "Maradjon-e „A szerelés menete szakembernek” lépéssor a laikusokat is megszólító (audience: laikus) cikkben, vagy kerüljön szakembernek szóló, összecsukott blokkba? A „hogyan kell bekötni a konnektort” keresőszinonimát az ellenőr kivette; visszakerüljön-e?"
+  - "Elegendő-e a háromfázisú (CEE-rendszerű, ötpólusú) dugalj puszta említése, vagy külön cikk kell?"
 ai: vázlat
 review: lektorra-var
 version: 0.1
@@ -59,7 +57,7 @@ updated: 2026-10-10
 
 **Röviden:** A védőérintkezős (földelt) dugalj három vezetőt kap: fázisvezetőt (L), nullavezetőt (N) és védővezetőt (PE), amely a dugalj oldalsó védőérintkezőihez csatlakozik. A mai gyakorlatban a dugaljáramkört a lakáselosztóban saját kismegszakító és egy 30 mA-es áram-védőkapcsoló (FI-relé) védi. Több dugalj áthurkolással vagy kötődobozos leágaztatással kerülhet egy áramkörre; a védővezető mindkét esetben megszakítás és kapcsoló nélkül jut el minden dugaljig.
 
-[ÁBRA: abra-1 „Dugaljkör áthurkolással, FI-relé és kismegszakító után”. Forrás: dugalj-bekotese.netlist.json (id: dugalj-athurkolas); a rajz, a vezetéktábla, az ábra desc-je és a Működés nézet is ebből készül, kézzel nem rajzolható át. viewBox 0 0 460 220, elhelyezés a netlista layout mezője szerint. Bekötés nézet: balra a lakáselosztó (betáp-gyűjtősín L, N, PE; Q1 kétpólusú áram-védőkapcsoló; utána nullasín és F1 kismegszakító; külön PE-sín), jobbra az X1 és az X2 dugalj három-három kapoccsal (L, N, védőérintkező). Az X1-ből a továbbmenő vezetők az X2-höz futnak. Minden éren felirat és szín: L barna, N kék, PE zöld alapon sárga csíkkal. Szerelési rajz nézet: alaprajzi elrendezés a tervező jeleivel (lakáselosztó, két socket jel), szakaszonként érszám-vonalkákkal (3 / 3, a szakasztáblázat szerint). Működés nézet: két gomb (Q1, F1; aria-pressed), kiemelt áramút, szöveges állapot („Az X1 és az X2 dugalj feszültség alatt” / „nem ad feszültséget”), alatta az állapottáblázat. Alsó sor (.fig-small): „Így látod a tervezőben: a PE egyszínű zöld.” title: „Dugalj bekötése áthurkolással”; desc: a netlistából generált leírás.]
+[ÁBRA: abra-1 „Dugaljkör áthurkolással, FI-relé és kismegszakító után”. Forrás: dugalj-bekotese.netlist.json (id: dugalj-athurkolas); a rajz, a vezetéktábla, az ábra desc-je és a Működés nézet is ebből készül, kézzel nem rajzolható át. viewBox 0 0 460 220, elhelyezés a netlista layout mezője szerint. Bekötés nézet: balra a lakáselosztó (betáp-gyűjtősín L, N, PE; Q1 kétpólusú áram-védőkapcsoló; utána nullasín és F1 kismegszakító; külön PE-sín), jobbra az X1 és az X2 dugalj három-három kapoccsal (L, N, védőérintkező). Az X1-ből a továbbmenő vezetők az X2-höz futnak. Minden éren felirat és szín: L barna, N kék, PE zöld alapon sárga csíkkal. Működés nézet: két gomb (Q1, F1; aria-pressed), kiemelt áramút, szöveges állapot („Az X1 és az X2 dugalj feszültség alatt” / „nem ad feszültséget”), alatta az állapottáblázat. Alsó sor (.fig-small): „Így látod a tervezőben: a PE egyszínű zöld.” title: „Dugalj bekötése áthurkolással”; desc: a netlistából generált leírás.]
 
 ## A védőérintkezős dugalj
 
@@ -119,7 +117,7 @@ A dugalj betétjén három kapocs van: a két hüvelyhez tartozó L és N, valam
 
 **Leágaztatás** (2. ábra): a kötődobozban szerepenként egy-egy vezetékösszekötő fogja össze a vezetőket, és minden dugaljhoz külön szakasz indul. Egy dugalj cseréje a többit nem érinti.
 
-[ÁBRA: abra-2 „Dugaljkör leágaztatással, kötődobozból”. Forrás: dugalj-bekotese-leagaztatas.netlist.json (id: dugalj-leagaztatas); a rajz, a vezetéktábla, a desc és a Működés nézet ebből készül. viewBox 0 0 460 240. Bekötés nézet: balra a lakáselosztó (mint az 1. ábrán), középen fent a kötődoboz három vezetékösszekötővel (L, N, PE), alatta az X1 és az X2 dugalj, mindegyik saját háromeres szakasszal. Színek: L barna, N kék, PE zöld-sárga. Szerelési rajz nézet: a tervező jelei (lakáselosztó, kötődoboz, két socket jel), érszám-vonalkák (3 / 3 / 3). Működés nézet: Q1 és F1 gomb, kiemelt áramút, alatta az állapottáblázat. Alsó sor (.fig-small): „Így látod a tervezőben: a PE egyszínű zöld.” title: „Dugalj bekötése leágaztatással”; desc: a netlistából generált leírás.]
+[ÁBRA: abra-2 „Dugaljkör leágaztatással, kötődobozból”. Forrás: dugalj-bekotese-leagaztatas.netlist.json (id: dugalj-leagaztatas); a rajz, a vezetéktábla, a desc és a Működés nézet ebből készül. viewBox 0 0 460 240. Bekötés nézet: balra a lakáselosztó (mint az 1. ábrán), középen fent a kötődoboz három vezetékösszekötővel (L, N, PE), alatta az X1 és az X2 dugalj, mindegyik saját háromeres szakasszal. Színek: L barna, N kék, PE zöld-sárga. Működés nézet: Q1 és F1 gomb, kiemelt áramút, alatta az állapottáblázat. Alsó sor (.fig-small): „Így látod a tervezőben: a PE egyszínű zöld.” title: „Dugalj bekötése leágaztatással”; desc: a netlistából generált leírás.]
 
 <!-- sim:szakaszok src=dugalj-bekotese-leagaztatas.netlist.json -->
 | Szakasz | Vezetők | Érszám |

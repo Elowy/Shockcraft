@@ -26,6 +26,8 @@ import {RELEASES,T1_SLUGS,TABLE_GATED,type ExpertReview,type ReleaseRecord} from
 import {HP_W,LE_W,MCB_RATINGS,PSU_SIZES} from '../lib/calc/constants';
 import {UNITS,unitById,type Unit,type UnitKind} from '../lib/calc/units';
 import {SAFETY} from '../lib/kb/safety';
+import {CIRCUIT_RULES} from '../lib/kb/circuit-rules';
+import {r3RecordGaps} from '../lib/kb/content/gate';
 import {loadNetlist,netlistFingerprint,runNetlist,wireTable,type Netlist} from '../lib/kb/circuit';
 import {KB_RELEASES,type KbRelease} from '../lib/kb/release';
 import {buildScene,scenePrims} from '../components/kezikonyv/diagram/scene';
@@ -33,6 +35,7 @@ import type {Prim} from '../components/kezikonyv/diagram/symbols';
 import {sourceFingerprint} from './calc-source';
 import {diagramFiles,diagramSource,netlistFiles,NETLIST_DIR} from './kb-content/diagrams';
 import {parseDraft} from './kb-content/parse';
+import {articleId,articleMinutes,flatten,mdArticle,r3Articles,sourceRows,type ArticleData} from './lektori-csomag-cikkek';
 
 // ---------------------------------------------------------------- Kiadások
 /**
@@ -41,9 +44,11 @@ import {parseDraft} from './kb-content/parse';
  * Nem tervezet kiadásnál kötelező a jóváhagyott tartalom ujjlenyomata részenként: `tables` (1. rész), `formulas` (2. rész) és
  * kalkulátoronként `calcs[slug]` = „tartalmi/forrás” ujjlenyomat-pár, az LK-4-től ábránként `diagrams[netlista-id]` = „netlista/ábra”
  * ujjlenyomat-pár – a jóváhagyások (SIZING_REVIEW.approvalRef, a kalkulátorok és a Tudástár R3 cikkeinek lektori rekordja) ehhez
- * kötődnek (reviewRefProblems, releaseRefProblems, diagramRefProblems).
+ * kötődnek (reviewRefProblems, releaseRefProblems, diagramRefProblems). Az LK-4-től (ARTICLES_FROM) kiadásonként rögzítve van az R3
+ * cikkvázlatok tartalmi ujjlenyomata is (`articles[cikk-azonosító]`): a lektor az 5. részben a cikk SZÖVEGÉT hagyja jóvá, a Tudástár
+ * lektori rekordjának `fingerprint`-je és `approvalRef`-je ehhez kötődik (articleRefProblems).
  */
-export type Edition={number:number;date:string;content:string;draft?:true;sent?:string;tables?:string;formulas?:string;calcs?:Readonly<Record<string,string>>;diagrams?:Readonly<Record<string,string>>;note?:string};
+export type Edition={number:number;date:string;content:string;draft?:true;sent?:string;tables?:string;formulas?:string;calcs?:Readonly<Record<string,string>>;diagrams?:Readonly<Record<string,string>>;articles?:Readonly<Record<string,string>>;note?:string};
 /**
  * A csomag kiadásainak előzménylistája; a legutolsó az aktuális. Ha a csomag tartalma (bármely szöveg, tétel, érték vagy űrlapelem)
  * változik, a generátor megáll, és kiírja a bejegyzést: a még ki nem küldött (sent nélküli) utolsó kiadásé átírható, különben új
@@ -55,12 +60,12 @@ export const EDITIONS:readonly Edition[]=[
  {number:1,date:'2026-10-10',content:'48479e60',draft:true,note:'belső tervezet, lektornak nem küldve; az ujjlenyomat még csak a tételeket fedte'},
  {number:2,date:'2026-10-10',content:'4f9723b6',draft:true,note:'belső tervezet, lektornak nem küldve'},
  {number:3,date:'2026-10-10',content:'77cbe404',tables:'c78b23ee',formulas:'25b6c94f',calcs:{'feszultseges':'f1be2f7d/c0f73c97','motor-aram':'d3861940/81ecfbc6','led-szalag-tapegyseg':'12c6bbe4/48423097','fazisjavitas':'9d9f7219/737957ec','keresztmetszet':'b7b5caee/fb81ce00','kismegszakito':'a8ff2c9b/48c4f6af','hurokimpedancia':'293f288b/b6d0b20e','terhelhetoseg-tablazat':'135442b5/5f043d00'}},
- {number:4,date:'2026-10-12',content:'09c63bbe',tables:'c78b23ee',formulas:'25b6c94f',calcs:{'feszultseges':'f1be2f7d/c0f73c97','motor-aram':'d3861940/81ecfbc6','led-szalag-tapegyseg':'12c6bbe4/48423097','fazisjavitas':'9d9f7219/737957ec','keresztmetszet':'b7b5caee/fb81ce00','kismegszakito':'a8ff2c9b/48c4f6af','hurokimpedancia':'293f288b/b6d0b20e','terhelhetoseg-tablazat':'135442b5/5f043d00'},diagrams:{'egypolusu-kapcsolo-101':'162c980a/0b299afb','ketpolusu-kapcsolo-102':'a253fd8a/361fdb2a','csillarkapcsolo-105':'171c858b/f7930873','valtokapcsolo-106':'909db559/79d7b08a','kettos-valtokapcsolo-106-6':'837cd200/7a0aa663','keresztkapcsolo-107':'835f0537/2902a14a','keresztkapcsolo-107-2x107':'9566473c/96217f1e','keresztkapcsolo-107-3x107':'f9fd89d8/5e3b5a40','keresztkapcsolo-107-4x107':'e67cbcc6/b7949588','dugalj-athurkolas':'9bb3ff8e/f68b16a5','dugalj-leagaztatas':'143d7450/ff622029','kismegszakito-aramkorok':'3bf085c5/244ec1ac','fi-rele-bekotes':'8f0e1c8c/d8644f80','fi-rele-hibahelyzetek':'704b52c6/bcf3e28d','foldeles-tn-c':'742e564d/a2c56b74','foldeles-tn-s':'816da23b/2f8e3995','foldeles-tn-c-s':'bff6a9cd/f84a4546','foldeles-tt':'553eca92/9a79c8ae','foldeles-it':'60981084/f1d3c3b2','eph-alapok':'d0990558/c6056099'}},
+ {number:4,date:'2026-10-12',content:'df31ad27',tables:'c78b23ee',formulas:'25b6c94f',calcs:{'feszultseges':'f1be2f7d/c0f73c97','motor-aram':'d3861940/81ecfbc6','led-szalag-tapegyseg':'12c6bbe4/48423097','fazisjavitas':'9d9f7219/737957ec','keresztmetszet':'b7b5caee/fb81ce00','kismegszakito':'a8ff2c9b/48c4f6af','hurokimpedancia':'293f288b/b6d0b20e','terhelhetoseg-tablazat':'135442b5/5f043d00'},diagrams:{'egypolusu-kapcsolo-101':'162c980a/1dcf64c0','ketpolusu-kapcsolo-102':'a253fd8a/8f880407','csillarkapcsolo-105':'171c858b/0b2d7654','valtokapcsolo-106':'909db559/8b477227','kettos-valtokapcsolo-106-6':'837cd200/2c4744a0','keresztkapcsolo-107':'835f0537/3fafb965','keresztkapcsolo-107-2x107':'9566473c/862239b0','keresztkapcsolo-107-3x107':'f9fd89d8/02bf7fb3','keresztkapcsolo-107-4x107':'e67cbcc6/aff64b7d','dugalj-athurkolas':'9bb3ff8e/5ddcd826','dugalj-leagaztatas':'143d7450/42c9277a','kismegszakito-aramkorok':'3bf085c5/85c98132','fi-rele-bekotes':'8f0e1c8c/0d32d689','fi-rele-hibahelyzetek':'704b52c6/51b5b201','foldeles-tn-c':'742e564d/fc6fb08c','foldeles-tn-s':'816da23b/916b312b','foldeles-tn-c-s':'bff6a9cd/86f15a2d','foldeles-tt':'553eca92/e3d263ee','foldeles-it':'3723d185/22bba2ea','eph-alapok':'d8926fe6/217145db'},articles:{'aram-vedokapcsolo-fi-rele':'b14c8c33','csillarkapcsolo-105-bekotese':'68cc59f0','dugalj-bekotese':'5d62b44a','egyenpotencialra-hozas-eph':'42f19255','egypolusu-kapcsolo-101-bekotese':'6f7c9cdc','feszultsegmentesites-ot-szabalya':'099bbab3','foldelesi-rendszerek':'1a172e63','keresztkapcsolo-107-bekotese':'932700dc','ketpolusu-kapcsolo-102-bekotese':'6a9a7747','kettos-valtokapcsolo-106-6-bekotese':'ec7dca3e','kismegszakito':'539e0515','valtokapcsolo-106-bekotese':'6ed95068','vilagitasi-kapcsolasok':'a7a9b850'}},
 ];
 export const EDITION=EDITIONS[EDITIONS.length-1];
 export const PATHS={md:'docs/lektori-csomag.md',pdf:'docs/lektori-csomag.pdf',font:'public/fonts/NotoSans-Regular.ttf',sizingDoc:'docs/meretezes.md'} as const;
 export const TITLE='Villanyrajz – lektori csomag';
-const SUBTITLE='Szakmai lektori ellenőrzőcsomag a méretezési segédszámításhoz, a szabványhoz kötött kalkulátorokhoz és a Tudástár bekötési ábráihoz: táblázatok, képletek, programozott döntések, kalkulátorok és bekötési ábrák';
+const SUBTITLE='Szakmai lektori ellenőrzőcsomag a méretezési segédszámításhoz, a szabványhoz kötött kalkulátorokhoz és a Tudástár biztonságkritikus (R3) tartalmához: táblázatok, képletek, programozott döntések, kalkulátorok, bekötési ábrák és cikkvázlatok';
 
 // ---------------------------------------------------------------- Modell
 /** Pontokkal elválasztott útvonal a reviewedContent()-ben, pl. „tables.ampacity.PVC.2.B2.1”. */
@@ -124,7 +129,7 @@ export type RuleItem={kind:'rule';id:string;title:string;rule:string;rationale:s
 export type Item=ValueItem|RuleItem;
 export type Matrix={corner:string;columns:string[];rows:{label:string;cells:string[]}[]};
 /** `layout`: a PDF-táblázat oszlopszélességei mm-ben (azonosító, megnevezés, érték, helyes érték; a ✓ és ✗ oszlop 7–7 mm) és az érték igazítása. */
-export type Block={id:string;title:string;source:string;intro:string[];minutes:number;columns?:[string,string];layout?:{widths:[number,number,number,number];align:'left'|'right'};matrix?:Matrix;questions?:{id:string;text:string}[];items:Item[];diagram?:DiagramData};
+export type Block={id:string;title:string;source:string;intro:string[];minutes:number;columns?:[string,string];layout?:{widths:[number,number,number,number];align:'left'|'right'};matrix?:Matrix;questions?:{id:string;text:string}[];items:Item[];diagram?:DiagramData;article?:ArticleData};
 /** A 4. rész ábrája: a kirajzolt Bekötés nézet (alapállás) rajzelemei, a jelmagyarázat, a vezeték-, szakasz- és kapcsolóállás-táblázat,
  * a netlista és az ábra ujjlenyomata, valamint a TS- és a Python-szimuláció egyezésének jelzése. */
 export type DiagramData={file:string;netlistId:string;netlistFp:string;diagramFp:string;viewBox:readonly [number,number,number,number];prims:Prim[];legend:string[];
@@ -133,7 +138,9 @@ export type Part={no:number;title:string;intro:string[];blocks:Block[];placehold
 /** A 3. rész egy kalkulátora a jóváhagyó laphoz: tartalmi és forrás-ujjlenyomat, táblázat-kapu, jelenlegi kiadási állapot. */
 export type CalcRow={slug:string;title:string;id:string;fingerprint:string;source:string;gated:boolean;state:string};
 export type DiagramRow={id:string;block:string;title:string;netlistFp:string;diagramFp:string;article:string};
-export type Package={edition:Edition;parts:Part[];fingerprints:{tables:string;formulas:string;calculators:string;diagrams:string;content:string};review:SizingReview;approved:boolean;tablesVersion:string;notCovered:string[];calcs:CalcRow[];diagrams:DiagramRow[]};
+/** Az 5. rész egy cikke a jóváhagyó laphoz: tartalmi ujjlenyomat (ehhez kötődik a cikk lektori rekordja), a kiadást még akadályozó hiány. */
+export type ArticleRow={slug:string;block:string;title:string;fingerprint:string;blocked?:string};
+export type Package={edition:Edition;parts:Part[];fingerprints:{tables:string;formulas:string;calculators:string;diagrams:string;articles:string;content:string};review:SizingReview;approved:boolean;tablesVersion:string;notCovered:string[];calcs:CalcRow[];diagrams:DiagramRow[];articles:ArticleRow[]};
 
 // ---------------------------------------------------------------- Formázás
 /** Kerekített szám a kézzel számolt példákhoz. */
@@ -1046,6 +1053,24 @@ export function r3Questions(section:string):string[]{
  const body=md.slice(at+section.length+5),end=body.indexOf('\n## ');
  return [...(end<0?body:body.slice(0,end)).matchAll(/^\d+\.\s+(.+)$/gm)].map(m=>m[1].trim());
 }
+/** A lektori kérdéslista (R3_QUESTIONS) szakaszai: a csoportok szakaszai és a belső jegyzetek szakasza – más szakasz nem lehet (egy új szakasz
+ * ne maradjon ki némán a csomagból). */
+export const INTERNAL_NOTES='Belső jegyzetek (a lektori csomagba nem kerül)';
+export function r3QuestionSections():string[]{
+ return [...readFileSync(R3_QUESTIONS,'utf8').replace(/\r\n/g,'\n').matchAll(/^## (.+)$/gm)].map(m=>m[1].trim());
+}
+/** Fejlesztői, szerkesztői és koordinációs szóhasználat, amely a lektornak szánt kérdésben nem állhat (fájlnév, kód, belső hivatkozás). */
+export const QUESTION_TABOO:readonly [RegExp,string][]=[
+ [/Koordináció:|Szerkesztő:|Szerkesztői:|Fejlesztő|Naplóbejegyzés/,'belső szerepkör vagy napló'],[/\.(?:py|tsx?|jsx?|mjs|md|json)\b/,'fájlnév'],[/\b(?:lib|components|content|docs|scripts|tests|app)\//,'útvonal'],
+ [/`/,'kódjelölés'],[/\bterv\s*\d/i,'belső terv-hivatkozás'],[/check_|OUT_WORDS|\bchecks\.|\bsim\b|front matter|\baudience\b|foldeles_ext|\bI1[0-9]\b/i,'fejlesztői kifejezés'],
+ [/tulajdonos|marketing/i,'üzleti döntés'],
+];
+/** A lektori kérdések tiltólistás hibái (üres lista: rendben). */
+export function questionProblems(id:string,text:string):string[]{
+ const out:string[]=[];
+ for(const [re,why] of QUESTION_TABOO){const m=re.exec(text);if(m)out.push(`${id}: a lektori kérdés ${why}ot tartalmaz („${m[0]}”) – lektori nyelven kell megfogalmazni; belső jegyzetnek a „${INTERNAL_NOTES}” szakaszba való`)}
+ return out;
+}
 /** A netlista ábrájának adatai: rajzelemek (Bekötés nézet, alapállás), táblák, ujjlenyomatok, a TS = Python egyezés (a rögzített
  * referencia szerint, amelyet a tests/kb-circuit.ts a Python-szimulátorral vet össze). Eltérésnél a csomag nem készülhet el. */
 export function diagramData(file:string):DiagramData{
@@ -1066,7 +1091,7 @@ export function diagramData(file:string):DiagramData{
   wires:wires.map(w=>[String(w.no),w.fromLabel,w.toLabel,w.conductor,w.color,w.section]),
   sections:rep.sections.map(x=>[x.label,x.conductors.join(', '),String(x.count)]),
   truth:{headers:[...scene.selectors.map(x=>x.id),'Eredmény (a szimuláció szerint)'],columns:scene.selectors.map(x=>x.id+' – '+x.label),rows:scene.states.map(st=>[...scene.selectors.map(x=>x.states.find(y=>y.name===st.states[x.id])?.label??''),st.text.join('; ')])},
-  python:`egyezik (${rep.combinations} állás; kimenetek, invariánsok, vezetéktábla; Python-szimulátor: ${Object.entries(ref.sim).map(([k,v])=>k+' '+v).join(', ')})`,
+  python:`a Python-referenciaszimulátor és annak TypeScript-átirata azonos eredményt ad (${rep.combinations} állás: kimenetek, invariánsok, vezetéktábla; referencia: ${Object.entries(ref.sim).map(([k,v])=>k+' '+v).join(', ')}) – ez az átirat hűségét igazolja, a modell és a bekötés szakmai helyességét nem`,
   article,figure,caption:fig&&fig.t==='figure'?fig.caption:d.netlist.title};
 }
 /** A 4. rész ábráinak sorrendje (netlista-id): csoportonként a cikkek és az ábrák sorrendjében. */
@@ -1080,35 +1105,89 @@ export const diagramOrder=()=>{
  if(extra.length||byId.size!==DIAGRAM_ORDER.length)throw Error('A 4. rész sorrendje (DIAGRAM_ORDER) nem egyezik a netlistákkal: '+extra.join(', '));
  return DIAGRAM_ORDER.map(id=>byId.get(id)!);
 };
+/** A biztonsági szabályok blokkja (4. rész eleje): a szimulátor minden állásban ellenőrzött szabályai (lib/kb/circuit-rules.ts). */
+function rulesBlock():Block{
+ return {id:'BEK-SZABALYOK',title:'Biztonsági szabályok, amelyeket a szimulátor minden állásban ellenőriz',source:'lib/kb/circuit-rules.ts (a szimulátor: lib/kb/circuit.ts; Python-referencia: content/tudastar/r3-sim/sim.py)',
+  intro:['A szimulátor minden kapcsolóállásban és hibahelyzetben ellenőrzi az alábbi szabályokat; ha egy ábra bármelyik állásban megsérti valamelyiket, az ábra nem készülhet el (a rajz és a táblázat nem jön létre). A szabályok a bekötés logikai helyességét védik; a szimuláció ideális vezetőkkel, igen/nem alapon számol: áramerősséget, feszültséget és lekapcsolási időt nem.',
+   'A lektor a szabályokat tételenként jóváhagyhatja vagy kifogásolhatja; a 4. rész kérdései ezekre a kódokra hivatkoznak (például I16: minden dugalj FI-relé mögött van). Az S0–S9 szerkezeti ellenőrzések formaiak, szakmai kérdés nincs bennük.'],
+  minutes:Math.ceil(CIRCUIT_RULES.length*0.8)+4,columns:['Szabály','Tartalom és hatókör'],layout:{widths:[28,36,72,28],align:'left'},
+  items:CIRCUIT_RULES.map(r=>value('BEK-SZAB-'+r.code,`${r.code} – ${r.title}`,`${r.text} (hatókör: ${r.applies}; ${r.scope==='állás'?'minden kapcsolóállásban':r.scope==='földelés'?'a földelési rendszer szerkezete':'formai ellenőrzés'})`,[]))};
+}
+/** Egy csoport közös kérdései külön blokkban (egyedi azonosítóval és válaszmezővel), hogy a csoport minden ábrájához és cikkéhez tartozzanak. */
+function questionBlock(g:typeof DIAGRAM_GROUPS[number],ids:string[]):Block{
+ const qs=r3Questions(g.section).map((text,i)=>({id:`BEK-${g.id}-Q${i+1}`,text}));
+ for(const q of qs){const bad=questionProblems(q.id,q.text);if(bad.length)throw Error(bad.join('; '))}
+ return {id:`BEK-${g.id}-KERDESEK`,title:`${g.title} – közös kérdések`,source:`lektori kérdéslista (${R3_QUESTIONS}), „${g.section}” szakasz`,
+  intro:[`A témakör közös kérdései: a témakör minden ábrájára és cikkére vonatkoznak (ábrák: ${ids.join(', ')}). A válaszokat a kérdések alatti mezőbe kérjük; a kérdések azonosítójára (${qs[0]?.id}…) a megjegyzésekben lehet hivatkozni.`],
+  minutes:4*qs.length,questions:qs,items:[]};
+}
 function diagramsPart():Part{
  const files=diagramOrder();
  if(files.length!==netlistFiles('.').length)throw Error('A 4. rész csoportjai nem fedik le az összes netlistát');
- const blocks:Block[]=[],seen=new Set<string>();
+ const sections=r3QuestionSections(),want=[...DIAGRAM_GROUPS.map(g=>g.section),INTERNAL_NOTES];
+ const extra=sections.filter(x=>!want.includes(x));
+ if(extra.length)throw Error(`${R3_QUESTIONS}: a(z) ${extra.map(x=>'„'+x+'”').join(', ')} szakasz nem tartozik csoporthoz, és nem is a „${INTERNAL_NOTES}” – új szakasz ne maradjon ki némán a csomagból`);
+ const blocks:Block[]=[rulesBlock()];
  for(const g of DIAGRAM_GROUPS){
-  const general=r3Questions(g.section);
-  files.filter(f=>g.match(f)).forEach((file,k)=>{
-   const d=diagramData(file),id=bekId(d.netlistId),nl=JSON.parse(readFileSync(NETLIST_DIR+'/'+file,'utf8')) as Netlist;
-   // A cikk saját lektori kérdései a cikk első ábrájánál, a témakör közös kérdései a csoport első ábrájánál.
-   const own=seen.has(d.article)?[]:parseDraft(readFileSync(NETLIST_DIR+'/'+d.article+'.md','utf8')).front.lektorKerdesek??[];seen.add(d.article);
-   const questions=[...own.map((q,i)=>({id,text:`(${i+1}., a cikk saját kérdése) ${q}`})),...(k===0?general.map((q,i)=>({id,text:`(${g.title} – közös kérdés ${i+1}.) ${q}`})):[])];
+  const group=files.filter(f=>g.match(f)),datas=group.map(f=>diagramData(f));
+  const qb=questionBlock(g,datas.map(d=>bekId(d.netlistId)));
+  blocks.push(qb);
+  const qRange=qb.questions!.length?`${qb.questions![0].id}–${qb.questions![qb.questions!.length-1].id.replace(/^.*-Q/,'Q')}`:'';
+  group.forEach((file,k)=>{
+   const d=datas[k],id=bekId(d.netlistId),nl=JSON.parse(readFileSync(NETLIST_DIR+'/'+file,'utf8')) as Netlist;
    const items:Item[]=[
-    value(id+'-NL','Netlista (a rajz és a táblák forrása)',`${file} · ${d.netlistFp}`,[]),
-    value(id+'-RAJZ','Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok',`az ábra fent · ${d.diagramFp}`,[]),
+    value(id+'-RAJZ','Bekötési rajz (Bekötés nézet, alapállás): kapcsok, erek, érszínek és feliratok',`az ábra fent · netlista ${d.netlistFp}, ábra ${d.diagramFp}`,[]),
     value(id+'-VEZ',`Vezetéktábla (${d.wires.length} ér): honnan, hová, vezető, szín, szakasz`,'lent, 1. táblázat',[]),
     ...(d.sections.length?[value(id+'-SZAK',`Szakaszok és érszám (${d.sections.length} szakasz)`,'lent, 2. táblázat',[])]:[]),
-    value(id+'-ALL',`Kapcsolóállás-táblázat (${d.truth.rows.length} állás): kapcsolók, hibahelyzetek, eredmény`,'lent, '+(d.sections.length?3:2)+'. táblázat · TS = Python',[]),
+    value(id+'-ALL',`Kapcsolóállás-táblázat (${d.truth.rows.length} állás): kapcsolók, hibahelyzetek, eredmény`,'lent, '+(d.sections.length?3:2)+'. táblázat',[]),
    ];
    blocks.push({id,title:nl.title,source:`${NETLIST_DIR}/${file} (netlista), content/tudastar/diagramok/${d.netlistId}.json (elrendezés); cikk: ${d.article}, ${d.figure} („${d.caption}”)`,
-    minutes:10+Math.ceil(d.wires.length/4)+Math.ceil(d.truth.rows.length/8),columns:['Ellenőrizendő','Hol'],layout:{widths:[42,54,62,20],align:'left'},
-    intro:[`Ábra-azonosító: ${d.netlistId}. Netlista-ujjlenyomat: ${d.netlistFp}; ábra-ujjlenyomat: ${d.diagramFp} (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A kapcsolóállás-táblázatot a program szimulátora számolta; a független Python-szimulátorral: ${d.python}.`,...(nl.note?['A netlista megjegyzése: '+nl.note]:[])],
-    questions,items,diagram:d});
+    minutes:10+Math.ceil(d.wires.length/4)+Math.ceil(d.truth.rows.length/8),columns:['Ellenőrizendő','Hol'],layout:{widths:[34,44,48,38],align:'left'},
+    intro:[`Ábra-azonosító: ${d.netlistId}. Netlista-ujjlenyomat: ${d.netlistFp}; ábra-ujjlenyomat: ${d.diagramFp} (netlista, elrendezés, szimbólumkészlet, rajzoló kód, ábraszínek). A rajz, a vezeték-, a szakasz- és a kapcsolóállás-táblázat ugyanabból a netlistából készül (a netlista tartalmát az 1–3. táblázat adja; a fájlt a lektor nem kapja). Gépi ellenőrzés: ${d.python}.`,
+     `A témakör közös kérdései${qRange?` (${qRange})`:''} a(z) ${qb.id} blokkban állnak; a cikk saját kérdései az 5. részben, a(z) ${articleId(d.article)} blokkban.`,...(nl.note?['A netlista megjegyzése: '+nl.note]:[])],
+    items,diagram:d});
   });
  }
  return {no:4,title:'Bekötési ábrák (R3)',blocks,intro:[
-  'A Villanyszerelő Tudástár Sémák szekciójának és biztonsági cikkeinek bekötési ábrái. Minden ábra egy netlistából (alkatrészek, kapcsok, erek szerepe és színe, kábelszakaszok, kapcsolóállások) és egy elrendezésből (helyek, útvonalak) készül; a program ugyanebből rajzolja a cikk ábráját, a vezetéktáblát és a Működés nézetet. Ábránként egy blokk: az ábra (Bekötés nézet, alapállás), a jelmagyarázat, a vezetéktábla, a szakaszok érszáma és a kapcsolóállás-táblázat, a netlista és az ábra ujjlenyomatával.',
-  'Az ábra és a netlista egyezését (a vezetékvégpontok a kapcsokon, a csomópontok, az érszínek, a feliratok, az érintkezők) automatikus teszt ellenőrzi; a kapcsolóállás-táblázatot két, egymástól független szimulátor (TypeScript és Python) számolja azonosan. A lektortól a villamos tartalom ellenőrzését kérjük: helyes-e a bekötés, az érszín-kiosztás, a kapcsok szerepe, a szakaszok érszáma és a működés minden állásban, és alkalmas-e a rajz szakember tájékoztatására.',
-  'Biztonságkritikus (R3) tartalom: az ábrát a lektor és egy második olvasó hagyja jóvá (Jóváhagyó lap, „4. rész – ábránkénti döntés”). A cikk csak akkor jelenik meg, ha minden ábrája jóváhagyott, és a cikk szövegét is jóváhagyták (az 5. rész elkészültéig a cikkvázlat alapján: content/tudastar/r3/*.md, docs/lektoralas.md). Az ábra bármely változása (netlista, elrendezés, szimbólum, rajzoló kód, ábraszín) új ujjlenyomatot ad: a cikk ilyenkor „újraellenőrzendő”, és új jóváhagyás kell.',
-  'A rajzon az erek színe a valódi ér színe (a zöld-sárga ér zöld alapon sárga csíkos); a szín mellett minden éren felirat áll. A tervező alaprajzán a védővezető egyszínű zöld (az ábra „Így látod a tervezőben” sora ezt magyarázza). A szaggatott szürke vonal készüléken belüli kötést vagy érintési pontot, a piros szaggatott vonal jelképes hibahelyet jelöl – ezek nem szerelt erek.',
+  'A Villanyszerelő Tudástár Sémák szekciójának és biztonsági cikkeinek bekötési ábrái. Minden ábra egy netlistából (alkatrészek, kapcsok, erek szerepe és színe, kábelszakaszok, kapcsolóállások) és egy elrendezésből (helyek, útvonalak) készül; a program ugyanebből rajzolja a cikk ábráját, a vezetéktáblát és a Működés nézetet. A rész elején a szimulátor biztonsági szabályai állnak (BEK-SZABALYOK), utána témakörönként a közös kérdések, majd ábránként egy blokk: az ábra (Bekötés nézet, alapállás), a jelmagyarázat, a vezetéktábla, a szakaszok érszáma és a kapcsolóállás-táblázat, a netlista és az ábra ujjlenyomatával.',
+  'Az ábra és a netlista egyezését (a vezetékvégpontok a kapcsokon, a csomópontok, az érszínek, a feliratok, az érintkezők, a hibajelek és feliratok elhelyezése) automatikus teszt ellenőrzi; a kapcsolóállás-táblázatot két megvalósítás számolja azonosan: a Python-referenciaszimulátor és annak sorról sorra követett TypeScript-átirata. A gépi egyezés az átirat hűségét igazolja – a bekötés és a modell szakmai helyességét nem; ezt a lektor ítéli meg. A lektortól a villamos tartalom ellenőrzését kérjük: helyes-e a bekötés, az érszín-kiosztás, a kapcsok szerepe, a szakaszok érszáma és a működés minden állásban, helyesek-e a biztonsági szabályok, és alkalmas-e a rajz szakember tájékoztatására.',
+  'Biztonságkritikus (R3) tartalom: az ábrát a lektor és egy második olvasó hagyja jóvá (Jóváhagyó lap, „4. rész – ábránkénti döntés”; a lap ábránkénti döntése mérvadó, a blokkok végi jelölések csak előkészítik). A cikk csak akkor jelenik meg, ha minden ábrája jóváhagyott, és a cikk szövegét is jóváhagyták (5. rész). Az ábra bármely változása (netlista, elrendezés, szimbólum, rajzoló kód, ábraszín) új ujjlenyomatot ad: a cikk ilyenkor „újraellenőrzendő”, és új jóváhagyás kell.',
+  'A rajzon az erek színe a valódi ér színe (a zöld-sárga ér zöld alapon sárga csíkos; sötét témában a barna és a fekete ér világos körvonalat kap); a szín mellett minden éren felirat áll. A tervező alaprajzán a védővezető egyszínű zöld (az ábra „Így látod a tervezőben” sora ezt magyarázza). A szaggatott szürke vonal készüléken belüli kötést vagy érintési pontot, a piros szaggatott vonal jelképes hibahelyet jelöl – ezek nem szerelt erek. A keresztkapcsolás ábrái (1–4 × 107) változatként, egymás alatt állnak; változatválasztó nincs (a vázlat korábbi leírásával szemben).',
+ ]};
+}
+/** A netlistafájl ábrájának blokkazonosítója (BEK-…). */
+const bekOfFile=(file:string)=>bekId((JSON.parse(readFileSync(NETLIST_DIR+'/'+file,'utf8')) as Netlist).id);
+/** A cikk ábrahelyőrzőjének hivatkozása a csomagban (a 4. rész blokkja). */
+export function figureRef(a:ArticleData,figId:string):string{
+ const f=a.figures.find(x=>x.id===figId);
+ if(f?.netlist)return 'a rajz a 4. részben: '+[f.netlist,...f.variants].map(bekOfFile).join(', ');
+ // Netlista nélküli (saját SVG-) ábra: a 4. részben nincs, a csomag nem mutatja – ilyen ábra most csak kiadást akadályozó hiányként létezik
+ // (pl. az összegáramváltó elve, a jelleggörbe). Ha egy ki nem adható jelölés nélküli cikkben fordulna elő, a generálás megáll.
+ if(a.blocked)return 'ez az ábra még nincs kész (a cikk kiadását akadályozza)';
+ throw new Error(a.slug+': a(z) '+figId+' ábra netlista nélküli, a lektori csomagban nem szerepel, a cikk mégsincs a kiadást akadályozó hiányok között (BLOCKED)');
+}
+/** Az 5. rész: az R3 cikkvázlatok szövege (a lektor a szöveget is jóváhagyja; a cikk csak ezzel együtt jelenhet meg). */
+function articlesPart():Part{
+ const arts=r3Articles();
+ const blocks:Block[]=arts.map(a=>{
+  const id=articleId(a.slug),figs=a.figures.filter(f=>f.netlist).flatMap(f=>[f.netlist!,...f.variants]).map(bekOfFile);
+  const questions=a.questions.map((text,i)=>({id:`${id}-Q${i+1}`,text}));
+  for(const q of questions){const bad=questionProblems(q.id,q.text);if(bad.length)throw Error(bad.join('; '))}
+  const items:Item[]=[
+   value(id+'-SZOVEG','A cikk szövege: veszély-doboz, szakaszok, táblák, számpéldák',`tartalmi ujjlenyomat ${a.fingerprint} · ${a.words} szó`,[]),
+   value(id+'-FORRAS',`Források és szabványpontok (${a.sources.length})`,'a cikk végén, a „Források és szabványpontok” táblázatban',[]),
+   ...(figs.length?[value(id+'-ABRA','Ábrák: a 4. rész blokkjai',figs.join(', '),[])]:[]),
+  ];
+  return {id,title:a.title,source:`${a.file} (cikkvázlat); azonosító: ${a.slug}`,
+   intro:[`Tartalmi ujjlenyomat: ${a.fingerprint} (a cikk teljes szövegéé: cím, összefoglaló, szakaszok, táblák, források) – a Tudástár lektori rekordja ehhez kötődik: ha a szöveg a jóváhagyás után bármiben változik, a cikk nem jelenik meg („újraellenőrzendő”), és új jóváhagyás kell. Összefoglaló: ${a.summary}`,
+    ...(a.blocked?[`A cikk kiadásához a szöveg jóváhagyásán túl még hiányzik: ${a.blocked}. A szöveg ettől függetlenül jóváhagyható; a cikk csak a hiány pótlása és az új jóváhagyás után jelenhet meg.`]:[]),
+    ...(figs.length?[`Ábrák: ${figs.join(', ')} (4. rész) – az ábrák és a cikk szövege együtt hagyható jóvá.`]:['Ennek a cikknek nincs netlistás bekötési ábrája (a 4. részben nem szerepel).'])],
+   minutes:articleMinutes(a),columns:['Ellenőrizendő','Hol'],layout:{widths:[46,34,42,42],align:'left'},questions,items,article:a};
+ });
+ return {no:5,title:'Biztonsági cikkek (R3) – a cikkvázlatok szövege',blocks,intro:[
+  'A Villanyszerelő Tudástár biztonságkritikus (R3) cikkei közül ide kerül minden vázlat, amelyet szakmai lektor és második olvasó jóváhagyása nélkül a program nem tesz közzé. A cikk szövegét (a nem zárható felső veszély-doboztól a forrásokig) is a lektor hagyja jóvá: ezért a teljes szöveg itt áll, tartalmi ujjlenyomattal; a Jóváhagyó lap „5. rész – cikkenkénti döntés” táblázata a jóváhagyást ehhez az ujjlenyomathoz köti.',
+  'A cikkvázlatok nem a végső megjelenésükben, hanem folyó szövegként szerepelnek (a szöveg, a táblák és a források azonosak a cikkben megjelenővel; az ábrák a 4. részben vannak). A táblázatok „Kapcsolóállás-táblázat” jellegű részeit a szimulátor számolta (a 4. rész blokkjaiban is megtalálhatók). A veszély-doboz szövege a figyelmeztetések közös szövegével szó szerint azonos.',
+  'Négy cikk kiadásához a szöveg jóváhagyásán túl még elem hiányzik (a blokk bevezetője megnevezi); ezek szövege is jóváhagyható, de a cikk csak a hiány pótlása után jelenhet meg. Cikkenként a tartalmi ujjlenyomatot, a lektor jogosultságát, a dátumot, a jóváhagyás hivatkozását és a második olvasót a Tudástár lektori rekordja rögzíti (docs/lektoralas.md); a rekord hiányosan nem tesz közzé semmit.',
  ]};
 }
 
@@ -1123,8 +1202,7 @@ export const PARTS:((ctx:{notCovered:string[]})=>Part)[]=[
  ({notCovered})=>formulasPart(notCovered),
  ()=>calculatorsPart(),
  ()=>diagramsPart(),
- ()=>placeholder(5,'Biztonsági cikkek (R3)','CIK','A Tudástár biztonsági (R3) cikkeinek elkészülte után kerül be: cikkenként az állítások, a figyelmeztetések és a források tételes listája.',
-  ['a feszültségmentesítés öt szabálya','áram-védőkapcsoló (FI-relé) alapjai','kismegszakító (B/C/D) és Ib ≤ In ≤ Iz','földelési rendszerek']),
+ ()=>articlesPart(),
  ()=>placeholder(6,'Vizsgakérdések','VK','A vizsgaszimuláció kérdésbankjának elkészülte után kerül be (szakoktatóval vagy vizsgáztatóval együtt): kérdésenként a helyes válasz, a disztraktorok és az indoklás.',
   ['villanyszerelő szakmai kérdésbank']),
 ];
@@ -1157,7 +1235,7 @@ export const calcBadgeTexts=()=>{
 };
 /** Ahol a reviewText() megjelenik (a tests/lektori-csomag.ts a forráskódból ellenőrzi, hogy új hely nem került be e felsorolás nélkül). */
 export const NAME_PLACES=()=>`a tervező Méretezés fülén (Eszközök → Tervsegéd → Méretezés) minden felhasználónak; minden felhasználó exportált terv-PDF-jében, ha a méretezési táblákat bekapcsolja, az elosztóoldalak „méretezés indoklása” táblájának „Táblázatok – Állapot” sorában (ugyanennek a táblának az utolsó sora a terv tervezőjének „Tervezői ellenőrzés” aláírósora); a nyilvános, keresőkben is megtalálható kalkulátoroldalakon a táblázatokat használó kalkulátorok (${T1_ORDER.map(defOf).filter(d=>d.tables).map(d=>d.title).join(', ')}) „Táblázatok állapota” sorában és a Vezeték-ellenállás kalkulátor ρ1 szerinti tájékoztató sorában`;
-const FORM={blockOk:'A blokk minden tétele egyezik',blockNote:'Megjegyzés a blokkhoz (forrás, kiadás)',fix:'Helyes érték / megjegyzés',question:'Kérdés a lektorhoz',verified:'Összevetés'};
+const FORM={blockOk:'A blokk minden tétele egyezik',blockNote:'Megjegyzés a blokkhoz (forrás, kiadás)',fix:'Helyes érték / megjegyzés',question:'Kérdés a lektorhoz',answer:'Válasz',verified:'Összevetés'};
 /** A bevezető állandó szakaszai (a becsült ráfordítás nélkül; a csomag-ujjlenyomat része). */
 function staticIntroSections():Section[]{
  return [
@@ -1180,15 +1258,16 @@ function staticIntroSections():Section[]{
     'az 1. rész értékei, táblázatszámai, kiadásai és leírásai a hivatkozott szabványok hatályos kiadásával egyeznek (vagy a lektor megadta a helyes értéket);',
     'a 2. rész képletei helyesek, és a programozott döntések, alapértékek iránya és jelölése elfogadható egy tervezői ellenőrzést segítő számításhoz;',
     'a 3. rész „Jóváhagyom” jelölésű kalkulátorainak képletei, bemeneti korlátai, alapértékei, figyelmeztetései és szóhasználata helyesek, illetve elfogadhatók egy tájékoztató, „számítás szerinti” kalkulátorhoz;',
-    'a 4. rész „Jóváhagyom” jelölésű bekötési ábrái (bekötés, érszínek, kapcsok szerepe, szakaszok érszáma, működés minden állásban) helyesek, és alkalmasak szakember tájékoztatására; R3 tartalomként ehhez a második olvasó egyetértése is kell.',
+    'a 4. rész „Jóváhagyom” jelölésű bekötési ábrái (bekötés, érszínek, kapcsok szerepe, szakaszok érszáma, működés minden állásban) és a szimulátor biztonsági szabályai (BEK-SZABALYOK) helyesek, és alkalmasak szakember tájékoztatására; R3 tartalomként ehhez a második olvasó egyetértése is kell;',
+    'az 5. rész „Jóváhagyom” jelölésű cikkvázlatainak szövege (a nem zárható veszély-doboz, az állítások, a figyelmeztetések, a táblák, a számpéldák és a források) helyes, és alkalmas a megjelölt közönség tájékoztatására; R3 tartalomként ehhez is a második olvasó egyetértése kell. A jóváhagyás a megadott tartalmi ujjlenyomatú szövegre szól.',
    ]},
    P('A jóváhagyás nem jelenti:'),
    {kind:'ul',items:[
     'tervezői felelősségvállalást az egyes, a programmal készült tervekért vagy a kalkulátorokkal végzett egyes számításokért: az eredmény továbbra is „tervezői ellenőrzést segítő”, illetve „számítás szerinti” érték, nem tervezői méretezés; a tervért annak tervezője felel – a programban megjelenő jóváhagyási szöveg is csak a táblázatértékekre vonatkozik;',
     'a program egészének (forráskód, felület, más funkciók) vizsgálatát vagy minősítését;',
     'a felhasználó által megadott adatok (terhelés, hossz, szerelési mód, Zs, projekt-felülírás) helyességének igazolását, illetve a kész berendezés mérésének kiváltását;',
-    'a hatókörön kívüli esetek (D-HATOKOR és a kalkulátorok „Nem vizsgált” listái) vizsgálatát, és az 5–6. részt, amely jelenleg helyőrző;',
-    'a 4. rész ábráihoz tartozó cikkek szövegének jóváhagyását: a cikk csak akkor jelenhet meg, ha a szövegét is jóváhagyták (az 5. rész elkészültéig a cikkvázlat alapján, docs/lektoralas.md).',
+    'a hatókörön kívüli esetek (D-HATOKOR és a kalkulátorok „Nem vizsgált” listái) vizsgálatát, és a 6. részt, amely jelenleg helyőrző;',
+    'a Tudástár cikkeinek közzétételét magát: a cikk csak akkor jelenik meg, ha a szövegét (5. rész) és minden ábráját (4. rész) is jóváhagyták, és a Tudástár lektori rekordja teljes (jogosultság, dátum, jóváhagyási hivatkozás, második olvasó); négy vázlat kiadásához ezen túl még ábra vagy nézet hiányzik (5. rész).',
    ]},
   ]},
   {title:'Hogyan kell kitölteni?',body:[{kind:'ol',items:[
@@ -1197,10 +1276,11 @@ function staticIntroSections():Section[]{
    `Gyorsítás: ha a blokk minden tétele egyezik, elég a blokk végén „${FORM.blockOk}” négyzetet jelölni; a tételeket nem kell egyenként pipálni. Ha bármelyik tétel eltér, a blokk négyzetét ne jelölje; az eltérő tételeket jelölje ✗-szel, a többi, pipálatlanul hagyott tétel egyezőnek számít. A terhelhetőségi táblák elején álló áttekintő mátrix soronként vethető össze a szabvány táblázatával.`,
    `A 2. és a 3. részben minden szabálytétel egy szabályt, indoklást és kézzel számolt példát tartalmaz; a példát érdemes újraszámolni. A „${FORM.question}” pontokra kérjük külön választ a megjegyzés mezőben.`,
    'A 3. részben a táblázatértékeket nem kell újra összevetni (az 1. rész azonosítóival hivatkozunk rájuk). A kalkulátorok kalkulátoronként hagyhatók jóvá (Jóváhagyó lap, „3. rész – kalkulátoronkénti döntés”). A kalkulátorok előnézetben ki is próbálhatók (a hozzáférést a megbízó adja), de a csomag önmagában is ellenőrizhető.',
-   'A 4. részben ábránként a rajzot, a vezetéktáblát, a szakaszok érszámát és a kapcsolóállás-táblázatot kell átnézni, és a blokk végén (és a Jóváhagyó lap „4. rész – ábránkénti döntés” táblázatában) jelölni: Jóváhagyom, Javítással (a hibát a megjegyzésbe), vagy Elutasítom. A cikkek saját és a témakör közös lektori kérdései a blokkok elején állnak.',
+   'A 4. részben a biztonsági szabályokat (BEK-SZABALYOK) tételenként, ábránként pedig a rajzot, a vezetéktáblát, a szakaszok érszámát és a kapcsolóállás-táblázatot kell átnézni, és a blokk végén (és a Jóváhagyó lap „4. rész – ábránkénti döntés” táblázatában) jelölni: Jóváhagyom, Javítással (a hibát a megjegyzésbe), vagy Elutasítom. A témakörök közös lektori kérdései (BEK-…-KERDESEK blokkok) az ábrák előtt állnak, a cikkek saját kérdései az 5. rész cikkblokkjaiban; minden kérdésnek egyedi azonosítója és válaszmezője van.',
+   'Az 5. részben cikkenként a teljes szöveget (a veszély-dobozt, az állításokat, a táblákat, a számpéldákat és a forrásokat) kell átnézni, és a blokk végén (és a Jóváhagyó lap „5. rész – cikkenkénti döntés” táblázatában) jelölni: Jóváhagyom, Javítással, vagy Elutasítom. A Jóváhagyó lap ábránkénti és cikkenkénti döntése mérvadó; a blokkok végi jelölések (a „Döntés” sor, „A blokk minden tétele egyezik”) csak előkészítik azt, és eltérésnél a lap számít.',
    'Ha két forrás egy értékre eltérő számot ad, mindkettőt kérjük a megjegyzésbe írni a forrással; az érték a tisztázásig „ellenőrizendő” marad.',
    'Terjedelmesebb javítást (pl. egy teljes táblázat javasolt értékeit) külön mellékletben kérjük, a tételazonosítókra hivatkozva.',
-   'Végül a Jóváhagyó lapot kell kitölteni és aláírni (a lapokat a láblécben szignálni), és a jelölt csomaggal együtt (papíron vagy szkennelve) visszaküldeni.',
+   'Végül a Jóváhagyó lapot kell kitölteni és aláírni (a lapokat a láblécben szignálni); a 4. és az 5. rész jóváhagyásához a második olvasó lapját is, és a jelölt csomaggal együtt (papíron vagy szkennelve) visszaküldeni.',
   ]},P('A csomag belső munkaanyag, nem nyilvános. A benne szereplő számértékek a program jelenlegi értékei, amelyeket a szabvánnyal össze kell vetni; nem a szabvány szövegének másolatai.')]},
   {title:'Jelölések',body:[{kind:'ul',items:[
    'Ib – tervezett (terhelési) áram; In – a védelem névleges árama; I2 – a védelem megállapodás szerinti kioldóárama (a működést biztosító áram)',
@@ -1218,8 +1298,8 @@ const minutes=(pkg:Package)=>reviewable(pkg).flatMap(p=>p.blocks).reduce((s,b)=>
 function effortSection(pkg:Package):Section{
  const blocks=reviewable(pkg).flatMap(p=>p.blocks);
  return {title:'Becsült ráfordítás',body:[
-  P('A becslés a szabványok kéznél lévő, hatályos kiadását és a csomag egyszeri átnézését feltételezi. Eltérések esetén a javított kiadás visszaellenőrzése (csak a változott tételek) külön kb. 15–30 perc.'),
-  {kind:'table',headers:['Blokk','Tartalom','Tételek','Becsült idő'],widths:[34,90,20,30],right:[2,3],rows:[
+  P('A becslés a szabványok kéznél lévő, hatályos kiadását és a csomag egyszeri átnézését feltételezi: tételenként és ábránként a táblák összevetését, a lektori kérdésekre kérdésenként 4 percet, az 5. részben a cikkvázlatok gondos átolvasását (kb. 110 szó/perc) és a döntést. Eltérések esetén a javított kiadás visszaellenőrzése (csak a változott tételek) külön kb. 15–30 perc.'),
+  {kind:'table',headers:['Blokk','Tartalom','Tételek','Becsült idő'],widths:[52,72,20,30],right:[2,3],rows:[
    ...blocks.map(b=>[b.id,b.title,String(b.items.length),duration(b.minutes)]),
    ['–','Jóváhagyó lap kitöltése','–',duration(APPROVAL_MINUTES)],
    ['','Összesen',String(blocks.reduce((s,b)=>s+b.items.length,0)),'kb. '+duration(minutes(pkg))],
@@ -1231,23 +1311,26 @@ const introSections=(pkg:Package)=>[...staticIntroSections(),effortSection(pkg)]
 const partStatus=(pkg:Package,no:number):string[]=>no===1?[
  `Jelenlegi állapot: ${pkg.approved?'jóváhagyott':'ellenőrizendő'}. Táblázatváltozat: ${pkg.tablesVersion}; táblázat-ujjlenyomat: ${pkg.fingerprints.tables}.`,
  'A rögzítés körülményei (a programban rögzített megjegyzés): '+pkg.review.note,
-]:no===3?['Jelenlegi kiadási állapot: '+pkg.calcs.map(c=>`${c.title}: ${c.state}`).join('; ')+'.']:[];
+]:no===3?['Jelenlegi kiadási állapot: '+pkg.calcs.map(c=>`${c.title}: ${c.state}`).join('; ')+'.']:no===5?['A kiadáshoz a szövegen túl hiányzik: '+(pkg.articles.filter(a=>a.blocked).map(a=>`${a.slug} – ${a.blocked}`).join('; ')||'semmi')+'.']:[];
 const RELEASE_STATES:Record<string,string>={kozzeteve:'közzétéve',kiadatlan:'kiadatlan (lektori jóváhagyásra vár)',ujraellenorzendo:'újraellenőrzendő',['tablazatra-var']:'lektorálva, a táblázatok jóváhagyására vár',tiltott:'tiltott'};
 const DECISIONS=['Az 1–2. részt eltérés nélkül jóváhagyom.','Az 1–2. részt a jelölt eltérések javítása után hagyom jóvá; a javított kiadás változott tételeit ellenőrzöm.','Az 1–2. részt nem hagyom jóvá (indoklás a megjegyzésben).'];
 const CALC_DECISION_NOTE='A 3. rész kalkulátoronként hagyható jóvá. „Jóváhagyom”: a kalkulátor blokkja és a KAL-KOZOS blokk eltérés nélkül egyezik; a program a kalkulátort a sorban álló ujjlenyomat-párral rögzített lektori rekorddal teszi közzé, a táblázat-kapus kalkulátort csak az 1. rész jóváhagyása után. „Javítás után / nem”: a kalkulátor a javított kiadásban (a változott tételek ellenőrzése után) vagy egyáltalán nem hagyható jóvá; az okot kérjük a megjegyzésbe írni. Jelöletlen sor: nem jóváhagyott.';
-const DECLARATION_TEMPLATE='Alulírott kijelentem, hogy a Villanyrajz lektori csomag ezen a lapon megjelölt, {oldal} oldalas kiadásának 1. (méretezési táblázatok), 2. (képletek és programozott döntések), 3. (szabványhoz kötött kalkulátorok) és 4. (bekötési ábrák) részét a hivatkozott szabványok hatályos kiadásával összevetettem, és a tételeket a fenti döntés, valamint a kalkulátoronkénti és az ábránkénti döntés szerint jelöltem. A 3. és a 4. részből kizárólag a „Jóváhagyom” jelölésű kalkulátorokat és ábrákat hagyom jóvá; a 4. rész ábráinak jóváhagyásához a második olvasó egyetértése is szükséges. A jóváhagyás kizárólag a csomagban, a megjelölt ujjlenyomatokkal azonosított tartalomra vonatkozik; nem minősül a programmal készült egyes tervekért vagy a kalkulátorokkal végzett egyes számításokért vállalt tervezői felelősségnek, és nem terjed ki a csomag 5–6. részére.';
+const DECLARATION_TEMPLATE='Alulírott kijelentem, hogy a Villanyrajz lektori csomag ezen a lapon megjelölt, {oldal} oldalas kiadásának 1. (méretezési táblázatok), 2. (képletek és programozott döntések), 3. (szabványhoz kötött kalkulátorok), 4. (bekötési ábrák és biztonsági szabályok) és 5. (R3 cikkvázlatok) részét a hivatkozott szabványok hatályos kiadásával összevetettem, és a tételeket a fenti döntés, valamint a kalkulátoronkénti, az ábránkénti és a cikkenkénti döntés szerint jelöltem. A 3., a 4. és az 5. részből kizárólag a „Jóváhagyom” jelölésű kalkulátorokat, ábrákat és cikkszövegeket hagyom jóvá; a 4. és az 5. rész jóváhagyásához a második olvasó egyetértése is szükséges. A jóváhagyás kizárólag a csomagban, a megjelölt ujjlenyomatokkal azonosított tartalomra vonatkozik (a cikkszövegnél a megadott tartalmi ujjlenyomatra); nem minősül a programmal készült egyes tervekért vagy a kalkulátorokkal végzett egyes számításokért vállalt tervezői felelősségnek, és nem terjed ki a csomag 6. részére.';
 export const declaration=(pages:number)=>DECLARATION_TEMPLATE.replace('{oldal}',String(pages));
-const BINDING='Az 1. rész ujjlenyomatát a program maga ellenőrzi: eltérésnél „ellenőrizendő” állapotra áll vissza. A 2. rész ujjlenyomatát a fejlesztési folyamat automatikus tesztje veti össze a jóváhagyottal. A 3. részben kalkulátoronként a tartalmi és a forrás-ujjlenyomat kerül a kiadási rekordba: tartalmi eltérésnél a program a kalkulátort nem teszi közzé, forráseltérésnél az automatikus teszt elbukik. A 4. részben ábránként a netlista és az ábra ujjlenyomata kerül a csomagkiadásba; a Tudástár cikkének lektori rekordja ehhez kötődik: ha a netlista, az elrendezés, egy szimbólum, a rajzoló kód vagy egy ábraszín változik, a cikk nem jelenik meg („újraellenőrzendő”). Bármelyik eltérésénél új kiadás és új jóváhagyás kell.';
-const DIAGRAM_DECISION_NOTE='A 4. rész ábránként hagyható jóvá. „Jóváhagyom”: az ábra blokkja eltérés nélkül helyes (bekötés, érszínek, kapcsok, szakaszok, működés). „Javítással”: az ábra a megjegyzésben leírt javítás után, a javított kiadásban hagyható jóvá. „Elutasítom”: az ábra a cikkben nem jelenhet meg; az okot kérjük a megjegyzésbe írni. Jelöletlen sor: nem jóváhagyott. Az ábra csak a cikk szövegének jóváhagyásával együtt jelenhet meg.';
-const SECOND_READER='R3 (biztonságkritikus) tartalom: a 4. rész ábráit egy második, szintén jogosult olvasó is átnézi. Aláírásával azt igazolja, hogy a lektor „Jóváhagyom” jelölésű ábráival egyetért; eltérő véleményét a megjegyzésbe írja. A program a második olvasó nevét nem rögzíti, csak a jogosultságát.';
-const SECOND_FIELDS=['Második olvasó jogosultsága','Dátum','Aláírás'];
+const BINDING='Az 1. rész ujjlenyomatát a program maga ellenőrzi: eltérésnél „ellenőrizendő” állapotra áll vissza. A 2. rész ujjlenyomatát a fejlesztési folyamat automatikus tesztje veti össze a jóváhagyottal. A 3. részben kalkulátoronként a tartalmi és a forrás-ujjlenyomat kerül a kiadási rekordba: tartalmi eltérésnél a program a kalkulátort nem teszi közzé, forráseltérésnél az automatikus teszt elbukik. A 4. részben ábránként a netlista és az ábra ujjlenyomata, az 5. részben cikkenként a tartalmi ujjlenyomat kerül a csomagkiadásba; a Tudástár cikkének lektori rekordja ezekhez kötődik (a rekord approvalRef-je a kiküldött kiadást és az ujjlenyomatokat nevezi meg; a rekord teljes: jogosultság, dátum, hivatkozás, második olvasó): ha a cikk szövege, a netlista, az elrendezés, egy szimbólum, a rajzoló kód, a megjelenítés (veszély-doboz) vagy egy ábraszín változik, a cikk nem jelenik meg („újraellenőrzendő”), és szövege a buildbe sem kerül. Bármelyik eltérésénél új kiadás és új jóváhagyás kell.';
+const DIAGRAM_DECISION_NOTE='A 4. rész ábránként hagyható jóvá, a biztonsági szabályokkal (BEK-SZABALYOK) együtt. „Jóváhagyom”: az ábra blokkja eltérés nélkül helyes (bekötés, érszínek, kapcsok, szakaszok, működés). „Javítással”: az ábra a megjegyzésben leírt javítás után, a javított kiadásban hagyható jóvá. „Elutasítom”: az ábra a cikkben nem jelenhet meg; az okot kérjük a megjegyzésbe írni. Jelöletlen sor: nem jóváhagyott. A Jóváhagyó lap ábránkénti döntése mérvadó (a blokkok végi jelölések csak előkészítik). Az ábra csak a cikk szövegének jóváhagyásával együtt jelenhet meg.';
+const ARTICLE_DECISION_NOTE='Az 5. rész cikkenként hagyható jóvá. „Jóváhagyom”: a cikk szövege (veszély-doboz, állítások, figyelmeztetések, táblák, számpéldák, források) eltérés nélkül helyes és alkalmas a megjelölt közönség tájékoztatására; a jóváhagyás a sorban megadott tartalmi ujjlenyomatú szövegre szól. „Javítással”: a szöveg a megjegyzésben leírt javítás után, a javított kiadásban hagyható jóvá. „Elutasítom”: a cikk nem jelenhet meg; az okot kérjük a megjegyzésbe írni. Jelöletlen sor: nem jóváhagyott. Ahol a „Hiányzik” oszlopban bejegyzés áll, a cikk kiadásához a szöveg jóváhagyásán túl az is kell.';
+const SECOND_READER='R3 (biztonságkritikus) tartalom: a 4. rész ábráit és az 5. rész cikkszövegeit egy második, szintén jogosult olvasó is átnézi. Aláírásával azt igazolja, hogy a lektor „Jóváhagyom” jelölésű ábráival és cikkszövegeivel egyetért, és hogy a program szerzőitől, fejlesztőitől és a csomag összeállítóitól független; eltérő véleményét a megjegyzésbe írja. A program a második olvasó nevét nem rögzíti, csak a jogosultságát.';
+const SECOND_FIELDS=['Második olvasó jogosultsága','Dátum','Aláírás','Függetlenségi nyilatkozat: a program szerzőitől, fejlesztőitől és a csomag összeállítóitól független vagyok (igen / nem)','Megjegyzés (a lektorétól eltérő vélemény, kifogás)'];
 const DIAGRAM_DECISIONS=['Jóváhagyom','Javítással','Elutasítom'];
+const ARTICLE_DECISIONS=DIAGRAM_DECISIONS;
 const CONSENT=()=>`Hozzájárulok, hogy nevem, névjegyzéki számom, jogosultságom és a jóváhagyás dátuma ${NAME_PLACES()} – ezzel a szöveggel megjelenjen: „${approvedTexts().named}”; továbbá hogy a 3. részből általam jóváhagyott kalkulátorok saját oldalán (jelvény; lábléc-sor) nevem és jogosultságom így megjelenjen: „${calcBadgeTexts().named}”. Tudomásul veszem, hogy ehhez nevem és névjegyzéki számom a program nyilvános oldalainak kódjába is bekerül. Hozzájárulás hiányában a program nevemet és névjegyzéki számomat nem rögzíti, és a lektorálást a jogosultságom megnevezésével jelzi: „${approvedTexts().anonymous}”, illetve „${calcBadgeTexts().anonymous}”. A kalkulátorlistán és a keresőben a jelvény név nélküli. A jóváhagyás érvénye a hozzájárulástól nem függ.`;
 const FIELDS=['Jóváhagyó neve','Kamarai / névjegyzéki szám','Jogosultság megnevezése','Hely','Dátum','Aláírás'];
 const FIELD_HINT='A „Jogosultság megnevezése” a programban a lektorálás jelzésében szó szerint megjelenik (név nélkül is); például: épületvillamossági tervező (MMK-névjegyzék) vagy érintésvédelmi szabványossági felülvizsgáló.';
 const DEVIATION_STEPS=[
  `A lektor az eltérő tételt ✗-szel jelöli, és a „${FORM.fix}” mezőbe beírja a helyes értéket; a forrást (szabvány, kiadás, pont vagy táblázat) a „${FORM.blockNote}” mezőben vagy a tételnél adja meg.`,
- 'A Jóváhagyó lapon az 1–2. résznél a második lehetőséget („javítás után hagyom jóvá”), a 3. résznél az érintett kalkulátor sorában a „Javítás után / nem” négyzetet jelöli, és aláírja. Az eltéréssel érintett részre, illetve kalkulátorra ennél a kiadásnál jóváhagyás nem rögzíthető: a jóváhagyás mindig egy pontos ujjlenyomathoz tartozik.',
+ 'A Jóváhagyó lapon az 1–2. résznél a második lehetőséget („javítás után hagyom jóvá”), a 3. résznél az érintett kalkulátor sorában a „Javítás után / nem” négyzetet, a 4. és az 5. résznél az érintett ábra, illetve cikk sorában a „Javítással” vagy az „Elutasítom” négyzetet jelöli, és aláírja; a lap ábránkénti és cikkenkénti döntése mérvadó a blokkok végi jelölésekkel szemben. Az eltéréssel érintett részre, kalkulátorra, ábrára vagy cikkre ennél a kiadásnál jóváhagyás nem rögzíthető: a jóváhagyás mindig egy pontos ujjlenyomathoz tartozik.',
+ 'Javítással jóváhagyott ábránál vagy cikknél a javított kiadásban csak a változott ábrát, illetve szöveget kell újra ellenőrizni (a kiadás bejegyzése a változott ujjlenyomatokat nevezi meg); elutasított ábra vagy cikk nem jelenik meg a Tudástárban, amíg új, jóváhagyott kiadás nem készül.',
  'A fejlesztő a javításokat a programban bevezeti, és új kiadást (új csomagverzió és ujjlenyomatok) készít; a változott tételek listáját megküldi a lektornak.',
  'A lektor csak a változott tételeket ellenőrzi, és az új kiadás Jóváhagyó lapját írja alá; a program ennek ujjlenyomatait rögzíti.',
  'Ha két forrás vagy két ellenőr eltérő értéket ad, mindkét érték a forrásával a megjegyzésbe kerül; az érték a tisztázásig „ellenőrizendő” marad.',
@@ -1255,7 +1338,7 @@ const DEVIATION_STEPS=[
 ];
 const COVER_NOTE='Belső munkaanyag a szakmai lektor részére – nem nyilvános. A csomagot a program generálja; a táblázatértékek a program jelenlegi értékei, amelyeket a szabvánnyal kell összevetni.';
 /** A tételeken kívüli, a csomagban megjelenő összes szöveg (bevezető, űrlapelemek, jóváhagyó lap) – a csomag-ujjlenyomat része. */
-export const packageTexts=()=>({title:TITLE,subtitle:SUBTITLE,cover:COVER_NOTE,intro:staticIntroSections(),form:FORM,approval:{decisions:DECISIONS,calcNote:CALC_DECISION_NOTE,diagramNote:DIAGRAM_DECISION_NOTE,diagramDecisions:DIAGRAM_DECISIONS,secondReader:SECOND_READER,secondFields:SECOND_FIELDS,declaration:DECLARATION_TEMPLATE,binding:BINDING,consent:CONSENT(),fields:FIELDS,hint:FIELD_HINT,deviation:DEVIATION_STEPS}});
+export const packageTexts=()=>({title:TITLE,subtitle:SUBTITLE,cover:COVER_NOTE,intro:staticIntroSections(),form:FORM,approval:{decisions:DECISIONS,calcNote:CALC_DECISION_NOTE,diagramNote:DIAGRAM_DECISION_NOTE,diagramDecisions:DIAGRAM_DECISIONS,articleNote:ARTICLE_DECISION_NOTE,articleDecisions:ARTICLE_DECISIONS,secondReader:SECOND_READER,secondFields:SECOND_FIELDS,declaration:DECLARATION_TEMPLATE,binding:BINDING,consent:CONSENT(),fields:FIELDS,hint:FIELD_HINT,deviation:DEVIATION_STEPS}});
 
 // ---------------------------------------------------------------- Csomag
 /** Az ujjlenyomat a megjelenő tartalomra (azonosítók, szövegek, értékek, mátrixok, kérdések, összevetés-jelölés); a jóváhagyási állapot, a becsült idő és az oldalszám nem része. */
@@ -1263,20 +1346,23 @@ const projectItem=(i:Item)=>i.kind==='value'?{id:i.id,label:i.label,value:i.valu
 /** Az ábra (4. rész) a csomag-ujjlenyomatban: a netlista és az ábra ujjlenyomata (ez fedi a rajzot: netlista, elrendezés, szimbólumok,
  * rajzoló kód, ábraszínek), a jelmagyarázat, a táblák, a TS = Python jelzés és a PDF-rajz stílusa (a stíluslapból származtatva). */
 const projectDiagram=(d:DiagramData)=>({file:d.file,netlist:d.netlistFp,diagram:d.diagramFp,legend:d.legend,wires:d.wires,sections:d.sections,truth:d.truth,python:d.python,caption:d.caption,pdfStyle:fingerprint(pdfDiagramStyles())});
-const project=(parts:Part[])=>parts.map(p=>({no:p.no,title:p.title,intro:p.intro,placeholder:p.placeholder??null,blocks:p.blocks.map(b=>({id:b.id,title:b.title,source:b.source,intro:b.intro,columns:b.columns??null,matrix:b.matrix??null,questions:b.questions??null,items:b.items.map(projectItem),...(b.diagram?{diagram:projectDiagram(b.diagram)}:{})}))}));
+/** A cikkvázlat (5. rész) a csomag-ujjlenyomatban: a tartalmi ujjlenyomat (fedi a teljes szöveget és a forrásokat), a megjelenő szöveg, a források, az ábrák, a kiadást akadályozó hiány. */
+const projectArticle=(a:ArticleData)=>({slug:a.slug,fingerprint:a.fingerprint,words:a.words,text:flatten(a.blocks),sources:sourceRows(a),figures:a.figures,blocked:a.blocked??null});
+const project=(parts:Part[])=>parts.map(p=>({no:p.no,title:p.title,intro:p.intro,placeholder:p.placeholder??null,blocks:p.blocks.map(b=>({id:b.id,title:b.title,source:b.source,intro:b.intro,columns:b.columns??null,matrix:b.matrix??null,questions:b.questions??null,items:b.items.map(projectItem),...(b.diagram?{diagram:projectDiagram(b.diagram)}:{}),...(b.article?{article:projectArticle(b.article)}:{})}))}));
 export const partFingerprint=(part:Part)=>fingerprint(project([part]));
 export const contentFingerprint=(parts:Part[],texts:unknown=packageTexts())=>fingerprint({parts:project(parts),texts});
 export function buildPackage():Package{
  const notCovered=[...SIZING_NOT_COVERED],parts=PARTS.map(f=>f({notCovered}));
- const formulas=parts.find(p=>p.no===2)!,calculators=parts.find(p=>p.no===3)!,diagramsP=parts.find(p=>p.no===4)!;
+ const formulas=parts.find(p=>p.no===2)!,calculators=parts.find(p=>p.no===3)!,diagramsP=parts.find(p=>p.no===4)!,articlesP=parts.find(p=>p.no===5)!;
  const calcs=T1_ORDER.map(slug=>{const d=defOf(slug);return {slug,title:d.title,id:kalId(slug),fingerprint:calcFingerprint(d),source:sourceFingerprint(slug),gated:TABLE_GATED.has(slug),state:RELEASE_STATES[releaseInfo(d).state]}});
- const diagrams=diagramsP.blocks.map(b=>({id:b.diagram!.netlistId,block:b.id,title:b.title,netlistFp:b.diagram!.netlistFp,diagramFp:b.diagram!.diagramFp,article:b.diagram!.article}));
- return {edition:EDITION,parts,notCovered,review:SIZING_REVIEW,approved:tablesApproved(),tablesVersion:T.version,calcs,diagrams,
-  fingerprints:{tables:tablesFingerprint(),formulas:partFingerprint(formulas),calculators:partFingerprint(calculators),diagrams:partFingerprint(diagramsP),content:contentFingerprint(parts)}};
+ const diagrams=diagramsP.blocks.filter(b=>b.diagram).map(b=>({id:b.diagram!.netlistId,block:b.id,title:b.title,netlistFp:b.diagram!.netlistFp,diagramFp:b.diagram!.diagramFp,article:b.diagram!.article}));
+ const articles=articlesP.blocks.map(b=>({slug:b.article!.slug,block:b.id,title:b.article!.title,fingerprint:b.article!.fingerprint,...(b.article!.blocked?{blocked:b.article!.blocked}:{})}));
+ return {edition:EDITION,parts,notCovered,review:SIZING_REVIEW,approved:tablesApproved(),tablesVersion:T.version,calcs,diagrams,articles,
+  fingerprints:{tables:tablesFingerprint(),formulas:partFingerprint(formulas),calculators:partFingerprint(calculators),diagrams:partFingerprint(diagramsP),articles:partFingerprint(articlesP),content:contentFingerprint(parts)}};
 }
 export const allItems=(pkg:Package)=>pkg.parts.flatMap(p=>p.blocks.flatMap(b=>b.items));
-export const allIds=(pkg:Package)=>[...pkg.parts.flatMap(p=>p.blocks.map(b=>b.id)),...allItems(pkg).map(i=>i.id)];
-/** Az azonosítók előtagjai: 1. rész T, F, SZP, L; 2. rész K, D; 3. rész KAL; 4. rész BEK (bekötési ábrák); a helyőrző részek előtagjai előre lefoglalva (ABR: a 4. rész korábbi helyőrző-előtagja). */
+export const allIds=(pkg:Package)=>[...pkg.parts.flatMap(p=>p.blocks.map(b=>b.id)),...pkg.parts.flatMap(p=>p.blocks.flatMap(b=>(b.questions??[]).map(q=>q.id).filter(id=>/-Q\d+$/.test(id)))),...allItems(pkg).map(i=>i.id)];
+/** Az azonosítók előtagjai: 1. rész T, F, SZP, L; 2. rész K, D; 3. rész KAL; 4. rész BEK (biztonsági szabályok, közös kérdések és bekötési ábrák; a kérdések azonosítója BEK-<csoport>-Q<n>); 5. rész CIK (cikkvázlatok; a kérdések CIK-<cikk>-Q<n>); a 6. rész helyőrzőjének előtagja (VK) előre lefoglalva (ABR: a 4. rész korábbi helyőrző-előtagja). */
 export const ID_PREFIXES=['T','F','SZP','L','K','D','KAL','BEK','ABR','CIK','VK'] as const;
 /** Azonosító-hivatkozások a szövegekben (pl. „T-PVC2-B2-2.5”, „D-XLPE”). */
 export const ID_REF=new RegExp(`(?<![\\p{L}\\d-])(?:${ID_PREFIXES.join('|')})-[A-Z0-9](?:[A-Z0-9.-]*[A-Z0-9])?(?![\\p{L}\\d])`,'gu');
@@ -1295,7 +1381,7 @@ export function packageProblems(pkg:Package,content:unknown):string[]{
   const text=i.kind==='value'?i.label+' '+i.value:[i.rule,i.rationale,i.example,i.question??'',i.source].join(' ');
   for(const ref of text.match(ID_REF)??[])if(!seen.has(ref))problems.push(`${i.id}: nem létező azonosítóra hivatkozik: ${ref}`);
  }
- for(const b of pkg.parts.flatMap(p=>p.blocks))for(const ref of [...b.intro,b.source,...(b.questions??[]).flatMap(q=>[q.id,q.text])].join(' ').match(ID_REF)??[])if(!seen.has(ref))problems.push(`${b.id}: nem létező azonosítóra hivatkozik: ${ref}`);
+ for(const b of pkg.parts.flatMap(p=>p.blocks))for(const ref of [...b.intro,b.source,...(b.questions??[]).map(q=>q.text)].join(' ').match(ID_REF)??[])if(!seen.has(ref)&&!/-Q\d+$/.test(ref))problems.push(`${b.id}: nem létező azonosítóra hivatkozik: ${ref}`);
  for(const ref of JSON.stringify(packageTexts()).match(ID_REF)??[])if(!seen.has(ref))problems.push(`Bevezető vagy jóváhagyó lap: nem létező azonosítóra hivatkozik: ${ref}`);
  return problems;
 }
@@ -1309,9 +1395,20 @@ function metaRows(pkg:Package):[string,string][]{
   ['2. rész – képlet-ujjlenyomat',pkg.fingerprints.formulas+' (a fejlesztési folyamat automatikus tesztje ellenőrzi)'],
   ['3. rész – kalkulátor-ujjlenyomat',pkg.fingerprints.calculators+' (a 3. rész egészéé; kalkulátoronként: a döntési táblázatban)'],
   ['4. rész – ábra-ujjlenyomat',pkg.fingerprints.diagrams+' (a 4. rész egészéé; ábránként: a döntési táblázatban)'],
+  ['5. rész – cikk-ujjlenyomat',pkg.fingerprints.articles+' (az 5. rész egészéé; cikkenként: a döntési táblázatban)'],
   ['Jóváhagyási állapot (1. rész)',pkg.approved?`jóváhagyott – ${r.qualification}, ${r.date}; hivatkozás: ${r.approvalRef}; a név megjelenik a programban: ${reviewNameShown(r)?`igen (${r.reviewer}, ${r.registry})`:'nem'}`:'ellenőrizendő – jogosult tervező még nem hagyta jóvá'],
-  ['Ellenőrizendő tételek',c.map(x=>`${x.no}. rész: ${x.n}`).join('; ')+` (összesen ${c.reduce((s,x)=>s+x.n,0)})`],
+  ['Ellenőrizendő tételek',c.map(x=>`${x.no}. rész: ${x.n}`).join('; ')+` (összesen ${c.reduce((s,x)=>s+x.n,0)}; ezen kívül a kérdések: ${reviewable(pkg).flatMap(p=>p.blocks).reduce((n,b)=>n+(b.questions?.length??0),0)})`],
   ['Becsült ráfordítás','kb. '+duration(minutes(pkg))],
+ ];
+}
+
+/** A Jóváhagyó lap azonosító sorai (sűrítve, hogy a döntés, az aláírás és a hozzájárulás egy lapra férjen): a kiadás és az öt rész ujjlenyomata. */
+function signRows(pkg:Package):[string,string][]{
+ const f=pkg.fingerprints;
+ return [
+  ['Csomagverzió',editionLabel(pkg.edition)],
+  ['Csomag-ujjlenyomat',f.content+' (a csomag teljes szövegéé: bevezető, tételek, jóváhagyó lap)'],
+  ['Részek ujjlenyomata',`1. rész (táblázatok): ${f.tables}; 2. rész (képletek): ${f.formulas}; 3. rész (kalkulátorok): ${f.calculators}; 4. rész (ábrák): ${f.diagrams}; 5. rész (cikkek): ${f.articles} – ábránként, cikkenként és kalkulátoronként a döntési táblázatokban`],
  ];
 }
 
@@ -1325,7 +1422,7 @@ function mdPara(x:Para):string[]{
 }
 const blockChecks=(b:Block)=>b.items.flatMap(i=>i.kind==='value'?i.checks??[]:[]);
 /** A jóváhagyó lapon előre kitöltött kiadás és ujjlenyomatok (a kalkulátoronkéntiek a kalkulátoronkénti döntés táblázatában). */
-export const approvedFingerprints=(pkg:Package)=>`${editionLabel(pkg.edition)}; csomag: ${pkg.fingerprints.content}; 1. rész: ${pkg.fingerprints.tables}; 2. rész: ${pkg.fingerprints.formulas}; 3. rész: ${pkg.fingerprints.calculators}; 4. rész: ${pkg.fingerprints.diagrams}`;
+export const approvedFingerprints=(pkg:Package)=>`${editionLabel(pkg.edition)}; csomag: ${pkg.fingerprints.content}; 1. rész: ${pkg.fingerprints.tables}; 2. rész: ${pkg.fingerprints.formulas}; 3. rész: ${pkg.fingerprints.calculators}; 4. rész: ${pkg.fingerprints.diagrams}; 5. rész: ${pkg.fingerprints.articles}`;
 /** A 4. rész ábrablokkjának Markdown-része: az ábra a PDF-változatban (vektoros rajz), itt a jelmagyarázat és a táblák. */
 function mdDiagram(d:DiagramData):string[]{
  const tbl=(h:string[],rows:string[][])=>['| '+h.join(' | ')+' |','|'+h.map(()=>'---').join('|')+'|',...rows.map(r=>'| '+r.map(cell).join(' | ')+' |'),''];
@@ -1334,7 +1431,7 @@ function mdDiagram(d:DiagramData):string[]{
   '**Jelmagyarázat:** '+d.legend.join('; ')+'.','',
   `**${++n}. táblázat – vezetéktábla.**`,'',...tbl(['#','Honnan','Hová','Vezető','Szín','Szakasz'],d.wires),
   ...(d.sections.length?[`**${++n}. táblázat – szakaszok és érszám.**`,'',...tbl(['Szakasz','Vezetők','Érszám'],d.sections)]:[]),
-  `**${++n}. táblázat – kapcsolóállás-táblázat** (TS = Python: ${d.python}). Oszlopok: ${d.truth.columns.join('; ')}.`,'',...tbl(d.truth.headers,d.truth.rows)];
+  `**${++n}. táblázat – kapcsolóállás-táblázat.** Oszlopok: ${d.truth.columns.join('; ')}. Gépi ellenőrzés: ${d.python}.`,'',...tbl(d.truth.headers,d.truth.rows)];
 }
 /** A Markdown-változat; `pages` a PDF oldalszáma (a nyilatkozat hivatkozik rá). */
 export function renderMarkdown(pkg:Package,pages:number):string{
@@ -1352,7 +1449,7 @@ export function renderMarkdown(pkg:Package,pages:number):string{
   for(const t of partStatus(pkg,part.no))o.push(t,'');
   for(const b of part.blocks){
    o.push(`### ${b.id} – ${b.title}`,'','Forrás: '+b.source,'',...b.intro.flatMap(t=>[t,'']));
-   for(const q of b.questions??[])o.push(`**${FORM.question} (${q.id}).** ${q.text}`,'');
+   if(b.article)o.push(...mdArticle(b.article,id=>figureRef(b.article!,id)));
    if(b.matrix){o.push('Áttekintés:','','| '+[b.matrix.corner,...b.matrix.columns].join(' | ')+' |','|'+[b.matrix.corner,...b.matrix.columns].map(()=>'---:').join('|')+'|',...b.matrix.rows.map(r=>'| '+[r.label,...r.cells].join(' | ')+' |'),'')}
    if(b.diagram)o.push(...mdDiagram(b.diagram));
    const values=b.items.filter((i):i is ValueItem=>i.kind==='value');
@@ -1362,16 +1459,19 @@ export function renderMarkdown(pkg:Package,pages:number):string{
     const checks=blockChecks(b);if(checks.length)o.push(verifiedText(checks),'');
    }
    for(const i of b.items)if(i.kind==='rule')o.push(`#### ${i.id} – ${i.title}`,'',`**Szabály.** ${i.rule}`,'',`**Indoklás.** ${i.rationale}`,'',`**Kézzel számolt példa.** ${i.example}`,'',...(i.question?[`**${FORM.question}.** ${i.question}`,'']:[]),`**Forrás.** ${i.source}`,'',`**${FORM.verified}.** ${verifiedText(i.checks)}`,'',`| Azonosító | ✓ | ✗ | ${FORM.fix} |`,'|---|:-:|:-:|---|',`| ${i.id} | ${BOX} | ${BOX} | |`,'');
-   if(b.diagram)o.push(`**Döntés (${b.id}):** `+DIAGRAM_DECISIONS.map(d=>`${BOX} ${d}`).join(' · '),'');
+   // A kérdések az ábra, a táblák és a cikkszöveg UTÁN állnak (a lektor előbb látja, amire a kérdés vonatkozik), egyedi azonosítóval és válaszmezővel.
+   for(const q of b.questions??[])o.push(`**${FORM.question} (${q.id}).** ${q.text}`,'',`${FORM.answer} (${q.id}):`,'');
+   if(b.diagram||b.article)o.push(`**Döntés (${b.id}):** `+(b.article?ARTICLE_DECISIONS:DIAGRAM_DECISIONS).map(d=>`${BOX} ${d}`).join(' · '),'');
    o.push(`${BOX} ${FORM.blockOk} (${b.id}).`,'',`${FORM.blockNote}:`,'');
   }
  }
  o.push('## Jóváhagyó lap','','Blokkösszesítő:','','| Blokk | Megnevezés | Tételek | Mind rendben | Eltérő tételek (db) |','|---|---|---:|:-:|---|',...reviewable(pkg).flatMap(p=>p.blocks).map(b=>`| ${b.id} | ${cell(b.title)} | ${b.items.length} | ${BOX} | |`),'');
  o.push('### 3. rész – kalkulátoronkénti döntés','',CALC_DECISION_NOTE,'','| Kalkulátor | Blokk | Tartalmi ujjlenyomat | Forrás-ujjlenyomat | Táblázat-kapu | Döntés |','|---|---|---|---|---|---|',...pkg.calcs.map(c=>`| ${cell(c.title)} | ${c.id} | ${c.fingerprint} | ${c.source} | ${c.gated?'igen':'nem'} | ${BOX} Jóváhagyom · ${BOX} Javítás után / nem |`),'');
  o.push('### 4. rész – ábránkénti döntés','',DIAGRAM_DECISION_NOTE,'','| Ábra | Blokk | Netlista (ujjlenyomat) | Ábra (ujjlenyomat) | Döntés |','|---|---|---|---|---|',...pkg.diagrams.map(d=>`| ${cell(d.title)} | ${d.block} | ${d.netlistFp} | ${d.diagramFp} | ${DIAGRAM_DECISIONS.map(x=>BOX+' '+x).join(' · ')} |`),'');
- o.push('### 4. rész – második olvasó','',SECOND_READER,'','| Adat | Kitöltés |','|---|---|',...SECOND_FIELDS.map(f=>`| ${f} | |`),'');
+ o.push('### 5. rész – cikkenkénti döntés','',ARTICLE_DECISION_NOTE,'','| Cikk | Blokk | Tartalmi ujjlenyomat | Hiányzik a kiadáshoz | Döntés |','|---|---|---|---|---|',...pkg.articles.map(a=>`| ${cell(a.title)} | ${a.block} | ${a.fingerprint} | ${a.blocked?cell(a.blocked):'–'} | ${ARTICLE_DECISIONS.map(x=>BOX+' '+x).join(' · ')} |`),'');
+ o.push('### 4–5. rész – második olvasó','',SECOND_READER,'','| Adat | Kitöltés |','|---|---|',...SECOND_FIELDS.map(f=>`| ${f} | |`),'');
  o.push('### Teendő eltérés esetén','',...DEVIATION_STEPS.map((s,n)=>`${n+1}. ${s}`),'');
- o.push('### Döntés és aláírás','','A jóváhagyott csomag:','','| Adat | Érték |','|---|---|',...metaRows(pkg).slice(0,7).map(([k,v])=>`| ${k} | ${cell(v)} |`),'');
+ o.push('### Döntés és aláírás','','A jóváhagyott csomag:','','| Adat | Érték |','|---|---|',...signRows(pkg).map(([k,v])=>`| ${k} | ${cell(v)} |`),'');
  o.push('Döntés:','',...DECISIONS.map(d=>`- ${BOX} ${d}`),'',declaration(pages),'',BINDING,'',FIELD_HINT,'','| Adat | Kitöltés |','|---|---|',...FIELDS.map(f=>`| ${f} | |`),`| Jóváhagyott csomagverzió és ujjlenyomatok | ${approvedFingerprints(pkg)} |`,'| Megjegyzések | |','');
  o.push(`${BOX} ${CONSENT()}`,'');
  return o.join('\n');
@@ -1405,6 +1505,61 @@ export function cssColor(tokens:Record<string,string>,v:string|undefined):string
  if(/^#[0-9a-f]{3}$/i.test(x))return '#'+[...x.slice(1)].map(c=>c+c).join('').toLowerCase();
  return /^#[0-9a-f]{6}$/i.test(x)?x.toLowerCase():null;
 }
+type DgStyles=ReturnType<typeof pdfDiagramStyles>;
+/** Egy rajzelem osztályaiból a stíluslapból származtatott tulajdonságok (az alap osztállyal kiegészítve). */
+export function propsOf(DG:DgStyles,cls:string|undefined,base?:string):Record<string,string>{
+ const out:Record<string,string>={...(base?DG.rules[base]??{}:{})};
+ for(const k of (cls??'').split(' '))Object.assign(out,DG.rules[k]??{});
+ return out;
+}
+/** A rajzelem kirajzolódik-e a PDF-ben (van látható kitöltése vagy körvonala; a szöveg mindig). */
+export function primVisible(DG:DgStyles,p:Prim):boolean{
+ if(p.k==='text')return true;
+ const pr=propsOf(DG,p.cls),fill=pr.fill===undefined?'#000000':cssColor(DG.tokens,pr.fill);
+ return !!(fill||cssColor(DG.tokens,pr.stroke));
+}
+/** A legkisebb megengedett kirajzolt ábrafelirat (pt) a PDF-ben: ez alatt a lektor a feliratot nem tudja biztonsággal elolvasni. */
+export const PDF_MIN_LABEL_PT=6.5;
+/**
+ * A KIRAJZOLT PDF ellenőrzése a modellel szemben (nem csak a Markdownnal és a bájtazonosságot): minden blokk a PDF-ben van; a táblák minden
+ * sora kirajzolódott (értéktábla, vezeték-, szakasz-, kapcsolóállás-táblázat, források); minden ábra kirajzolódott, a margón belül, minden látható
+ * elemmel és legalább PDF_MIN_LABEL_PT betűmérettel; a cikk minden szakaszcíme és minden kérdés (válaszmezővel) megvan. Üres lista: rendben.
+ */
+export function pdfProblems(pkg:Package,info:PdfInfo,texts:readonly string[]):string[]{
+ const p:string[]=[],DG=pdfDiagramStyles(),text=texts.join('\n'),m=info.margins,tol=0.05;
+ for(const part of pkg.parts)for(const b of part.blocks){
+  const bi=info.blocks[b.id];
+  if(!bi){p.push(`${b.id}: a blokk nincs a PDF-ben`);continue}
+  if(bi.pages[1]<bi.pages[0])p.push(`${b.id}: érvénytelen oldaltartomány`);
+  const values=b.items.filter(i=>i.kind==='value').length;
+  if(values&&bi.tables.values!==values)p.push(`${b.id}: az értéktábla ${bi.tables.values??0} sora rajzolódott ki, ${values} kellene`);
+  const qn=b.questions?.length??0;
+  if(bi.questions!==qn||bi.answers!==qn)p.push(`${b.id}: ${qn} kérdésből ${bi.questions} és ${bi.answers} válaszmező rajzolódott ki`);
+  for(const q of b.questions??[])if(!text.includes(q.id))p.push(`${b.id}: a(z) ${q.id} kérdés azonosítója nincs a PDF szövegében`);
+  if(b.diagram){
+   const d=b.diagram,bd=bi.diagram;
+   if(!bd)p.push(`${b.id}: az ábra nem rajzolódott ki a PDF-ben`);
+   else{
+    const [x0,y0,x1,y1]=bd.box;
+    if(x0<m.left-tol||x1>m.right+tol||y0<m.top-tol||y1>m.bottom+tol)p.push(`${b.id}: az ábra kilóg a lap margójáról (${bd.box.map(n=>n.toFixed(1)).join(', ')} mm)`);
+    const want=d.prims.filter(x=>primVisible(DG,x)).length;
+    if(bd.prims!==want)p.push(`${b.id}: az ábrából ${bd.prims} elem rajzolódott ki, ${want} kellene`);
+    if(bd.minPt<PDF_MIN_LABEL_PT)p.push(`${b.id}: a legkisebb ábrafelirat ${bd.minPt.toFixed(2)} pt (legalább ${PDF_MIN_LABEL_PT} pt kell)`);
+   }
+   if(bi.tables.wires!==d.wires.length)p.push(`${b.id}: a vezetéktábla ${bi.tables.wires??0} sora rajzolódott ki, ${d.wires.length} kellene`);
+   if(d.sections.length&&bi.tables.sections!==d.sections.length)p.push(`${b.id}: a szakasztábla ${bi.tables.sections??0} sora rajzolódott ki, ${d.sections.length} kellene`);
+   if(bi.tables.truth!==d.truth.rows.length)p.push(`${b.id}: a kapcsolóállás-táblázat ${bi.tables.truth??0} sora rajzolódott ki, ${d.truth.rows.length} kellene`);
+  }
+  if(b.article){
+   const heads=flatten(b.article.blocks).filter(x=>x.k==='h2').map(x=>(x as {text:string}).text);
+   if(JSON.stringify(bi.articleHeads)!==JSON.stringify(heads))p.push(`${b.id}: a cikk szakaszcímei (${bi.articleHeads.length}) nem egyeznek a vázlattal (${heads.length})`);
+   if(bi.tables.sources!==(b.article.sources.length||undefined))p.push(`${b.id}: a források ${bi.tables.sources??0} sora rajzolódott ki, ${b.article.sources.length} kellene`);
+   const first=flatten(b.article.blocks).find(x=>x.k==='callout') as {label:string}|undefined;
+   if(first&&!text.includes(first.label))p.push(`${b.id}: a veszély-doboz címe nincs a PDF szövegében`);
+  }
+ }
+ return p;
+}
 /** ASCII-közeli szöveg (a PDF metaadataihoz): a NotoSans-ból hiányzó jelek cseréje. */
 export const pdfText=(s:string)=>s.replace(/[\u0000-\u001f]/g,' ').replace(/[  ]/g,' ').replace(/[‐-‒]/g,'-').replace(/−/g,'-').replace(/→/g,'->').replace(/≤/g,'<=').replace(/≥/g,'>=').replace(/≈/g,'~').replace(/√/g,'gyök ').replace(/✓/g,'pipa').replace(/✗/g,'X').replace(/☐/g,'[ ]');
 /**
@@ -1428,13 +1583,20 @@ const pdfDate=(iso:string)=>`D:${iso.replace(/-/g,'')}000000+00'00'`;
 const C={text:'#263b49',muted:'#5d7180',accent:'#1f5f6e',rule:'#d6e0e5',head:'#e3eeeb',zebra:'#f6f8fa',bar:'#eef3f5',note:'#fbf6ea',noteLine:'#e3cf9f'};
 type Toc=Record<string,number>;
 
-function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;toc:Toc;texts:string[];breaks:string[]}{
+/** A kirajzolt PDF blokkonkénti adatai: az oldaltartomány, az ábra befoglaló téglalapja (mm), a rajz elemszáma és a legkisebb kirajzolt betűméret
+ * (pt), a táblák kirajzolt sorainak száma, a cikk szakaszai, a kérdések és a válaszmezők száma. A `pdfProblems` a modellel veti össze. */
+export type PdfBlockInfo={pages:[number,number];diagram?:{box:[number,number,number,number];prims:number;minPt:number};tables:Record<string,number>;articleHeads:string[];questions:number;answers:number};
+export type PdfInfo={blocks:Record<string,PdfBlockInfo>;margins:{left:number;right:number;top:number;bottom:number}};
+/** Tesztkampók: a PDF-ellenőrzés (pdfProblems) mutációs próbájához – szándékosan hibás kirajzolás. Éles generálásban sosem állítjuk be. */
+export type PdfFaults={skipDiagram?:string;skipTruth?:string;truncateWires?:{id:string;rows:number};diagramScale?:{id:string;scale:number}};
+function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number,faults:PdfFaults={}):{doc:jsPDF;toc:Toc;texts:string[];breaks:string[];info:PdfInfo}{
  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true,putOnlyUsedFonts:true});
  doc.addFileToVFS('NotoSans.ttf',font);doc.addFont('NotoSans.ttf','NotoSans','normal');doc.setFont('NotoSans');
  doc.setProperties({title:pdfText(TITLE+' '+editionLabel(pkg.edition)),subject:pdfText(SUBTITLE),creator:'Villanyrajz',author:'Villanyrajz'});
  doc.setCreationDate(pdfDate(pkg.edition.date));
  doc.setFileId((pkg.fingerprints.content+pkg.fingerprints.tables+pkg.fingerprints.formulas+pkg.edition.number.toString(16).padStart(8,'0')).toUpperCase());
  const W=210,H=297,M=16,CW=W-2*M,TOP=23,BOTTOM=H-19,toc:Toc={},texts:string[]=[],breaks:string[]=[];
+ const info:PdfInfo={blocks:{},margins:{left:M,right:W-M,top:TOP,bottom:BOTTOM}};
  let y=TOP,pages=0;
  const lh=(size:number)=>size*0.3528*1.3;
  /** Egy hiányzó jel kirajzolása a helyőrző dobozában (x: bal szél, yy: alapvonal, w: a helyőrző szélessége). */
@@ -1509,9 +1671,12 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
  const noIcon=(cx:number,cy:number)=>{doc.setDrawColor(C.text);doc.setLineWidth(.45);doc.line(cx-1.2,cy-1.2,cx+1.2,cy+1.2);doc.line(cx-1.2,cy+1.2,cx+1.2,cy-1.2)};
  const dashed=(x1:number,x2:number,yy:number)=>{doc.setDrawColor(C.muted);doc.setLineWidth(.2);doc.setLineDashPattern([0.6,0.9],0);doc.line(x1,yy,x2,yy);doc.setLineDashPattern([],0)};
  type Col={title:string;w:number;align?:'left'|'right'|'center';box?:boolean;icon?:'ok'|'no'};
- /** `tail`: az utolsó sor csak az utána következő `tail` magasságú elemmel (pl. a blokk záró mezőjével) együtt kerül az oldalra. */
- const table=(cols:Col[],rows:string[][],o:{size?:number;minRow?:number;tail?:number}={})=>{
-  const size=o.size??8.5,total=cols.reduce((s,c)=>s+c.w,0),ws=cols.map(c=>c.w/total*CW),line=lh(size),minRow=o.minRow??6;
+ /** A cikkszöveg táblázatainak oszlopsúlya: a leghosszabb szó és az átlagos cellahossz szerint (hogy a hosszú szavak ne törjenek). */
+ const weights=(head:string[],rows:string[][])=>head.map((h,i)=>{const cells=[h,...rows.map(r=>r[i]??'')],lw=Math.max(...cells.flatMap(c=>c.split(/\s+/).map(w=>w.length))),avg=cells.reduce((n,c)=>n+c.length,0)/cells.length;return Math.max(lw*1.15,Math.min(avg,36)*0.45,4)});
+ /** `tail`: az utolsó sor csak az utána következő `tail` magasságú elemmel (pl. a blokk záró mezőjével) együtt kerül az oldalra. `loose`: a szó
+  * közbeni törés nem hiba. Visszatérési érték: a ténylegesen kirajzolt sorok száma. */
+ const table=(cols:Col[],rows:string[][],o:{size?:number;minRow?:number;tail?:number;loose?:boolean}={}):number=>{
+  const size=o.size??8.5,breaks0=breaks.length,total=cols.reduce((s,c)=>s+c.w,0),ws=cols.map(c=>c.w/total*CW),line=lh(size),minRow=o.minRow??6;let drawn=0;
   const head=()=>{
    const hl=cols.map((c,i)=>c.icon?[]:split(c.title,ws[i]-3,7.8)),hh=Math.max(7,...hl.map(l=>l.length*lh(7.8)+3));
    doc.setFillColor(C.head);doc.rect(M,y,CW,hh,'F');let x=M;
@@ -1525,9 +1690,12 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
    if(n%2===1){doc.setFillColor(C.zebra);doc.rect(M,y,CW,h,'F')}
    let x=M;
    cols.forEach((c,i)=>{if(c.box)box(x+ws[i]/2,y+h/2);else{const top=y+(h-cells[i].length*line)/2;cells[i].forEach((l,k)=>write(l,c.align==='right'?x+ws[i]-1.5:c.align==='center'?x+ws[i]/2:x+1.5,top+line*(k+0.74),size,C.text,c.align??'left'))}x+=ws[i]});
-   y+=h;doc.setDrawColor(C.rule);doc.setLineWidth(.2);doc.line(M,y,W-M,y);
+   y+=h;doc.setDrawColor(C.rule);doc.setLineWidth(.2);doc.line(M,y,W-M,y);drawn++;
   });
   y+=3;
+  // Laza mód (a cikkszöveg szabad táblái): a szó közbeni törés nem hiba, ha egy keskeny oszlopban nem kerülhető el.
+  if(o.loose)breaks.length=breaks0;
+  return drawn;
  };
  const checkLine=(s:string,size=9.5)=>{const ls=split(s,CW-8,size),h=lh(size);ensure(ls.length*h+1);box(M+2,y+h*0.45);ls.forEach(l=>{write(l,M+7,y+h*0.74,size);y+=h});y+=1.6};
  const fieldRow=(label:string,o:{height?:number;value?:string}={})=>{
@@ -1548,12 +1716,13 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
  const DG=pdfDiagramStyles(),DG_MAX_H=150,DG_MAX_SCALE=0.36;
  const dgScale=(d:DiagramData)=>Math.min(CW/d.viewBox[2],DG_MAX_H/d.viewBox[3],DG_MAX_SCALE);
  const diagramH=(d:DiagramData)=>d.viewBox[3]*dgScale(d)+5;
- const drawDiagram=(d:DiagramData)=>{
-  const [vx,vy,vw,vh]=d.viewBox,sc=dgScale(d),h=vh*sc;
+ const drawDiagram=(d:DiagramData,bi:PdfBlockInfo)=>{
+  if(faults.skipDiagram===d.netlistId)return;
+  const [vx,vy,vw,vh]=d.viewBox,sc=faults.diagramScale?.id===d.netlistId?faults.diagramScale.scale:dgScale(d),h=vh*sc;
   keep(h+5);ensure(h+5);
   const ox=M+(CW-vw*sc)/2-vx*sc,oy=y+1.5-vy*sc,X=(x:number)=>ox+x*sc,Y=(v:number)=>oy+v*sc;
   doc.setDrawColor(C.rule);doc.setLineWidth(.2);doc.rect(M,y,CW,h+3,'S');
-  const props=(cls:string|undefined,base?:string)=>{const out:Record<string,string>={...(base?DG.rules[base]??{}:{})};for(const k of (cls??'').split(' '))Object.assign(out,DG.rules[k]??{});return out};
+  const props=(cls:string|undefined,base?:string)=>propsOf(DG,cls,base);
   const stroke=(pr:Record<string,string>)=>{
    const c=cssColor(DG.tokens,pr.stroke);if(!c)return false;
    doc.setDrawColor(c);doc.setLineWidth(parseFloat(pr['stroke-width']??'1')*sc);
@@ -1561,10 +1730,11 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
    const cap=pr['stroke-linecap']==='round'?'round':'butt';doc.setLineCap(cap);doc.setLineJoin(pr['stroke-linejoin']==='round'?'round':'miter');
    return true;
   };
+  let drawn=0,minPt=Infinity;
   for(const p of d.prims){
    if(p.k==='text'){
     const pr=props(p.cls,'text'),size=(p.size??11)*sc/0.3528,align=p.anchor==='middle'?'center':p.anchor==='end'?'right':'left';
-    doc.setFontSize(size);texts.push(p.s);
+    doc.setFontSize(size);texts.push(p.s);drawn++;minPt=Math.min(minPt,size);
     const halo=cssColor(DG.tokens,pr.stroke);
     if(halo&&pr['paint-order']==='stroke'){doc.setDrawColor(halo);doc.setLineWidth(parseFloat(pr['stroke-width']??'3')*sc);doc.setLineDashPattern([],0);doc.setLineJoin('round');doc.text(p.s,X(p.at[0]),Y(p.at[1]),{align,renderingMode:'stroke'})}
     doc.setTextColor(cssColor(DG.tokens,pr.fill)??C.text);doc.text(p.s,X(p.at[0]),Y(p.at[1]),{align,renderingMode:'fill'});
@@ -1572,6 +1742,7 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
    }
    const pr=props(p.cls),fillC=pr.fill===undefined?'#000000':cssColor(DG.tokens,pr.fill),st=stroke(pr),mode=fillC&&st?'FD':fillC?'F':st?'S':null;
    if(!mode)continue;
+   drawn++;
    if(fillC)doc.setFillColor(fillC);
    if(p.k==='line'){if(st)doc.line(X(p.a[0]),Y(p.a[1]),X(p.b[0]),Y(p.b[1]))}
    else if(p.k==='poly'){
@@ -1582,20 +1753,41 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
    else if(p.k==='circle')doc.circle(X(p.c[0]),Y(p.c[1]),p.r*sc,mode);
   }
   doc.setLineDashPattern([],0);doc.setLineCap('butt');doc.setLineJoin('miter');
+  bi.diagram={box:[X(vx),Y(vy),X(vx+vw),Y(vy+vh)],prims:drawn,minPt};
   y+=h+5;
  };
- const diagramTables=(d:DiagramData)=>{
+ /** Táblázatcím: a cím a táblázat fejlécével és első sorával együtt marad (nem marad árva a lap alján). */
+ const tableTitle=(t:string,need=7+5*2)=>{keep(paraH(t,9,1)+need);para(t,{size:9,color:C.accent,gap:1})};
+ const diagramTables=(d:DiagramData,bi:PdfBlockInfo)=>{
   para('Jelmagyarázat: '+d.legend.join('; ')+'.',{size:8.5,color:C.muted,gap:2});
   let n=0;
-  para(`${++n}. táblázat – vezetéktábla`,{size:9,color:C.accent,gap:1});
-  table([{title:'#',w:6,align:'right'},{title:'Honnan',w:40},{title:'Hová',w:40},{title:'Vezető',w:24},{title:'Szín',w:16},{title:'Szakasz',w:36}],d.wires,{size:7.5,minRow:5});
-  if(d.sections.length){para(`${++n}. táblázat – szakaszok és érszám`,{size:9,color:C.accent,gap:1});table([{title:'Szakasz',w:50},{title:'Vezetők',w:100},{title:'Érszám',w:14,align:'right'}],d.sections,{size:7.5,minRow:5})}
-  para(`${++n}. táblázat – kapcsolóállás-táblázat (TS = Python: ${d.python})`,{size:9,color:C.accent,gap:1});
-  para('Oszlopok: '+d.truth.columns.join('; ')+'.',{size:8,color:C.muted,gap:1});
+  tableTitle(`${++n}. táblázat – vezetéktábla`);
+  const wireRows=faults.truncateWires?.id===d.netlistId?d.wires.slice(0,faults.truncateWires.rows):d.wires;
+  bi.tables.wires=table([{title:'#',w:6,align:'right'},{title:'Honnan',w:40},{title:'Hová',w:40},{title:'Vezető',w:24},{title:'Szín',w:16},{title:'Szakasz',w:36}],wireRows,{size:7.5,minRow:5});
+  if(d.sections.length){tableTitle(`${++n}. táblázat – szakaszok és érszám`);bi.tables.sections=table([{title:'Szakasz',w:50},{title:'Vezetők',w:100},{title:'Érszám',w:14,align:'right'}],d.sections,{size:7.5,minRow:5})}
+  if(faults.skipTruth===d.netlistId)return;
+  tableTitle(`${++n}. táblázat – kapcsolóállás-táblázat`,7+5*2+lh(8)+lh(8.5));
+  para('Oszlopok: '+d.truth.columns.join('; ')+'. Gépi ellenőrzés: '+d.python+'.',{size:8,color:C.muted,gap:1});
   const nSel=d.truth.headers.length-1;
-  table([...d.truth.headers.slice(0,-1).map(t=>({title:t,w:22})),{title:d.truth.headers[nSel],w:Math.max(46,178-nSel*22)}],d.truth.rows,{size:7.5,minRow:5});
+  bi.tables.truth=table([...d.truth.headers.slice(0,-1).map(t=>({title:t,w:22})),{title:d.truth.headers[nSel],w:Math.max(46,178-nSel*22)}],d.truth.rows,{size:7.5,minRow:5});
  };
- const decisionLine=(id:string)=>{const size=9.5,h=lh(size)+1;ensure(h+1);write('Döntés ('+id+'):',M,y+h*0.62,size,C.accent);let x=M+doc.getTextWidth(pdfInline('Döntés ('+id+'): '))+4;for(const d of DIAGRAM_DECISIONS){box(x,y+h*0.45);write(d,x+3,y+h*0.62,size);doc.setFontSize(size);x+=doc.getTextWidth(d)+12}y+=h+1.5};
+ /** A döntés sora (négyzetek); `need`: a sor, az „A blokk minden tétele egyezik” és a megjegyzés együtt marad. */
+ const decisionLine=(id:string,decisions:readonly string[])=>{const size=9.5,h=lh(size)+1;ensure(h+1);write('Döntés ('+id+'):',M,y+h*0.62,size,C.accent);let x=M+doc.getTextWidth(pdfInline('Döntés ('+id+'): '))+4;for(const d of decisions){box(x,y+h*0.45);write(d,x+3,y+h*0.62,size);doc.setFontSize(size);x+=doc.getTextWidth(d)+12}y+=h+1.5};
+ /** Az R3 cikkvázlat szövege (5. rész): veszély-doboz, szakaszok, bekezdések, listák, táblák, források – ugyanabból a bejárásból (flatten), mint a Markdown. */
+ const subHead=(t:string)=>{keep(22);if(!atTop())y+=2;for(const l of split(t,CW,10.5)){write(l,M,y+lh(10.5)*0.74,10.5,C.accent);y+=lh(10.5)}y+=1.2};
+ const drawArticle=(a:ArticleData,bi:PdfBlockInfo)=>{
+  for(const x of flatten(a.blocks)){
+   switch(x.k){
+    case 'callout':note([x.label+'. '+x.text],9);break;
+    case 'h2':bi.articleHeads.push(x.text);subHead(x.text);break;
+    case 'p':if(x.style==='h3'){keep(14);para(x.text,{size:10,color:C.accent,gap:1})}else para(x.text,{size:9,...(x.style==='formula'?{indent:6,color:C.muted}:{}),gap:1.6});break;
+    case 'list':list(x.items,x.ordered);break;
+    case 'table':{const ws=weights(x.head,x.rows);table(x.head.map((t,i)=>({title:t,w:ws[i]})),x.rows,{size:x.head.length>=7?7:7.5,minRow:5,loose:true});break}
+    case 'figure':para('['+figureRef(a,x.id)+'] '+x.caption,{size:8.5,color:C.muted,gap:1.6});break;
+   }
+  }
+  if(a.sources.length){tableTitle('Források és szabványpontok');bi.tables.sources=table([{title:'Szabvány',w:58},{title:'Kiadás',w:32},{title:'Pont',w:88}],sourceRows(a),{size:7.5,minRow:5,loose:true})}
+ };
 
  // Címlap
  newPage();
@@ -1646,29 +1838,39 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
   const status=partStatus(pkg,part.no);if(status.length)note(status,9);
   for(const b of part.blocks){
    const values=b.items.filter((i):i is ValueItem=>i.kind==='value'),rules=b.items.filter((i):i is RuleItem=>i.kind==='rule');
-   const qs=(b.questions??[]).map(q=>`${FORM.question} (${q.id}): ${q.text}`);
-   // A blokk fejléce csak az első tartalmi elemmel (mátrix, táblázat eleje vagy első szabálytétel) együtt kerül egy oldalra.
-   const headH=h2H(`${b.id} – ${b.title}`)+paraH('Forrás: '+b.source,8.5,1.2)+b.intro.reduce((s,t)=>s+paraH(t,9),0)+qs.reduce((s,q)=>s+noteH([q],9),0);
-   const firstH=b.diagram?diagramH(b.diagram):b.matrix?7+6*3:values.length?7+VALUE_ROW*2:rules.length?ruleItemH(rules[0]):0;
+   const decision=b.diagram||b.article?(b.article?ARTICLE_DECISIONS:DIAGRAM_DECISIONS):null;
+   // A blokk fejléce csak az első tartalmi elemmel (mátrix, táblázat eleje, első szabálytétel, a cikk eleje vagy az első kérdés) együtt kerül egy oldalra.
+   const headH=h2H(`${b.id} – ${b.title}`)+paraH('Forrás: '+b.source,8.5,1.2)+b.intro.reduce((s,t)=>s+paraH(t,9),0);
+   const q0=b.questions?.[0],qH=q0?noteH([`${FORM.question} (${q0.id}): ${q0.text}`],9)+commentH(3):0;
+   const firstH=b.diagram?diagramH(b.diagram):b.article?36:b.matrix?7+6*3:values.length?7+VALUE_ROW*2:rules.length?ruleItemH(rules[0]):qH;
    keep(headH+firstH);
    h2(`${b.id} – ${b.title}`,0);
+   const bi:PdfBlockInfo={pages:[pages,pages],tables:{},articleHeads:[],questions:0,answers:0};info.blocks[b.id]=bi;
    para('Forrás: '+b.source,{size:8.5,color:C.muted,gap:1.2});
    b.intro.forEach(t=>para(t,{size:9}));
-   for(const q of qs)note([q],9);
    if(b.matrix)table([{title:b.matrix.corner,w:20,align:'right'},...b.matrix.columns.map(c=>({title:c,w:20,align:'right' as const}))],b.matrix.rows.map(r=>[r.label,...r.cells]),{size:9});
-   if(b.diagram){drawDiagram(b.diagram);diagramTables(b.diagram)}
-   // A blokk záró mezője (négyzet és megjegyzés) az utolsó táblázatsorral vagy szabálytétellel együtt marad.
-   const checks=blockChecks(b),footH=(checks.length?paraH(verifiedText(checks),8.5,2):0)+lh(9)+0.6+commentH(3)+2;
+   if(b.article)drawArticle(b.article,bi);
+   if(b.diagram){drawDiagram(b.diagram,bi);diagramTables(b.diagram,bi)}
+   // A blokk záró mezője (döntés, négyzet és megjegyzés) az utolsó táblázatsorral, szabálytétellel vagy kérdéssel együtt marad.
+   const checks=blockChecks(b),decH=decision?lh(9.5)+2.5:0,tailH=decH+lh(9)+0.6+commentH(3)+2,footH=(checks.length?paraH(verifiedText(checks),8.5,2):0)+tailH;
+   const lastIsValues=!rules.length&&!(b.questions?.length);
    if(values.length){
-    table(valueCols(b),values.map(i=>[i.id,i.label,i.value,'','','']),{minRow:VALUE_ROW,tail:rules.length?0:footH});
+    bi.tables.values=table(valueCols(b),values.map(i=>[i.id,i.label,i.value,'','','']),{minRow:VALUE_ROW,tail:lastIsValues?footH:0});
     if(checks.length)para(verifiedText(checks),{size:8.5,color:C.muted,gap:2});
    }
-   rules.forEach((i,n)=>ruleItem(i,n===rules.length-1?footH:0));
-   if(b.diagram)decisionLine(b.id);
-   keep(lh(9)+0.6+commentH(3));
+   rules.forEach((i,n)=>ruleItem(i,n===rules.length-1&&!(b.questions?.length)?footH:0));
+   // A kérdések a tartalom UTÁN állnak (a lektor előbb látja, amire vonatkoznak), egyedi azonosítóval és válaszmezővel.
+   (b.questions??[]).forEach((q,n,all)=>{
+    const text=`${FORM.question} (${q.id}): ${q.text}`;
+    keep(noteH([text],9)+commentH(3)+(n===all.length-1?tailH:0));
+    note([text],9);bi.questions++;commentField(`${FORM.answer} (${q.id})`,3);bi.answers++;
+   });
+   keep(tailH);
+   if(decision)decisionLine(b.id,decision);
    y-=1;checkLine(`${FORM.blockOk} (${b.id}).`,9);
    commentField(FORM.blockNote,3);
    y+=2;
+   bi.pages[1]=pages;
   }
  }
 
@@ -1676,14 +1878,17 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
  // a nyilatkozat, az adatok, az aláírás és a hozzájárulás.
  h1('Jóváhagyó lap','approval');
  para('Blokkonként: „Mind rendben”, ha a blokk minden tétele egyezik; különben az eltérő (✗) tételek száma.',{size:9.5,gap:2});
- table([{title:'Blokk',w:32},{title:'Megnevezés',w:72},{title:'Tételek',w:16,align:'right'},{title:'Mind rendben',w:22,box:true},{title:'Eltérő tételek (db)',w:36}],reviewable(pkg).flatMap(p=>p.blocks).map(b=>[b.id,b.title,String(b.items.length),'','']),{minRow:7.5});
+ table([{title:'Blokk',w:50},{title:'Megnevezés',w:58},{title:'Tételek',w:16,align:'right'},{title:'Mind rendben',w:22,box:true},{title:'Eltérő tételek (db)',w:32}],reviewable(pkg).flatMap(p=>p.blocks).map(b=>[b.id,b.title,String(b.items.length),'','']),{minRow:7.5});
  h2('3. rész – kalkulátoronkénti döntés',60);
  para(CALC_DECISION_NOTE,{size:9,gap:2});
- table([{title:'Kalkulátor',w:42},{title:'Blokk',w:34},{title:'Tartalom (ujjlenyomat)',w:23},{title:'Forrás (ujjlenyomat)',w:23},{title:'Táblázat-kapu',w:16},{title:'Jóváhagyom',w:20,box:true},{title:'Javítás után / nem',w:20,box:true}],pkg.calcs.map(c=>[c.title,c.id,c.fingerprint,c.source,c.gated?'igen':'nem','','']),{minRow:9});
+ table([{title:'Kalkulátor',w:42},{title:'Blokk',w:34},{title:'Tartalom (ujjlenyomat)',w:22},{title:'Forrás (ujjlenyomat)',w:22},{title:'Táblázat-kapu',w:15},{title:'Jóváhagyom',w:22,box:true},{title:'Javítás után / nem',w:20,box:true}],pkg.calcs.map(c=>[c.title,c.id,c.fingerprint,c.source,c.gated?'igen':'nem','','']),{minRow:9});
  h2('4. rész – ábránkénti döntés',60);
  para(DIAGRAM_DECISION_NOTE,{size:9,gap:2});
- table([{title:'Ábra',w:38},{title:'Blokk',w:40},{title:'Netlista',w:20},{title:'Ábra-ujjl.',w:20},{title:'Jóváhagyom',w:20,box:true},{title:'Javítással',w:20,box:true},{title:'Elutasítom',w:20,box:true}],pkg.diagrams.map(d=>[d.title,d.block,d.netlistFp,d.diagramFp,'','','']),{minRow:9,size:8});
- h2('4. rész – második olvasó',40);
+ table([{title:'Ábra',w:36},{title:'Blokk',w:42},{title:'Netlista',w:18},{title:'Ábra-ujjl.',w:18},{title:'Jóváhagyom',w:22,box:true},{title:'Javítással',w:20,box:true},{title:'Elutasítom',w:20,box:true}],pkg.diagrams.map(d=>[d.title,d.block,d.netlistFp,d.diagramFp,'','','']),{minRow:9,size:8});
+ h2('5. rész – cikkenkénti döntés',60);
+ para(ARTICLE_DECISION_NOTE,{size:9,gap:2});
+ table([{title:'Cikk',w:34},{title:'Blokk',w:52},{title:'Tartalmi ujjl.',w:17},{title:'Kiadáshoz hiányzik',w:18},{title:'Jóváhagyom',w:21,box:true},{title:'Javítással',w:19,box:true},{title:'Elutasítom',w:19,box:true}],pkg.articles.map(a=>[a.title,a.block,a.fingerprint,a.blocked?'igen – lásd az 5. részt':'–','','','']),{minRow:9,size:8});
+ h2('4–5. rész – második olvasó',40);
  para(SECOND_READER,{size:9,gap:2});
  SECOND_FIELDS.forEach(f=>fieldRow(f,{height:f==='Aláírás'?15:9}));
  h2('Teendő eltérés esetén',40);
@@ -1693,7 +1898,7 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
  newPage();
  const signPage=pages;
  h2('Jóváhagyó lap – döntés és aláírás',0);
- table([{title:'A jóváhagyott csomag',w:55},{title:'Érték (előre kitöltve)',w:123}],metaRows(pkg).slice(0,7),{size:8.5});
+ table([{title:'A jóváhagyott csomag',w:55},{title:'Érték (előre kitöltve)',w:123}],signRows(pkg),{size:8.5});
  DECISIONS.forEach(d=>checkLine(d));
  y+=1;para(declaration(pagesIn),{size:9,gap:2});
  para(FIELD_HINT,{size:8.5,color:C.muted,gap:0});
@@ -1710,23 +1915,23 @@ function drawPdf(pkg:Package,font:string,tocIn:Toc,pagesIn:number):{doc:jsPDF;to
   write('Szignó:',122,H-9,7.5,C.muted);dashed(132,166,H-8.6);
   write(i+' / '+n+'. oldal',W-M,H-9,8,C.text,'right');
  }
- return {doc,toc,texts,breaks};
+ return {doc,toc,texts,breaks,info};
 }
 /** Több menetben rajzol, amíg a tartalomjegyzék oldalszámai és a nyilatkozat oldalszáma állandó. */
-export function renderPdf(pkg:Package,font:string):{doc:jsPDF;pages:number;texts:string[]}{
+export function renderPdf(pkg:Package,font:string,faults:PdfFaults={}):{doc:jsPDF;pages:number;texts:string[];info:PdfInfo}{
  let toc:Toc={},pages=99;
  for(let pass=0;pass<5;pass++){
-  const r=drawPdf(pkg,font,toc,pages),n=r.doc.getNumberOfPages();
+  const r=drawPdf(pkg,font,toc,pages,faults),n=r.doc.getNumberOfPages();
   if(r.breaks.length)throw Error('A PDF-ben szó közben törik a szöveg (szélesebb oszlop vagy rövidebb szó kell): '+[...new Set(r.breaks)].join('; '));
-  if(n===pages&&JSON.stringify(r.toc)===JSON.stringify(toc))return {doc:r.doc,pages:n,texts:r.texts};
+  if(n===pages&&JSON.stringify(r.toc)===JSON.stringify(toc))return {doc:r.doc,pages:n,texts:r.texts,info:r.info};
   toc=r.toc;pages=n;
  }
  throw Error('A PDF oldalszáma nem állandósult.');
 }
-export function render(pkg:Package,font:string){
- const {doc,pages,texts}=renderPdf(pkg,font),md=renderMarkdown(pkg,pages);
+export function render(pkg:Package,font:string,faults:PdfFaults={}){
+ const {doc,pages,texts,info}=renderPdf(pkg,font,faults),md=renderMarkdown(pkg,pages);
  if(/[Ѐ-ӿ]/u.test(md))throw Error('A csomag szövege cirill betűt tartalmaz; ezek a PDF-ben a hiányzó jelek helyőrzői.');
- return {md,pdf:Buffer.from(doc.output('arraybuffer')),pages,texts};
+ return {md,pdf:Buffer.from(doc.output('arraybuffer')),pages,texts,info};
 }
 export const readFont=()=>readFileSync(PATHS.font).toString('base64');
 
@@ -1774,12 +1979,16 @@ const HEX8=/^[0-9a-f]{8}$/,PAIR=/^[0-9a-f]{8}\/[0-9a-f]{8}$/;
 export const calcPairs=(pkg:Package):Record<string,string>=>Object.fromEntries(pkg.calcs.map(c=>[c.slug,c.fingerprint+'/'+c.source]));
 /** A csomag ábránkénti ujjlenyomat-párjai („netlista/ábra”) a 4. rész sorrendjében (netlista-id szerint). */
 export const diagramPairs=(pkg:Package):Record<string,string>=>Object.fromEntries(pkg.diagrams.map(d=>[d.id,d.netlistFp+'/'+d.diagramFp]));
-/** Az LK-4-től a nem tervezet kiadás az ábránkénti ujjlenyomat-párokat is rögzíti. */
+/** A csomag cikkenkénti tartalmi ujjlenyomatai (cikk-azonosító → ujjlenyomat) az 5. rész sorrendjében. */
+export const articlePairs=(pkg:Package):Record<string,string>=>Object.fromEntries(pkg.articles.map(a=>[a.slug,a.fingerprint]));
+/** Az LK-4-től a nem tervezet kiadás az ábránkénti ujjlenyomat-párokat és a cikkenkénti tartalmi ujjlenyomatot is rögzíti. */
 export const DIAGRAMS_FROM=4;
+export const ARTICLES_FROM=4;
 /** Az aktuális kiadás bejegyzése a megadott sorszámmal és dátummal (a generátor hibaüzenete ezt kéri bemásolni). */
 export function editionEntry(pkg:Package,number:number,date:string):string{
  return `{number:${number},date:'${date}',content:'${pkg.fingerprints.content}',tables:'${pkg.fingerprints.tables}',formulas:'${pkg.fingerprints.formulas}',calcs:{${Object.entries(calcPairs(pkg)).map(([k,v])=>`'${k}':'${v}'`).join(',')}}`+
-  (number>=DIAGRAMS_FROM?`,diagrams:{${Object.entries(diagramPairs(pkg)).map(([k,v])=>`'${k}':'${v}'`).join(',')}}`:'')+'}';
+  (number>=DIAGRAMS_FROM?`,diagrams:{${Object.entries(diagramPairs(pkg)).map(([k,v])=>`'${k}':'${v}'`).join(',')}}`:'')+
+  (number>=ARTICLES_FROM?`,articles:{${Object.entries(articlePairs(pkg)).map(([k,v])=>`'${k}':'${v}'`).join(',')}}`:'')+'}';
 }
 /**
  * A kiadások (EDITIONS) és a tartalom összhangja. `committed`: a git HEAD-ben rögzített kiadások (committedEditions); a korábbi és a
@@ -1799,10 +2008,11 @@ export function editionProblems(pkg:Package,committed:CommittedEdition[]|null=co
    const calcs=e.calcs??{};
    if(Object.keys(calcs).join()!==T1_ORDER.join()||!Object.values(calcs).every(v=>PAIR.test(v)))problems.push(`EDITIONS: LK-${e.number}: a nem tervezet kiadásnál kötelező a kalkulátoronkénti ujjlenyomat-pár (calcs: {slug: 'tartalmi/forrás'}, a T1_ORDER sorrendjében).`);
    if(e.number>=DIAGRAMS_FROM&&(!e.diagrams||!Object.keys(e.diagrams).length||!Object.values(e.diagrams).every(v=>PAIR.test(v))))problems.push(`EDITIONS: LK-${e.number}: az LK-${DIAGRAMS_FROM}-től a nem tervezet kiadásnál kötelező az ábránkénti ujjlenyomat-pár (diagrams: {netlista-id: 'netlista/ábra'}).`);
+   if(e.number>=ARTICLES_FROM&&(!e.articles||!Object.keys(e.articles).length||!Object.values(e.articles).every(v=>HEX8.test(v))))problems.push(`EDITIONS: LK-${e.number}: az LK-${ARTICLES_FROM}-től a nem tervezet kiadásnál kötelező a cikkenkénti tartalmi ujjlenyomat (articles: {cikk-azonosító: 'ujjlenyomat'}).`);
   }
  });
  const now=editionEntry(pkg,last.number,last.date),fresh=editionEntry(pkg,last.number+1,'<mai dátum>');
- const stale=last.content!==pkg.fingerprints.content||(!last.draft&&(last.tables!==pkg.fingerprints.tables||last.formulas!==pkg.fingerprints.formulas||JSON.stringify(last.calcs??{})!==JSON.stringify(calcPairs(pkg))||(last.number>=DIAGRAMS_FROM&&JSON.stringify(last.diagrams??{})!==JSON.stringify(diagramPairs(pkg)))));
+ const stale=last.content!==pkg.fingerprints.content||(!last.draft&&(last.tables!==pkg.fingerprints.tables||last.formulas!==pkg.fingerprints.formulas||JSON.stringify(last.calcs??{})!==JSON.stringify(calcPairs(pkg))||(last.number>=DIAGRAMS_FROM&&JSON.stringify(last.diagrams??{})!==JSON.stringify(diagramPairs(pkg)))||(last.number>=ARTICLES_FROM&&JSON.stringify(last.articles??{})!==JSON.stringify(articlePairs(pkg)))));
  if(stale)problems.push(`A csomag tartalma vagy ujjlenyomatai eltérnek az LK-${last.number} kiadás bejegyzésétől (rögzített csomag-ujjlenyomat: ${last.content}, jelenlegi: ${pkg.fingerprints.content}). `+(last.sent!==undefined
   ?`Az LK-${last.number} már kiment a lektorhoz (sent: ${last.sent}): vegyél fel új bejegyzést az EDITIONS végére: ${fresh} (scripts/lektori-csomag.ts), majd futtasd újra a generátort.`
   :`Ha az LK-${last.number} még nem ment ki a lektorhoz, írd át a bejegyzését erre: ${now}; ha már kiment, jelöld kiküldöttnek (sent) és vegyél fel új bejegyzést: ${fresh} (scripts/lektori-csomag.ts). Utána futtasd újra a generátort.`));
@@ -1865,6 +2075,28 @@ export function diagramRefProblems(records:Readonly<Record<string,KbRelease>>,di
  }
  return problems;
 }
+/**
+ * A Tudástár MINDEN R3 lektori rekordja (a netlista nélküli cikkeké is) és a csomagkiadások összhangja – a cikk SZÖVEGE jóváhagyásának kötése:
+ *  - a rekord teljes (jogosultság, dátum, jóváhagyási hivatkozás, második olvasó – r3RecordGaps), különben a kapu sem enged;
+ *  - az `approvalRef` pontosan egy kiküldött, nem tervezet kiadást nevez meg annak csomag-ujjlenyomatával (refEdition);
+ *  - abban a kiadásban a cikk tartalmi ujjlenyomata (`articles[cikk]`) azonos a rekord `fingerprint`-jével – a lektor ezt a szöveget hagyta
+ *    jóvá –, és a hivatkozás a tartalmi ujjlenyomatot is tartalmazza;
+ *  - a cikk szerepel a csomag 5. részében (`pkgArticles`).
+ * Üres lista: rendben (rekord nélkül nincs mit ellenőrizni).
+ */
+export function articleRefProblems(records:Readonly<Record<string,KbRelease>>,pkgArticles:Readonly<Record<string,string>>,editions:readonly Edition[]=EDITIONS):string[]{
+ const problems:string[]=[];
+ for(const [id,rec] of Object.entries(records)){
+  if(rec.risk!=='R3')continue;
+  const gaps=r3RecordGaps(rec);if(gaps.length)problems.push(`${id}: a lektori rekord hiányos (kötelező: ${gaps.join(', ')})`);
+  if(rec.kind!=='lektoralt')continue;
+  if(!(id in pkgArticles)){problems.push(`${id}: a cikk nincs a csomag 5. részében, szövegének jóváhagyása nem igazolható`);continue}
+  const {edition:e,problems:p}=refEdition(id,rec.approvalRef??'',editions);problems.push(...p);if(!e)continue;
+  if(e.articles?.[id]!==rec.fingerprint)problems.push(`${id}: az LK-${e.number} kiadásban a cikk tartalmi ujjlenyomata ${e.articles?.[id]??'nincs'}, a rekordé ${rec.fingerprint} – a lektor nem ezt a szöveget hagyta jóvá`);
+  else if(!(rec.approvalRef??'').includes(rec.fingerprint))problems.push(`${id}: az approvalRef-ben szerepeljen a cikk tartalmi ujjlenyomata (${rec.fingerprint})`);
+ }
+ return problems;
+}
 /** A cikkek ábrái (cikk-id → netlista-id-k) a netlisták `article` mezőjéből, a 4. rész sorrendjében. */
 export const articleDiagrams=(pkg:Package):Record<string,string[]>=>{const out:Record<string,string[]>={};for(const d of pkg.diagrams)(out[d.article]??=[]).push(d.id);return out};
 /**
@@ -1884,8 +2116,9 @@ export function reviewRefProblems(review:SizingReview,formulas:string,editions:r
 export const eol=(s:string)=>s.replace(/\r\n/g,'\n');
 /** A generált fájlok naprakészsége. Üres lista: minden rendben. A Markdown-összevetés a sorvégektől független. */
 export function checkOutputs(pkg:Package=buildPackage(),font:string=readFont()):string[]{
- const problems=[...editionProblems(pkg),...packageProblems(pkg,reviewedContent()),...diagramRefProblems(KB_RELEASES,articleDiagrams(pkg),diagramPairs(pkg))];
+ const problems=[...editionProblems(pkg),...packageProblems(pkg,reviewedContent()),...diagramRefProblems(KB_RELEASES,articleDiagrams(pkg),diagramPairs(pkg)),...articleRefProblems(KB_RELEASES,articlePairs(pkg))];
  const out=render(pkg,font);
+ problems.push(...pdfProblems(pkg,out.info,out.texts));
  if(!existsSync(PATHS.md)||eol(readFileSync(PATHS.md,'utf8'))!==out.md)problems.push(PATHS.md+' elavult vagy hiányzik.');
  if(!existsSync(PATHS.pdf)||!readFileSync(PATHS.pdf).equals(out.pdf))problems.push(PATHS.pdf+' elavult vagy hiányzik.');
  return problems;
@@ -1897,14 +2130,16 @@ function main(){
  if(check){
   const problems=checkOutputs(pkg,font);
   if(problems.length){console.error('A lektori csomag nem naprakész:\n- '+problems.join('\n- ')+'\nJavítás: node --import tsx scripts/lektori-csomag.ts');process.exit(1)}
-  console.log(`A lektori csomag naprakész: ${editionLabel()}, csomag-ujjlenyomat ${pkg.fingerprints.content}, táblázat-ujjlenyomat ${pkg.fingerprints.tables}, képlet-ujjlenyomat ${pkg.fingerprints.formulas}, kalkulátor-ujjlenyomat (3. rész) ${pkg.fingerprints.calculators}, ábra-ujjlenyomat (4. rész) ${pkg.fingerprints.diagrams}.`);
+  console.log(`A lektori csomag naprakész: ${editionLabel()}, csomag-ujjlenyomat ${pkg.fingerprints.content}, táblázat-ujjlenyomat ${pkg.fingerprints.tables}, képlet-ujjlenyomat ${pkg.fingerprints.formulas}, kalkulátor-ujjlenyomat (3. rész) ${pkg.fingerprints.calculators}, ábra-ujjlenyomat (4. rész) ${pkg.fingerprints.diagrams}, cikk-ujjlenyomat (5. rész) ${pkg.fingerprints.articles}.`);
   return;
  }
- const problems=[...editionProblems(pkg),...packageProblems(pkg,reviewedContent()),...diagramRefProblems(KB_RELEASES,articleDiagrams(pkg),diagramPairs(pkg))];
+ const problems=[...editionProblems(pkg),...packageProblems(pkg,reviewedContent()),...diagramRefProblems(KB_RELEASES,articleDiagrams(pkg),diagramPairs(pkg)),...articleRefProblems(KB_RELEASES,articlePairs(pkg))];
  if(problems.length){console.error('A lektori csomag nem generálható:\n- '+problems.join('\n- '));process.exit(1)}
  const out=render(pkg,font);
+ const pdfBad=pdfProblems(pkg,out.info,out.texts);
+ if(pdfBad.length){console.error('A lektori csomag PDF-je hibás:\n- '+pdfBad.join('\n- '));process.exit(1)}
  writeFileSync(PATHS.md,out.md);writeFileSync(PATHS.pdf,out.pdf);
- console.log(`Kész: ${PATHS.md}, ${PATHS.pdf} (${out.pages} oldal). ${editionLabel()}; csomag ${pkg.fingerprints.content}, 1. rész ${pkg.fingerprints.tables}, 2. rész ${pkg.fingerprints.formulas}, 3. rész ${pkg.fingerprints.calculators}, 4. rész ${pkg.fingerprints.diagrams}.`);
+ console.log(`Kész: ${PATHS.md}, ${PATHS.pdf} (${out.pages} oldal). ${editionLabel()}; csomag ${pkg.fingerprints.content}, 1. rész ${pkg.fingerprints.tables}, 2. rész ${pkg.fingerprints.formulas}, 3. rész ${pkg.fingerprints.calculators}, 4. rész ${pkg.fingerprints.diagrams}, 5. rész ${pkg.fingerprints.articles}.`);
 }
 if((process.argv[1]??'').replace(/\\/g,'/').endsWith('scripts/lektori-csomag.ts')){
  if(!existsSync(PATHS.font)){console.error('Futtasd a repó gyökeréből: node --import tsx scripts/lektori-csomag.ts');process.exit(1)}

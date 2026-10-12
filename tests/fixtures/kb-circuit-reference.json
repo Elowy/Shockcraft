@@ -1767,7 +1767,7 @@
 "file": "egyenpotencialra-hozas-eph.netlist.json",
 "report": {
 "id": "eph-alapok",
-"fingerprint": "d0990558",
+"fingerprint": "d8926fe6",
 "system": "TN-C-S",
 "selectors": [
 {
@@ -2134,14 +2134,14 @@
 {
 "no": 5,
 "fromLabel": "PSZ PEN-szétválasztási pont (PE-sín és N-sín, összekötő híddal): PE-sín",
-"toLabel": "Fő EPH-sín (főföldelő sín): gyűjtőkapocs",
+"toLabel": "Fő EPH-sín (főföldelő sín): fő védővezető (érkező)",
 "conductor": "PE (fő védővezető)",
 "color": "zöld-sárga",
 "section": "elosztón belül"
 },
 {
 "no": 6,
-"fromLabel": "Fő EPH-sín (főföldelő sín): gyűjtőkapocs",
+"fromLabel": "Fő EPH-sín (főföldelő sín): földelővezető az RA-hoz",
 "toLabel": "RA alapföldelő: földelőkapocs",
 "conductor": "földelővezető",
 "color": "zöld-sárga",
@@ -2149,7 +2149,7 @@
 },
 {
 "no": 7,
-"fromLabel": "Fő EPH-sín (főföldelő sín): gyűjtőkapocs",
+"fromLabel": "Fő EPH-sín (főföldelő sín): EPH-vezető a vízvezetékhez",
 "toLabel": "VIZ fém vízvezeték (idegen vezetőképes rész): csőbilincs (EPH-kötés)",
 "conductor": "EPH-vezető",
 "color": "zöld-sárga",
@@ -2181,7 +2181,7 @@
 },
 {
 "no": 11,
-"fromLabel": "Fő EPH-sín (főföldelő sín): gyűjtőkapocs",
+"fromLabel": "Fő EPH-sín (főföldelő sín): védővezető a fogyasztóhoz",
 "toLabel": "M1 fémházas mosógép (I. érintésvédelmi osztály): fémház (PE)",
 "conductor": "PE",
 "color": "zöld-sárga",
@@ -2197,7 +2197,7 @@
 "EPH1": "bekötve",
 "SZ": "ép"
 },
-"nets": "5816c7b8",
+"nets": "b0107f2c",
 "count": 5,
 "live": [
 "F1.1",
@@ -2213,7 +2213,7 @@
 "EPH1": "bekötve",
 "SZ": "szakadt"
 },
-"nets": "7b22505e",
+"nets": "cad2acea",
 "count": 6,
 "live": [
 "F1.1",
@@ -2229,7 +2229,7 @@
 "EPH1": "hiányzik",
 "SZ": "ép"
 },
-"nets": "6cada89e",
+"nets": "d3524a4a",
 "count": 6,
 "live": [
 "F1.1",
@@ -2245,7 +2245,7 @@
 "EPH1": "hiányzik",
 "SZ": "szakadt"
 },
-"nets": "1dd43930",
+"nets": "13abef54",
 "count": 7,
 "live": [
 "F1.1",
@@ -2261,7 +2261,7 @@
 "EPH1": "bekötve",
 "SZ": "ép"
 },
-"nets": "5816c7b8",
+"nets": "b0107f2c",
 "count": 5,
 "live": [
 "F1.1",
@@ -2277,7 +2277,7 @@
 "EPH1": "bekötve",
 "SZ": "szakadt"
 },
-"nets": "7b22505e",
+"nets": "cad2acea",
 "count": 6,
 "live": [
 "F1.1",
@@ -2293,7 +2293,7 @@
 "EPH1": "hiányzik",
 "SZ": "ép"
 },
-"nets": "6cada89e",
+"nets": "d3524a4a",
 "count": 6,
 "live": [
 "F1.1",
@@ -2309,7 +2309,7 @@
 "EPH1": "hiányzik",
 "SZ": "szakadt"
 },
-"nets": "1dd43930",
+"nets": "13abef54",
 "count": 7,
 "live": [
 "F1.1",
@@ -2502,7 +2502,7 @@
 "file": "foldelesi-rendszerek-it.netlist.json",
 "report": {
 "id": "foldeles-it",
-"fingerprint": "60981084",
+"fingerprint": "3723d185",
 "system": "IT",
 "selectors": [
 {
@@ -2529,7 +2529,7 @@
 },
 {
 "id": "H2",
-"label": "H2 testzárlat M2-ben (L2 → fémház)",
+"label": "H2 testzárlat M2-ben (L3 → fémház)",
 "states": [
 "nincs",
 "fennáll"
@@ -2855,12 +2855,12 @@
 "H1": "nincs",
 "H2": "nincs"
 },
-"nets": "864d33fd",
+"nets": "6fdd1111",
 "count": 6,
 "live": [
 "H1.a",
 "H2.a",
-"M1.L3"
+"M1.L2"
 ]
 },
 {
@@ -2870,12 +2870,12 @@
 "H1": "nincs",
 "H2": "fennáll"
 },
-"nets": "864d33fd",
+"nets": "6fdd1111",
 "count": 6,
 "live": [
 "H1.a",
 "H2.a",
-"M1.L3"
+"M1.L2"
 ]
 },
 {
@@ -2885,12 +2885,12 @@
 "H1": "fennáll",
 "H2": "nincs"
 },
-"nets": "864d33fd",
+"nets": "6fdd1111",
 "count": 6,
 "live": [
 "H1.a",
 "H2.a",
-"M1.L3"
+"M1.L2"
 ]
 },
 {
@@ -2900,12 +2900,12 @@
 "H1": "fennáll",
 "H2": "fennáll"
 },
-"nets": "864d33fd",
+"nets": "6fdd1111",
 "count": 6,
 "live": [
 "H1.a",
 "H2.a",
-"M1.L3"
+"M1.L2"
 ]
 }
 ]
@@ -24183,7 +24183,7 @@
 "codes": [
 "E6"
 ],
-"errors": "ee3ea519",
+"errors": "75e49c5d",
 "rows": "b3e73f84",
 "combinations": 8
 },
@@ -24204,7 +24204,45 @@
 "codes": [
 "E6"
 ],
-"errors": "b4cc15f7",
+"errors": "91bafd43",
+"rows": "b3e73f84",
+"combinations": 8
+},
+{
+"file": "egyenpotencialra-hozas-eph.netlist.json",
+"ops": [
+{
+"op": "set",
+"path": [
+"wires",
+4,
+"to"
+],
+"value": "MET.EPH"
+}
+],
+"pass": true,
+"codes": [],
+"errors": "741638a5",
+"rows": "b3e73f84",
+"combinations": 8
+},
+{
+"file": "egyenpotencialra-hozas-eph.netlist.json",
+"ops": [
+{
+"op": "set",
+"path": [
+"wires",
+4,
+"to"
+],
+"value": "MET.PE-ki"
+}
+],
+"pass": true,
+"codes": [],
+"errors": "741638a5",
 "rows": "b3e73f84",
 "combinations": 8
 },
@@ -24262,6 +24300,44 @@
 "file": "egyenpotencialra-hozas-eph.netlist.json",
 "ops": [
 {
+"op": "set",
+"path": [
+"wires",
+5,
+"from"
+],
+"value": "MET.EPH"
+}
+],
+"pass": true,
+"codes": [],
+"errors": "741638a5",
+"rows": "b3e73f84",
+"combinations": 8
+},
+{
+"file": "egyenpotencialra-hozas-eph.netlist.json",
+"ops": [
+{
+"op": "set",
+"path": [
+"wires",
+5,
+"from"
+],
+"value": "MET.PE-be"
+}
+],
+"pass": true,
+"codes": [],
+"errors": "741638a5",
+"rows": "b3e73f84",
+"combinations": 8
+},
+{
+"file": "egyenpotencialra-hozas-eph.netlist.json",
+"ops": [
+{
 "op": "del",
 "path": [
 "wires",
@@ -24299,6 +24375,44 @@
 "E6"
 ],
 "errors": "e4064a37",
+"rows": "b3e73f84",
+"combinations": 8
+},
+{
+"file": "egyenpotencialra-hozas-eph.netlist.json",
+"ops": [
+{
+"op": "set",
+"path": [
+"wires",
+6,
+"from"
+],
+"value": "MET.PE-be"
+}
+],
+"pass": true,
+"codes": [],
+"errors": "741638a5",
+"rows": "b3e73f84",
+"combinations": 8
+},
+{
+"file": "egyenpotencialra-hozas-eph.netlist.json",
+"ops": [
+{
+"op": "set",
+"path": [
+"wires",
+6,
+"from"
+],
+"value": "MET.PE-ki"
+}
+],
+"pass": true,
+"codes": [],
+"errors": "741638a5",
 "rows": "b3e73f84",
 "combinations": 8
 },
@@ -24993,6 +25107,44 @@
 "path": [
 "wires",
 10,
+"from"
+],
+"value": "MET.EPH"
+}
+],
+"pass": true,
+"codes": [],
+"errors": "741638a5",
+"rows": "b3e73f84",
+"combinations": 8
+},
+{
+"file": "egyenpotencialra-hozas-eph.netlist.json",
+"ops": [
+{
+"op": "set",
+"path": [
+"wires",
+10,
+"from"
+],
+"value": "MET.PE-be"
+}
+],
+"pass": true,
+"codes": [],
+"errors": "741638a5",
+"rows": "b3e73f84",
+"combinations": 8
+},
+{
+"file": "egyenpotencialra-hozas-eph.netlist.json",
+"ops": [
+{
+"op": "set",
+"path": [
+"wires",
+10,
 "to"
 ],
 "value": "M1.L"
@@ -25050,7 +25202,7 @@
 "I10",
 "I10"
 ],
-"errors": "8f8c01b3",
+"errors": "d67e2da8",
 "rows": "7001cfdc",
 "combinations": 8
 },
@@ -25092,7 +25244,7 @@
 "I10",
 "I10"
 ],
-"errors": "5ff40e8b",
+"errors": "f111cad0",
 "rows": "766e942d",
 "combinations": 8
 },
@@ -25263,294 +25415,6 @@
 ],
 "errors": "2ceaf542",
 "rows": "968539ed",
-"combinations": 8
-},
-{
-"file": "egyenpotencialra-hozas-eph.netlist.json",
-"ops": [
-{
-"op": "set",
-"path": [
-"wires",
-11,
-"to"
-],
-"value": "M1.PE"
-}
-],
-"pass": false,
-"codes": [
-"E4",
-"E4",
-"E4",
-"E4",
-"E4",
-"E4",
-"E4",
-"E4",
-"E6",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10"
-],
-"errors": "e11a4ccf",
-"rows": "968539ed",
-"combinations": 8
-},
-{
-"file": "egyenpotencialra-hozas-eph.netlist.json",
-"ops": [
-{
-"op": "del",
-"path": [
-"wires",
-11
-]
-}
-],
-"pass": false,
-"codes": [
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10"
-],
-"errors": "286566f8",
-"rows": "968539ed",
-"combinations": 8
-},
-{
-"file": "egyenpotencialra-hozas-eph.netlist.json",
-"ops": [
-{
-"op": "set",
-"path": [
-"wires",
-12,
-"from"
-],
-"value": "H1.a"
-}
-],
-"pass": false,
-"codes": [
-"E4",
-"E4",
-"E4",
-"E4",
-"E4",
-"E4",
-"E4",
-"E4",
-"E4",
-"E4",
-"E4",
-"E4",
-"E5",
-"E6",
-"E7",
-"E7",
-"E7",
-"E7",
-"E7",
-"E7",
-"E7",
-"E7",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10"
-],
-"errors": "f9eb4b5d",
-"rows": "2c288ec9",
-"combinations": 8
-},
-{
-"file": "egyenpotencialra-hozas-eph.netlist.json",
-"ops": [
-{
-"op": "set",
-"path": [
-"wires",
-12,
-"to"
-],
-"value": "M1.L"
-}
-],
-"pass": false,
-"codes": [
-"E4",
-"E4",
-"E4",
-"E4",
-"E4",
-"E4",
-"E4",
-"E4",
-"E6",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10"
-],
-"errors": "96443048",
-"rows": "968539ed",
-"combinations": 8
-},
-{
-"file": "egyenpotencialra-hozas-eph.netlist.json",
-"ops": [
-{
-"op": "set",
-"path": [
-"wires",
-12,
-"to"
-],
-"value": "M1.N"
-}
-],
-"pass": false,
-"codes": [
-"E6",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10"
-],
-"errors": "1c626d83",
-"rows": "fda9c750",
-"combinations": 8
-},
-{
-"file": "egyenpotencialra-hozas-eph.netlist.json",
-"ops": [
-{
-"op": "del",
-"path": [
-"wires",
-12
-]
-}
-],
-"pass": false,
-"codes": [
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10",
-"I10"
-],
-"errors": "286566f8",
-"rows": "968539ed",
-"combinations": 8
-},
-{
-"file": "egyenpotencialra-hozas-eph.netlist.json",
-"ops": [
-{
-"op": "set",
-"path": [
-"components",
-0,
-"terminals",
-0,
-"role"
-],
-"value": "L2"
-}
-],
-"pass": true,
-"codes": [],
-"errors": "741638a5",
-"rows": "b3e73f84",
-"combinations": 8
-},
-{
-"file": "egyenpotencialra-hozas-eph.netlist.json",
-"ops": [
-{
-"op": "set",
-"path": [
-"components",
-0,
-"terminals",
-1,
-"role"
-],
-"value": "L1"
-}
-],
-"pass": true,
-"codes": [],
-"errors": "741638a5",
-"rows": "b3e73f84",
 "combinations": 8
 },
 {
@@ -27249,13 +27113,10 @@
 "I10",
 "I10",
 "I10",
-"I10",
-"I10",
-"I10",
 "I10"
 ],
-"errors": "760e1923",
-"rows": "0a81d2b4",
+"errors": "106096e8",
+"rows": "8887c195",
 "combinations": 4
 },
 {
@@ -27366,13 +27227,10 @@
 "I10",
 "I10",
 "I10",
-"I10",
-"I10",
-"I10",
 "I10"
 ],
-"errors": "cd7964de",
-"rows": "f8c64316",
+"errors": "32587c2d",
+"rows": "e674bdaf",
 "combinations": 4
 },
 {
@@ -27458,10 +27316,13 @@
 "I10",
 "I10",
 "I10",
+"I10",
+"I10",
+"I10",
 "I10"
 ],
-"errors": "2ed406f5",
-"rows": "e674bdaf",
+"errors": "0087fe36",
+"rows": "f8c64316",
 "combinations": 4
 },
 {
@@ -27589,13 +27450,10 @@
 "I10",
 "I10",
 "I10",
-"I10",
-"I10",
-"I10",
 "I10"
 ],
-"errors": "d9340cd0",
-"rows": "18ef91b4",
+"errors": "d44ed8e5",
+"rows": "96393895",
 "combinations": 4
 },
 {
@@ -27625,14 +27483,10 @@
 "I10",
 "I10",
 "I10",
-"I10",
-"I10",
-"I10",
-"I10",
 "I10"
 ],
-"errors": "71003584",
-"rows": "4ffaa244",
+"errors": "32587c2d",
+"rows": "e674bdaf",
 "combinations": 4
 },
 {
@@ -27656,14 +27510,10 @@
 "I10",
 "I10",
 "I10",
-"I10",
-"I10",
-"I10",
-"I10",
 "I10"
 ],
-"errors": "7254f320",
-"rows": "08ede776",
+"errors": "d44ed8e5",
+"rows": "96393895",
 "combinations": 4
 },
 {
@@ -27689,10 +27539,13 @@
 "I10",
 "I10",
 "I10",
+"I10",
+"I10",
+"I10",
 "I10"
 ],
-"errors": "d44ed8e5",
-"rows": "96393895",
+"errors": "d9340cd0",
+"rows": "18ef91b4",
 "combinations": 4
 },
 {
@@ -27722,10 +27575,14 @@
 "I10",
 "I10",
 "I10",
+"I10",
+"I10",
+"I10",
+"I10",
 "I10"
 ],
-"errors": "2ed406f5",
-"rows": "e674bdaf",
+"errors": "e71d358c",
+"rows": "4ffaa244",
 "combinations": 4
 },
 {
@@ -27749,10 +27606,14 @@
 "I10",
 "I10",
 "I10",
+"I10",
+"I10",
+"I10",
+"I10",
 "I10"
 ],
-"errors": "d44ed8e5",
-"rows": "96393895",
+"errors": "7254f320",
+"rows": "08ede776",
 "combinations": 4
 },
 {
@@ -27900,13 +27761,10 @@
 "I10",
 "I10",
 "I10",
-"I10",
-"I10",
-"I10",
 "I10"
 ],
-"errors": "cd7964de",
-"rows": "f8c64316",
+"errors": "32587c2d",
+"rows": "e674bdaf",
 "combinations": 4
 },
 {
@@ -27992,10 +27850,13 @@
 "I10",
 "I10",
 "I10",
+"I10",
+"I10",
+"I10",
 "I10"
 ],
-"errors": "2ed406f5",
-"rows": "e674bdaf",
+"errors": "0087fe36",
+"rows": "f8c64316",
 "combinations": 4
 },
 {
@@ -28123,13 +27984,10 @@
 "I10",
 "I10",
 "I10",
-"I10",
-"I10",
-"I10",
 "I10"
 ],
-"errors": "cd7964de",
-"rows": "f8c64316",
+"errors": "32587c2d",
+"rows": "e674bdaf",
 "combinations": 4
 },
 {
@@ -28182,13 +28040,10 @@
 "I10",
 "I10",
 "I10",
-"I10",
-"I10",
-"I10",
 "I10"
 ],
-"errors": "d9340cd0",
-"rows": "18ef91b4",
+"errors": "d44ed8e5",
+"rows": "96393895",
 "combinations": 4
 },
 {
@@ -28218,14 +28073,10 @@
 "I10",
 "I10",
 "I10",
-"I10",
-"I10",
-"I10",
-"I10",
 "I10"
 ],
-"errors": "71003584",
-"rows": "4ffaa244",
+"errors": "32587c2d",
+"rows": "e674bdaf",
 "combinations": 4
 },
 {
@@ -28249,14 +28100,10 @@
 "I10",
 "I10",
 "I10",
-"I10",
-"I10",
-"I10",
-"I10",
 "I10"
 ],
-"errors": "7254f320",
-"rows": "08ede776",
+"errors": "d44ed8e5",
+"rows": "96393895",
 "combinations": 4
 },
 {
@@ -28282,10 +28129,13 @@
 "I10",
 "I10",
 "I10",
+"I10",
+"I10",
+"I10",
 "I10"
 ],
-"errors": "d44ed8e5",
-"rows": "96393895",
+"errors": "d9340cd0",
+"rows": "18ef91b4",
 "combinations": 4
 },
 {
@@ -28315,10 +28165,14 @@
 "I10",
 "I10",
 "I10",
+"I10",
+"I10",
+"I10",
+"I10",
 "I10"
 ],
-"errors": "2ed406f5",
-"rows": "e674bdaf",
+"errors": "e71d358c",
+"rows": "4ffaa244",
 "combinations": 4
 },
 {
@@ -28342,10 +28196,14 @@
 "I10",
 "I10",
 "I10",
+"I10",
+"I10",
+"I10",
+"I10",
 "I10"
 ],
-"errors": "d44ed8e5",
-"rows": "96393895",
+"errors": "7254f320",
+"rows": "08ede776",
 "combinations": 4
 },
 {
@@ -28444,10 +28302,14 @@
 "value": "M1.L3"
 }
 ],
-"pass": true,
-"codes": [],
-"errors": "741638a5",
-"rows": "b9c9bfe5",
+"pass": false,
+"codes": [
+"I10",
+"I10",
+"I10"
+],
+"errors": "5a65db96",
+"rows": "a9fb3193",
 "combinations": 4
 },
 {
@@ -28539,7 +28401,7 @@
 "I10",
 "I10"
 ],
-"errors": "c94acfb7",
+"errors": "d9bc3646",
 "rows": "a23e0d08",
 "combinations": 4
 },
@@ -28553,7 +28415,7 @@
 19,
 "to"
 ],
-"value": "M2.L3"
+"value": "M2.L2"
 }
 ],
 "pass": true,
@@ -28615,10 +28477,12 @@
 "I10",
 "I10",
 "I10",
+"I10",
+"I10",
 "I10"
 ],
-"errors": "6ce31b7c",
-"rows": "9308221d",
+"errors": "d3dccd44",
+"rows": "b92aa551",
 "combinations": 4
 },
 {
@@ -28646,13 +28510,10 @@
 "I10",
 "I10",
 "I10",
-"I10",
-"I10",
-"I10",
 "I10"
 ],
-"errors": "f2d4bc4c",
-"rows": "f8c64316",
+"errors": "b884832b",
+"rows": "e674bdaf",
 "combinations": 4
 },
 {
@@ -28680,10 +28541,13 @@
 "I10",
 "I10",
 "I10",
+"I10",
+"I10",
+"I10",
 "I10"
 ],
-"errors": "b884832b",
-"rows": "e674bdaf",
+"errors": "f2d4bc4c",
+"rows": "f8c64316",
 "combinations": 4
 },
 {

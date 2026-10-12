@@ -297,13 +297,13 @@
   {
    "id": "H2",
    "type": "hibaut",
-   "label": "H2 testzárlat M2-ben (L2 → fémház)",
+   "label": "H2 testzárlat M2-ben (L3 → fémház)",
    "at": "M2",
    "outputLabel": "H2: hibaáram útja",
    "terminals": [
     {
      "id": "a",
-     "role": "L2",
+     "role": "L3",
      "label": "fázisoldali hibahely"
     },
     {
@@ -513,7 +513,7 @@
   {
    "id": "w20",
    "from": "H2.a",
-   "to": "M2.L2",
+   "to": "M2.L3",
    "conductor": "hibahely"
   },
   {

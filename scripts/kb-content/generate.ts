@@ -21,7 +21,7 @@ import {SAFETY} from '../../lib/kb/safety';
 import {fingerprint} from '../../lib/sizing-tables';
 import type {DiagramSource} from '../../components/kezikonyv/diagram/diagram-figure';
 import {checkReasons} from './checklist';
-import {diagramFiles,diagramSource} from './diagrams';
+import {diagramFiles,diagramSource,riskViewSource} from './diagrams';
 import {figureSource} from './figures';
 import {parseDraft,pendingFields,type FrontMatter} from './parse';
 import {frontMatterSchema} from './schema';
@@ -100,7 +100,7 @@ export function checkRiskFloor(file:string,m:{section:KbMeta['section'];category
 }
 
 /** Egy vázlat → cikk. `root`: a repó gyökere (az ábrák forrás-ujjlenyomatához, scripts/kb-content/figures.ts). */
-export function articleFromDraft(file:string,src:string,root:string):GenArticle{
+export function articleFromDraft(file:string,src:string,root:string,opts:{figures?:boolean}={}):GenArticle{
  const {front,blocks}=parseDraft(src);
  const checked=frontMatterSchema.safeParse(front);
  if(!checked.success)throw new Error(file+': hibás front matter – '+checked.error.issues.map(i=>i.path.join('.')+': '+i.message).join('; '));
@@ -120,7 +120,11 @@ export function articleFromDraft(file:string,src:string,root:string):GenArticle{
  const anchors=blocks.filter((b):b is Extract<KbBlock,{t:'h2'}>=>b.t==='h2').map(b=>({id:b.id,title:inlinePlain(b.text)}));
  const words=blocksText(blocks).split(/\s+/).filter(w=>/[\p{L}\p{N}]/u.test(w)).length;
  const figIds=figureIds(blocks),plain=figIds.filter(id=>!dg.some(d=>d.figure===id));
- const figures=dg.length?fingerprint({figures:figureSource(root,f.slug,plain),diagrams:dg.map(d=>({id:d.figure,src:diagramSource(root,d.files)}))}):figureSource(root,f.slug,plain);
+ // `opts.figures === false`: csak a tartalmi ujjlenyomat kell (a lektori csomag cikkvázlat-része: a még ki nem adható vázlatnak – pl.
+ // hiányzó ábra – a szövege is jóváhagyható); az ábra-ujjlenyomat ilyenkor '' (kiadási rekordhoz nem használható).
+ const figs=opts.figures===false?'':dg.length?fingerprint({figures:figureSource(root,f.slug,plain),diagrams:dg.map(d=>({id:d.figure,src:diagramSource(root,d.files)}))}):figureSource(root,f.slug,plain);
+ // R3: a veszély-doboz és a cikktörzs megjelenítése (renderelő modulok és .kk-callout szabályok) is a lektor által jóváhagyott állapot része.
+ const figures=opts.figures===false?'':f.risk==='R3'?fingerprint({figures:figs,riskView:riskViewSource(root)}):figs;
  const meta:KbMeta={...coreR3,anchors,words,fingerprint:contentFingerprint(coreR3,body),figures};
  return {file,meta,body};
 }
@@ -144,6 +148,16 @@ export function buildModel(root:string,releases:Readonly<Record<string,KbRelease
    articles.push(articleFromDraft(file,src,root));
   }else pending.push({file,id:p.slug,slug:p.slug,section:p.section as KbPending['section'],category:p.category,risk:'R3'});
  }
+ // R3: a törzs (a szöveg) csak a kapu szerint KÖZZÉTETT cikknél generálódik. Elavult (ujraellenorzendo) vagy hiányos lektori rekordnál –
+ // ha az ábra, a szimbólum, az elrendezés, a megjelenítés vagy a szöveg a jóváhagyás óta változott – szöveg nélküli csonk marad (KB_PENDING).
+ for(let i=articles.length-1;i>=0;i--){
+  const a=articles[i];
+  if(a.meta.risk==='R3'&&gateState(a.meta,contentFingerprint(a.meta,a.body),releases,suspended).state!=='kozzeteve'){
+   articles.splice(i,1);
+   pending.push({file:a.file,id:a.meta.id,slug:a.meta.slug,section:a.meta.section as KbPending['section'],category:a.meta.category,risk:'R3'});
+  }
+ }
+ pending.sort((a,b)=>a.file<b.file?-1:1);
  const ids=new Set<string>();
  for(const x of [...articles.map(a=>a.meta.id),...pending.map(p=>p.id)]){if(ids.has(x))throw new Error('Ismétlődő azonosító: '+x);ids.add(x)}
  // A böngészőbe töltődő keresőindex: csak a kapu szerint közzétett cikkek és (ha a szótár közzétett) a szótári kifejezések.
@@ -154,7 +168,7 @@ export function buildModel(root:string,releases:Readonly<Record<string,KbRelease
  const diagrams:Record<string,DiagramSource>={};
  for(const a of published)for(const d of a.meta.diagrams??[]){
   const fig=readFigures(root,a.file).find(x=>x.id===d.figure)!;
-  for(const file of [fig.netlist!,...(fig.variants??[])]){const x=diagramFiles(root,file);diagrams[x.netlist.id]={netlist:x.netlist,layout:x.layout}}
+  for(const file of [fig.netlist!,...(fig.variants??[])]){const x=diagramFiles(root,file);diagrams[x.netlist.id]={file,netlist:x.netlist,layout:x.layout}}
  }
  return {articles,pending,search,diagrams};
 }

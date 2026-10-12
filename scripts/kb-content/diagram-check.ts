@@ -51,6 +51,20 @@ export function touching(a:Pt,b:Pt,c:Pt,d:Pt):boolean{
  for(const [p,q,r] of [[a,c,d],[b,c,d],[c,a,b],[d,a,b]] as [Pt,Pt,Pt][])if(same(p,q)||same(p,r)||interior(p,q,r))return true;
  return false;
 }
+/** A két szakasz metszi vagy érinti egymást (közös pont van)? */
+export function segCross(a:Pt,b:Pt,c:Pt,d:Pt):boolean{return segHit(a,b,c,d)!==null}
+/** A két szakasz közös pontja (metszés vagy érintés), 'overlap' hosszú kollineáris átfedésnél, null, ha nincs közös pont. */
+export function segHit(a:Pt,b:Pt,c:Pt,d:Pt):Pt|'overlap'|null{
+ const r:Pt=[b[0]-a[0],b[1]-a[1]],s:Pt=[d[0]-c[0],d[1]-c[1]],den=r[0]*s[1]-r[1]*s[0],ac:Pt=[c[0]-a[0],c[1]-a[1]];
+ const lr=Math.hypot(r[0],r[1]),ls=Math.hypot(s[0],s[1]);if(lr<EPS||ls<EPS)return null;
+ if(Math.abs(den)<1e-9*lr*ls){
+  if(Math.abs(ac[0]*r[1]-ac[1]*r[0])/lr>EPS)return null;
+  return overlapLen(a,b,c,d)>EPS?'overlap':(same(a,c)||same(a,d)?a:same(b,c)||same(b,d)?b:null);
+ }
+ const t=(ac[0]*s[1]-ac[1]*s[0])/den,u=(ac[0]*r[1]-ac[1]*r[0])/den,te=EPS/lr,ue=EPS/ls;
+ if(t<-te||t>1+te||u<-ue||u>1+ue)return null;
+ return [a[0]+t*r[0],a[1]+t*r[1]];
+}
 const distSeg=(p:Pt,a:Pt,b:Pt)=>{const dx=b[0]-a[0],dy=b[1]-a[1],l2=dx*dx+dy*dy;const t=l2?Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/l2)):0;return Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dy)};
 
 /** Az érszín (netlista) → az ábra ér-osztálya; a teszt saját táblája (a jelenettől független). */
@@ -168,6 +182,16 @@ export function checkDiagramSvg(svg:string,netlist:Netlist,pyWires?:readonly {fr
    if(o(s.a,s.b,t.a)*o(s.a,s.b,t.b)<0&&o(t.a,t.b,s.a)*o(t.a,t.b,s.b)<0)crossings++;
   }
  }
+ // Különböző típusú vezetők (pl. EPH-vezető és védővezető, földelővezető és védővezető) nem futhatnak együtt ugyanazon a vonalon: úgy
+ // látszanának, mintha az egyik a másikba ágazna (toldás), holott külön ér, külön kapocsról. Külön kapocs (sín több kapoccsal) kell.
+ {
+  const real=nlWires.filter(w=>CONDUCTOR_CLASS[w.conductor]!=='virtualis');
+  for(let i=0;i<real.length;i++)for(let j=i+1;j<real.length;j++){
+   const a=drawn.get(real[i].id),b=drawn.get(real[j].id);if(!a||!b||real[i].conductor===real[j].conductor)continue;
+   let ov=0;for(let p=1;p<a.pts.length;p++)for(let q=1;q<b.pts.length;q++)ov+=overlapLen(a.pts[p-1],a.pts[p],b.pts[q-1],b.pts[q]);
+   if(ov>3)problem(real[i].id+' ('+real[i].conductor+') és '+real[j].id+' ('+real[j].conductor+'): különböző típusú vezetők együtt futnak '+ov.toFixed(0)+' egységen át');
+  }
+ }
  // Csomópontpöttyök: csak ott, ahol ugyanazon hálózat legalább három irányú ága találkozik (kapcson kívül); ott kötelező.
  const dotEls=els.filter(e=>e.attrs['data-junction']);
  const dots:Pt[]=dotEls.map(e=>[+e.attrs.cx,+e.attrs.cy]);
@@ -195,7 +219,7 @@ export function checkDiagramSvg(svg:string,netlist:Netlist,pyWires?:readonly {fr
  for(const e of els.filter(x=>x.attrs['data-halo']||x.attrs['data-stripe']||x.attrs['data-gap'])){const id=e.attrs['data-halo']??e.attrs['data-stripe']??e.attrs['data-gap'],d=drawn.get(id);const ps=ptsOf(e);if(!d||ps.length!==d.pts.length||ps.some((p,i)=>!same(p,d.pts[i])))problem(id+': a halo/csíkozás/rés nem a vezetéken fut')}
  for(const e of els.filter(x=>x.attrs['data-cap'])){const d=drawn.get(e.attrs['data-cap']),[a,b]=ptsOf(e);const on=(q:Pt,s0:Pt,s1:Pt)=>same(q,s0)||same(q,s1)||interior(q,s0,s1);if(!d||!d.pts.slice(1).some((p,i)=>on(a,d.pts[i],p)&&on(b,d.pts[i],p))||!(same(a,d.pts[0])||same(a,d.pts[d.pts.length-1])))problem(e.attrs['data-cap']+': a PEN-végjelölés nem a vezeték végén van')}
  // Fekete ér: sötét témához világos halo; zöld-sárga: sárga csíkozás.
- for(const w of nlWires){if(w.color==='fekete'&&!els.some(e=>e.attrs['data-halo']===w.id))problem(w.id+': a fekete érhez nincs halo');if(w.color==='zöld-sárga'&&!els.some(e=>e.attrs['data-stripe']===w.id))problem(w.id+': a zöld-sárga érhez nincs csíkozás')}
+ for(const w of nlWires){if((w.color==='fekete'||w.color==='barna')&&!els.some(e=>e.attrs['data-halo']===w.id))problem(w.id+': a '+w.color+' érhez nincs halo');if(w.color==='zöld-sárga'&&!els.some(e=>e.attrs['data-stripe']===w.id))problem(w.id+': a zöld-sárga érhez nincs csíkozás')}
  // Érintkezők: állásonként a netlista párjai, a csonkok belső végpontjai között; pontosan egy állás látható választónként.
  const stub=new Map<string,Pt>();
  for(const e of els.filter(x=>x.attrs['data-stub'])){const ps=ptsOf(e),k=e.attrs['data-stub'],t=term.get(k);if(t&&!same(ps[0],t.at))problem(k+': a csonk nem a kapocsból indul');stub.set(k,ps[ps.length-1])}
@@ -230,9 +254,71 @@ export function checkDiagramSvg(svg:string,netlist:Netlist,pyWires?:readonly {fr
   if(other<own+0.5)problem(w.id+': az érfelirat közelebb van egy másik hálózat vezetékéhez');
  }
  // Feliratok: nem fedik egymást (becsült szövegdoboz).
- const boxes=els.filter(e=>e.tag==='text').map(e=>{const s=+(e.attrs['font-size']??11),w=e.text.length*s*0.56,x=+e.attrs.x,y=+e.attrs.y,anc=e.attrs['text-anchor']??'start';const x0=anc==='middle'?x-w/2:anc==='end'?x-w:x;return {t:e.text,x0,x1:x0+w,y0:y-s*0.78,y1:y+s*0.2}});
+ const textEls=els.filter(e=>e.tag==='text');
+ const boxOf=(e:El)=>{const s=+(e.attrs['font-size']??11),w=e.text.length*s*0.56,x=+e.attrs.x,y=+e.attrs.y,anc=e.attrs['text-anchor']??'start';const x0=anc==='middle'?x-w/2:anc==='end'?x-w:x;return {e,t:e.text,x0,x1:x0+w,y0:y-s*0.78,y1:y+s*0.2}};
+ const boxes=textEls.map(boxOf);
  for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){const a=boxes[i],b=boxes[j];const ox=Math.min(a.x1,b.x1)-Math.max(a.x0,b.x0),oy=Math.min(a.y1,b.y1)-Math.max(a.y0,b.y0);if(ox>1.2&&oy>1.2)problem('egymást fedő feliratok: „'+a.t+'” és „'+b.t+'”')}
  for(const b of boxes)if(b.x0<vb[0]-1||b.x1>vb[0]+vb[2]+1||b.y0<vb[1]-1||b.y1>vb[1]+vb[3]+1)problem('a felirat kilóg a rajzból: „'+b.t+'”');
+ // --- Feliratok és rajzelemek (félreolvasás ellen): a felirat dobozát nem metszheti idegen elem.
+ const polyOf=(e:El)=>{const p=ptsOf(e);return p.slice(1).map((q,i)=>[p[i],q] as [Pt,Pt])};
+ const lineEls=els.filter(e=>(e.tag==='line'||e.tag==='polyline')&&!!e.attrs.class);
+ const hasCls=(e:El,k:string)=>cls(e).includes(k);
+ const boxSegs=(b:{x0:number;x1:number;y0:number;y1:number}):[Pt,Pt][]=>[[[b.x0,b.y0],[b.x1,b.y0]],[[b.x1,b.y0],[b.x1,b.y1]],[[b.x1,b.y1],[b.x0,b.y1]],[[b.x0,b.y1],[b.x0,b.y0]]];
+ /** A szakasz metszi (vagy érinti) a szövegdobozt (kis ráhagyással: a vonalvastagság és a szöveg körvonala). */
+ const hitsBox=(a:Pt,b:Pt,bx:{x0:number;x1:number;y0:number;y1:number},pad=1.6)=>{
+  const B={x0:bx.x0-pad,x1:bx.x1+pad,y0:bx.y0-pad,y1:bx.y1+pad},inB=(p:Pt)=>p[0]>=B.x0&&p[0]<=B.x1&&p[1]>=B.y0&&p[1]<=B.y1;
+  if(inB(a)||inB(b))return true;
+  return boxSegs(B).some(([c,d])=>segCross(a,b,c,d));
+ };
+ // (a) érfelirat: nem ülhet idegen hálózat vagy más típusú (más feliratú) vezetéken – a halo a saját vezetéket takarja, az idegent nem szabad.
+ // (A TN-C-ben az N és a PE statikusan egy hálózat – a PEN-kapocs hídja –, mégsem szabad a „PE” feliratnak a kék érre kerülnie.)
+ const tagOfWire=new Map(nlWires.map(w=>[w.id,expectedTag(w.conductor,w.label)]));
+ for(const w of nlWires){
+  const d=drawn.get(w.id);if(!d)continue;
+  for(const lab of labels.filter(e=>e.attrs['data-for']===w.id)){
+   const bx=boxOf(lab);
+   for(const s of segs){
+    if(s.owner===w.id)continue;
+    const otherTag=tagOfWire.get(s.owner),diff=s.net!==d.net||(otherTag!==undefined&&otherTag!==''&&otherTag!==lab.text);
+    if(diff&&hitsBox(s.a,s.b,bx,0.4))problem(w.id+': az érfelirat („'+lab.text+'”) idegen hálózat vagy más típusú vezeték („'+(otherTag??'híd')+'”) vezetékén ül ('+s.owner+')');
+   }
+  }
+ }
+ // (b) kapocsfelirat: a SAJÁT kapcsához áll a legközelebb (nem egy szomszédos kapocs mellett)
+ for(const e of textEls){
+  const k=e.attrs['data-for'];if(!k||!term.has(k))continue;
+  const bx=boxOf(e),c:Pt=[(bx.x0+bx.x1)/2,(bx.y0+bx.y1)/2],own=Math.hypot(c[0]-term.get(k)!.at[0],c[1]-term.get(k)!.at[1]);
+  for(const [k2,t2] of term){if(k2===k)continue;const o=Math.hypot(c[0]-t2.at[0],c[1]-t2.at[1]);if(o<own+0.5)problem('a(z) „'+e.text+'” kapocsfelirat ('+k+') közelebb áll a(z) '+k2+' kapocshoz ('+o.toFixed(1)+' < '+own.toFixed(1)+')')}
+ }
+ // (c) alkatrész-, hely-, megjegyzés- és érintésfelirat: nem fedhet vezetéket, hibajelet, érintési nyilat, hidat, és nem ülhet doboz szegélyén
+ const plain=textEls.filter(e=>e.attrs['data-label']||hasCls(e,'kk-dg-t-place')||hasCls(e,'kk-dg-t-note')||hasCls(e,'kk-dg-t-touch'));
+ const rects=els.filter(e=>e.tag==='rect'&&e.attrs.width);
+ for(const e of plain){
+  const bx=boxOf(e);
+  for(const l of lineEls){
+   const what=hasCls(l,'kk-dg-touch')?'érintési nyíl':hasCls(l,'kk-dg-fault')?'hibajel':hasCls(l,'kk-dg-bridge')?'híd':hasCls(l,'kk-dg-w')&&l.attrs['data-wire']?'vezeték ('+l.attrs['data-wire']+')':'';
+   if(!what)continue;
+   if(polyOf(l).some(([a,b])=>hitsBox(a,b,bx,0.6)))problem('a(z) „'+e.text+'” felirat '+what+' fölött áll');
+  }
+  for(const r of rects){
+   const x=+r.attrs.x,y=+r.attrs.y,w=+r.attrs.width,h=+r.attrs.height,edges:[Pt,Pt][]=[[[x,y],[x+w,y]],[[x+w,y],[x+w,y+h]],[[x+w,y+h],[x,y+h]],[[x,y+h],[x,y]]];
+   if(edges.some(([a,b])=>hitsBox(a,b,bx,0.6)))problem('a(z) „'+e.text+'” felirat egy doboz ('+(r.attrs.class??'').replace(/kk-dg-/g,'')+') szegélyén ül');
+  }
+ }
+ // --- A hibajel (testzárlat) nem keresztezhet és nem érinthet idegen elemet (csonkot, vezetéket, hidat, érintkezőt, érintési nyilat):
+ // csak a két végpontján csatlakozhat (a saját fáziscsonkhoz és a PE-hez). Szomszédos sávban kell futnia – lásd az IT-ábrát.
+ for(const f of els.filter(e=>(e.tag==='polyline')&&hasCls(e,'kk-dg-fault'))){
+  const fp=ptsOf(f),first=fp[0],last=fp[fp.length-1];
+  const nearEnd=(p:Pt)=>Math.hypot(p[0]-first[0],p[1]-first[1])<0.9||Math.hypot(p[0]-last[0],p[1]-last[1])<0.9;
+  for(const g of lineEls){
+   if(g===f||hasCls(g,'kk-dg-fault')||hasCls(g,'kk-dg-w-fault')||hasCls(g,'kk-dg-w-gap')||hasCls(g,'kk-dg-w-halo')||hasCls(g,'kk-dg-w-pes')||hasCls(g,'kk-dg-w-cap')||hasCls(g,'kk-dg-w-inner')||hasCls(g,'kk-dg-w-touch')||hasCls(g,'kk-dg-sym-link')||hasCls(g,'kk-dg-sym-thin'))continue;
+   for(const [a,b] of polyOf(g))for(const [c,d2] of polyOf(f)){
+    const hit=segHit(a,b,c,d2);
+    if(hit==='overlap')problem('a hibajel ('+f.attrs['data-out']+') hosszan fedi a(z) '+(g.attrs['data-wire']??g.attrs['data-stub']??g.attrs.class)+' elemet');
+    else if(hit&&!nearEnd(hit))problem('a hibajel ('+f.attrs['data-out']+') keresztezi/érinti a(z) '+(g.attrs['data-wire']??g.attrs['data-stub']??(g.attrs.class??'').replace(/kk-dg-/g,''))+' elemet itt: '+hit.map(n=>n.toFixed(1)).join(','));
+   }
+  }
+ }
  // Olvashatóság keskeny képernyőn: 48rem alatt a rajz a min-width alá nem kicsinyedik (alatta a keret vízszintesen görget), így a
  // legkisebb felirat ott is legalább 10 px (a többi ábra mércéje 390 px-en – tests/kb-figures.mjs; a stíluslap .kk-dg-svg szabálya).
  const minW=+(root?.attrs.style?.match(/min-width:\s*([\d.]+)px/)?.[1]??0);

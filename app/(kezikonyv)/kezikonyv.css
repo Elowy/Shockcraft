@@ -579,12 +579,13 @@ html.js .kk-quiz-nojs{display:none}
    A fekete ér sötét témában fekete mag világos halóval; a zöld-sárga ér zöld alapon sárga csíkozással; a szín mellett minden éren felirat. */
 .kk-dg{margin:1.5rem 0;max-width:46rem}
 .kk-dg-frame{overflow-x:auto;border:1px solid var(--kk-border);border-radius:var(--kk-radius);background:var(--kk-bg);padding:.5rem}
-/* Keskeny képernyőn (48rem alatt) a rajz nem kicsinyedik a min-width alá (a legkisebb felirat így is ≥ 10 px), a keret görget – a széles
-   ábrákéhoz hasonló árnyék jelzi. Szélesebb képernyőn a hasábba illeszkedik (a legszélesebb, 4 × 107-es változatnál a felirat ≥ 9,4 px). */
-.kk-dg-frame{background:linear-gradient(to right,var(--kk-bg) 30%,transparent) left/2.5rem 100% no-repeat local,linear-gradient(to left,var(--kk-bg) 30%,transparent) right/2.5rem 100% no-repeat local,radial-gradient(farthest-side at 0 50%,#0003,transparent) left/.75rem 100% no-repeat scroll,radial-gradient(farthest-side at 100% 50%,#0003,transparent) right/.75rem 100% no-repeat scroll,var(--kk-bg)}
+/* A rajz sosem kicsinyedik a saját minWidth-je (az elrendezés `minWidth`-je: a legkisebb felirat ≥ 10 px) alá – sem keskeny, sem széles
+   képernyőn: ahol a hasáb keskenyebb (pl. a 4 × 107-es változat 764 egysége a 662 px-es hasábban), a keret vízszintesen görget, és a
+   görgethetőséget látható árnyék jelzi a szélén. */
+.kk-dg-frame{background:linear-gradient(to right,var(--kk-bg) 30%,transparent) left/2.5rem 100% no-repeat local,linear-gradient(to left,var(--kk-bg) 30%,transparent) right/2.5rem 100% no-repeat local,linear-gradient(to right,var(--kk-scroll-shadow),transparent) left/1rem 100% no-repeat scroll,linear-gradient(to left,var(--kk-scroll-shadow),transparent) right/1rem 100% no-repeat scroll,var(--kk-bg);--kk-scroll-shadow:#26323d55}
+[data-theme=dark] .kk .kk-dg-frame{--kk-scroll-shadow:#e6eef455}
 .kk-dg-frame:focus-visible{outline:3px solid var(--kk-focus);outline-offset:2px}
 .kk-dg-svg{display:block;width:100%;height:auto;color:var(--kk-fg);font-family:inherit}
-@media (min-width:48rem){.kk-dg-svg{min-width:0!important}}
 .kk-dg-svg text{fill:var(--kk-fg);paint-order:stroke;stroke:var(--kk-bg);stroke-width:3px;stroke-linejoin:round}
 .kk-dg-svg .kk-dg-t-term{fill:var(--kk-muted)}.kk-dg-svg .kk-dg-t-part{font-weight:650}.kk-dg-svg .kk-dg-t-place{fill:var(--kk-muted);font-style:italic}
 .kk-dg-svg .kk-dg-t-wire{font-weight:700}.kk-dg-svg .kk-dg-t-note{fill:var(--kk-muted)}.kk-dg-svg .kk-dg-t-danger{fill:var(--kk-bad-fg)}.kk-dg-svg .kk-dg-t-muted{fill:var(--kk-muted);stroke:none}
@@ -596,14 +597,17 @@ html.js .kk-quiz-nojs{display:none}
 .kk-dg-sym-bar{stroke:var(--kk-fg);stroke-width:4;stroke-linecap:round}.kk-dg-sym-dot{fill:var(--kk-fg)}.kk-dg-sym-pe{stroke:var(--kk-wire-pe);stroke-width:1.4}
 .kk-dg-sym-load,.kk-dg-pipe{fill:var(--kk-surface-2);stroke:var(--kk-fg);stroke-width:1.2}
 .kk-dg-contact{stroke:var(--kk-fg);stroke-width:1.9;stroke-linecap:round}.kk-dg-svg .is-off{display:none}
-.kk-dg-lamp{fill:var(--kk-bg);stroke:var(--kk-fg);stroke-width:1.3}.kk-dg-lamp.is-on,.kk-dg-sym-load.is-on{fill:#ffd54a}.kk-dg-sym.is-on{stroke-width:2.6}
+.kk-dg-lamp{fill:var(--kk-bg);stroke:var(--kk-fg);stroke-width:1.3}.kk-dg-lamp.is-on,.kk-dg-sym-load.is-on{fill:#ffd54a}.kk-dg-sym.is-on{stroke-width:2.6}.kk-dg-lamp.is-on,.kk-dg-sym-load.is-on{stroke-width:2.4}
+/* „Ég / működik / kiold”: nem csak színváltás – vastagabb vonal, a lámpa körül sugárkoszorú, a kioldó FI-relé doboza vastag veszélyszínű keretet kap. */
+.kk-dg-ray,.kk-dg-trip{fill:none;stroke:none}.kk-dg-ray.is-on{stroke:var(--kk-fg);stroke-width:1.8;stroke-linecap:round}.kk-dg-trip.is-on{stroke:var(--kk-danger-line);stroke-width:2.8}
 .kk-dg-fault{stroke:var(--kk-danger-line);stroke-width:1.4;stroke-dasharray:3 2}.kk-dg-fault.is-on{stroke-width:2.4;stroke-dasharray:none}
 .kk-dg-person{stroke:var(--kk-fg);stroke-width:1.4}.kk-dg-person.is-on{stroke:var(--kk-danger-line);stroke-width:2.2}
 .kk-dg-soil{stroke:var(--kk-muted);stroke-width:1.4}.kk-dg-soil-hatch{stroke:var(--kk-muted);stroke-width:.8}
 .kk-dg-touch,.kk-dg-touch-head{stroke:var(--kk-danger-line);stroke-width:1.2}.kk-dg-touch{stroke-dasharray:4 3}
 .kk-dg-w,.kk-dg-w-halo,.kk-dg-w-pes,.kk-dg-w-cap,.kk-dg-bridge,.kk-dg-w-gap{fill:none;stroke-linecap:round;stroke-linejoin:round}
 .kk-dg-w-gap{stroke:var(--kk-bg);stroke-width:6;stroke-linecap:butt}
-.kk-dg-w{stroke-width:2.4}.kk-dg-w-l1{stroke:var(--kk-wire-l1)}.kk-dg-w-l2{stroke:var(--kk-wire-l2-swatch)}.kk-dg-w-l3{stroke:var(--kk-wire-l3)}.kk-dg-w-n{stroke:var(--kk-wire-n)}.kk-dg-w-pe{stroke:var(--kk-wire-pe)}
+/* A barna és a fekete ér a valódi színével rajzolódik mindkét témában; sötét témában világos halo veszi körül (a barna és a fekete mag így is látszik). */
+.kk-dg-w{stroke-width:2.4}.kk-dg-w-l1{stroke:var(--kk-wire-l1-swatch)}.kk-dg-w-l2{stroke:var(--kk-wire-l2-swatch)}.kk-dg-w-l3{stroke:var(--kk-wire-l3)}.kk-dg-w-n{stroke:var(--kk-wire-n)}.kk-dg-w-pe{stroke:var(--kk-wire-pe)}
 .kk-dg-w-halo{stroke:var(--kk-bg);stroke-width:4.6}[data-theme=dark] .kk .kk-dg-w-halo{stroke:var(--kk-wire-l2)}
 .kk-dg-w-pes{stroke:var(--kk-wire-pe-stripe);stroke-width:2.4;stroke-dasharray:5 5;stroke-linecap:butt}.kk-dg-w-cap{stroke:var(--kk-wire-n);stroke-width:3.4;stroke-linecap:butt}
 .kk-dg-w-inner{stroke:var(--kk-muted);stroke-width:1;stroke-dasharray:2 2}.kk-dg-w-fault{stroke:var(--kk-danger-line);stroke-width:1.2;stroke-dasharray:4 3}.kk-dg-w-touch{stroke:var(--kk-muted);stroke-width:1.2;stroke-dasharray:3 3}
@@ -616,7 +620,8 @@ html.js .kk-quiz-nojs{display:none}
 .kk-dg-legend{display:flex;flex-wrap:wrap;gap:.25rem 1rem;margin:.5rem 0 0;padding:0;list-style:none;font-size:.875rem}
 .kk-dg-legend li{display:flex;align-items:center;gap:.4rem;font-size:.875rem}
 .kk-dg-sw{display:inline-block;width:1.6rem;height:.4rem;border-radius:.2rem;flex:none}
-.kk-dg-sw.w-l1{background:var(--kk-wire-l1)}.kk-dg-sw.w-l2{background:var(--kk-wire-l2-swatch);outline:1px solid var(--kk-border)}.kk-dg-sw.w-l3{background:var(--kk-wire-l3)}.kk-dg-sw.w-n{background:var(--kk-wire-n)}
+.kk-dg-sw.w-l1{background:var(--kk-wire-l1-swatch)}.kk-dg-sw.w-l2{background:var(--kk-wire-l2-swatch);outline:1px solid var(--kk-border)}[data-theme=dark] .kk .kk-dg-sw.w-l1,[data-theme=dark] .kk .kk-dg-sw.w-l2{outline:2px solid var(--kk-wire-l2)}
+.kk-dg-sw,.kk-dg-truth tr.is-current td{print-color-adjust:exact;-webkit-print-color-adjust:exact}.kk-dg-sw.w-l3{background:var(--kk-wire-l3)}.kk-dg-sw.w-n{background:var(--kk-wire-n)}
 .kk-dg-sw.w-pe{background:repeating-linear-gradient(90deg,var(--kk-wire-pe) 0 .45rem,var(--kk-wire-pe-stripe) .45rem .9rem)}
 .kk-dg-sw.w-inner,.kk-dg-sw.w-fault,.kk-dg-sw.w-touch{height:0;border-top:2px dashed var(--kk-muted)}.kk-dg-sw.w-fault{border-color:var(--kk-danger-line)}
 .kk-dg-planner{margin:.5rem 0 0;color:var(--kk-muted);font-size:.875rem}
@@ -645,7 +650,7 @@ html:not(.js) .kk-dg-view-hidden{display:block}html:not(.js) .kk-dg-view-title{d
 .kk-semak-cards{display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(min(100%,18rem),1fr))}
 .kk-semak-card{border:1px solid var(--kk-border);border-radius:var(--kk-radius);padding:.75rem;background:var(--kk-bg);min-width:0}
 .kk-semak-card h3{margin:.5rem 0 .25rem}.kk-semak-card h3 a{text-decoration:underline;text-underline-offset:.15em}
-.kk-semak-card p{margin:.25rem 0}.kk-semak-meta{font-size:.875rem}.kk-semak-meta a{text-decoration:underline}
+.kk-semak-card p{margin:.25rem 0}.kk-semak-meta{font-size:.875rem}.kk-nowrap{white-space:nowrap}
 .kk-semak-mini{border:1px solid var(--kk-border);border-radius:.5rem;padding:.25rem;background:var(--kk-bg);overflow:hidden}.kk-semak-mini .kk-dg-svg{min-width:0!important}
 .kk-toc-inline-static ol{margin:.5rem 0 1rem}.kk-toc-inline-static a{display:inline-block;min-height:2.75rem;padding:.6rem 0}
 @media(prefers-contrast:more){.kk-dg-w{stroke-width:3.2}.kk-dg-w-pes{stroke-width:3.2}.kk-dg-w-halo{stroke-width:5.4}.kk-dg-sym,.kk-dg-contact{stroke-width:1.9}.kk-dg-sym-place{stroke:var(--kk-fg)}}

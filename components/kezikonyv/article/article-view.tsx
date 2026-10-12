@@ -2,6 +2,7 @@
 // morzsamenü, H1, ellenőrzési jelvény, műveletek, tartalomjegyzék, törzs (Röviden, R2-nél Figyelem-doboz, ábrák, képletek, kidolgozott
 // példák, Gyakori tévedések), kapcsolódó kalkulátorok és cikkek, források („kiadás ellenőrzés alatt” jelöléssel), egy tervező-blokk,
 // előző/következő, lábléc-meta (verzió, ujjlenyomat, változásnapló, hibajelzés). Az alapfigyelmeztetés a Shell láblécében áll.
+import {NoWrap} from './nowrap';
 import {BadgeCheck,ChevronLeft,ChevronRight,ClipboardCheck,FileWarning} from 'lucide-react';
 import {bySlug,isPublished as calcPublished} from '@/lib/calc/registry';
 import {CHANGE_LABELS,changesFor} from '@/lib/kb/content/changes';
@@ -66,13 +67,13 @@ export function ArticleView({meta,body,info,preview,origin,glossary=false,diagra
   <div className="kk-page kk-page-article">
    <aside className="kk-side" aria-label={cat?.label??sec.label}>
     <p className="kk-side-title">{cat?.label??sec.label}</p>
-    <ul>{siblings.map(a=><li key={a.id}><a href={articleHref(a)} aria-current={a.id===meta.id?'page':undefined}>{a.navTitle}</a></li>)}</ul>
+    <ul>{siblings.map(a=><li key={a.id}><a href={articleHref(a)} aria-current={a.id===meta.id?'page':undefined}><NoWrap text={a.navTitle}/></a></li>)}</ul>
     <a className="kk-side-all" href={sec.href}>{sec.label}: összes cikk</a>
    </aside>
    <main id="tartalom" className="kk-main kk-article">
-    <nav className="kk-crumbs" aria-label="Morzsamenü"><ol><li><a href={KB_HOME}>Tudástár</a></li><li><a href={sec.href}>{sec.label}</a></li>{cat&&<li><a href={categoryHref(cat)}>{cat.label}</a></li>}<li aria-current="page">{meta.navTitle}</li></ol></nav>
+    <nav className="kk-crumbs" aria-label="Morzsamenü"><ol><li><a href={KB_HOME}>Tudástár</a></li><li><a href={sec.href}>{sec.label}</a></li>{cat&&<li><a href={categoryHref(cat)}>{cat.label}</a></li>}<li aria-current="page"><NoWrap text={meta.navTitle}/></li></ol></nav>
     {draft&&<p className="kk-preview-banner" role="note"><FileWarning aria-hidden="true"/> Tervezet – nem közzétett. Ez az oldal csak lektori előnézetben látszik ({info.reason}).</p>}
-    <h1>{meta.title}</h1>
+    <h1><NoWrap text={meta.title}/></h1>
     <ReviewLine meta={meta} info={info} draft={draft}/>
     <ArticleActions id={meta.id} title={meta.title} href={href}/>
     {glossary?<nav className="kk-letters" aria-label="Betűk">{toc.map(([id,l])=><a key={id} href={'#'+id}>{l}</a>)}</nav>
@@ -85,14 +86,14 @@ export function ArticleView({meta,body,info,preview,origin,glossary=false,diagra
      {!!quiz.length&&<div className="kk-selftest"><h3 id="teszteld-magad">Teszteld magad</h3>
       <p><a className="kk-button" href={quizHref({feladat:quiz.map(t=>t.id),hossz:5})}><ClipboardCheck aria-hidden="true"/> 5 számolós gyakorló feladat</a></p>
       <p className="kk-muted">{quiz.map(t=>t.title).join(', ')} – minden kérdés után magyarázattal és levezetéssel. {QUIZ_NOTICE}</p></div>}
-     {!!rel.items.length&&<><h3>Cikkek</h3><ul className="kk-related-grid">{rel.items.map(a=><li key={a.id}><a href={articleHref(a)}><b>{a.title}</b><small>{a.summary}</small></a></li>)}</ul></>}
+     {!!rel.items.length&&<><h3>Cikkek</h3><ul className="kk-related-grid">{rel.items.map(a=><li key={a.id}><a href={articleHref(a)}><b><NoWrap text={a.title}/></b><small>{a.summary}</small></a></li>)}</ul></>}
      {rel.pending>0&&<p className="kk-muted">További {rel.pending} kapcsolódó cikk hamarosan – szakmai lektorálás alatt.</p>}
     </section>}
     <SourcesSection sources={body.sources}/>
     <PlannerCta/>
     {(prev||next)&&<nav className="kk-prevnext" aria-label="Előző és következő cikk">
-     {prev?<a href={articleHref(prev)} rel="prev"><ChevronLeft aria-hidden="true"/><span><small>Előző</small>{prev.navTitle}</span></a>:<span/>}
-     {next?<a href={articleHref(next)} rel="next" className="next"><span><small>Következő</small>{next.navTitle}</span><ChevronRight aria-hidden="true"/></a>:<span/>}
+     {prev?<a href={articleHref(prev)} rel="prev"><ChevronLeft aria-hidden="true"/><span><small>Előző</small><NoWrap text={prev.navTitle}/></span></a>:<span/>}
+     {next?<a href={articleHref(next)} rel="next" className="next"><span><small>Következő</small><NoWrap text={next.navTitle}/></span><ChevronRight aria-hidden="true"/></a>:<span/>}
     </nav>}
     <ChangesSection meta={meta}/>
     <MetaLine meta={meta} info={info} draft={draft} url={(origin??'')+href}/>

@@ -1,7 +1,7 @@
 // A Sémák gyűjtőoldala (/tudastar/semak – docs/tudastar-terv.md 2.4 „A /tudastar/semak gyűjtőoldal”): tartalomjegyzékes összefoglaló,
 // saját canonicallal; a részletoldalak a kanonikusak. Szakaszai a kategóriák (Világítási kapcsolások és dugaljak, Földelési
 // rendszerek), kártyánként mini-ábra (a cikk első netlistás ábrájának Bekötés nézete), a „Röviden” szöveg és mélylink, a végén a
-// kapcsolódó kalkulátorok. A felső, nem zárható veszély-doboz a figyelmeztetés-könyvtárból (lib/kb/safety.ts `bekotes`).
+// kapcsolódó kalkulátorok. A kártyán egyetlen link van (a cím); a miniábra felirat nélküli (a kis méretű feliratok olvashatatlanok lennének). A felső, nem zárható veszély-doboz a figyelmeztetés-könyvtárból (lib/kb/safety.ts `bekotes`).
 // Szerverkomponens, adatvezérelt (a route a regiszterből adja az adatot; a tests/kb-semak.ts nem közzétett mintán rendereli).
 import {ShieldAlert} from 'lucide-react';
 import {inlinePlain} from '@/lib/kb/content/inline';
@@ -12,6 +12,7 @@ import {SAFETY} from '@/lib/kb/safety';
 import {BekotesSvg} from '../diagram/bekotes';
 import type {DiagramSource} from '../diagram/diagram-figure';
 import {buildScene} from '../diagram/scene';
+import {NoWrap} from '../article/nowrap';
 
 export type SemakItem={meta:KbMeta;body:KbBody;href:string;listBadge:string;diagrams:Readonly<Record<string,readonly DiagramSource[]>>};
 export type SemakCalc={slug:string;title:string;short:string};
@@ -22,10 +23,10 @@ export function SemakCard({item}:{item:SemakItem}){
  const rovid=body.blocks.find(b=>b.t==='rovid');
  const scene=first?buildScene(first.netlist,first.layout):null;
  return <article className="kk-semak-card" aria-labelledby={'sema-'+meta.id}>
-  {scene&&<div className="kk-semak-mini" aria-hidden="true"><BekotesSvg scene={scene} uid={'mini-'+meta.id} title={meta.title}/></div>}
-  <h3 id={'sema-'+meta.id}><a href={item.href}>{meta.title}</a></h3>
+  {scene&&<div className="kk-semak-mini" aria-hidden="true"><BekotesSvg scene={scene} uid={'mini-'+meta.id} title={meta.title} bare/></div>}
+  <h3 id={'sema-'+meta.id}><a href={item.href}><NoWrap text={meta.title}/></a></h3>
   <p>{rovid&&rovid.t==='rovid'?inlinePlain(rovid.text):meta.summary}</p>
-  <p className="kk-semak-meta"><span className="kk-badge">{item.listBadge}</span> <a href={item.href}>Bekötési rajz, működés és vezetéktábla</a></p>
+  <p className="kk-semak-meta"><span className="kk-badge">{item.listBadge}</span></p>
  </article>;
 }
 

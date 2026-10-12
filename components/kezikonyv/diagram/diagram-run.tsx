@@ -41,6 +41,20 @@ export function DiagramViews({data,bekotes,mukodes,truth}:{data:RunData;bekotes:
   window.addEventListener('beforeprint',before);window.addEventListener('afterprint',after);
   return ()=>{window.removeEventListener('beforeprint',before);window.removeEventListener('afterprint',after)};
  },[]);
+ // A rajzkeret csak akkor görgethető régió (Tab-megálló, címke), ha a rajz valóban túlcsordul rajta (keskeny képernyőn); a szerver a
+ // tabindex-et és a címkét alapból ráteszi (JS nélkül és nyomtatásban is érvényes), itt vesszük el és adjuk vissza a túlcsordulás szerint.
+ useEffect(()=>{
+  const fig=panel.current?.closest('figure');if(!fig||typeof ResizeObserver==='undefined')return;
+  const frames=[...fig.querySelectorAll<HTMLElement>('.kk-dg-frame')];
+  const fit=(el:HTMLElement)=>{
+   const over=el.scrollWidth>el.clientWidth+1;
+   if(over){el.setAttribute('tabindex','0');el.setAttribute('role','region');const l=el.getAttribute('data-scroll-label');if(l)el.setAttribute('aria-label',l)}
+   else{el.removeAttribute('tabindex');el.removeAttribute('role');el.removeAttribute('aria-label')}
+  };
+  const ro=new ResizeObserver(es=>{for(const e of es)fit(e.target as HTMLElement)});
+  for(const el of frames){fit(el);ro.observe(el);const svg=el.firstElementChild;if(svg)ro.observe(svg)}
+  return ()=>ro.disconnect();
+ },[]);
  const set=(id:string,name:string)=>setCombo(c=>({...c,[id]:name}));
  const onTabKey=(e:KeyboardEvent<HTMLButtonElement>,i:number)=>{
   const n=e.key==='ArrowRight'?i+1:e.key==='ArrowLeft'?i-1:e.key==='Home'?0:e.key==='End'?VIEWS.length-1:null;
@@ -66,7 +80,8 @@ export function DiagramViews({data,bekotes,mukodes,truth}:{data:RunData;bekotes:
       if(s.states.length<2)return <p key={s.id} className="kk-dg-fixed">{s.label}: <b>{st.label}</b></p>;
       const next=s.states[(s.states.indexOf(st)+1)%s.states.length];
       return s.states.length===2
-       ?<button key={s.id} type="button" aria-pressed={st.pressed} onClick={()=>set(s.id,next.name)}>{s.label}<small>{st.label}</small></button>
+       // A kétállású gomb neve állandó (a felirat), az állást az aria-pressed hordozza; a látható állásszöveg a képernyőolvasónak rejtett.
+       ?<button key={s.id} type="button" aria-pressed={st.pressed} onClick={()=>set(s.id,next.name)}>{s.label}<small aria-hidden="true">{st.label}</small></button>
        :<button key={s.id} type="button" onClick={()=>set(s.id,next.name)}>{s.label}<small>{st.label}</small></button>;
      })}
     </fieldset>)}
