@@ -1,0 +1,713 @@
+[
+  {
+    "id": "q-alap-0001",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Egy 46 Ω-os ellenállást 230 V-ra kapcsolunk. Mekkora áram folyik rajta?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "0,2 A",
+        "correct": false,
+        "why": "Ez az R / U hányados, fordított osztás."
+      },
+      {
+        "id": "b",
+        "text": "2,5 A",
+        "correct": false
+      },
+      {
+        "id": "c",
+        "text": "5 A",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "10 580 A",
+        "correct": false,
+        "why": "Ez az U · R szorzat; az áram a feszültség és az ellenállás hányadosa."
+      }
+    ],
+    "explanation": "Ohm törvénye szerint I = U / R = 230 V / 46 Ω = 5 A. A mértékegység is ellenőriz: V / Ω = A, a szorzat (V · Ω) nem áramot ad.",
+    "ref": "ohm-torvenye#az-osszefugges",
+    "shuffle": false,
+    "family": "ohm-aram",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0002",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 1,
+    "type": "multi",
+    "stem": "Melyik összefüggés helyes egy állandó ellenállású (ohmos) elemre? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "U = R · I",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "R = U / I",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "R = U · I",
+        "correct": false,
+        "why": "Az ellenállás a feszültség és az áram hányadosa, nem a szorzata."
+      },
+      {
+        "id": "d",
+        "text": "P = I² · R",
+        "correct": true
+      },
+      {
+        "id": "e",
+        "text": "P = U · R",
+        "correct": false,
+        "why": "A teljesítmény P = U · I, illetve P = U² / R."
+      }
+    ],
+    "explanation": "Ohm törvénye U = R · I, ebből R = U / I és I = U / R. A teljesítménybe (P = U · I) behelyettesítve P = I² · R és P = U² / R adódik. Az R = U · I (V · A = W, nem Ω) és a P = U · R (V · Ω, nem W) mértékegységben sem jön ki.",
+    "ref": "ohm-torvenye#ohm-torvenye-es-a-teljesitmeny",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0003",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy 4,7 kΩ-os ellenállásra 12 V egyenfeszültséget kapcsolunk. Mekkora az áram?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "0,255 mA",
+        "correct": false
+      },
+      {
+        "id": "b",
+        "text": "2,55 mA",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "2,55 A",
+        "correct": false,
+        "why": "Előtag-tévesztés: a 4,7 kΩ 4700 Ω, nem 4,7 Ω."
+      },
+      {
+        "id": "d",
+        "text": "56,4 A",
+        "correct": false,
+        "why": "Ez az U · R szorzat számértéke."
+      }
+    ],
+    "explanation": "Alapegységre váltva I = 12 V / 4700 Ω ≈ 0,00255 A = 2,55 mA. A leggyakoribb hiba a kilo-előtag elhagyása, amely ezerszeres eltérést okoz.",
+    "ref": "ohm-torvenye#gyakori-tevedesek",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0004",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Két fűtőszálat külön-külön 230 V-ra kapcsolunk: az egyik 26,45 Ω-os, a másik 52,9 Ω-os. Melyik vesz fel nagyobb teljesítményt?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A 26,45 Ω-os, kb. 2000 W-ot",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Az 52,9 Ω-os, mert a nagyobb ellenálláson több hő fejlődik",
+        "correct": false,
+        "why": "Ez állandó áramnál igaz (P = I² · R), állandó feszültségen fordítva."
+      },
+      {
+        "id": "c",
+        "text": "Egyforma a teljesítményük, mert a feszültség azonos",
+        "correct": false
+      },
+      {
+        "id": "d",
+        "text": "A vezeték hosszától függ, ebből az adatból nem dönthető el",
+        "correct": false
+      }
+    ],
+    "explanation": "Állandó feszültségen P = U² / R, vagyis a kisebb ellenállás nagyobb teljesítményt ad: 230² / 26,45 ≈ 2000 W, 230² / 52,9 ≈ 1000 W. A „nagyobb ellenállás, több hő” szabály csak azonos áramnál, például sorosan kapcsolt elemeknél érvényes.",
+    "ref": "ohm-torvenye#ohm-torvenye-es-a-teljesitmeny",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0005",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 1,
+    "type": "truefalse",
+    "stem": "A hálózati 230 V az effektív érték; a szinuszos feszültség csúcsértéke ennél nagyobb, kb. 325 V.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "Szinuszos feszültségnél a csúcsérték Û = √2 · U_eff ≈ 1,414 · 230 V ≈ 325 V. A hálózati feszültség és áram megadott értékei mindig effektív értékek.",
+    "ref": "elektromos-feszultseg#egyenfeszultseg-es-valtakozo-feszultseg",
+    "shuffle": false,
+    "family": "csucsertek",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0006",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Miért kb. 400 V a feszültség a hazai hálózat két fázisvezetője között, ha mindkettő 230 V a nullavezetőhöz képest?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Mert a fázisok 120°-kal eltoltak, így U_v = √3 · 230 V ≈ 400 V",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Mert a két fázisfeszültség összeadódik: 2 · 230 V ≈ 400 V",
+        "correct": false,
+        "why": "Az összeg 460 V lenne; a két feszültség nem egyszerre éri el a csúcsát."
+      },
+      {
+        "id": "c",
+        "text": "Mert a transzformátor a fázisok között külön 400 V-os tekercset tartalmaz",
+        "correct": false
+      },
+      {
+        "id": "d",
+        "text": "Mert a 400 V a csúcsérték, a 230 V pedig az effektív érték",
+        "correct": false,
+        "why": "A 230 V és a 400 V egyaránt effektív érték."
+      }
+    ],
+    "explanation": "A háromfázisú hálózat fázisfeszültségei egyharmad periódussal (120°-kal) eltolva érik el a csúcsukat, ezért a két fázis közötti (vonali) feszültséget vektorosan kell számolni: √3 · 230 V ≈ 398 V, kerekítve 400 V. Az egyszerű összeadás (460 V) azért hibás, mert figyelmen kívül hagyja az eltolást.",
+    "ref": "elektromos-feszultseg#fazisfeszultseg-es-vonali-feszultseg",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0007",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 1,
+    "type": "truefalse",
+    "stem": "Az 50 Hz-es váltakozó áram iránya másodpercenként 100-szor változik.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "Az 50 Hz azt jelenti, hogy másodpercenként 50 teljes periódus zajlik le, és minden periódusban kétszer vált irányt az áram. Így a periódusidő 1 / 50 Hz = 20 ms, az irányváltások száma másodpercenként 100.",
+    "ref": "elektromos-aram#egyenaram-es-valtakozo-aram",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0008",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Egy áram a periódus egyik felében 10 A, a másik felében 0 A. Mekkora az effektív értéke?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "5 A",
+        "correct": false,
+        "why": "Ez az egyszerű átlag; a melegedést az effektív érték határozza meg."
+      },
+      {
+        "id": "b",
+        "text": "kb. 7,07 A",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "10 A",
+        "correct": false
+      },
+      {
+        "id": "d",
+        "text": "kb. 14,1 A",
+        "correct": false
+      }
+    ],
+    "explanation": "Az effektív érték a négyzetek átlagából vont gyök: √(0,5 · 10² + 0,5 · 0²) A = √50 A ≈ 7,07 A. Ez az az egyenáram-érték, amely ugyanannyi hőt fejleszt, ezért a vezeték melegedése szempontjából a 7,07 A számít, nem az 5 A-es átlag.",
+    "ref": "elektromos-aram#az-effektiv-ertek",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0009",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 1,
+    "type": "truefalse",
+    "stem": "Az amperóra (Ah) energiaegység: egy akkumulátor Ah-ban megadott adata közvetlenül megmutatja a tárolt energiát.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": false
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": true
+      }
+    ],
+    "explanation": "Az amperóra töltésmennyiség (1 Ah = 3600 C), nem energia. Energiát csak a feszültséggel szorozva kapunk: például 12 V · 2 Ah = 24 Wh.",
+    "ref": "elektromos-aram#mi-az-elektromos-aram",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0010",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy egyfázisú, induktív fogyasztó adatai: U = 230 V, I = 5 A, cos φ = 0,8. Mekkora a hatásos teljesítménye?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "690 W",
+        "correct": false,
+        "why": "Ez a meddő teljesítmény számértéke (U · I · sin φ), mértékegysége var."
+      },
+      {
+        "id": "b",
+        "text": "920 W",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "1150 W",
+        "correct": false,
+        "why": "Ez a látszólagos teljesítmény (U · I), mértékegysége VA."
+      },
+      {
+        "id": "d",
+        "text": "1437,5 W",
+        "correct": false,
+        "why": "Itt a cos φ-vel osztottak szorzás helyett."
+      }
+    ],
+    "explanation": "A hatásos teljesítmény P = U · I · cos φ = 230 V · 5 A · 0,8 = 920 W. A látszólagos teljesítmény S = U · I = 1150 VA, a meddő Q = S · sin φ = 1150 · 0,6 = 690 var; ellenőrzésként √(920² + 690²) = 1150.",
+    "ref": "elektromos-teljesitmeny#egyfazisu-valtakozo-aram-p-q-s-es-cos",
+    "shuffle": false,
+    "family": "p-cosfi",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0011",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy 11 kW-os, háromfázisú, tisztán ohmos fűtés 400 V-os vonali feszültségről üzemel (cos φ = 1). Mekkora a fázisvezetők árama?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "kb. 9,2 A",
+        "correct": false,
+        "why": "Ez P / (3 · 400 V); a 3-as szorzó a fázisfeszültséghez tartozik, nem a vonalihoz."
+      },
+      {
+        "id": "b",
+        "text": "kb. 15,9 A",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "27,5 A",
+        "correct": false,
+        "why": "A √3 kimaradt: P / U_v kb. 1,73-szoros hibát ad."
+      },
+      {
+        "id": "d",
+        "text": "kb. 47,8 A",
+        "correct": false,
+        "why": "Ez P / 230 V, mintha az egész teljesítmény egy fázison lenne."
+      }
+    ],
+    "explanation": "Szimmetrikus háromfázisú terhelésnél I = P / (√3 · U_v · cos φ) = 11 000 W / (1,732 · 400 V) ≈ 15,9 A. A √3 elhagyása (27,5 A) a leggyakoribb hiba; ugyanez fázisfeszültséggel számolva: 11 000 / (3 · 230,9) ≈ 15,9 A.",
+    "ref": "elektromos-teljesitmeny#aram-a-teljesitmenybol",
+    "shuffle": false,
+    "family": "aram-3f",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0012",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Egy 2000 W-os vízforraló naponta összesen 15 percig működik. Mennyi villamos energiát használ el naponta?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "0,25 kWh",
+        "correct": false
+      },
+      {
+        "id": "b",
+        "text": "0,5 kWh",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "2 kWh",
+        "correct": false,
+        "why": "A 2 kW teljesítmény, nem napi energia; a működési idővel szorozni kell."
+      },
+      {
+        "id": "d",
+        "text": "30 kWh",
+        "correct": false,
+        "why": "A perceket órára kell váltani: 15 perc = 0,25 h."
+      }
+    ],
+    "explanation": "Az energia a teljesítmény és az idő szorzata: W = 2 kW · 0,25 h = 0,5 kWh. A kW teljesítmény (milyen gyorsan fogy az energia), a kWh energia (mennyi fogyott).",
+    "ref": "elektromos-teljesitmeny#energia-es-fogyasztas",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0013",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 3,
+    "type": "multi",
+    "stem": "Melyik állítás igaz szinuszos feszültségnél és áramnál a hatásos (P), a meddő (Q) és a látszólagos (S) teljesítményre? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "S = U · I, mértékegysége a VA",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "S² = P² + Q²",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "A fogyasztásmérő a hatásos energiát méri",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "A meddő teljesítmény munkát végez a fogyasztóban, ezért ezt is a hatásos részhez kell adni",
+        "correct": false,
+        "why": "A meddő teljesítmény munkát nem végez, csak ide-oda áramlik."
+      },
+      {
+        "id": "e",
+        "text": "A VA és a W minden terhelésnél egyenlő",
+        "correct": false,
+        "why": "Csak cos φ = 1 (tisztán ohmos terhelés) esetén."
+      }
+    ],
+    "explanation": "A három teljesítmény derékszögű háromszöget alkot: S² = P² + Q², és cos φ = P / S. A meddő teljesítmény munkát nem végez, de növeli az áramot és így a vezeték melegedését, a fogyasztásmérő pedig a hatásos energiát méri.",
+    "ref": "elektromos-teljesitmeny#egyfazisu-valtakozo-aram-p-q-s-es-cos",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0014",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Egy lakáselosztó fázissínjéről egyszerre három, ellenállásjellegű áramkör működik: 8,7 A, 5,0 A és 4,0 A árammal. Mekkora áram folyik be a fázissín csomópontjába?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "5,9 A",
+        "correct": false,
+        "why": "Ez az átlag; a csomóponti törvény összeget ír elő."
+      },
+      {
+        "id": "b",
+        "text": "8,7 A",
+        "correct": false
+      },
+      {
+        "id": "c",
+        "text": "17,7 A",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "35,4 A",
+        "correct": false
+      }
+    ],
+    "explanation": "Kirchhoff csomóponti törvénye szerint a csomópontba befolyó áram egyenlő a kifolyó áramok összegével: 8,7 + 5,0 + 4,0 = 17,7 A. Az egyszerű összeadás itt azért megengedett, mert mindhárom terhelés ohmos, azaz az áramok fázisban vannak.",
+    "ref": "kirchhoff-torvenyei#szampelda-aram-a-lakaseloszto-fazissinjen",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0015",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Háromfázisú elosztásban az L1 és az L2 fázison 10–10 A, az L3-on 0 A folyik, a terhelések tisztán ohmosak (szinuszos áram). Mekkora áram folyik a közös nullavezetőben?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "0 A",
+        "correct": false,
+        "why": "Nulla csak kiegyenlített terhelésnél adódik."
+      },
+      {
+        "id": "b",
+        "text": "10 A",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "kb. 14,1 A",
+        "correct": false
+      },
+      {
+        "id": "d",
+        "text": "20 A",
+        "correct": false,
+        "why": "A fázisáramok effektív értékei a 120°-os eltolás miatt nem adódnak össze egyszerűen."
+      }
+    ],
+    "explanation": "A nullavezető árama a 120°-kal eltolt fázisáramok vektoros összege: I_N = √(I1² + I2² + I3² − I1·I2 − I2·I3 − I3·I1) = √(100 + 100 + 0 − 100 − 0 − 0) A = 10 A. Torzított áramú fogyasztóknál (LED-meghajtók, számítógépek) a nullavezető árama ennél nagyobb is lehet.",
+    "ref": "kirchhoff-torvenyei#valtakozo-aramnal-pillanatertekek-es-fazisszog",
+    "shuffle": false,
+    "family": "nulla-aram",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0016",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "Egy ép, szivárgás nélküli egyfázisú áramkörben a nullavezetőn ugyanakkora áram folyik vissza, mint amekkora a fázisvezetőn a fogyasztó felé folyik.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "Soros áramkörben az áram minden pontban ugyanakkora, ezért a nullavezető árama megegyezik a fázisvezetőével. Ha a kettő eltér, az áram egy része más úton (például a védővezetőn) folyik el; ezt a különbséget érzékeli az áram-védőkapcsoló.",
+    "ref": "elektromos-aram#aramerosseg-a-gyakorlatban",
+    "shuffle": false,
+    "family": "nulla-egyfazis",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0017",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Két egyforma, 230 V-on egyenként 1000 W-os fűtőbetétet sorosan kötünk, és 230 V-ra kapcsolunk. Mekkora az együttes teljesítményük (az ellenállásukat állandónak véve)?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "250 W",
+        "correct": false,
+        "why": "Ennyi jut egy betétre; a kérdés a kettő együttes teljesítménye."
+      },
+      {
+        "id": "b",
+        "text": "500 W",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "1000 W",
+        "correct": false
+      },
+      {
+        "id": "d",
+        "text": "2000 W",
+        "correct": false,
+        "why": "Ennyi párhuzamos kapcsolásnál adódik."
+      }
+    ],
+    "explanation": "Egy betét ellenállása R = 230² / 1000 = 52,9 Ω, a soros eredő 105,8 Ω, így P = 230² / 105,8 = 500 W. Mindkét betétre csak a feszültség fele jut, ezért betétenként a teljesítmény a névleges negyede (250 W), a kettő együtt 500 W.",
+    "ref": "soros-es-parhuzamos-kapcsolas#kidolgozott-pelda-ketfokozatu-futes-ket-futobetettel",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0018",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Miért kapja a lakásban minden bekapcsolt fogyasztó a teljes, 230 V-os hálózati feszültséget?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Mert a fogyasztók a fázis- és a nullavezető közé, egymással párhuzamosan kapcsolódnak",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Mert a fogyasztók sorba vannak kötve, és a feszültség megoszlik közöttük",
+        "correct": false,
+        "why": "Soros kapcsolásnál éppen hogy nem kapná meg mindegyik a teljes feszültséget."
+      },
+      {
+        "id": "c",
+        "text": "Mert minden dugalj mögött saját transzformátor van",
+        "correct": false
+      },
+      {
+        "id": "d",
+        "text": "Mert a kismegszakító minden fogyasztónak külön 230 V-ot állít elő",
+        "correct": false,
+        "why": "A kismegszakító védelmi eszköz, feszültséget nem állít elő."
+      }
+    ],
+    "explanation": "Párhuzamos kapcsolásban minden elem ugyanarra a két pontra csatlakozik, így ugyanazt a feszültséget kapja. Ennek következménye az is, hogy minden újabb bekapcsolt készülékkel nő az áramkör összárama.",
+    "ref": "soros-es-parhuzamos-kapcsolas#a-lakas-fogyasztoi-parhuzamosan-kapcsolodnak",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0019",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Hogyan változik egy vezetékben fejlődő hő, ha a rajta átfolyó áram kétszeresére nő (az ellenállás és az idő változatlan)?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Kétszeresére nő",
+        "correct": false,
+        "why": "A hő az áram négyzetével arányos, nem az árammal."
+      },
+      {
+        "id": "b",
+        "text": "Négyszeresére nő",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "Nyolcszorosára nő",
+        "correct": false
+      },
+      {
+        "id": "d",
+        "text": "Változatlan marad, mert az ellenállás ugyanaz",
+        "correct": false
+      }
+    ],
+    "explanation": "A Joule–Lenz-törvény szerint Q = I² · R · t, vagyis a hő az áram négyzetével arányos: kétszeres áram négyszeres hőt termel. Ezért melegszik a túlterhelt vezeték a vártnál sokkal jobban.",
+    "ref": "joule-lenz-torveny#a-negyzetes-osszefugges",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-alap-0020",
+    "version": 1,
+    "topic": "alapfogalmak-szamitasok",
+    "difficulty": 3,
+    "type": "multi",
+    "stem": "Egy 22 Ω-os és egy 47 Ω-os ellenállást párhuzamosan kapcsolunk. Melyik állítás igaz? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Az eredő ellenállás kb. 15 Ω, kisebb a legkisebb tagnál",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Az eredő R1 · R2 / (R1 + R2) alakban számolható",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "A 22 Ω-os ágon folyik a nagyobb áram",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "Az eredő 69 Ω, az ellenállások összege",
+        "correct": false,
+        "why": "Az ellenállások soros kapcsolásban adódnak össze."
+      },
+      {
+        "id": "e",
+        "text": "Ha a 47 Ω-os ág megszakad, a 22 Ω-os ág is áram nélkül marad",
+        "correct": false,
+        "why": "Párhuzamos kapcsolásban egy ág kiesése a többit nem érinti."
+      }
+    ],
+    "explanation": "Két párhuzamos tagra az eredő R1 · R2 / (R1 + R2) = 22 · 47 / 69 ≈ 14,99 Ω, ami mindig kisebb a legkisebb tagnál. Mivel mindkét ág ugyanazt a feszültséget kapja, a kisebb ellenállású ágon folyik a nagyobb áram, és egy ág kiesése a másikat nem érinti.",
+    "ref": "soros-es-parhuzamos-kapcsolas#parhuzamos-kapcsolas",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  }
+]

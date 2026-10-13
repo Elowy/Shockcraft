@@ -1,5 +1,5 @@
 [Unit]
-Description=ShockCraft electrical planner
+Description=Villanyrajz electrical planner
 After=network-online.target
 Wants=network-online.target
 

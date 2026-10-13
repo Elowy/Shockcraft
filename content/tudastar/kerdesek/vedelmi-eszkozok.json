@@ -1,0 +1,805 @@
+[
+  {
+    "id": "q-ved-0001",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mit véd elsősorban a kismegszakító?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A vezetéket a túlterhelés és a zárlat okozta túlmelegedéstől",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A csatlakoztatott készüléket a saját belső meghibásodásának következményeitől",
+        "correct": false,
+        "why": "A készüléket a saját belső védelme óvja; a kismegszakító a vezetékhez van méretezve."
+      },
+      {
+        "id": "c",
+        "text": "Az embert attól, hogy a fázis érintésekor áramütés érje",
+        "correct": false,
+        "why": "A testen átfolyó, már veszélyes áram nagyságrendekkel kisebb a kismegszakító kioldási áramánál; erre az áram-védőkapcsoló szolgál."
+      },
+      {
+        "id": "d",
+        "text": "A hálózatot a villámcsapás okozta túlfeszültségtől",
+        "correct": false,
+        "why": "Erre túlfeszültség-védelmi eszköz szolgál; a kismegszakító túláram ellen véd."
+      }
+    ],
+    "explanation": "A kismegszakító túláram ellen véd: túlterhelésnél a hőkioldója késleltetve, zárlatnál az elektromágneses kioldója azonnal bont, mielőtt a vezeték szigetelése és a kötések túlmelegednének. Ezért a névleges áramát a vezeték terhelhetőségéhez kell választani, nem a csatlakoztatott készülékhez.",
+    "ref": "kismegszakito#mire-valo",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0002",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mit jelent egy kismegszakító előlapján a „C16” felirat?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "C jelleggörbe és 16 A névleges áram",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "16 mA névleges különbözeti áramú, C típusú áram-védőkapcsoló",
+        "correct": false,
+        "why": "A különbözeti áram az áram-védőkapcsoló jellemzője, IΔn jellel adják meg."
+      },
+      {
+        "id": "c",
+        "text": "C osztályú, 16 kA megszakítóképességű készülék",
+        "correct": false,
+        "why": "A megszakítóképességet keretbe írt szám jelöli, amperben."
+      },
+      {
+        "id": "d",
+        "text": "Legfeljebb 16 kapcsolási ciklusra szánt C kivitel",
+        "correct": false
+      }
+    ],
+    "explanation": "A betű a kioldási jelleggörbe: azt mutatja, a névleges áram hányszorosánál old ki azonnal az elektromágneses kioldó (C: 5–10 · In). A szám a névleges áram amperben; hogy egy áramkörhöz mekkora kell, az méretezés kérdése (Ib ≤ In ≤ Iz).",
+    "ref": "kismegszakito#kapcsok-es-feliratok",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0003",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy B16-os kismegszakító elektromágneses kioldója milyen áramtartományban működik azonnal (a tartomány felső határán már biztosan)?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "18,1–23,2 A",
+        "correct": false,
+        "why": "Ez az 1,13 · In és az 1,45 · In közötti hőkioldói sáv, ahol a kioldás késleltetett."
+      },
+      {
+        "id": "b",
+        "text": "48–80 A",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "80–160 A",
+        "correct": false,
+        "why": "Ez a C16-os kismegszakító tartománya (5–10 · In)."
+      },
+      {
+        "id": "d",
+        "text": "160–320 A",
+        "correct": false,
+        "why": "Ez a D16-os kismegszakító tartománya (10–20 · In)."
+      }
+    ],
+    "explanation": "A B jelleggörbe azonnali kioldási tartománya a névleges áram 3–5-szöröse: 3 · 16 A = 48 A és 5 · 16 A = 80 A. A tartomány alsó határa alatt a kioldás még nem azonnali, a felső határánál már biztosan az; a pontos görbét a gyártói adatlap adja meg.",
+    "ref": "rovidzarlat-es-tulterheles#miert-old-le-azonnal",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0004",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "A kismegszakító melyik része működik egy ép, de túlterhelt áramkörben, ahol az áram a névlegesnek csak kis többszöröse?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A hőkioldó (ikerfém), késleltetve",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Az elektromágneses kioldó, a másodperc töredéke alatt",
+        "correct": false,
+        "why": "Az elektromágneses kioldó zárlati nagyságrendű áramra, azonnal működik."
+      },
+      {
+        "id": "c",
+        "text": "Az ívoltó kamra, amely a túláramot elvezeti",
+        "correct": false,
+        "why": "Az ívoltó kamra a bontáskor keletkező ívet oltja, kioldást nem kezdeményez."
+      },
+      {
+        "id": "d",
+        "text": "A próbagomb belső ellenállása",
+        "correct": false,
+        "why": "Próbagombja az áram-védőkapcsolónak van, nem a kismegszakítónak."
+      }
+    ],
+    "explanation": "Túlterhelésnél a hőkioldó ikerféme lassan melegszik és hajlik el, ezért késleltetve old ki; minél nagyobb a túlterhelés, annál hamarabb. Az elektromágneses kioldó a zárlati nagyságrendű áramra, azonnal működik.",
+    "ref": "kismegszakito#ket-kioldo-egy-keszulekben",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0005",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "Egy 16 A névleges áramú kismegszakító 17 A-es tartós terhelőáramnál akár egy óránál tovább is bekapcsolva maradhat.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "Az 1,13 · In = 18,08 A-es egyezményes áramnál a kismegszakító legalább egy óráig nem old ki, így a 17 A-es áramnál is hosszan bekapcsolva maradhat. Egy órán belül biztosan csak 1,45 · In = 23,2 A-nél old ki; ezért kell a vezetéket úgy megválasztani, hogy ezt a sávot is elviselje (I2 ≤ 1,45 · Iz).",
+    "ref": "rovidzarlat-es-tulterheles#szampelda-tulterhelt-dugaljkor",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0006",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy áramkör tervezett üzemi árama (Ib) 10 A, a vezeték terhelhetősége (Iz) az adott beépítési körülmények között 18 A. Az alábbi névleges áramok közül melyik teljesíti az Ib ≤ In ≤ Iz feltételt?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "6 A",
+        "correct": false,
+        "why": "In < Ib: a kismegszakító már az üzemi áramnál is kioldhatna."
+      },
+      {
+        "id": "b",
+        "text": "16 A",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "20 A",
+        "correct": false,
+        "why": "In > Iz: a vezeték túlmelegedhet, mielőtt a védelem működne."
+      },
+      {
+        "id": "d",
+        "text": "25 A",
+        "correct": false,
+        "why": "In > Iz: a vezeték túlterhelés elleni védelme nem biztosított."
+      }
+    ],
+    "explanation": "A névleges áram nem lehet kisebb az üzemi áramnál (10 A), és nem lehet nagyobb a vezeték terhelhetőségénél (18 A); a felsoroltak közül csak a 16 A esik a kettő közé. Kismegszakítónál az I2 ≤ 1,45 · Iz feltétel ezzel együtt teljesül, mert az egyezményes kioldóáram I2 = 1,45 · In.",
+    "ref": "kismegszakito#az-ib-in-iz-elve",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0007",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy dugaljkör kismegszakítója rendszeresen leold, amikor egyszerre több nagy fogyasztó működik rajta. Mi a helyes megközelítés?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Az okot szakemberrel felderíttetni; a terhelés megosztása vagy új áramkör segíthet",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Nagyobb névleges áramú kismegszakítót kell beépíteni, hogy ne oldjon le",
+        "correct": false,
+        "why": "A nagyobb kismegszakító már nem védi a vezetéket: az előbb melegedhet túl, mint hogy a védelem működne."
+      },
+      {
+        "id": "c",
+        "text": "Egy azonos névleges áramú, de D jelleggörbéjű kismegszakító megoldja a problémát",
+        "correct": false,
+        "why": "A jelleggörbe a zárlati kioldást befolyásolja, a túlterhelésit nem; a magasabb betűhöz ráadásul nagyobb zárlati áram kell."
+      },
+      {
+        "id": "d",
+        "text": "Addig kell visszakapcsolni, amíg bent marad, mert a kioldás csak átmeneti zavar",
+        "correct": false,
+        "why": "Az ismételt visszakapcsolás nem szünteti meg az okot, és veszélyes lehet."
+      }
+    ],
+    "explanation": "A túlterhelés miatti leoldás azt jelzi, hogy az áramkörön a megengedettnél több áram folyik; a kismegszakító ilyenkor éppen a vezetéket védi. A megoldás a terhelés csökkentése vagy megosztása, illetve egy szakember által tervezett új áramkör, nem a védelem „erősítése”.",
+    "ref": "rovidzarlat-es-tulterheles#gyakori-tevedesek",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0008",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mit figyel az áram-védőkapcsoló (FI-relé)?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Az áramkörbe befolyó és az onnan visszatérő áram különbségét",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A fázisvezető áramának nagyságát, és túláramnál kiold",
+        "correct": false,
+        "why": "Ez a túláramvédelem (kismegszakító) feladata."
+      },
+      {
+        "id": "c",
+        "text": "A hálózati feszültség nagyságát és ingadozását",
+        "correct": false
+      },
+      {
+        "id": "d",
+        "text": "A vezeték hőmérsékletét egy beépített ikerfémmel",
+        "correct": false,
+        "why": "Ikerfémes hőkioldó a kismegszakítóban van."
+      }
+    ],
+    "explanation": "A fázis- és a nullavezető együtt halad át az összegáramváltó vasmagján; ép áramkörben a két áram egyenlő és ellentétes irányú, hatásuk kioltja egymást. Ha az áram egy része más úton (a védővezetőn, a földön vagy egy emberen át) tér vissza, különbség marad, és a készülék kiold.",
+    "ref": "aram-vedokapcsolo-fi-rele#hogyan-mukodik",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0009",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 2,
+    "type": "multi",
+    "stem": "Az alábbi helyzetek közül melyekben NEM old ki önmagában az áram-védőkapcsoló (FI-relé)? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Tisztán fázis–nulla rövidzárlat, amelyben nincs áramút a föld vagy a védővezető felé",
+        "correct": true,
+        "why": "Az áram a vasmagon át be- és visszafolyik, különbözeti áram nem keletkezik."
+      },
+      {
+        "id": "b",
+        "text": "Túlterhelés: túl sok fogyasztó működik egy ép áramkörön",
+        "correct": true,
+        "why": "A befolyó és a visszatérő áram ilyenkor is egyenlő."
+      },
+      {
+        "id": "c",
+        "text": "Valaki a földtől elszigetelve egyszerre érinti a fázis- és a nullavezetőt",
+        "correct": true,
+        "why": "Az ember ilyenkor úgy viselkedik, mint egy fogyasztó: nincs különbözeti áram."
+      },
+      {
+        "id": "d",
+        "text": "Testzárlat, amelynél a hibaáram a védővezetőn tér vissza, és eléri a névleges különbözeti áramot",
+        "correct": false,
+        "why": "A védővezetőn visszatérő áram megkerüli a vasmagot, ezért a FI-relé kiold."
+      },
+      {
+        "id": "e",
+        "text": "Valaki a fázist érinti, és a testén át a föld felé a kioldási értéket elérő áram folyik",
+        "correct": false,
+        "why": "Ez a kiegészítő védelem tipikus esete: a FI-relé kiold."
+      }
+    ],
+    "explanation": "Az áram-védőkapcsoló csak a befolyó és a visszatérő áram különbségére old ki. Túlterhelésnél, tisztán fázis–nulla zárlatnál és a földtől elszigetelt fázis–nulla érintésnél nincs különbség, ezért a túláram ellen kismegszakító vagy kombinált védelem (RCBO) kell. Testzárlatnál és fázis–föld érintésnél viszont az áram egy része a vasmagot megkerülve tér vissza, ilyenkor a készülék kiold.",
+    "ref": "aram-vedokapcsolo-fi-rele#mi-ellen-nem-ved",
+    "shuffle": true,
+    "family": "fi-nem-old-ki",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0010",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mire szolgál elsősorban a 30 mA névleges különbözeti áramú áram-védőkapcsoló?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Személyvédelmi célú kiegészítő védelemre áramütés ellen",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A vezetékek túlterhelés elleni védelmére",
+        "correct": false,
+        "why": "Túlterhelés ellen a kismegszakító véd; a FI-relé a túláramot nem érzékeli."
+      },
+      {
+        "id": "c",
+        "text": "A nagy zárlati áram gyors megszakítására",
+        "correct": false,
+        "why": "Tisztán fázis–nulla zárlatnál nincs különbözeti áram, ezért a FI-relé nem old ki."
+      },
+      {
+        "id": "d",
+        "text": "A hálózatból érkező túlfeszültség levezetésére",
+        "correct": false
+      }
+    ],
+    "explanation": "A 30 mA-es érzékenység személyvédelmi célú kiegészítő védelem: kiold, ha valakin át a fázisból a föld felé elegendő áram folyik, és ezzel az áramütés időtartamát korlátozza. A 100 vagy 300 mA-es készülékek tűzvédelmi vagy csoportvédelmi célúak, közvetlen érintés elleni kiegészítő védelemre nem alkalmasak.",
+    "ref": "aram-vedokapcsolo-fi-rele#a-30-ma-es-a-tobbi-erzekenyseg",
+    "shuffle": true,
+    "family": "fi-erzekenyseg",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0011",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "A 300 mA névleges különbözeti áramú áram-védőkapcsoló a közvetlen érintés elleni, személyvédelmi célú kiegészítő védelemre is alkalmas.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": false
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": true
+      }
+    ],
+    "explanation": "A 100 vagy 300 mA-es készülékek tűzvédelmi célúak vagy csoportvédelemre szolgálnak; a személyvédelmi kiegészítő védelemhez legfeljebb 30 mA névleges különbözeti áramú készülék kell (különleges helyeken esetenként ennél érzékenyebbet is alkalmaznak). Hogy melyik áramkörre milyen érzékenységű védelem kell, azt a tervező a hatályos előírások alapján határozza meg.",
+    "ref": "aram-vedokapcsolo-fi-rele#a-30-ma-es-a-tobbi-erzekenyseg",
+    "shuffle": false,
+    "family": "fi-erzekenyseg",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0012",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Egy 30 mA névleges különbözeti áramú (IΔn) áram-védőkapcsoló kioldási határairól, szinuszos váltakozó különbözeti áramnál, melyik állítás helyes?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "15 mA különbözeti áramnál még nem old ki, 30 mA-nél már biztosan kiold",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Már 1 mA különbözeti áramnál biztosan kiold, ezért nagyon érzékeny",
+        "correct": false,
+        "why": "Az IΔn fele alatt a készülék nem old ki; a kis szivárgóáramok ezért nem okoznak kioldást."
+      },
+      {
+        "id": "c",
+        "text": "Csak 60 mA fölött old ki biztosan, 30 mA-nél még nem",
+        "correct": false,
+        "why": "A névleges különbözeti áramnál a kioldásnak biztosan meg kell történnie."
+      },
+      {
+        "id": "d",
+        "text": "A kioldás a terhelőáram nagyságától függ, a különbözeti áramtól nem",
+        "correct": false,
+        "why": "A FI-relé éppen a különbözeti áramot figyeli."
+      }
+    ],
+    "explanation": "A névleges különbözeti áram felénél a készülék még nem, a névleges értéknél már biztosan kiold; 30 mA-es készüléknél tehát 15 mA-nél még nem, 30 mA-nél biztosan. A kettő között a tényleges kioldási pont készülékenként eltér; általános (késleltetés nélküli) kivitelnél a kioldási idő IΔn-nél legfeljebb 0,3 s, ötszörösénél legfeljebb 0,04 s.",
+    "ref": "aram-vedokapcsolo-fi-rele#hogyan-mukodik",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0013",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Az áram-védőkapcsolók alábbi típusai közül melyik érzékeli a sima (hullámosságmentes) egyenáramú hibaáramot is?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "AC típus",
+        "correct": false,
+        "why": "Az AC típus csak a szinuszos váltakozó hibaáramot érzékeli."
+      },
+      {
+        "id": "b",
+        "text": "A típus",
+        "correct": false,
+        "why": "Az A típus a lüktető (egyenirányított) egyenáramot érzékeli, a simát nem."
+      },
+      {
+        "id": "c",
+        "text": "F típus",
+        "correct": false,
+        "why": "Az F az A-n túl a vegyes frekvenciájú hibaáramot érzékeli, a sima egyenáramot nem."
+      },
+      {
+        "id": "d",
+        "text": "B típus",
+        "correct": true
+      }
+    ],
+    "explanation": "A B típus az F típus képességein túl a sima egyenáramú hibaáramot is érzékeli; ilyen hibaáram például háromfázisú frekvenciaváltóknál, egyes elektromosautó-töltőknél és napelemes invertereknél fordulhat elő. A sima egyenáram „elvakíthatja” az AC vagy A típusú készüléket, ezért a típust a csatlakozó készülékek és a gyártói előírások alapján a tervező választja meg.",
+    "ref": "aram-vedokapcsolo-fi-rele#tipusok-ac-a-f-b",
+    "shuffle": true,
+    "family": "fi-b-tipus",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0014",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mit ellenőriz az áram-védőkapcsoló „T” jelű próbagombja?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A kioldó szerkezet és a belső próbaáramkör működését",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A védővezető folytonosságát egészen a dugaljakig",
+        "correct": false,
+        "why": "A próbaáramkör nem halad át a védővezetőn."
+      },
+      {
+        "id": "c",
+        "text": "A pontos kioldási áramot és a kioldási időt",
+        "correct": false,
+        "why": "Ezeket a szakember műszerrel méri."
+      },
+      {
+        "id": "d",
+        "text": "Az épület földelési ellenállásának nagyságát",
+        "correct": false
+      }
+    ],
+    "explanation": "A próbagomb egy ellenálláson át különbözeti áramot hoz létre a készüléken belül, így a kioldó szerkezet működését ellenőrzi; a gyártó által megadott időközönként érdemes megnyomni. A kioldási áramot és időt, valamint a védővezetőt nem vizsgálja, ezeket a szakember műszerrel méri; ha a készülék a gombra nem old ki, szakembert kell hívni.",
+    "ref": "aram-vedokapcsolo-fi-rele#a-probagomb",
+    "shuffle": true,
+    "family": "fi-probagomb",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0015",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Mit egyesít egy készülékben a kombinált védelem (RCBO, „áramvédős kismegszakító”)?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A túláramvédelmet és a különbözetiáram-védelmet, áramkörönként",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A kismegszakítót és egy túlfeszültség-levezetőt, közös házban",
+        "correct": false
+      },
+      {
+        "id": "c",
+        "text": "Két különböző jelleggörbéjű kismegszakítót egyetlen modulban",
+        "correct": false
+      },
+      {
+        "id": "d",
+        "text": "Az áram-védőkapcsolót és a főkapcsolót, túláramvédelem nélkül",
+        "correct": false,
+        "why": "Az RCBO-nak éppen a beépített túláramvédelem a lényege."
+      }
+    ],
+    "explanation": "Az RCBO a túlterhelés és a zárlat elleni védelmet és a különbözeti áram figyelését egyetlen, áramkörönkénti készülékben valósítja meg. Előnye, hogy egy áramkör szivárgása csak azt az áramkört kapcsolja le, a többit nem.",
+    "ref": "kismegszakito#kismegszakito-fi-rele-kombinalt-vedelem",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0016",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Mit jelent a kismegszakító előlapján a keretbe írt „6000” szám?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A névleges zárlati megszakítóképességet amperben",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A legnagyobb tartósan kapcsolható teljesítményt wattban",
+        "correct": false
+      },
+      {
+        "id": "c",
+        "text": "Az élettartam alatt megengedett kapcsolások számát",
+        "correct": false
+      },
+      {
+        "id": "d",
+        "text": "A készülék lökőfeszültség-állóságát voltban",
+        "correct": false
+      }
+    ],
+    "explanation": "A keretbe írt szám azt mutatja, mekkora zárlati áramot tud a kismegszakító biztonságosan megszakítani, például 6000 A-t. A beépítés helyén várható legnagyobb zárlati áramnál nem lehet kisebb; a transzformátor közelében a zárlati áram több ezer amper is lehet.",
+    "ref": "kismegszakito#kapcsok-es-feliratok",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0017",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Egy hosszú, vékony vezetékű áramkör hibahurok-impedanciája nagy. Mi a kockázata, ha ide indokolatlanul D jelleggörbéjű kismegszakítót építenek be?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A hibaáram az azonnali kioldási tartomány alá eshet, csak a hőkioldó működne",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A kismegszakító már a normál üzemi áramnál is folyamatosan leold",
+        "correct": false,
+        "why": "A D jelleggörbe a zárlati kioldás küszöbét emeli, üzemi áramnál nem okoz kioldást."
+      },
+      {
+        "id": "c",
+        "text": "Az elé kötött áram-védőkapcsoló érzékenysége a felére csökken",
+        "correct": false
+      },
+      {
+        "id": "d",
+        "text": "A vezeték feszültségesése a jelleggörbe miatt jelentősen, akár kétszeresére megnő",
+        "correct": false,
+        "why": "A feszültségesést a vezeték ellenállása és az áram határozza meg, nem a védelem jelleggörbéje."
+      }
+    ],
+    "explanation": "A D jelleggörbéjű kismegszakító csak a névleges áram 10–20-szorosánál old ki azonnal, ehhez pedig kis hurokimpedancia kell. Nagy hurokimpedanciánál a zárlati áram ez alá eshet; testzárlatkor ilyenkor a fémtesteken a megengedettnél tovább maradhat veszélyes érintési feszültség. A jelleggörbe megválasztása tervezői döntés.",
+    "ref": "kismegszakito#b-c-es-d-jelleggorbe",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet",
+    "family": "jelleggorbe-hurok"
+  },
+  {
+    "id": "q-ved-0018",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Régi elosztóban kiolvadt egy olvadóbiztosító-betét. Mi igaz a cseréjére?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Csak azonos névleges áramú és jellegű betét kerülhet a helyére",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A nagyobb névleges áramú betét a jobb, mert az ritkábban olvad ki",
+        "correct": false,
+        "why": "A nagyobb betét már nem védi a vezetéket a túlmelegedéstől."
+      },
+      {
+        "id": "c",
+        "text": "A kiolvadt betét huzallal átkötve („megpatkolva”) tovább használható",
+        "correct": false,
+        "why": "Az átkötött biztosíték életveszélyes és tűzveszélyes: a védelem megszűnik."
+      },
+      {
+        "id": "d",
+        "text": "Bármilyen betét megfelel, amely a foglalatba illeszkedik",
+        "correct": false
+      }
+    ],
+    "explanation": "Az olvadóbiztosító ugyanazt a feladatot látja el, mint a kismegszakító: a névleges áramát a vezetékhez választották, ezért csak azonos névleges áramú és jellegű betét kerülhet a helyére. A „megpatkolt” biztosíték a védelmet teljesen megszünteti; ha egy betét ismételten kiolvad, az okot szakembernek kell megkeresnie.",
+    "ref": "kismegszakito#regi-berendezesben",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0019",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 3,
+    "type": "multi",
+    "stem": "Melyik állítás igaz a kismegszakítóra? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Elsősorban a vezetéket védi a túlmelegedéstől",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Szabadkioldású: hibánál akkor is kiold, ha a kart bekapcsolt helyzetben tartják",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "Az egypólusú kivitel csak a fázist bontja, ezért a lekapcsolása önmagában nem feszültségmentesítés",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "Kiold, ha valaki a fázist érinti, mert a testen átfolyó áram mindig eléri a kioldási értékét",
+        "correct": false,
+        "why": "A testen átfolyó áram nagyságrendekkel kisebb a kismegszakító kioldási áramánál."
+      },
+      {
+        "id": "e",
+        "text": "Ha gyakran leold, egy nagyobb névleges áramúra cserélve a vezeték védelme is javul",
+        "correct": false,
+        "why": "Éppen ellenkezőleg: a vezeték túlmelegedhet, mielőtt a nagyobb kismegszakító működne."
+      }
+    ],
+    "explanation": "A kismegszakító a vezetéket védi a túlmelegedéstől, és szabadkioldású, vagyis a kar lefogásával sem akadályozható meg a kioldás. Az egypólusú kivitel csak a fázist bontja, ezért a lekapcsolása önmagában nem feszültségmentesítés; a fázis érintésekor fellépő testáramra nem old ki, erre az áram-védőkapcsoló szolgál.",
+    "ref": "kismegszakito#mire-valo",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0020",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Egy lámpatestben az áram-védőkapcsoló utáni (védett oldali) nullavezetőt összekötötték a védővezetővel. Mi a várható következmény?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Terheléskor kiold, mert az áram egy része a védővezetőn tér vissza",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Semmi, mert a nulla- és a védővezető amúgy is azonos potenciálon van",
+        "correct": false,
+        "why": "A védett oldalon a nullavezető nem érintkezhet a védővezetővel; az áram megoszlik a két vezető között."
+      },
+      {
+        "id": "c",
+        "text": "A kismegszakító rövidzárlat miatt azonnal leold",
+        "correct": false,
+        "why": "A nulla–védővezető összekötés nem fázis–nulla zárlat; a kismegszakító nem érzékeli."
+      },
+      {
+        "id": "d",
+        "text": "A FI-relé érzékenysége megnő, így még gyorsabban véd",
+        "correct": false,
+        "why": "Éppen ellenkezőleg: amíg nem old ki, a hibaáram egy része a nullavezetőn tér vissza, és a védelem érzékenysége romlik."
+      }
+    ],
+    "explanation": "A védett oldalon a nullavezető sehol nem érintkezhet a védővezetővel vagy a földdel. Ha mégis, a terhelőáram egy része a védővezetőn tér vissza, megkerüli az összegáramváltót, és a FI-relé terheléskor kiold; amíg nem old ki, a védelem érzékenysége romlik.",
+    "ref": "aram-vedokapcsolo-fi-rele#gyakori-hibak",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0021",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Mire szolgál a túlfeszültség-védelmi eszköz (SPD, túlfeszültség-levezető)?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A rövid, nagy feszültségimpulzusok levezetésére a földelés felé",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A vezetékek tartós túlterhelésének lekapcsolására, késleltetve",
+        "correct": false,
+        "why": "Ez a kismegszakító feladata."
+      },
+      {
+        "id": "c",
+        "text": "A befolyó és a visszatérő áram különbségének figyelésére",
+        "correct": false,
+        "why": "Ez az áram-védőkapcsoló (FI-relé) feladata."
+      },
+      {
+        "id": "d",
+        "text": "A hálózati feszültség tartós csökkentésére 230 V alá",
+        "correct": false,
+        "why": "A túlfeszültség-védelem a rövid impulzusokat vezeti le, a hálózati feszültséget nem szabályozza."
+      }
+    ],
+    "explanation": "A túlfeszültség-védelmi eszköz a villámcsapásból vagy kapcsolási folyamatokból eredő rövid, nagy feszültségimpulzusokat a földelés felé vezeti le, és így védi a berendezést. Fokozatai az 1., a 2. és a 3. típus, a betáplálástól a fogyasztó felé haladva; a túláram és a különbözeti áram elleni védelmet nem helyettesíti.",
+    "ref": "szakszotar#betu-t",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-ved-0022",
+    "version": 1,
+    "topic": "vedelmi-eszkozok",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "Szelektív védelemnél hiba esetén csak a hibához legközelebbi védelmi készülék kapcsol le, a többi áramkör üzemben marad.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "A szelektivitás a sorba kapcsolt védelmi készülékek olyan összehangolása, hogy egy áramkör hibája ne kapcsolja le a többit vagy az egész lakást. Ezt szolgálja például, hogy minden áramkör saját kismegszakítót kap, és az áramkörönkénti kombinált védelem (RCBO) is, mert egy áramkör szivárgása ilyenkor csak azt az áramkört kapcsolja le.",
+    "ref": "szakszotar#betu-sz",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  }
+]

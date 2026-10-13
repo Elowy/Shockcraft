@@ -1,6 +1,6 @@
-# ShockCraft
+# Villanyrajz
 
-Magyar nyelvű villamos alaprajz- és lakáselosztó-tervező webalkalmazás.
+Magyar nyelvű villamos alaprajz- és lakáselosztó-tervező webalkalmazás (korábbi nevén ShockCraft; domain: villanyrajz.hu).
 
 ## Használat
 
@@ -14,6 +14,10 @@ Magyar nyelvű villamos alaprajz- és lakáselosztó-tervező webalkalmazás.
 - JSON export/import teljes tervhez; SVG export az aktuális alaprajzhoz. Ctrl+Z visszavon, Ctrl+Shift+Z újraalkalmaz, Ctrl+S ment.
 
 A bal oldali struktúrában a szobák, szintek és épületek/lakrészek mellett törlésgomb található. A szoba törlése csak a körvonalat és nevet távolítja el; a szint törlése annak teljes rajzát, az épület törlése annak szintjeit és villamos elosztását is eltávolítja. A telki hálózat önálló jelölései megmaradnak. Minden ilyen törlés egy lépésben visszavonható; az utolsó szint vagy épület is törölhető.
+
+## Kalkulátorok
+
+A `/kalkulatorok` oldalon ingyenes, belépés és süti nélkül használható villamos kalkulátorok érhetők el (Ohm-törvény, teljesítmény, áram, látszólagos és meddő teljesítmény, vezeték-ellenállás, eredő ellenállás és kapacitás, fogyasztás és költség, fázisterhelés, átváltók, színkód, feszültségosztó, lumen–lux, csillag–delta, transzformátor, akkumulátor, LED-előtét, reaktancia, hőmérséklet). Minden eredmény mértékegységgel, levezetéssel és forrással jelenik meg; a bemenetek megosztható URL-ben maradnak, a kedvenceket és a legutóbbiakat csak a böngésző tárolja. A szabványhoz kötött számítások (feszültségesés, keresztmetszet, kismegszakító, hurokimpedancia, terhelhetőség, motoráram, LED-tápegység, fázisjavítás) elkészültek, de csak szakmai lektor jóváhagyása után jelennek meg. Elérés: nyilvános fejléc, főoldal, a tervező felső sávja és Tervsegédje, valamint a Fázisterhelés fül mélylinkje. Részletek, kiadási folyamat: `docs/kalkulatorok.md`.
 
 ## Nyomtatás, hálózat és magasságok
 
@@ -30,7 +34,7 @@ A bal oldali struktúrában a szobák, szintek és épületek/lakrészek mellett
 
 ## Fiók és adatbázis
 
-A fejléc Belépés/Fiókom gombja a ShockCraft saját e-mailes regisztrációját, bejelentkezését és kijelentkezését nyitja meg. ChatGPT-fiók nem szükséges. Vendégként a tervek a böngészőben is menthetők; másik eszközön történő megnyitáshoz fiókba mentés vagy JSON-export/import szükséges. A szerver bcrypt jelszólenyomatot és lejáró, visszavonható munkameneteket tárol; a jelszó nem kerül a böngésző tárhelyére.
+A fejléc Belépés/Fiókom gombja a Villanyrajz saját e-mailes regisztrációját, bejelentkezését és kijelentkezését nyitja meg. ChatGPT-fiók nem szükséges. Vendégként a tervek a böngészőben is menthetők; másik eszközön történő megnyitáshoz fiókba mentés vagy JSON-export/import szükséges. A szerver bcrypt jelszólenyomatot és lejáró, visszavonható munkameneteket tárol; a jelszó nem kerül a böngésző tárhelyére.
 
 A `plans` táblában a korábbi mentés `account:<users.id>`, az új projektek `account:<users.id>:project:<UUID>` kulcsot használnak. Az összes projekt tulajdonosa a szerveroldali munkamenetből származik; a korábbi mentés változatlanul megmarad a projektlistában. A GET és PUT végpont is ellenőrzi a szerveroldali munkamenetet. A kliens nem választhat másik tulajdonost. A verzióellenőrzés megakadályozza az elavult ablakból történő felülírást, a fiókváltás ellenőrzése pedig a másik fiókba történő véletlen mentést. Az API-válaszok nem gyorsítótárazhatók.
 
@@ -40,7 +44,7 @@ MySQL-szerver hiányában a meglévő D1 adatbázis működik tovább. A MySQL-a
 
 ## Saját Node.js-tárhely és VPS
 
-A [telepítési útmutató](docs/telepites.md) és a [letölthető PDF](public/docs/ShockCraft-telepitesi-utmutato.pdf) végigvezet a MySQL, környezeti változók, HTTPS, Nginx, systemd, frissítés és mentés beállításán. A `deploy/` könyvtár konfigurációmintákat tartalmaz. Node.js-es fordítás: `npm run build:node`; indítás `.env.production` mellett: `npm run start:node`. A Node-változat MySQL-t igényel. Az alapértelmezett `build` továbbra is a Sites kiadást készíti. A két célt külön kiadási könyvtárban fordítsd, mert mindkettő a `dist/` könyvtárat használja.
+A [telepítési útmutató](docs/telepites.md) és a [letölthető PDF](public/docs/Villanyrajz-telepitesi-utmutato.pdf) végigvezet a MySQL, környezeti változók, HTTPS, Nginx, systemd, frissítés és mentés beállításán. A `deploy/` könyvtár konfigurációmintákat tartalmaz. Node.js-es fordítás: `npm run build:node`; indítás `.env.production` mellett: `npm run start:node`. A Node-változat MySQL-t igényel. Az alapértelmezett `build` továbbra is a Sites kiadást készíti. A két célt külön kiadási könyvtárban fordítsd, mert mindkettő a `dist/` könyvtárat használja.
 
 Az **Eszközök → Tervsegéd** anyagkimutatást ad épületenként vagy teljes projektre, állítható 0–50% kábelráhagyással és magyar Excel-kompatibilis CSV-exporttal. A méteradatok tartalmazzák a függőleges szakaszokat; egy rajzolt nyomvonal egy kábelt jelent. A kapcsolt telki elosztójelölést nem számolja kétszer. A kereső ékezet nélkül is keres szobák, szerelvények, nyomvonalak és elosztókészülékek között; a találat a megfelelő szintet és elemet nyitja meg.
 
@@ -53,7 +57,7 @@ Az adatbázissémát a db/schema.ts, a migrációkat a drizzle könyvtár tartal
     node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_perfect_absorbing_man.sql
     node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0001_omniscient_iceman.sql
 
-A migrációt helyi adatbázison egyszer kell alkalmazni. Éles telepítésnél a Sites végzi el. A .openai/hosting.json a meglévő Sites-alkalmazást azonosítja.
+A `drizzle/` könyvtár összes `.sql` fájlját sorrendben (0000–0011) kell alkalmazni, a fenti parancs `--file` paraméterét cserélve; meglévő helyi adatbázison csak a még nem alkalmazott, újabb fájlokat (például az ügyfél- és teendőkezeléshez tartozó `drizzle/0009_wonderful_lucky_pierre.sql`-t, a tervmegosztáshoz tartozó `drizzle/0010_late_king_cobra.sql`-t és a termékkatalógushoz tartozó, legutóbbi `drizzle/0011_colossal_madame_masque.sql`-t). A migrációt helyi adatbázison egyszer kell alkalmazni. Éles telepítésnél a Sites végzi el. A .openai/hosting.json a meglévő Sites-alkalmazást azonosítja.
 
 A saját hitelesítés integrációs ellenőrzése a helyi Worker és migrációk elindítása után: `node tests/auth-flow.mjs` (alapértelmezett cím: `http://127.0.0.1:5180`). Tesztfelhasználókat hoz létre kizárólag a helyi adatbázisban. MySQL-beállításellenőrzés: `node --experimental-strip-types tests/mysql-config.mjs`. Tényleges MySQL-kapcsolatot szerver hiányában még nem ellenőriztünk.
 
@@ -63,7 +67,7 @@ Az új változat ellenőrzése: magasságot figyelembe vevő geometria, kapcsolt
 
 TypeScript-ellenőrzés és gyártási build sikeres. Böngészőben ellenőrizve: szobarajzolás, falra illesztett dugalj, töréspontos nyomvonal, elosztómodul hozzáadás, visszavonás, mentés, mobilmenü. Célzottan ellenőrizve: geometria, modulátfedés, tartós visszaolvasás, elavult és hibás mentési kérések elutasítása. A read_electrical_plan WebMCP eszköz érvényes és hibás bemenettel ellenőrizve.
 
-Első tervezőszerkesztő-változat: téglalap alakú szobák, külön rajzolható falszakaszok, felhasználónként több mentett projekt, épületenként egy 72 modulos elosztó. Az SVG jelölések alkalmazássaját jelölések. Nincs automatikus villamos méretezés, szelektivitás-, feszültségesés- vagy szabványmegfelelőség-vizsgálat; a mintaterv értékei szerkeszthető példaadatok.
+Első tervezőszerkesztő-változat: téglalap alakú szobák, külön rajzolható falszakaszok, felhasználónként több mentett projekt, épületenként egy 72 modulos elosztó. Az SVG jelölések alkalmazássaját jelölések. A Méretezés fül tervezői ellenőrzést segítő segédszámítást ad (terhelhetőség, túlterhelés-védelem, feszültségesés, opcionálisan hurokimpedancia); szelektivitás-, zárlati szilárdság- és szabványmegfelelőség-vizsgálat nincs; a mintaterv értékei szerkeszthető példaadatok.
 
 
 ## Projektdíjak és Stripe

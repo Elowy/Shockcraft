@@ -62,6 +62,8 @@ export async function PATCH(req:Request){
   // Keep the plan and its entitlement. Revision guards also stop stale autosaves in other tabs.
   const changed=await db.run('UPDATE plans SET state = ?, state_changed_at = ?, revision = revision + 1 WHERE id = ? AND revision = ?',[data.state,now,key,data.revision]);
   if(!changed)return Response.json({error:'A projekt közben megváltozott. Frissítsd a projektlistát.'},{status:409,headers});
+  // A lomtárba tett projekt megosztási linkjei véglegesen megszűnnek; a visszaállítás sem éleszti újra őket.
+  if(data.state==='trash')try{await db.run('DELETE FROM plan_shares WHERE owner_id = ? AND project_key = ?',[user.userId,key])}catch(e){console.error('Share revoke failed',e instanceof Error?e.name:'Error')}
   return Response.json({projectId:data.projectId,userId:user.userId,revision:data.revision+1,state:data.state,stateChangedAt:now},{headers});
  })}catch{return Response.json({error:'A projekt állapota nem módosítható. Frissítsd a listát és próbáld újra.'},{status:503,headers})}
 }

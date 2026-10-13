@@ -1,0 +1,787 @@
+{
+ "format": "kb-netlista/1",
+ "id": "v09-idegen-nullasin-masik-fi",
+ "title": "PRÓBA (szándékosan hibás): Idegen nullasín: a konyhai kör a Q2 FI-relé után kap fázist, de a nullája a Q1 nullasínjén van",
+ "short": "Kismegszakítók – két áramkör",
+ "article": "kismegszakito",
+ "figure": "abra-2",
+ "version": 1,
+ "note": "Tervezet a szakmai lektornak (R3). Érszínek: barna = fázisvezető (L), kék = nullavezető (N), zöld-sárga = védővezető (PE). A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A betáp a lakáselosztó gyűjtősínjeit jelképezi (TN-C-S rendszer, a PEN szétválasztása a betáp előtt); a szétválasztási pont után a nulla- és a védővezető sehol nem köthető újra össze (a szimulátor az ilyen kötést zárlatként elutasítja). A mérőhelyi és csatlakozási rész az elosztói engedélyes hatásköre, ezért itt nem szerepel. A keresztmetszet és a kismegszakító névleges árama méretezés kérdése (lib/sizing-tables.ts, jóváhagyásra vár), ezért az ábra nem ad számot. A kismegszakítók táplálása fésűs sínnel vagy áthidalóval történik; az ábrán ez egy fázisvezetőként jelenik meg. A világítási áramkör ugyanígy kapcsolódik, csak a kismegszakító után kapcsoló és lámpa következik.",
+ "components": [
+  {
+   "id": "T",
+   "type": "tap",
+   "label": "Betáp (gyűjtősín)",
+   "symbol": "panel",
+   "at": "EL",
+   "megjegyzes": "A lakáselosztó betápja a fogyasztásmérő és a főkapcsoló után. A mérőhelyi rész az elosztói engedélyes hatásköre.",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ]
+  },
+  {
+   "id": "Q1",
+   "type": "fi-rele",
+   "label": "Q1 áram-védőkapcsoló (FI-relé)",
+   "symbol": "RCD",
+   "at": "EL",
+   "poles": [
+    [
+     "1",
+     "2"
+    ],
+    [
+     "N-be",
+     "N-ki"
+    ]
+   ],
+   "megjegyzes": "Kétpólusú (fázis + nulla) kivitel, IΔn = 30 mA. A kapocsjelölés és az, hogy a betáp felül vagy alul van, gyártónként eltérhet; a gyártói útmutató az irányadó.",
+   "terminals": [
+    {
+     "id": "1",
+     "role": "L",
+     "label": "1 (fázis, táp oldal)"
+    },
+    {
+     "id": "2",
+     "role": "L",
+     "label": "2 (fázis, védett oldal)"
+    },
+    {
+     "id": "N-be",
+     "role": "N",
+     "label": "N (táp oldal)"
+    },
+    {
+     "id": "N-ki",
+     "role": "N",
+     "label": "N (védett oldal)"
+    }
+   ],
+   "states": [
+    {
+     "name": "be",
+     "label": "bekapcsolva",
+     "connect": [
+      [
+       "1",
+       "2"
+      ],
+      [
+       "N-be",
+       "N-ki"
+      ]
+     ]
+    },
+    {
+     "name": "ki",
+     "label": "kikapcsolva",
+     "connect": []
+    }
+   ]
+  },
+  {
+   "id": "XN",
+   "type": "n-sin",
+   "label": "Nullasín (N) a FI-relé után",
+   "symbol": "NEUTRAL",
+   "at": "EL",
+   "megjegyzes": "Csak a Q1 által védett áramkörök nullavezetői kerülhetnek erre a sínre.",
+   "terminals": [
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    }
+   ]
+  },
+  {
+   "id": "XPE",
+   "type": "pe-sin",
+   "label": "PE-sín",
+   "symbol": "PE",
+   "at": "EL",
+   "terminals": [
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ]
+  },
+  {
+   "id": "F1",
+   "type": "kismegszakito",
+   "label": "F1 kismegszakító (nappali dugaljak)",
+   "symbol": "MCB",
+   "at": "EL",
+   "terminals": [
+    {
+     "id": "1",
+     "role": "L",
+     "label": "1 (be)"
+    },
+    {
+     "id": "2",
+     "role": "L",
+     "label": "2 (ki)"
+    }
+   ],
+   "states": [
+    {
+     "name": "be",
+     "label": "bekapcsolva",
+     "connect": [
+      [
+       "1",
+       "2"
+      ]
+     ]
+    },
+    {
+     "name": "ki",
+     "label": "kikapcsolva",
+     "connect": []
+    }
+   ]
+  },
+  {
+   "id": "F2",
+   "type": "kismegszakito",
+   "label": "F2 kismegszakító (konyhai dugaljak)",
+   "symbol": "MCB",
+   "at": "EL",
+   "terminals": [
+    {
+     "id": "1",
+     "role": "L",
+     "label": "1 (be)"
+    },
+    {
+     "id": "2",
+     "role": "L",
+     "label": "2 (ki)"
+    }
+   ],
+   "states": [
+    {
+     "name": "be",
+     "label": "bekapcsolva",
+     "connect": [
+      [
+       "1",
+       "2"
+      ]
+     ]
+    },
+    {
+     "name": "ki",
+     "label": "kikapcsolva",
+     "connect": []
+    }
+   ]
+  },
+  {
+   "id": "X1",
+   "type": "dugalj",
+   "label": "X1 dugalj (nappali)",
+   "symbol": "socket",
+   "at": "X1",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L kapocs"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N kapocs"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "védőérintkező kapocs"
+    }
+   ]
+  },
+  {
+   "id": "X2",
+   "type": "dugalj",
+   "label": "X2 dugalj (konyha)",
+   "symbol": "socket",
+   "at": "X2",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L kapocs"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N kapocs"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "védőérintkező kapocs"
+    }
+   ]
+  },
+  {
+   "id": "Q2",
+   "type": "fi-rele",
+   "label": "Q2 áram-védőkapcsoló (FI-relé)",
+   "symbol": "RCD",
+   "at": "EL",
+   "poles": [
+    [
+     "1",
+     "2"
+    ],
+    [
+     "N-be",
+     "N-ki"
+    ]
+   ],
+   "megjegyzes": "Kétpólusú (fázis + nulla) kivitel, IΔn = 30 mA. A kapocsjelölés és az, hogy a betáp felül vagy alul van, gyártónként eltérhet; a gyártói útmutató az irányadó.",
+   "terminals": [
+    {
+     "id": "1",
+     "role": "L",
+     "label": "1 (fázis, táp oldal)"
+    },
+    {
+     "id": "2",
+     "role": "L",
+     "label": "2 (fázis, védett oldal)"
+    },
+    {
+     "id": "N-be",
+     "role": "N",
+     "label": "N (táp oldal)"
+    },
+    {
+     "id": "N-ki",
+     "role": "N",
+     "label": "N (védett oldal)"
+    }
+   ],
+   "states": [
+    {
+     "name": "be",
+     "label": "bekapcsolva",
+     "connect": [
+      [
+       "1",
+       "2"
+      ],
+      [
+       "N-be",
+       "N-ki"
+      ]
+     ]
+    },
+    {
+     "name": "ki",
+     "label": "kikapcsolva",
+     "connect": []
+    }
+   ]
+  },
+  {
+   "id": "XN2",
+   "type": "n-sin",
+   "label": "Nullasín (N) a Q2 után",
+   "symbol": "NEUTRAL",
+   "at": "EL",
+   "megjegyzes": "Csak a Q1 által védett áramkörök nullavezetői kerülhetnek erre a sínre.",
+   "terminals": [
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    }
+   ]
+  }
+ ],
+ "sections": [
+  {
+   "id": "W1",
+   "from": "EL",
+   "to": "X1",
+   "label": "Elosztó – X1 dugalj (nappali)",
+   "kind": "dugalj"
+  },
+  {
+   "id": "W2",
+   "from": "EL",
+   "to": "X2",
+   "label": "Elosztó – X2 dugalj (konyha)",
+   "kind": "dugalj"
+  }
+ ],
+ "wires": [
+  {
+   "id": "w1",
+   "from": "T.L",
+   "to": "Q1.1",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna"
+  },
+  {
+   "id": "w2",
+   "from": "T.N",
+   "to": "Q1.N-be",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék"
+  },
+  {
+   "id": "w3",
+   "from": "Q1.N-ki",
+   "to": "XN.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék"
+  },
+  {
+   "id": "w4",
+   "from": "T.PE",
+   "to": "XPE.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga"
+  },
+  {
+   "id": "w5",
+   "from": "Q1.2",
+   "to": "F1.1",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna"
+  },
+  {
+   "id": "w6",
+   "from": "Q2.2",
+   "to": "F2.1",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna",
+   "label": "(fésűs sín)"
+  },
+  {
+   "id": "w7",
+   "from": "F1.2",
+   "to": "X1.L",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna",
+   "section": "W1"
+  },
+  {
+   "id": "w8",
+   "from": "XN.N",
+   "to": "X1.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék",
+   "section": "W1"
+  },
+  {
+   "id": "w9",
+   "from": "XPE.PE",
+   "to": "X1.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "W1"
+  },
+  {
+   "id": "w10",
+   "from": "F2.2",
+   "to": "X2.L",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna",
+   "section": "W2"
+  },
+  {
+   "id": "w11",
+   "from": "XN.N",
+   "to": "X2.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék",
+   "section": "W2"
+  },
+  {
+   "id": "w12",
+   "from": "XPE.PE",
+   "to": "X2.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "W2"
+  },
+  {
+   "id": "w20",
+   "from": "T.L",
+   "to": "Q2.1",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna"
+  },
+  {
+   "id": "w21",
+   "from": "T.N",
+   "to": "Q2.N-be",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék"
+  },
+  {
+   "id": "w22",
+   "from": "Q2.N-ki",
+   "to": "XN2.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék"
+  }
+ ],
+ "truthTable": [
+  {
+   "states": {
+    "Q1": "be",
+    "F1": "be",
+    "F2": "be",
+    "Q2": "be"
+   },
+   "lamps": {},
+   "outlets": {
+    "X1": true,
+    "X2": true
+   },
+   "trips": {
+    "Q1": false,
+    "Q2": false
+   }
+  },
+  {
+   "states": {
+    "Q1": "be",
+    "F1": "be",
+    "F2": "ki",
+    "Q2": "be"
+   },
+   "lamps": {},
+   "outlets": {
+    "X1": true,
+    "X2": false
+   },
+   "trips": {
+    "Q1": false,
+    "Q2": false
+   }
+  },
+  {
+   "states": {
+    "Q1": "be",
+    "F1": "ki",
+    "F2": "be",
+    "Q2": "be"
+   },
+   "lamps": {},
+   "outlets": {
+    "X1": false,
+    "X2": true
+   },
+   "trips": {
+    "Q1": false,
+    "Q2": false
+   }
+  },
+  {
+   "states": {
+    "Q1": "be",
+    "F1": "ki",
+    "F2": "ki",
+    "Q2": "be"
+   },
+   "lamps": {},
+   "outlets": {
+    "X1": false,
+    "X2": false
+   },
+   "trips": {
+    "Q1": false,
+    "Q2": false
+   }
+  },
+  {
+   "states": {
+    "Q1": "ki",
+    "F1": "be",
+    "F2": "be",
+    "Q2": "be"
+   },
+   "lamps": {},
+   "outlets": {
+    "X1": false,
+    "X2": false
+   },
+   "trips": {
+    "Q1": false,
+    "Q2": false
+   }
+  },
+  {
+   "states": {
+    "Q1": "ki",
+    "F1": "be",
+    "F2": "ki",
+    "Q2": "be"
+   },
+   "lamps": {},
+   "outlets": {
+    "X1": false,
+    "X2": false
+   },
+   "trips": {
+    "Q1": false,
+    "Q2": false
+   }
+  },
+  {
+   "states": {
+    "Q1": "ki",
+    "F1": "ki",
+    "F2": "be",
+    "Q2": "be"
+   },
+   "lamps": {},
+   "outlets": {
+    "X1": false,
+    "X2": false
+   },
+   "trips": {
+    "Q1": false,
+    "Q2": false
+   }
+  },
+  {
+   "states": {
+    "Q1": "ki",
+    "F1": "ki",
+    "F2": "ki",
+    "Q2": "be"
+   },
+   "lamps": {},
+   "outlets": {
+    "X1": false,
+    "X2": false
+   },
+   "trips": {
+    "Q1": false,
+    "Q2": false
+   }
+  },
+  {
+   "states": {
+    "Q1": "be",
+    "F1": "be",
+    "F2": "be",
+    "Q2": "ki"
+   },
+   "lamps": {},
+   "outlets": {
+    "X1": true,
+    "X2": false
+   },
+   "trips": {
+    "Q1": false,
+    "Q2": false
+   }
+  },
+  {
+   "states": {
+    "Q1": "be",
+    "F1": "be",
+    "F2": "ki",
+    "Q2": "ki"
+   },
+   "lamps": {},
+   "outlets": {
+    "X1": true,
+    "X2": false
+   },
+   "trips": {
+    "Q1": false,
+    "Q2": false
+   }
+  },
+  {
+   "states": {
+    "Q1": "be",
+    "F1": "ki",
+    "F2": "be",
+    "Q2": "ki"
+   },
+   "lamps": {},
+   "outlets": {
+    "X1": false,
+    "X2": false
+   },
+   "trips": {
+    "Q1": false,
+    "Q2": false
+   }
+  },
+  {
+   "states": {
+    "Q1": "be",
+    "F1": "ki",
+    "F2": "ki",
+    "Q2": "ki"
+   },
+   "lamps": {},
+   "outlets": {
+    "X1": false,
+    "X2": false
+   },
+   "trips": {
+    "Q1": false,
+    "Q2": false
+   }
+  },
+  {
+   "states": {
+    "Q1": "ki",
+    "F1": "be",
+    "F2": "be",
+    "Q2": "ki"
+   },
+   "lamps": {},
+   "outlets": {
+    "X1": false,
+    "X2": false
+   },
+   "trips": {
+    "Q1": false,
+    "Q2": false
+   }
+  },
+  {
+   "states": {
+    "Q1": "ki",
+    "F1": "be",
+    "F2": "ki",
+    "Q2": "ki"
+   },
+   "lamps": {},
+   "outlets": {
+    "X1": false,
+    "X2": false
+   },
+   "trips": {
+    "Q1": false,
+    "Q2": false
+   }
+  },
+  {
+   "states": {
+    "Q1": "ki",
+    "F1": "ki",
+    "F2": "be",
+    "Q2": "ki"
+   },
+   "lamps": {},
+   "outlets": {
+    "X1": false,
+    "X2": false
+   },
+   "trips": {
+    "Q1": false,
+    "Q2": false
+   }
+  },
+  {
+   "states": {
+    "Q1": "ki",
+    "F1": "ki",
+    "F2": "ki",
+    "Q2": "ki"
+   },
+   "lamps": {},
+   "outlets": {
+    "X1": false,
+    "X2": false
+   },
+   "trips": {
+    "Q1": false,
+    "Q2": false
+   }
+  }
+ ],
+ "places": {
+  "EL": {
+   "label": "Lakáselosztó",
+   "inner": "elosztón belül"
+  }
+ },
+ "layout": {
+  "view": "bekotes",
+  "viewBox": "0 0 460 240",
+  "parts": {
+   "T": [
+    20,
+    30
+   ],
+   "Q1": [
+    80,
+    30
+   ],
+   "XN": [
+    80,
+    140
+   ],
+   "XPE": [
+    20,
+    170
+   ],
+   "F1": [
+    140,
+    30
+   ],
+   "F2": [
+    170,
+    30
+   ],
+   "X1": [
+    300,
+    60
+   ],
+   "X2": [
+    300,
+    170
+   ]
+  },
+  "megjegyzes": "Durva elhelyezés a Bekötés nézethez; a vezetékútvonalat (path) az ábramotor vagy a rajzoló adja."
+ }
+}

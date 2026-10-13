@@ -10,7 +10,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.enums import TA_LEFT
 
 root = Path(__file__).resolve().parent.parent
-out = root / 'public/docs/ShockCraft-telepitesi-utmutato.pdf'
+out = root / 'public/docs/Villanyrajz-telepitesi-utmutato.pdf'
 out.parent.mkdir(parents=True, exist_ok=True)
 pdfmetrics.registerFont(TTFont('Noto', str(root / 'public/fonts/NotoSans-Regular.ttf')))
 green = colors.HexColor('#256459')
@@ -54,10 +54,10 @@ def page(canvas, doc):
     canvas.setStrokeColor(green); canvas.setLineWidth(2)
     canvas.line(43, 804, 552, 804)
     canvas.setFont('Noto', 8); canvas.setFillColor(green)
-    canvas.drawString(43, 816, 'SHOCKCRAFT  /  TELEPÍTÉS')
+    canvas.drawString(43, 816, 'VILLANYRAJZ  /  TELEPÍTÉS')
     canvas.setFillColor(colors.HexColor('#71828a'))
     canvas.drawString(43, 26, 'Node.js + MySQL  ·  2026. szeptember 18.')
     canvas.drawRightString(552, 26, str(doc.page))
 
-SimpleDocTemplate(str(out), pagesize=(595.28,841.89), rightMargin=43, leftMargin=43, topMargin=56, bottomMargin=48, title='ShockCraft – Node.js és VPS telepítési útmutató', author='ShockCraft').build(story, onFirstPage=page, onLaterPages=page)
+SimpleDocTemplate(str(out), pagesize=(595.28,841.89), rightMargin=43, leftMargin=43, topMargin=56, bottomMargin=48, title='Villanyrajz – Node.js és VPS telepítési útmutató', author='Villanyrajz').build(story, onFirstPage=page, onLaterPages=page)
 print(out)

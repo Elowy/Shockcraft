@@ -1,4 +1,4 @@
-# ShockCraft – telepítési útmutató
+# Villanyrajz – telepítési útmutató
 
 Node.js-t támogató tárhelyhez és Linux VPS-hez. Frissítve: 2026. október 2.
 
@@ -12,7 +12,7 @@ Használat: [Háttéralaprajz és méretarány](hatteralaprajz.md).
 
 ## 1. Mire lesz szükség?
 
-A ShockCraft szerveroldali webalkalmazás. A felület mellett saját regisztrációt, munkameneteket és tervmentést szolgál ki. Egy egyszerű, csak fájlfeltöltésre vagy PHP-ra alkalmas tárhely nem elegendő.
+A Villanyrajz szerveroldali webalkalmazás. A technikai nevek (környezeti változók, szolgáltatásnév, útvonalak, adatbázisnév) a meglévő telepítésekkel való kompatibilitás miatt a korábbi ShockCraft nevet őrzik. A felület mellett saját regisztrációt, munkameneteket és tervmentést szolgál ki. Egy egyszerű, csak fájlfeltöltésre vagy PHP-ra alkalmas tárhely nem elegendő.
 
 - Node.js 22.13 vagy újabb támogatott kiadás, npm és terminál/SSH vagy tárhelyes build lehetőség. A helyi ellenőrzés Node.js 24 alatt történt.
 - MySQL 8.0 vagy újabb adatbázis, külön adatbázis-felhasználóval.
@@ -75,7 +75,7 @@ A GET /api/health végpont 200 és status: ok választ ad elérhető adatbázisn
 
 A szolgáltató kezelőfelületén a következő beállításokat keresd:
 
-- Alkalmazás gyökere: a teljes ShockCraft projekt könyvtára.
+- Alkalmazás gyökere: a Villanyrajz forráskódjának gyökérkönyvtára (ahol a package.json található).
 - Node.js verzió: legalább 22.13; a tárhely által támogatott megfelelő kiadás.
 - Telepítés: npm ci --include=dev --include=optional.
 - Build parancs: npm run build:node.
@@ -87,11 +87,48 @@ A szolgáltatónak ES-modulos Node.js-indítást és tartós folyamatot kell tá
 
 A proxy őrizze meg a valódi Host fejlécet, és állítsa felül az X-Real-IP fejlécet az ügyfél hiteles címével. A felhasználó által küldött IP-fejlécet nem szabad változtatás nélkül átengedni: a belépési próbálkozások korlátozása ezt is használja. Az e-mail szerinti korlát ettől függetlenül működik. Ne legyen megkerülhető közvetlen publikus Node-port.
 
+### Automatikus telepítés GitHubról FTP-n (luiz-tech.hu)
+
+Mit csinál:
+
+- A `main` ágra pusholt kódot (vagy kézi indításra: Actions → „Telepítés FTP-re” → Run workflow) a GitHub leforgatja, és a kész Node.js-kiadást FTPS-en (21-es port, explicit TLS) feltölti a tárhelyre.
+- Csak a változott fájlokat tölti fel (a szerveren az action `.ftp-deploy-sync-state.json` állapotfájlt tart).
+- A `tmp/restart.txt` minden kiadásnál megváltozik, ezért a Passenger újraindítja az alkalmazást.
+- A `dist/`, `scripts/` és `tmp/` könyvtárba tiltó `.htaccess` kerül: ha az alkalmazás könyvtára egyben a domain webgyökere, a webszerver akkor sem szolgálja ki közvetlenül a szerverkódot (a Node a fájlokat a fájlrendszerből olvassa, ez nem érinti). A gyökér `.htaccess`-ét (a cPanel Passenger-beállítása) a feltöltés nem írja felül.
+- A workflow: `.github/workflows/deploy-ftp.yml`; a lépései: előfeltétel-ellenőrzés, `npm run install:ci`, típusellenőrzés, `npm run build:node`, telepítőcsomag összeállítása, feltöltés.
+
+Egyszeri beállítás a GitHubon (Settings → Secrets and variables → Actions):
+
+- Titkok: `FTP_USERNAME` (az FTP-felhasználó), `FTP_PASSWORD` (az FTP-jelszó). A jelszó csak itt szerepeljen, soha ne kerüljön a repóba vagy üzenetbe.
+- Változók: `FTP_SERVER_DIR` – a célkönyvtár az FTP-fiókon belül, pl. `./villanyrajz-app/`; a záró perjel kötelező, és nem lehet a nyilvános webgyökér (public_html).
+- Opcionális változók: `FTP_SERVER` (alapértelmezés: `ftp.luiz-tech.hu`) és `FTP_PROTOCOL` (alapértelmezés: `ftps`; ha a tárhely nem támogat TLS-t, `ftp` – nem javasolt, mert a jelszó titkosítatlanul utazik).
+- Ha valamelyik kötelező érték hiányzik, a workflow az első lépésben magyar hibaüzenettel leáll.
+
+Egyszeri beállítás a tárhelyen (cPanel → Setup Node.js App):
+
+- Node.js: legalább 22.13.
+- Application root: az `FTP_SERVER_DIR` könyvtár.
+- Application startup file: `app.cjs`.
+- Környezeti változók a kezelőfelületen (a `.env.production` nem töltődik fel): `APP_ORIGIN`, `MYSQL_URL`, `SESSION_SECRET`, `ADMIN_USER_ID`, `SHOCKCRAFT_NODE_RUNTIME=1`, valamint a többi a 3. pont szerint.
+- A „Run NPM Install” gombot nem kell megnyomni: a csomag saját `node_modules`-t hoz.
+- MySQL: a sémát egyszer kell létrehozni – phpMyAdminban a `db/mysql-schema.sql` importálásával, vagy a `scripts/mysql-setup.mjs` futtatásával. Minden kiadásnál futtasd az újonnan megjelent táblákat is (pl. `workbooks`, `plan_shares`, `product_catalogs`).
+
+Ellenőrzés:
+
+- A GitHub Actions futásának naplója legyen zöld.
+- Utána a `GET /api/health` végpont 200-at adjon.
+
+Megjegyzés:
+
+- A feltöltés alatt rövid ideig vegyes fájlállapot lehet (régi és új fájlok együtt). Forgalmas oldalnál a kézi indítást érdemes csendes időszakban végezni.
+
 ## 5. VPS: domain, HTTPS és folyamatos futás
 
 A DNS-ben irányítsd a választott aldomaint a VPS-re. Telepíts érvényes HTTPS-tanúsítványt a szolgáltatód vagy az általad választott ACME-kliens útmutatója szerint. A deploy/nginx.conf kész mintát tartalmaz; a domain és a tanúsítványútvonal átírandó. Tanúsítvány nélkül a TLS-es blokk nem indul el.
 
 Az Nginx lényege: a 443-as HTTPS-kérések továbbítása a 127.0.0.1:3000 címre. A böngésző az Nginxet éri el. A Node-port ne legyen nyilvánosan elérhető. A mintában a proxy megőrzi a Host fejlécet, felülírja az IP-fejléceket, nem gyorsítótáraz, és nem puffereli az alkalmazás válaszait. A 3 MB-os kéréskorlát mellett az alkalmazás továbbra is legfeljebb 2 MB-os tervet fogad.
+
+A `proxy_cache` maradjon `off`, és Cloudflare mögött se legyen „Cache Everything” vagy edge-TTL szabály a `/api/*` és a `/megosztas` útvonalon: a megosztott terv és a fiókadatok soha nem kerülhetnek közös gyorsítótárba. A megosztott oldal fejléceit telepítés után `curl -sI https://<domain>/megosztas` paranccsal ellenőrizd: `Cache-Control: no-store`, `X-Frame-Options: DENY`, `Content-Security-Policy` (`frame-ancestors 'none'`), `Referrer-Policy: no-referrer` és `X-Robots-Tag: noindex` várható (részletek: [tervmegosztás](tervmegosztas.md)).
 
 A sablon telepítése után az Nginx beállítását ellenőrizd, és csak sikeres ellenőrzés után töltsd újra:
 
@@ -148,7 +185,7 @@ Mivel még nincs MySQL-szervered, a valódi MySQL-kapcsolatot, a cél tárhelyet
 
 Jelenleg nincs e-mailes címellenőrzés vagy elfelejtettjelszó-levélküldés. Felhasználónként több külön projekt menthető és nyitható meg. A kimutatás a rajzolt geometria alapján számol; nem végez villamos méretezést.
 
-Hivatalos műszaki háttér: a Node.js env-file beállítása, a vinext standalone kimenete és az Nginx proxy-beállításai. Az útmutatóban szereplő alkalmazásparancsok a ShockCraft csomag saját parancsai.
+Hivatalos műszaki háttér: a Node.js env-file beállítása, a vinext standalone kimenete és az Nginx proxy-beállításai. Az útmutatóban szereplő alkalmazásparancsok a Villanyrajz alkalmazás (npm-csomag) saját parancsai.
 
 - Node.js: https://nodejs.org/api/cli.html#--env-filefile
 - vinext: https://github.com/cloudflare/vinext

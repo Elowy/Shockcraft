@@ -1,0 +1,452 @@
+{
+ "format": "kb-netlista/1",
+ "id": "csillarkapcsolo-105",
+ "title": "Csillárkapcsoló (105): két lámpakör egy helyről",
+ "short": "105 – két kör",
+ "article": "csillarkapcsolo-105-bekotese",
+ "figure": "abra-1",
+ "version": 1,
+ "note": "Tervezet a szakmai lektornak (R3). Egy lehetséges, következetes érszín-kiosztás: barna = betáp fázis, fekete = kapcsolt fázis, szürke = váltóvezetékek (felirattal megkülönböztetve), kék = nullavezető, zöld-sárga = védővezető. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A két kapcsolt fázis itt: 1. kör fekete, 2. kör szürke (felirattal).",
+ "components": [
+  {
+   "id": "T",
+   "type": "tap",
+   "label": "Betáp",
+   "symbol": "panel",
+   "megjegyzes": "Az áramkör betápja az elosztóból, a kismegszakító és az áram-védőkapcsoló (FI-relé) után.",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ]
+  },
+  {
+   "id": "KD",
+   "type": "kotodoboz",
+   "label": "Kötődoboz",
+   "symbol": "box",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L-kötés"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N-kötés"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE-kötés"
+    },
+    {
+     "id": "LK1",
+     "role": "kapcsolt",
+     "label": "1. kör kapcsoltfázis-kötése"
+    },
+    {
+     "id": "LK2",
+     "role": "kapcsolt",
+     "label": "2. kör kapcsoltfázis-kötése"
+    }
+   ]
+  },
+  {
+   "id": "S1",
+   "type": "kapcsolo-105",
+   "label": "Csillárkapcsoló (105)",
+   "symbol": "switch5",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L kapocs (közös betáp)"
+    },
+    {
+     "id": "1",
+     "role": "kapcsolt",
+     "label": "1-es kapocs (1. kör)"
+    },
+    {
+     "id": "2",
+     "role": "kapcsolt",
+     "label": "2-es kapocs (2. kör)"
+    }
+   ],
+   "keys": [
+    {
+     "id": "b1",
+     "label": "1. billentyű",
+     "states": [
+      {
+       "name": "ki",
+       "connect": []
+      },
+      {
+       "name": "be",
+       "connect": [
+        [
+         "L",
+         "1"
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "id": "b2",
+     "label": "2. billentyű",
+     "states": [
+      {
+       "name": "ki",
+       "connect": []
+      },
+      {
+       "name": "be",
+       "connect": [
+        [
+         "L",
+         "2"
+        ]
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "CS",
+   "type": "sorkapocs",
+   "label": "Csillár sorkapcsa",
+   "symbol": "light",
+   "terminals": [
+    {
+     "id": "1",
+     "role": "kapcsolt",
+     "label": "1"
+    },
+    {
+     "id": "2",
+     "role": "kapcsolt",
+     "label": "2"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ]
+  },
+  {
+   "id": "E1",
+   "type": "lampa",
+   "label": "1. lámpacsoport",
+   "symbol": "light",
+   "at": "CS",
+   "class": "I",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L (fázis)"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ]
+  },
+  {
+   "id": "E2",
+   "type": "lampa",
+   "label": "2. lámpacsoport",
+   "symbol": "light",
+   "at": "CS",
+   "class": "I",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L (fázis)"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ]
+  }
+ ],
+ "sections": [
+  {
+   "id": "W0",
+   "from": "T",
+   "to": "KD",
+   "label": "Elosztó – kötődoboz",
+   "kind": "betap"
+  },
+  {
+   "id": "W1",
+   "from": "KD",
+   "to": "S1",
+   "label": "Kötődoboz – kapcsoló",
+   "kind": "kapcsolo"
+  },
+  {
+   "id": "W2",
+   "from": "KD",
+   "to": "CS",
+   "label": "Kötődoboz – csillár",
+   "kind": "lampa"
+  }
+ ],
+ "wires": [
+  {
+   "id": "w1",
+   "from": "T.L",
+   "to": "KD.L",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna",
+   "section": "W0"
+  },
+  {
+   "id": "w2",
+   "from": "T.N",
+   "to": "KD.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék",
+   "section": "W0"
+  },
+  {
+   "id": "w3",
+   "from": "T.PE",
+   "to": "KD.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "W0"
+  },
+  {
+   "id": "w4",
+   "from": "KD.L",
+   "to": "S1.L",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna",
+   "section": "W1"
+  },
+  {
+   "id": "w5",
+   "from": "S1.1",
+   "to": "KD.LK1",
+   "conductor": "kapcsolt fázis",
+   "role": "Lk",
+   "color": "fekete",
+   "label": "1",
+   "section": "W1"
+  },
+  {
+   "id": "w6",
+   "from": "S1.2",
+   "to": "KD.LK2",
+   "conductor": "kapcsolt fázis",
+   "role": "Lk",
+   "color": "szürke",
+   "label": "2",
+   "section": "W1"
+  },
+  {
+   "id": "w7",
+   "from": "KD.LK1",
+   "to": "CS.1",
+   "conductor": "kapcsolt fázis",
+   "role": "Lk",
+   "color": "fekete",
+   "label": "1",
+   "section": "W2"
+  },
+  {
+   "id": "w8",
+   "from": "KD.LK2",
+   "to": "CS.2",
+   "conductor": "kapcsolt fázis",
+   "role": "Lk",
+   "color": "szürke",
+   "label": "2",
+   "section": "W2"
+  },
+  {
+   "id": "w9",
+   "from": "KD.N",
+   "to": "CS.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék",
+   "section": "W2"
+  },
+  {
+   "id": "w10",
+   "from": "KD.PE",
+   "to": "CS.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "W2"
+  },
+  {
+   "id": "w11",
+   "from": "CS.1",
+   "to": "E1.L",
+   "conductor": "kapcsolt fázis",
+   "role": "Lk",
+   "color": "fekete",
+   "label": "1"
+  },
+  {
+   "id": "w12",
+   "from": "CS.2",
+   "to": "E2.L",
+   "conductor": "kapcsolt fázis",
+   "role": "Lk",
+   "color": "szürke",
+   "label": "2"
+  },
+  {
+   "id": "w13",
+   "from": "CS.N",
+   "to": "E1.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék"
+  },
+  {
+   "id": "w14",
+   "from": "CS.N",
+   "to": "E2.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék"
+  },
+  {
+   "id": "w15",
+   "from": "CS.PE",
+   "to": "E1.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga"
+  },
+  {
+   "id": "w16",
+   "from": "CS.PE",
+   "to": "E2.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga"
+  }
+ ],
+ "truthTable": [
+  {
+   "states": {
+    "S1.b1": "ki",
+    "S1.b2": "ki"
+   },
+   "lamps": {
+    "E1": false,
+    "E2": false
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "ki",
+    "S1.b2": "be"
+   },
+   "lamps": {
+    "E1": false,
+    "E2": true
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "be",
+    "S1.b2": "ki"
+   },
+   "lamps": {
+    "E1": true,
+    "E2": false
+   }
+  },
+  {
+   "states": {
+    "S1.b1": "be",
+    "S1.b2": "be"
+   },
+   "lamps": {
+    "E1": true,
+    "E2": true
+   }
+  }
+ ],
+ "layout": {
+  "view": "bekotes",
+  "viewBox": "0 0 380 240",
+  "parts": {
+   "T": [
+    20,
+    40
+   ],
+   "KD": [
+    180,
+    40
+   ],
+   "S1": [
+    180,
+    190
+   ],
+   "CS": [
+    320,
+    40
+   ],
+   "E1": [
+    300,
+    110
+   ],
+   "E2": [
+    340,
+    110
+   ]
+  },
+  "megjegyzes": "Durva elhelyezés a Bekötés nézethez; a vezetékútvonalat (path) az ábramotor vagy a rajzoló adja."
+ }
+}

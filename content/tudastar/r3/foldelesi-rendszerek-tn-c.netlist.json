@@ -1,0 +1,474 @@
+{
+ "format": "kb-netlista/1",
+ "id": "foldeles-tn-c",
+ "title": "TN-C rendszer: a PEN-vezető a fogyasztóig fut",
+ "short": "TN-C",
+ "article": "foldelesi-rendszerek",
+ "figure": "abra-1",
+ "version": 1,
+ "note": "Tervezet a szakmai lektornak (R3). Elvi rajz: a táppont az elosztói engedélyes transzformátora, a hálózat és a csatlakozás az elosztói engedélyes hatásköre; a rajz nem szerelési utasítás. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A keresztmetszet, a túláramvédelem névleges árama és a földelési ellenállás méretezés kérdése, ezért az ábra nem ad számot. A hibahely (testzárlat) és az érintési pont jelképes, nem szerelt vezeték. A táblázat a hiba fennállásának pillanatát mutatja, a lekapcsolás előtt. A régi, kéteres („nullázott”) berendezésekre jellemző felépítés; új berendezés így nem készül.",
+ "earthing": {
+  "system": "TN-C"
+ },
+ "components": [
+  {
+   "id": "TR",
+   "type": "tap",
+   "label": "T1 elosztói transzformátor, kisfeszültségű tekercs",
+   "short": "T1",
+   "at": "TR",
+   "terminals": [
+    {
+     "id": "L1",
+     "role": "L1",
+     "label": "L1"
+    },
+    {
+     "id": "L2",
+     "role": "L2",
+     "label": "L2"
+    },
+    {
+     "id": "L3",
+     "role": "L3",
+     "label": "L3"
+    },
+    {
+     "id": "PEN",
+     "role": "PEN",
+     "label": "csillagpont (PEN)"
+    }
+   ]
+  },
+  {
+   "id": "RB",
+   "type": "foldelo",
+   "label": "RB üzemi földelő (a csillagpont földelése)",
+   "short": "RB",
+   "at": "TR",
+   "kind": "uzemi",
+   "terminals": [
+    {
+     "id": "K",
+     "role": "FK",
+     "label": "földelőkapocs"
+    }
+   ]
+  },
+  {
+   "id": "XPEN",
+   "type": "sorkapocs",
+   "label": "PEN-kapocs az épület elosztójában",
+   "at": "EL",
+   "terminals": [
+    {
+     "id": "PEN",
+     "role": "PEN",
+     "label": "PEN"
+    }
+   ]
+  },
+  {
+   "id": "F1",
+   "type": "kismegszakito",
+   "label": "F1 túláramvédelem (kismegszakító vagy olvadóbiztosító)",
+   "short": "F1",
+   "at": "EL",
+   "terminals": [
+    {
+     "id": "1",
+     "role": "L",
+     "label": "1 (be)"
+    },
+    {
+     "id": "2",
+     "role": "L",
+     "label": "2 (ki)"
+    }
+   ],
+   "states": [
+    {
+     "name": "be",
+     "label": "bekapcsolva",
+     "connect": [
+      [
+       "1",
+       "2"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "XK",
+   "type": "pen-kapocs",
+   "label": "XK PEN-kapocs a fogyasztó csatlakozásánál (N és PE közös)",
+   "at": "M1",
+   "terminals": [
+    {
+     "id": "PEN",
+     "role": "PEN",
+     "label": "PEN"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ],
+   "bridges": [
+    [
+     "PEN",
+     "N",
+     "PE"
+    ]
+   ]
+  },
+  {
+   "id": "M1",
+   "type": "fogyaszto",
+   "label": "M1 fémházas fogyasztó (I. érintésvédelmi osztály)",
+   "outputLabel": "M1 fogyasztó",
+   "at": "M1",
+   "class": "I",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "fémház (PE)"
+    }
+   ]
+  },
+  {
+   "id": "H1",
+   "type": "hibaut",
+   "label": "H1 testzárlat M1-ben (fázis → fémház)",
+   "at": "M1",
+   "outputLabel": "H1: hibaáram útja",
+   "terminals": [
+    {
+     "id": "a",
+     "role": "L",
+     "label": "fázisoldali hibahely"
+    },
+    {
+     "id": "b",
+     "role": "PE",
+     "label": "fémház"
+    }
+   ],
+   "states": [
+    {
+     "name": "nincs",
+     "active": false
+    },
+    {
+     "name": "fennáll",
+     "active": true
+    }
+   ]
+  },
+  {
+   "id": "FOLD",
+   "type": "fold",
+   "label": "Föld (talaj)",
+   "at": "FOLD",
+   "terminals": [
+    {
+     "id": "E",
+     "role": "E",
+     "label": "föld"
+    }
+   ]
+  }
+ ],
+ "sections": [
+  {
+   "id": "S1",
+   "from": "TR",
+   "to": "EL",
+   "label": "Elosztói hálózat és csatlakozás (az engedélyes hatásköre)",
+   "kind": "halozat"
+  },
+  {
+   "id": "S2",
+   "from": "EL",
+   "to": "M1",
+   "label": "Fogyasztói áramkör",
+   "kind": "aramkor"
+  }
+ ],
+ "wires": [
+  {
+   "id": "w1",
+   "from": "TR.PEN",
+   "to": "RB.K",
+   "conductor": "földelővezető",
+   "role": "PE",
+   "color": "zöld-sárga"
+  },
+  {
+   "id": "w2",
+   "from": "TR.L1",
+   "to": "F1.1",
+   "conductor": "L1",
+   "role": "L1",
+   "color": "barna",
+   "section": "S1"
+  },
+  {
+   "id": "w3",
+   "from": "TR.PEN",
+   "to": "XPEN.PEN",
+   "conductor": "PEN",
+   "role": "PEN",
+   "color": "zöld-sárga",
+   "section": "S1"
+  },
+  {
+   "id": "w4",
+   "from": "F1.2",
+   "to": "M1.L",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna",
+   "section": "S2"
+  },
+  {
+   "id": "w5",
+   "from": "XPEN.PEN",
+   "to": "XK.PEN",
+   "conductor": "PEN",
+   "role": "PEN",
+   "color": "zöld-sárga",
+   "section": "S2"
+  },
+  {
+   "id": "w6",
+   "from": "XK.N",
+   "to": "M1.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék"
+  },
+  {
+   "id": "w7",
+   "from": "XK.PE",
+   "to": "M1.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga"
+  },
+  {
+   "id": "w8",
+   "from": "H1.a",
+   "to": "M1.L",
+   "conductor": "hibahely"
+  },
+  {
+   "id": "w9",
+   "from": "H1.b",
+   "to": "M1.PE",
+   "conductor": "hibahely"
+  }
+ ],
+ "breaks": [
+  {
+   "id": "SZ",
+   "label": "SZ PEN-szakadás a hálózatban",
+   "wire": "w3",
+   "states": [
+    {
+     "name": "ép"
+    },
+    {
+     "name": "szakadt",
+     "broken": true
+    }
+   ]
+  }
+ ],
+ "touch": [
+  {
+   "id": "U1",
+   "label": "M1 fémháza és a föld",
+   "a": "M1.PE",
+   "b": "FOLD.E"
+  }
+ ],
+ "compare": [
+  {
+   "label": "Testzárlat",
+   "states": {
+    "H1": "fennáll"
+   }
+  },
+  {
+   "label": "PEN-szakadás",
+   "states": {
+    "SZ": "szakadt"
+   }
+  }
+ ],
+ "truthTable": [
+  {
+   "states": {
+    "F1": "be",
+    "H1": "nincs",
+    "SZ": "ép"
+   },
+   "lamps": {
+    "M1": true
+   },
+   "consumers": {
+    "M1": "mukodik"
+   },
+   "loops": {
+    "H1": "nincs-hiba"
+   },
+   "overcurrent": {
+    "F1": false
+   },
+   "touch": {
+    "U1": "nincs"
+   }
+  },
+  {
+   "states": {
+    "F1": "be",
+    "H1": "nincs",
+    "SZ": "szakadt"
+   },
+   "lamps": {
+    "M1": false
+   },
+   "consumers": {
+    "M1": "nem-mukodik"
+   },
+   "loops": {
+    "H1": "nincs-hiba"
+   },
+   "overcurrent": {
+    "F1": false
+   },
+   "touch": {
+    "U1": "tartosan"
+   }
+  },
+  {
+   "states": {
+    "F1": "be",
+    "H1": "fennáll",
+    "SZ": "ép"
+   },
+   "lamps": {
+    "M1": true
+   },
+   "consumers": {
+    "M1": "mukodik"
+   },
+   "loops": {
+    "H1": "femes"
+   },
+   "overcurrent": {
+    "F1": true
+   },
+   "touch": {
+    "U1": "lekapcsolasig"
+   }
+  },
+  {
+   "states": {
+    "F1": "be",
+    "H1": "fennáll",
+    "SZ": "szakadt"
+   },
+   "lamps": {
+    "M1": false
+   },
+   "consumers": {
+    "M1": "nem-mukodik"
+   },
+   "loops": {
+    "H1": "nincs-hurok"
+   },
+   "overcurrent": {
+    "F1": false
+   },
+   "touch": {
+    "U1": "tartosan"
+   }
+  }
+ ],
+ "places": {
+  "TR": {
+   "label": "Transzformátorállomás (elosztói engedélyes)",
+   "inner": "a táppontnál"
+  },
+  "EL": {
+   "label": "Épület: csatlakozás, mérőhely utáni elosztó",
+   "inner": "elosztón belül"
+  },
+  "M1": {
+   "label": "Fogyasztó",
+   "inner": "a fogyasztó csatlakozásánál"
+  },
+  "FOLD": {
+   "label": "Föld (talaj)"
+  }
+ },
+ "layout": {
+  "view": "bekotes",
+  "viewBox": "0 0 480 240",
+  "parts": {
+   "TR": [
+    20,
+    40
+   ],
+   "RB": [
+    20,
+    190
+   ],
+   "XPEN": [
+    200,
+    120
+   ],
+   "F1": [
+    200,
+    40
+   ],
+   "XK": [
+    380,
+    120
+   ],
+   "M1": [
+    400,
+    40
+   ],
+   "H1": [
+    440,
+    80
+   ],
+   "FOLD": [
+    240,
+    220
+   ]
+  },
+  "megjegyzes": "Durva elhelyezés; az útvonalakat az ábramotor adja."
+ }
+}

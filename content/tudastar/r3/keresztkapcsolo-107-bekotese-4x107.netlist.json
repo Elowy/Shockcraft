@@ -1,0 +1,1669 @@
+{
+ "format": "kb-netlista/1",
+ "id": "keresztkapcsolo-107-4x107",
+ "title": "Keresztkapcsolás (106 + 4 × 107 + 106): egy lámpa 6 helyről",
+ "short": "107 – 6 hely",
+ "article": "keresztkapcsolo-107-bekotese",
+ "figure": "abra-1",
+ "version": 1,
+ "note": "Tervezet a szakmai lektornak (R3). Egy lehetséges, következetes érszín-kiosztás: barna = betáp fázis, fekete = kapcsolt fázis, szürke = váltóvezetékek (felirattal megkülönböztetve), kék = nullavezető, zöld-sárga = védővezető. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó. A keresztkapcsoló bemenő párja (A1, A2) az előző, kimenő párja (B1, B2) a következő kapcsoló felé néz; a kapcsok elrendezése gyártónként eltér.",
+ "components": [
+  {
+   "id": "T",
+   "type": "tap",
+   "label": "Betáp",
+   "symbol": "panel",
+   "megjegyzes": "Az áramkör betápja az elosztóból, a kismegszakító és az áram-védőkapcsoló (FI-relé) után.",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ]
+  },
+  {
+   "id": "KD",
+   "type": "kotodoboz",
+   "label": "Kötődoboz",
+   "symbol": "box",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L-kötés"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N-kötés"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE-kötés"
+    },
+    {
+     "id": "K1a",
+     "role": "valto-1",
+     "label": "1a váltóvezeték kötése"
+    },
+    {
+     "id": "K2a",
+     "role": "valto-2",
+     "label": "2a váltóvezeték kötése"
+    },
+    {
+     "id": "K1b",
+     "role": "valto-1",
+     "label": "1b váltóvezeték kötése"
+    },
+    {
+     "id": "K2b",
+     "role": "valto-2",
+     "label": "2b váltóvezeték kötése"
+    },
+    {
+     "id": "K1c",
+     "role": "valto-1",
+     "label": "1c váltóvezeték kötése"
+    },
+    {
+     "id": "K2c",
+     "role": "valto-2",
+     "label": "2c váltóvezeték kötése"
+    },
+    {
+     "id": "K1d",
+     "role": "valto-1",
+     "label": "1d váltóvezeték kötése"
+    },
+    {
+     "id": "K2d",
+     "role": "valto-2",
+     "label": "2d váltóvezeték kötése"
+    },
+    {
+     "id": "K1e",
+     "role": "valto-1",
+     "label": "1e váltóvezeték kötése"
+    },
+    {
+     "id": "K2e",
+     "role": "valto-2",
+     "label": "2e váltóvezeték kötése"
+    },
+    {
+     "id": "LK",
+     "role": "kapcsolt",
+     "label": "kapcsoltfázis-kötés"
+    }
+   ]
+  },
+  {
+   "id": "S1",
+   "type": "kapcsolo-106",
+   "label": "K1 (106, 1. hely)",
+   "symbol": "switch6",
+   "terminals": [
+    {
+     "id": "C",
+     "role": "kozos",
+     "label": "közös kapocs (C)"
+    },
+    {
+     "id": "1",
+     "role": "valto-1",
+     "label": "1-es kapocs"
+    },
+    {
+     "id": "2",
+     "role": "valto-2",
+     "label": "2-es kapocs"
+    }
+   ],
+   "states": [
+    {
+     "name": "0",
+     "label": "közös–1",
+     "connect": [
+      [
+       "C",
+       "1"
+      ]
+     ]
+    },
+    {
+     "name": "1",
+     "label": "közös–2",
+     "connect": [
+      [
+       "C",
+       "2"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "X1",
+   "type": "kapcsolo-107",
+   "label": "X1 (107, 2. hely)",
+   "symbol": "switch7",
+   "terminals": [
+    {
+     "id": "A1",
+     "role": "valto-1",
+     "label": "A1 (bemenő pár)"
+    },
+    {
+     "id": "A2",
+     "role": "valto-2",
+     "label": "A2 (bemenő pár)"
+    },
+    {
+     "id": "B1",
+     "role": "valto-1",
+     "label": "B1 (kimenő pár)"
+    },
+    {
+     "id": "B2",
+     "role": "valto-2",
+     "label": "B2 (kimenő pár)"
+    }
+   ],
+   "states": [
+    {
+     "name": "egyenes",
+     "label": "A1–B1, A2–B2",
+     "connect": [
+      [
+       "A1",
+       "B1"
+      ],
+      [
+       "A2",
+       "B2"
+      ]
+     ]
+    },
+    {
+     "name": "keresztezett",
+     "label": "A1–B2, A2–B1",
+     "connect": [
+      [
+       "A1",
+       "B2"
+      ],
+      [
+       "A2",
+       "B1"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "X2",
+   "type": "kapcsolo-107",
+   "label": "X2 (107, 3. hely)",
+   "symbol": "switch7",
+   "terminals": [
+    {
+     "id": "A1",
+     "role": "valto-1",
+     "label": "A1 (bemenő pár)"
+    },
+    {
+     "id": "A2",
+     "role": "valto-2",
+     "label": "A2 (bemenő pár)"
+    },
+    {
+     "id": "B1",
+     "role": "valto-1",
+     "label": "B1 (kimenő pár)"
+    },
+    {
+     "id": "B2",
+     "role": "valto-2",
+     "label": "B2 (kimenő pár)"
+    }
+   ],
+   "states": [
+    {
+     "name": "egyenes",
+     "label": "A1–B1, A2–B2",
+     "connect": [
+      [
+       "A1",
+       "B1"
+      ],
+      [
+       "A2",
+       "B2"
+      ]
+     ]
+    },
+    {
+     "name": "keresztezett",
+     "label": "A1–B2, A2–B1",
+     "connect": [
+      [
+       "A1",
+       "B2"
+      ],
+      [
+       "A2",
+       "B1"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "X3",
+   "type": "kapcsolo-107",
+   "label": "X3 (107, 4. hely)",
+   "symbol": "switch7",
+   "terminals": [
+    {
+     "id": "A1",
+     "role": "valto-1",
+     "label": "A1 (bemenő pár)"
+    },
+    {
+     "id": "A2",
+     "role": "valto-2",
+     "label": "A2 (bemenő pár)"
+    },
+    {
+     "id": "B1",
+     "role": "valto-1",
+     "label": "B1 (kimenő pár)"
+    },
+    {
+     "id": "B2",
+     "role": "valto-2",
+     "label": "B2 (kimenő pár)"
+    }
+   ],
+   "states": [
+    {
+     "name": "egyenes",
+     "label": "A1–B1, A2–B2",
+     "connect": [
+      [
+       "A1",
+       "B1"
+      ],
+      [
+       "A2",
+       "B2"
+      ]
+     ]
+    },
+    {
+     "name": "keresztezett",
+     "label": "A1–B2, A2–B1",
+     "connect": [
+      [
+       "A1",
+       "B2"
+      ],
+      [
+       "A2",
+       "B1"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "X4",
+   "type": "kapcsolo-107",
+   "label": "X4 (107, 5. hely)",
+   "symbol": "switch7",
+   "terminals": [
+    {
+     "id": "A1",
+     "role": "valto-1",
+     "label": "A1 (bemenő pár)"
+    },
+    {
+     "id": "A2",
+     "role": "valto-2",
+     "label": "A2 (bemenő pár)"
+    },
+    {
+     "id": "B1",
+     "role": "valto-1",
+     "label": "B1 (kimenő pár)"
+    },
+    {
+     "id": "B2",
+     "role": "valto-2",
+     "label": "B2 (kimenő pár)"
+    }
+   ],
+   "states": [
+    {
+     "name": "egyenes",
+     "label": "A1–B1, A2–B2",
+     "connect": [
+      [
+       "A1",
+       "B1"
+      ],
+      [
+       "A2",
+       "B2"
+      ]
+     ]
+    },
+    {
+     "name": "keresztezett",
+     "label": "A1–B2, A2–B1",
+     "connect": [
+      [
+       "A1",
+       "B2"
+      ],
+      [
+       "A2",
+       "B1"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "S2",
+   "type": "kapcsolo-106",
+   "label": "K2 (106, 6. hely)",
+   "symbol": "switch6",
+   "terminals": [
+    {
+     "id": "C",
+     "role": "kozos",
+     "label": "közös kapocs (C)"
+    },
+    {
+     "id": "1",
+     "role": "valto-1",
+     "label": "1-es kapocs"
+    },
+    {
+     "id": "2",
+     "role": "valto-2",
+     "label": "2-es kapocs"
+    }
+   ],
+   "states": [
+    {
+     "name": "0",
+     "label": "közös–1",
+     "connect": [
+      [
+       "C",
+       "1"
+      ]
+     ]
+    },
+    {
+     "name": "1",
+     "label": "közös–2",
+     "connect": [
+      [
+       "C",
+       "2"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "E1",
+   "type": "lampa",
+   "label": "Lámpa",
+   "symbol": "light",
+   "class": "I",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L (fázis)"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ]
+  }
+ ],
+ "sections": [
+  {
+   "id": "W0",
+   "from": "T",
+   "to": "KD",
+   "label": "Elosztó – kötődoboz",
+   "kind": "betap"
+  },
+  {
+   "id": "WS1",
+   "from": "KD",
+   "to": "S1",
+   "label": "Kötődoboz – K1 (1. hely)",
+   "kind": "kapcsolo"
+  },
+  {
+   "id": "WX1",
+   "from": "KD",
+   "to": "X1",
+   "label": "Kötődoboz – X1 (2. hely)",
+   "kind": "kapcsolo"
+  },
+  {
+   "id": "WX2",
+   "from": "KD",
+   "to": "X2",
+   "label": "Kötődoboz – X2 (3. hely)",
+   "kind": "kapcsolo"
+  },
+  {
+   "id": "WX3",
+   "from": "KD",
+   "to": "X3",
+   "label": "Kötődoboz – X3 (4. hely)",
+   "kind": "kapcsolo"
+  },
+  {
+   "id": "WX4",
+   "from": "KD",
+   "to": "X4",
+   "label": "Kötődoboz – X4 (5. hely)",
+   "kind": "kapcsolo"
+  },
+  {
+   "id": "WS2",
+   "from": "KD",
+   "to": "S2",
+   "label": "Kötődoboz – K2 (6. hely)",
+   "kind": "kapcsolo"
+  },
+  {
+   "id": "WE",
+   "from": "KD",
+   "to": "E1",
+   "label": "Kötődoboz – lámpa",
+   "kind": "lampa"
+  }
+ ],
+ "wires": [
+  {
+   "id": "w1",
+   "from": "T.L",
+   "to": "KD.L",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna",
+   "section": "W0"
+  },
+  {
+   "id": "w2",
+   "from": "T.N",
+   "to": "KD.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék",
+   "section": "W0"
+  },
+  {
+   "id": "w3",
+   "from": "T.PE",
+   "to": "KD.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "W0"
+  },
+  {
+   "id": "w4",
+   "from": "KD.L",
+   "to": "S1.C",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna",
+   "section": "WS1"
+  },
+  {
+   "id": "w5",
+   "from": "S1.1",
+   "to": "KD.K1a",
+   "conductor": "váltóvezeték",
+   "role": "K1",
+   "color": "szürke",
+   "label": "1a",
+   "section": "WS1"
+  },
+  {
+   "id": "w6",
+   "from": "S1.2",
+   "to": "KD.K2a",
+   "conductor": "váltóvezeték",
+   "role": "K2",
+   "color": "szürke",
+   "label": "2a",
+   "section": "WS1"
+  },
+  {
+   "id": "w7",
+   "from": "KD.K1a",
+   "to": "X1.A1",
+   "conductor": "váltóvezeték",
+   "role": "K1",
+   "color": "szürke",
+   "label": "1a",
+   "section": "WX1"
+  },
+  {
+   "id": "w8",
+   "from": "KD.K2a",
+   "to": "X1.A2",
+   "conductor": "váltóvezeték",
+   "role": "K2",
+   "color": "szürke",
+   "label": "2a",
+   "section": "WX1"
+  },
+  {
+   "id": "w9",
+   "from": "X1.B1",
+   "to": "KD.K1b",
+   "conductor": "váltóvezeték",
+   "role": "K1",
+   "color": "szürke",
+   "label": "1b",
+   "section": "WX1"
+  },
+  {
+   "id": "w10",
+   "from": "X1.B2",
+   "to": "KD.K2b",
+   "conductor": "váltóvezeték",
+   "role": "K2",
+   "color": "szürke",
+   "label": "2b",
+   "section": "WX1"
+  },
+  {
+   "id": "w11",
+   "from": "KD.K1b",
+   "to": "X2.A1",
+   "conductor": "váltóvezeték",
+   "role": "K1",
+   "color": "szürke",
+   "label": "1b",
+   "section": "WX2"
+  },
+  {
+   "id": "w12",
+   "from": "KD.K2b",
+   "to": "X2.A2",
+   "conductor": "váltóvezeték",
+   "role": "K2",
+   "color": "szürke",
+   "label": "2b",
+   "section": "WX2"
+  },
+  {
+   "id": "w13",
+   "from": "X2.B1",
+   "to": "KD.K1c",
+   "conductor": "váltóvezeték",
+   "role": "K1",
+   "color": "szürke",
+   "label": "1c",
+   "section": "WX2"
+  },
+  {
+   "id": "w14",
+   "from": "X2.B2",
+   "to": "KD.K2c",
+   "conductor": "váltóvezeték",
+   "role": "K2",
+   "color": "szürke",
+   "label": "2c",
+   "section": "WX2"
+  },
+  {
+   "id": "w15",
+   "from": "KD.K1c",
+   "to": "X3.A1",
+   "conductor": "váltóvezeték",
+   "role": "K1",
+   "color": "szürke",
+   "label": "1c",
+   "section": "WX3"
+  },
+  {
+   "id": "w16",
+   "from": "KD.K2c",
+   "to": "X3.A2",
+   "conductor": "váltóvezeték",
+   "role": "K2",
+   "color": "szürke",
+   "label": "2c",
+   "section": "WX3"
+  },
+  {
+   "id": "w17",
+   "from": "X3.B1",
+   "to": "KD.K1d",
+   "conductor": "váltóvezeték",
+   "role": "K1",
+   "color": "szürke",
+   "label": "1d",
+   "section": "WX3"
+  },
+  {
+   "id": "w18",
+   "from": "X3.B2",
+   "to": "KD.K2d",
+   "conductor": "váltóvezeték",
+   "role": "K2",
+   "color": "szürke",
+   "label": "2d",
+   "section": "WX3"
+  },
+  {
+   "id": "w19",
+   "from": "KD.K1d",
+   "to": "X4.A1",
+   "conductor": "váltóvezeték",
+   "role": "K1",
+   "color": "szürke",
+   "label": "1d",
+   "section": "WX4"
+  },
+  {
+   "id": "w20",
+   "from": "KD.K2d",
+   "to": "X4.A2",
+   "conductor": "váltóvezeték",
+   "role": "K2",
+   "color": "szürke",
+   "label": "2d",
+   "section": "WX4"
+  },
+  {
+   "id": "w21",
+   "from": "X4.B1",
+   "to": "KD.K1e",
+   "conductor": "váltóvezeték",
+   "role": "K1",
+   "color": "szürke",
+   "label": "1e",
+   "section": "WX4"
+  },
+  {
+   "id": "w22",
+   "from": "X4.B2",
+   "to": "KD.K2e",
+   "conductor": "váltóvezeték",
+   "role": "K2",
+   "color": "szürke",
+   "label": "2e",
+   "section": "WX4"
+  },
+  {
+   "id": "w23",
+   "from": "KD.K1e",
+   "to": "S2.1",
+   "conductor": "váltóvezeték",
+   "role": "K1",
+   "color": "szürke",
+   "label": "1e",
+   "section": "WS2"
+  },
+  {
+   "id": "w24",
+   "from": "KD.K2e",
+   "to": "S2.2",
+   "conductor": "váltóvezeték",
+   "role": "K2",
+   "color": "szürke",
+   "label": "2e",
+   "section": "WS2"
+  },
+  {
+   "id": "w25",
+   "from": "S2.C",
+   "to": "KD.LK",
+   "conductor": "kapcsolt fázis",
+   "role": "Lk",
+   "color": "fekete",
+   "section": "WS2"
+  },
+  {
+   "id": "w26",
+   "from": "KD.LK",
+   "to": "E1.L",
+   "conductor": "kapcsolt fázis",
+   "role": "Lk",
+   "color": "fekete",
+   "section": "WE"
+  },
+  {
+   "id": "w27",
+   "from": "KD.N",
+   "to": "E1.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék",
+   "section": "WE"
+  },
+  {
+   "id": "w28",
+   "from": "KD.PE",
+   "to": "E1.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "WE"
+  }
+ ],
+ "truthTable": [
+  {
+   "states": {
+    "S1": "0",
+    "X1": "egyenes",
+    "X2": "egyenes",
+    "X3": "egyenes",
+    "X4": "egyenes",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "egyenes",
+    "X2": "egyenes",
+    "X3": "egyenes",
+    "X4": "egyenes",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "egyenes",
+    "X2": "egyenes",
+    "X3": "egyenes",
+    "X4": "keresztezett",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "egyenes",
+    "X2": "egyenes",
+    "X3": "egyenes",
+    "X4": "keresztezett",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "egyenes",
+    "X2": "egyenes",
+    "X3": "keresztezett",
+    "X4": "egyenes",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "egyenes",
+    "X2": "egyenes",
+    "X3": "keresztezett",
+    "X4": "egyenes",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "egyenes",
+    "X2": "egyenes",
+    "X3": "keresztezett",
+    "X4": "keresztezett",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "egyenes",
+    "X2": "egyenes",
+    "X3": "keresztezett",
+    "X4": "keresztezett",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "egyenes",
+    "X2": "keresztezett",
+    "X3": "egyenes",
+    "X4": "egyenes",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "egyenes",
+    "X2": "keresztezett",
+    "X3": "egyenes",
+    "X4": "egyenes",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "egyenes",
+    "X2": "keresztezett",
+    "X3": "egyenes",
+    "X4": "keresztezett",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "egyenes",
+    "X2": "keresztezett",
+    "X3": "egyenes",
+    "X4": "keresztezett",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "egyenes",
+    "X2": "keresztezett",
+    "X3": "keresztezett",
+    "X4": "egyenes",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "egyenes",
+    "X2": "keresztezett",
+    "X3": "keresztezett",
+    "X4": "egyenes",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "egyenes",
+    "X2": "keresztezett",
+    "X3": "keresztezett",
+    "X4": "keresztezett",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "egyenes",
+    "X2": "keresztezett",
+    "X3": "keresztezett",
+    "X4": "keresztezett",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "keresztezett",
+    "X2": "egyenes",
+    "X3": "egyenes",
+    "X4": "egyenes",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "keresztezett",
+    "X2": "egyenes",
+    "X3": "egyenes",
+    "X4": "egyenes",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "keresztezett",
+    "X2": "egyenes",
+    "X3": "egyenes",
+    "X4": "keresztezett",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "keresztezett",
+    "X2": "egyenes",
+    "X3": "egyenes",
+    "X4": "keresztezett",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "keresztezett",
+    "X2": "egyenes",
+    "X3": "keresztezett",
+    "X4": "egyenes",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "keresztezett",
+    "X2": "egyenes",
+    "X3": "keresztezett",
+    "X4": "egyenes",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "keresztezett",
+    "X2": "egyenes",
+    "X3": "keresztezett",
+    "X4": "keresztezett",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "keresztezett",
+    "X2": "egyenes",
+    "X3": "keresztezett",
+    "X4": "keresztezett",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "keresztezett",
+    "X2": "keresztezett",
+    "X3": "egyenes",
+    "X4": "egyenes",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "keresztezett",
+    "X2": "keresztezett",
+    "X3": "egyenes",
+    "X4": "egyenes",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "keresztezett",
+    "X2": "keresztezett",
+    "X3": "egyenes",
+    "X4": "keresztezett",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "keresztezett",
+    "X2": "keresztezett",
+    "X3": "egyenes",
+    "X4": "keresztezett",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "keresztezett",
+    "X2": "keresztezett",
+    "X3": "keresztezett",
+    "X4": "egyenes",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "keresztezett",
+    "X2": "keresztezett",
+    "X3": "keresztezett",
+    "X4": "egyenes",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "keresztezett",
+    "X2": "keresztezett",
+    "X3": "keresztezett",
+    "X4": "keresztezett",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "0",
+    "X1": "keresztezett",
+    "X2": "keresztezett",
+    "X3": "keresztezett",
+    "X4": "keresztezett",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "egyenes",
+    "X2": "egyenes",
+    "X3": "egyenes",
+    "X4": "egyenes",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "egyenes",
+    "X2": "egyenes",
+    "X3": "egyenes",
+    "X4": "egyenes",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "egyenes",
+    "X2": "egyenes",
+    "X3": "egyenes",
+    "X4": "keresztezett",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "egyenes",
+    "X2": "egyenes",
+    "X3": "egyenes",
+    "X4": "keresztezett",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "egyenes",
+    "X2": "egyenes",
+    "X3": "keresztezett",
+    "X4": "egyenes",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "egyenes",
+    "X2": "egyenes",
+    "X3": "keresztezett",
+    "X4": "egyenes",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "egyenes",
+    "X2": "egyenes",
+    "X3": "keresztezett",
+    "X4": "keresztezett",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "egyenes",
+    "X2": "egyenes",
+    "X3": "keresztezett",
+    "X4": "keresztezett",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "egyenes",
+    "X2": "keresztezett",
+    "X3": "egyenes",
+    "X4": "egyenes",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "egyenes",
+    "X2": "keresztezett",
+    "X3": "egyenes",
+    "X4": "egyenes",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "egyenes",
+    "X2": "keresztezett",
+    "X3": "egyenes",
+    "X4": "keresztezett",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "egyenes",
+    "X2": "keresztezett",
+    "X3": "egyenes",
+    "X4": "keresztezett",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "egyenes",
+    "X2": "keresztezett",
+    "X3": "keresztezett",
+    "X4": "egyenes",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "egyenes",
+    "X2": "keresztezett",
+    "X3": "keresztezett",
+    "X4": "egyenes",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "egyenes",
+    "X2": "keresztezett",
+    "X3": "keresztezett",
+    "X4": "keresztezett",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "egyenes",
+    "X2": "keresztezett",
+    "X3": "keresztezett",
+    "X4": "keresztezett",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "keresztezett",
+    "X2": "egyenes",
+    "X3": "egyenes",
+    "X4": "egyenes",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "keresztezett",
+    "X2": "egyenes",
+    "X3": "egyenes",
+    "X4": "egyenes",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "keresztezett",
+    "X2": "egyenes",
+    "X3": "egyenes",
+    "X4": "keresztezett",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "keresztezett",
+    "X2": "egyenes",
+    "X3": "egyenes",
+    "X4": "keresztezett",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "keresztezett",
+    "X2": "egyenes",
+    "X3": "keresztezett",
+    "X4": "egyenes",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "keresztezett",
+    "X2": "egyenes",
+    "X3": "keresztezett",
+    "X4": "egyenes",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "keresztezett",
+    "X2": "egyenes",
+    "X3": "keresztezett",
+    "X4": "keresztezett",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "keresztezett",
+    "X2": "egyenes",
+    "X3": "keresztezett",
+    "X4": "keresztezett",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "keresztezett",
+    "X2": "keresztezett",
+    "X3": "egyenes",
+    "X4": "egyenes",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "keresztezett",
+    "X2": "keresztezett",
+    "X3": "egyenes",
+    "X4": "egyenes",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "keresztezett",
+    "X2": "keresztezett",
+    "X3": "egyenes",
+    "X4": "keresztezett",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "keresztezett",
+    "X2": "keresztezett",
+    "X3": "egyenes",
+    "X4": "keresztezett",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "keresztezett",
+    "X2": "keresztezett",
+    "X3": "keresztezett",
+    "X4": "egyenes",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": true
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "keresztezett",
+    "X2": "keresztezett",
+    "X3": "keresztezett",
+    "X4": "egyenes",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "keresztezett",
+    "X2": "keresztezett",
+    "X3": "keresztezett",
+    "X4": "keresztezett",
+    "S2": "0"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "1",
+    "X1": "keresztezett",
+    "X2": "keresztezett",
+    "X3": "keresztezett",
+    "X4": "keresztezett",
+    "S2": "1"
+   },
+   "lamps": {
+    "E1": true
+   }
+  }
+ ],
+ "layout": {
+  "view": "bekotes",
+  "viewBox": "0 0 380 240",
+  "parts": {
+   "T": [
+    20,
+    40
+   ],
+   "KD": [
+    180,
+    40
+   ],
+   "S1": [
+    30,
+    190
+   ],
+   "X1": [
+    90,
+    190
+   ],
+   "X2": [
+    150,
+    190
+   ],
+   "X3": [
+    210,
+    190
+   ],
+   "X4": [
+    270,
+    190
+   ],
+   "S2": [
+    330,
+    190
+   ],
+   "E1": [
+    330,
+    40
+   ]
+  },
+  "megjegyzes": "Durva elhelyezés a Bekötés nézethez; a vezetékútvonalat (path) az ábramotor vagy a rajzoló adja."
+ }
+}

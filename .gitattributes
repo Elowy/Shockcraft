@@ -1,0 +1,4 @@
+# Sorvégek: a Markdown mindig LF (a generált docs/lektori-csomag.md összevetése és a Windows alatti, core.autocrlf=true klón miatt is),
+# a PDF bináris (a docs/lektori-csomag.pdf bájtra azonos összevetése miatt). Lásd docs/lektoralas.md.
+*.md text eol=lf
+*.pdf binary

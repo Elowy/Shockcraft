@@ -1,0 +1,259 @@
+{
+ "format": "kb-netlista/1",
+ "id": "p15-101-nullazas-a-lampanal",
+ "title": "PRÓBA (szándékosan hibás): 101: a lámpatest védőkapcsa a nullavezetőre kötve (»nullázás« a lámpánál, PEN-szétválasztás utáni összekötés)",
+ "short": "101 – egy hely",
+ "article": "egypolusu-kapcsolo-101-bekotese",
+ "figure": "abra-1",
+ "version": 1,
+ "note": "Tervezet a szakmai lektornak (R3). Egy lehetséges, következetes érszín-kiosztás: barna = betáp fázis, fekete = kapcsolt fázis, szürke = váltóvezetékek (felirattal megkülönböztetve), kék = nullavezető, zöld-sárga = védővezető. A kapocsjelölés gyártónként eltérhet; a gyártói útmutató az irányadó.",
+ "components": [
+  {
+   "id": "T",
+   "type": "tap",
+   "label": "Betáp",
+   "symbol": "panel",
+   "megjegyzes": "Az áramkör betápja az elosztóból, a kismegszakító és az áram-védőkapcsoló (FI-relé) után.",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ]
+  },
+  {
+   "id": "KD",
+   "type": "kotodoboz",
+   "label": "Kötődoboz",
+   "symbol": "box",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L-kötés"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N-kötés"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE-kötés"
+    },
+    {
+     "id": "LK",
+     "role": "kapcsolt",
+     "label": "kapcsoltfázis-kötés"
+    }
+   ]
+  },
+  {
+   "id": "S1",
+   "type": "kapcsolo-101",
+   "label": "Kapcsoló (101)",
+   "symbol": "switch1",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L kapocs (betáp)"
+    },
+    {
+     "id": "1",
+     "role": "kapcsolt",
+     "label": "1-es kapocs (kimenet)"
+    }
+   ],
+   "states": [
+    {
+     "name": "ki",
+     "connect": []
+    },
+    {
+     "name": "be",
+     "connect": [
+      [
+       "L",
+       "1"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "E1",
+   "type": "lampa",
+   "label": "Lámpa",
+   "symbol": "light",
+   "class": "I",
+   "terminals": [
+    {
+     "id": "L",
+     "role": "L",
+     "label": "L (fázis)"
+    },
+    {
+     "id": "N",
+     "role": "N",
+     "label": "N"
+    },
+    {
+     "id": "PE",
+     "role": "PE",
+     "label": "PE"
+    }
+   ]
+  }
+ ],
+ "sections": [
+  {
+   "id": "W0",
+   "from": "T",
+   "to": "KD",
+   "label": "Elosztó – kötődoboz",
+   "kind": "betap"
+  },
+  {
+   "id": "W1",
+   "from": "KD",
+   "to": "S1",
+   "label": "Kötődoboz – kapcsoló",
+   "kind": "kapcsolo"
+  },
+  {
+   "id": "W2",
+   "from": "KD",
+   "to": "E1",
+   "label": "Kötődoboz – lámpa",
+   "kind": "lampa"
+  }
+ ],
+ "wires": [
+  {
+   "id": "w1",
+   "from": "T.L",
+   "to": "KD.L",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna",
+   "section": "W0"
+  },
+  {
+   "id": "w2",
+   "from": "T.N",
+   "to": "KD.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék",
+   "section": "W0"
+  },
+  {
+   "id": "w3",
+   "from": "T.PE",
+   "to": "KD.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "W0"
+  },
+  {
+   "id": "w4",
+   "from": "KD.L",
+   "to": "S1.L",
+   "conductor": "L",
+   "role": "L",
+   "color": "barna",
+   "section": "W1"
+  },
+  {
+   "id": "w5",
+   "from": "S1.1",
+   "to": "KD.LK",
+   "conductor": "kapcsolt fázis",
+   "role": "Lk",
+   "color": "fekete",
+   "section": "W1"
+  },
+  {
+   "id": "w6",
+   "from": "KD.LK",
+   "to": "E1.L",
+   "conductor": "kapcsolt fázis",
+   "role": "Lk",
+   "color": "fekete",
+   "section": "W2"
+  },
+  {
+   "id": "w7",
+   "from": "KD.N",
+   "to": "E1.N",
+   "conductor": "N",
+   "role": "N",
+   "color": "kék",
+   "section": "W2"
+  },
+  {
+   "id": "w8",
+   "from": "KD.N",
+   "to": "E1.PE",
+   "conductor": "PE",
+   "role": "PE",
+   "color": "zöld-sárga",
+   "section": "W2"
+  }
+ ],
+ "truthTable": [
+  {
+   "states": {
+    "S1": "ki"
+   },
+   "lamps": {
+    "E1": false
+   }
+  },
+  {
+   "states": {
+    "S1": "be"
+   },
+   "lamps": {
+    "E1": true
+   }
+  }
+ ],
+ "layout": {
+  "view": "bekotes",
+  "viewBox": "0 0 360 240",
+  "parts": {
+   "T": [
+    20,
+    40
+   ],
+   "KD": [
+    180,
+    40
+   ],
+   "S1": [
+    180,
+    190
+   ],
+   "E1": [
+    320,
+    40
+   ]
+  },
+  "megjegyzes": "Durva elhelyezés a Bekötés nézethez; a vezetékútvonalat (path) az ábramotor vagy a rajzoló adja."
+ }
+}

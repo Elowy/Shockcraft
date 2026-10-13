@@ -8,13 +8,13 @@ import type {SearchResult} from '@/lib/plan-tools';
 
 export function PlanChecks({plan,onLocate}:{plan:Plan;onLocate:(target:SearchResult)=>void}){
  const [scope,setScope]=useState('all'),[level,setLevel]=useState('all'),[limit,setLimit]=useState(100);
- const issues=useMemo(()=>checkPlan(plan),[plan]);
+ const issues=useMemo(()=>checkPlan(plan,{sizing:true}),[plan]);
  const effectiveScope=plan.buildings.some(b=>b.id===scope)?scope:'all';
  const scoped=issues.filter(i=>effectiveScope==='all'||i.target.buildingId===effectiveScope);
  const visible=scoped.filter(i=>level==='all'||i.level===level);
  const missing=scoped.filter(i=>i.level==='missing').length;
  return <section className="plan-checks" aria-label="Tervellenőrzés eredménye">
-  <p className="report-note">A megadott tervadatok teljességét és a rögzített kapcsolatokat vizsgáljuk. Ez a nézet nem végez villamos méretezést vagy szabványossági ellenőrzést.</p>
+  <p className="report-note">A megadott tervadatok teljességét és a rögzített kapcsolatokat vizsgáljuk; itt jelennek meg a méretezési segédszámítás nem megfelelő és nem számítható áramkörei is (részletek: Méretezés fül). Ez nem szabványossági minősítés.</p>
   <div className="report-controls"><Choice label="Ellenőrzés területe" value={effectiveScope} onChange={v=>{setScope(v);setLimit(100)}} items={[["all","Teljes projekt"],...plan.buildings.map(b=>[b.id,b.name] as [string,string])]}/><Choice label="Találatok szűrése" value={level} onChange={v=>{setLevel(v);setLimit(100)}} items={[["all","Minden találat"],["missing","Hiányzó adatok"],["review","Átnézendő tételek"]]}/></div>
   <div className="check-totals"><span><strong>{missing}</strong> hiányzó adat</span><span><strong>{scoped.length-missing}</strong> átnézendő tétel</span></div>
   <p className="report-note" role="status">{visible.length?visible.length+' találat. Válassz egyet az érintett elem megnyitásához.':'Nincs találat a kiválasztott feltételekkel.'}</p>

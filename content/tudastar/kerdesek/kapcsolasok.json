@@ -1,0 +1,749 @@
+[
+  {
+    "id": "q-kap-0001",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Melyik kapcsolót használják, ha egy lámpát vagy lámpacsoportot egyetlen helyről kapcsolnak?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Egypólusú kapcsoló (101)",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Csillárkapcsoló (105)",
+        "correct": false,
+        "why": "A 105-ös két lámpakört kapcsol egy helyről."
+      },
+      {
+        "id": "c",
+        "text": "Váltókapcsoló (106)",
+        "correct": false,
+        "why": "Két váltókapcsoló egy lámpát két helyről kapcsol."
+      },
+      {
+        "id": "d",
+        "text": "Keresztkapcsoló (107)",
+        "correct": false,
+        "why": "A 107-es két váltókapcsoló közé kerül, három vagy több helyhez."
+      }
+    ],
+    "explanation": "Egy lámpa egy helyről történő kapcsolásához egypólusú (101-es) kapcsoló kell, amely a fázisvezetőt bontja. A 105-ös a lámpakörök, a 106-os és a 107-es a kapcsolási helyek számát növeli.",
+    "ref": "vilagitasi-kapcsolasok#melyiket-valaszd",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0002",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Egy folyosói lámpát a folyosó mindkét végéről kapcsolni kell. Mely kapcsolók kellenek ehhez?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Két váltókapcsoló (2 × 106)",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Két egypólusú kapcsoló (2 × 101)",
+        "correct": false,
+        "why": "Két egypólusú kapcsolóból váltókapcsolás nem építhető."
+      },
+      {
+        "id": "c",
+        "text": "Egy csillárkapcsoló (105)",
+        "correct": false
+      },
+      {
+        "id": "d",
+        "text": "Egy kétpólusú kapcsoló (102)",
+        "correct": false
+      }
+    ],
+    "explanation": "Egy lámpa két helyről két váltókapcsolóval (106) kapcsolható: a két kapcsoló kimeneteit két váltóvezeték köti össze, és bármelyik átváltása megfordítja a lámpa állapotát. Két egypólusú kapcsolóval ez nem valósítható meg.",
+    "ref": "valtokapcsolo-106-bekotese#hogyan-mukodik",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0003",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Egy lépcsőházi lámpát négy helyről kell kapcsolni hagyományos kapcsolókkal. Mely kapcsolók szükségesek?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Két váltókapcsoló (106) és két keresztkapcsoló (107)",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Négy váltókapcsoló (106)",
+        "correct": false
+      },
+      {
+        "id": "c",
+        "text": "Egy váltókapcsoló és három keresztkapcsoló",
+        "correct": false,
+        "why": "A sor mindkét végére váltókapcsoló kerül."
+      },
+      {
+        "id": "d",
+        "text": "Két csillárkapcsoló (105) és két keresztkapcsoló (107)",
+        "correct": false
+      }
+    ],
+    "explanation": "A két szélső helyre váltókapcsoló, minden közbenső helyre egy-egy keresztkapcsoló kerül: négy helyhez tehát két 106-os és két 107-es kell. Sok kapcsolási helynél gyakran egyszerűbb a nyomógombos, impulzusrelés megoldás, ahol a nyomógombok párhuzamosan köthetők.",
+    "ref": "keresztkapcsolo-107-bekotese#hogyan-mukodik",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0004",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 1,
+    "type": "truefalse",
+    "stem": "Helyes bekötésnél az egypólusú világítási kapcsoló (101) a fázisvezetőt bontja, a nullavezető pedig a kapcsolót elkerülve jut a lámpához.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "A kapcsoló mindig a fázisvezetőt bontja, így kikapcsolt állásban a lámpa foglalata nem kap fázist. A nullavezető és a védővezető a kötődobozban, a kapcsolót elkerülve jut a lámpához.",
+    "ref": "egypolusu-kapcsolo-101-bekotese#hogyan-mukodik",
+    "shuffle": false,
+    "family": "kapcsolo-fazist-bont",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0005",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Mi a veszélye annak, ha egy egypólusú világítási kapcsolót a nullavezetőbe kötnek?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A foglalat kikapcsolt állásban is fázis alatt marad",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A lámpa egyik állásban sem kapcsol ki",
+        "correct": false
+      },
+      {
+        "id": "c",
+        "text": "Bekapcsoláskor azonnal zárlat keletkezik",
+        "correct": false
+      },
+      {
+        "id": "d",
+        "text": "Az áram-védőkapcsoló ettől biztosan kiold, így a hiba azonnal kiderül",
+        "correct": false,
+        "why": "A FI-relé a nullát bontó kapcsolót nem jelzi."
+      }
+    ],
+    "explanation": "Ha a kapcsoló a nullavezetőt szakítja meg, a lámpa ugyan kialszik, de a fázis a lámpán át a foglalatig továbbra is eljut, ami izzócsere vagy tisztítás közben áramütést okozhat. Ez a hiba a működésen nem látszik, csak szakember mérésével derül ki.",
+    "ref": "egypolusu-kapcsolo-101-bekotese#gyakori-hibak",
+    "shuffle": true,
+    "family": "kapcsolo-fazist-bont",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0006",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "Ha a világítási kapcsoló helyesen a fázist bontja, a kikapcsolt lámpa feszültségmentesnek tekinthető, és lámpacseréhez elég a falikapcsolót lekapcsolni.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": false
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": true
+      }
+    ],
+    "explanation": "A falikapcsoló üzemi kapcsoló, nem leválasztó: a lámpa nullavezetője kikapcsolt állásban is a hálózathoz csatlakozik, és hogy a kapcsoló valóban a fázist bontja-e, csak mérés mutatja meg. Szereléshez az áramkört az elosztóban le kell választani, és a feszültségmentességet ellenőrizni kell.",
+    "ref": "egypolusu-kapcsolo-101-bekotese#hogyan-mukodik",
+    "shuffle": false,
+    "family": "falikapcsolo-nem-levalaszt",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0007",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Hány kapcsa van egy váltókapcsolónak (106), és mi a szerepük?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Három: egy közös és két kimenő kapocs",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Kettő: egy bemenő és egy kimenő kapocs",
+        "correct": false,
+        "why": "Ez az egypólusú (101) kapcsoló."
+      },
+      {
+        "id": "c",
+        "text": "Négy: egy bemenő és egy kimenő kapocspár",
+        "correct": false,
+        "why": "Ez a keresztkapcsoló (107)."
+      },
+      {
+        "id": "d",
+        "text": "Négy: fázis és nulla be, fázis és nulla ki",
+        "correct": false,
+        "why": "Ez a kétpólusú (102) kapcsoló."
+      }
+    ],
+    "explanation": "A váltókapcsoló a közös kapcsot hol az 1-es, hol a 2-es kimenettel köti össze; „ki” állása nincs. A közös kapocs jelölése és helye gyártónként eltér, ezért a gyártói rajz az irányadó.",
+    "ref": "valtokapcsolo-106-bekotese#kapcsok-es-jelolesuk",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0008",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Egy váltókapcsolással (2 × 106) kapcsolt lámpa éppen kikapcsolt állapotban van. Mi igaz a két kapcsolót összekötő váltóvezetékekre?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Pontosan az egyikük fázis alatt van",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A két váltóvezeték feszültségmentes, mert a lámpa kikapcsolt",
+        "correct": false,
+        "why": "A kikapcsolt lámpa csak azt jelzi, hogy a fázis nem a lámpa felé vezető úton van."
+      },
+      {
+        "id": "c",
+        "text": "A két váltóvezeték a nullavezetőhöz kapcsolódik",
+        "correct": false,
+        "why": "A váltóvezetékek a két kapcsoló kimeneteit kötik össze, nullavezető nem kerül rájuk."
+      },
+      {
+        "id": "d",
+        "text": "Csak akkor van rajtuk feszültség, amikor a lámpa ég",
+        "correct": false
+      }
+    ],
+    "explanation": "A két váltóvezeték közül minden kapcsolóállásban az egyik fázis alatt van, akkor is, ha a lámpa nem ég, az első kapcsoló közös kapcsa pedig mindig fázist kap. A kikapcsolt lámpa tehát semmit nem árul el a dobozokban lévő feszültségről: munkavégzés előtt az áramkört az elosztóban kell leválasztani.",
+    "ref": "valtokapcsolo-106-bekotese#hogyan-mukodik",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0009",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 2,
+    "type": "multi",
+    "stem": "Melyik állítás igaz a keresztkapcsolós (107) világítási kapcsolásra? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A két szélső helyre váltókapcsoló (106) kerül",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Minden közbenső helyre egy keresztkapcsoló kerül",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "Bármelyik kapcsoló átváltása megfordítja a lámpa állapotát",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "A keresztkapcsoló a nullavezetőt is bontja",
+        "correct": false,
+        "why": "A 107-es csak a két váltóvezetéket köti egyenesen vagy keresztezve."
+      },
+      {
+        "id": "e",
+        "text": "Kikapcsolt lámpánál minden váltóvezeték feszültségmentes",
+        "correct": false,
+        "why": "A váltóvezeték-pár egyik ere minden állásban fázis alatt van."
+      }
+    ],
+    "explanation": "A keresztkapcsoló a két váltóvezetéket egyenesen vagy keresztezve vezeti tovább, ezért bármelyik kapcsoló átváltása a fázist a másik vezetékre teszi, és megfordítja a lámpa állapotát. A váltóvezetékek egyike minden állásban fázis alatt van, így egyetlen doboz sem tekinthető feszültségmentesnek csak azért, mert a lámpa nem ég.",
+    "ref": "keresztkapcsolo-107-bekotese#hogyan-mukodik",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0010",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Hány ér szükséges a csillárkapcsolóval (105) kapcsolt lámpáig a kötődobozos kialakításban?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "2",
+        "correct": false
+      },
+      {
+        "id": "b",
+        "text": "3",
+        "correct": false,
+        "why": "Két kapcsolt fázis és a nullavezető mellett a védővezető is kell."
+      },
+      {
+        "id": "c",
+        "text": "4",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "5",
+        "correct": false
+      }
+    ],
+    "explanation": "A csillárhoz két kapcsolt fázis (a két lámpakör), a nullavezető és a védővezető megy, összesen négy ér. A két kapcsolt fázist a lámpakiállásnál tartósan jelölni kell, mert színből nem különböztethetők meg biztosan.",
+    "ref": "vilagitasi-kapcsolasok#attekintes",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0011",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Egy szerelvénydobozból két lámpát kell kapcsolni, amelyeket két külön áramkör táplál. Melyik megoldás helyes?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Két egypólusú kapcsoló egy keretben (101 + 101), mindkét áramkör nullavezetője a saját áramkörénél marad",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Csillárkapcsoló (105), a két áramkör fázisát a közös betápkapocsra kötve",
+        "correct": false,
+        "why": "A 105-ös közös betápja a két áramkört összekötné."
+      },
+      {
+        "id": "c",
+        "text": "Csillárkapcsoló (105), a két áramkör nullavezetőjét egy összekötőbe kötve",
+        "correct": false,
+        "why": "Két áramkör nullavezetőjét összekötni tilos."
+      },
+      {
+        "id": "d",
+        "text": "Kettős váltókapcsoló áthidalóval, a két áramkört a közös kapcsokon összekötve",
+        "correct": false
+      }
+    ],
+    "explanation": "A 105-ös kapcsoló két lámpaköre közös betápról kap fázist, ezért két külön áramkörhöz két önálló betápkapcsú kapcsoló kell, és mindkét nullavezető a saját áramkörénél marad. A közösített nullavezetőn a „lekapcsolt” áramkörben is áram folyhat, ezért az ilyen dobozt egyik kismegszakító lekapcsolása sem teszi feszültségmentessé; a kettős betáplálást jelölni kell.",
+    "ref": "csillarkapcsolo-105-bekotese#hogyan-mukodik",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0012",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 2,
+    "type": "multi",
+    "stem": "Melyik állítás igaz a védővezetőre a világítási kapcsolásokban? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Folytonos, és egyetlen kapcsoló sem bonthatja",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A zöld-sárga ér fázis- vagy nullavezetőként soha nem használható",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "Minden fémtestű lámpatestig megszakítás nélkül el kell jutnia",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "A kétpólusú (102) kapcsoló a védővezetőt is bontja",
+        "correct": false,
+        "why": "A 102-es a fázist és a nullát bontja; a védővezetőt semmilyen kapcsoló nem bonthatja."
+      },
+      {
+        "id": "e",
+        "text": "Ha hiányzik, a lámpatest védőkapcsa a nullavezetőre köthető",
+        "correct": false,
+        "why": "A hiányzó védővezetőt tilos a nullavezetőből pótolni."
+      }
+    ],
+    "explanation": "A védővezető soha nem kapcsolt, és minden fémtestű lámpatestig megszakítás nélkül fut; a zöld-sárga ér csak védőfunkciójú vezető (védővezető, PEN, EPH-vezető) lehet, fázis- vagy nullavezető soha. A hiányzó védővezetőt tilos a nullavezetőből pótolni, mert nullaszakadásnál vagy felcserélt vezetőknél a fémtest fázis alá kerülhet.",
+    "ref": "vilagitasi-kapcsolasok#kozos-szabalyok",
+    "shuffle": true,
+    "family": "vedovezeto-szabalyok",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0013",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mit bont a kétpólusú (102-es) kapcsoló?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A fázis- és a nullavezetőt együtt",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A fázisvezetőt és a védővezetőt",
+        "correct": false,
+        "why": "A védővezetőt semmilyen kapcsoló nem bonthatja."
+      },
+      {
+        "id": "c",
+        "text": "Két lámpakör kapcsolt fázisát külön billentyűvel",
+        "correct": false,
+        "why": "Ez a csillárkapcsoló (105)."
+      },
+      {
+        "id": "d",
+        "text": "Csak a nullavezetőt",
+        "correct": false
+      }
+    ],
+    "explanation": "A 102-es kapcsolóban két érintkezőpár van, amelyeket egy billentyű együtt mozgat: az egyik a fázist, a másik a nullát bontja. A védővezetőt és a nullázásos berendezések közös PEN-vezetőjét ez a kapcsoló sem bonthatja.",
+    "ref": "ketpolusu-kapcsolo-102-bekotese#hogyan-mukodik",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0014",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 3,
+    "type": "truefalse",
+    "stem": "Régi, nullázásos (TN-C) berendezésben a kétpólusú (102) kapcsoló nullapólusával a közös PEN-vezető is bontható.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": false
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": true
+      }
+    ],
+    "explanation": "A PEN-vezető egyszerre nulla- és védővezető, ezért kapcsolni soha nem szabad: ha egy kapcsoló megszakítaná, a készülék teste is elveszítené a védelmét. Ilyen berendezésben a kétpólusú kapcsolás megoldását szakember tervezi meg, a földelési rendszer felmérése után.",
+    "ref": "ketpolusu-kapcsolo-102-bekotese#hogyan-mukodik",
+    "shuffle": false,
+    "family": "pen-nem-bonthato",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0015",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Váltókapcsolásnál (2 × 106) a betáp fázisa az első kapcsoló közös kapcsa helyett annak 1-es kapcsára került, az oda szánt váltóvezeték pedig a közös kapocsra (a két ér felcserélődött). Mi a jellemző tünet?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A négy állás-kombinációból csak egyben ég a lámpa",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A lámpa folyamatosan ég, egyik kapcsoló sem hat rá",
+        "correct": false,
+        "why": "Ez akkor fordul elő, ha a lámpa fázisa a kötődobozban a betáp fázisára kerül."
+      },
+      {
+        "id": "c",
+        "text": "Bármelyik kapcsoló átváltásakor zárlat keletkezik",
+        "correct": false
+      },
+      {
+        "id": "d",
+        "text": "A kapcsolás ugyanúgy működik, csak az állások értelmezése fordul meg",
+        "correct": false,
+        "why": "Ez a két váltóvezeték felcserélésének következménye, nem a rossz betápkapocsé."
+      }
+    ],
+    "explanation": "Ha a fázis nem a közös kapocsra jut, az első kapcsoló egyszerű be-ki kapcsolóként viselkedik, a második pedig csak az első egy bizonyos állásában működik, így a négy kombinációból csak egyben ég a lámpa. A két váltóvezeték felcserélése ezzel szemben nem hiba, csak az állások értelmezése fordul meg.",
+    "ref": "valtokapcsolo-106-bekotese#gyakori-hibak",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0016",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Melyik vezetőhöz csatlakoznak a hazai védőérintkezős dugalj oldalsó védőérintkezői?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A védővezetőhöz (PE)",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A nullavezetőhöz (N)",
+        "correct": false,
+        "why": "A védőérintkező kapcsát a nullára kötni tilos."
+      },
+      {
+        "id": "c",
+        "text": "A fázisvezetőhöz (L)",
+        "correct": false
+      },
+      {
+        "id": "d",
+        "text": "Semmihez, csak a dugó megvezetésére szolgálnak",
+        "correct": false
+      }
+    ],
+    "explanation": "A védőérintkező mindig a védővezetőhöz kapcsolódik, ezen keresztül kapja meg a fémházas (I. érintésvédelmi osztályú) készülék háza a védővezetőt. A dugó két irányban is bedugható, ezért a készülék nem számíthat arra, hogy a fázis mindig ugyanazon az érintkezőn érkezik.",
+    "ref": "dugalj-bekotese#a-vedoerintkezos-dugalj",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0017",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Áthurkolással bekötött dugaljsorban egy kapocs meglazul. Melyik vezető megszakadása marad a mindennapi használat során rejtve, mert a sorban következő dugaljak tovább működnek?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A védővezetőé (PE)",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A fázisvezetőé (L)",
+        "correct": false,
+        "why": "Fázis nélkül a dugaljak nem adnak feszültséget, ez a működésen látszik."
+      },
+      {
+        "id": "c",
+        "text": "A nullavezetőé (N)",
+        "correct": false,
+        "why": "Nulla nélkül a csatlakoztatott készülék nem működik."
+      },
+      {
+        "id": "d",
+        "text": "Áthurkolásnál bármelyik vezető szakadása azonnal kioldást okoz, így rejtett szakadás nincs",
+        "correct": false,
+        "why": "A szakadás nem okoz különbözeti vagy túláramot, ezért egyik védelem sem old ki."
+      }
+    ],
+    "explanation": "A fázis vagy a nulla hiánya a működésen látszik, a védővezetőé nem: a dugalj ugyanúgy működik, csak a csatlakoztatott fémházas készülék marad védelem nélkül. Ezért sok szakember legalább a védővezetőt kötőelemmel ágaztatja le.",
+    "ref": "dugalj-bekotese#athurkolas-vagy-leagaztatas",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0018",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "Egy dugaljáramkör kismegszakítójának lekapcsolása után a dugalj feszültségmentesnek tekinthető, és mérés nélkül hozzá lehet nyúlni.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": false
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": true
+      }
+    ],
+    "explanation": "A kismegszakító csak a fázisvezetőt bontja, a nullavezető a nullasínnel összeköttetésben marad, egy dobozban más áramkör vezetői is futhatnak, a felirat pedig tévedhet. A feszültségmentességet mindig méréssel kell megállapítani, a feszültségmentesítés öt szabálya szerint.",
+    "ref": "dugalj-bekotese#hogyan-mukodik",
+    "shuffle": false,
+    "family": "kismegszakito-nem-mentesit",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0019",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 3,
+    "type": "multi",
+    "stem": "Melyik bekötési hiba miatt kerülhet egy csatlakoztatott fémházas készülék háza fázisfeszültségre? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A fázisvezető a dugalj védőérintkező-kapcsára került",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "„Nullázott” dugalj (a védőérintkező a nullára kötve), és a nullavezető megszakad",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "„Nullázott” dugalj, és a fázis- és a nullavezető fel van cserélve",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "Szabályos védővezető mellett a dugalj L és N kapcsa fel van cserélve",
+        "correct": false,
+        "why": "A ház ilyenkor is a védővezetőn marad; a polaritáscsere más jellegű hiba."
+      },
+      {
+        "id": "e",
+        "text": "A dugaljat leágaztatással, kötődobozból kötötték be",
+        "correct": false,
+        "why": "A leágaztatás szabályos megoldás."
+      }
+    ],
+    "explanation": "A fázis a védőérintkezőn a legsúlyosabb hiba, mert a készülék háza közvetlenül fázis alá kerül. A „nullázott” dugaljnál a ház nullaszakadáskor a készüléken át, L–N felcserélésnél közvetlenül kap fázisfeszültséget, ezért a hiányzó védővezetőt tilos a nullából pótolni.",
+    "ref": "dugalj-bekotese#regi-berendezesben",
+    "shuffle": true,
+    "family": "nullazott-dugalj",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-kap-0020",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "A Villanyrajz tervezőjében mit jelent a kapcsoló alaprajzi jele alatt álló szám?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A típusszám utolsó jegyét (például 106 → 6)",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Az áramkör sorszámát az elosztóban",
+        "correct": false
+      },
+      {
+        "id": "c",
+        "text": "A beépítési magasságot deciméterben",
+        "correct": false
+      },
+      {
+        "id": "d",
+        "text": "Azt, hogy hány lámpát kapcsol a kapcsoló",
+        "correct": false
+      }
+    ],
+    "explanation": "A jel alatt a hazai típusszám utolsó jegye áll: 101 → 1, 102 → 2, 105 → 5, 106 → 6, 107 → 7. A kettős váltókapcsolónak nincs külön jele, a kettős kivitelt a szerelvény neve vagy megjegyzése rögzíti.",
+    "ref": "vilagitasi-kapcsolasok#jeloles-a-tervezoben",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet",
+    "retired": true,
+    "note": "Visszavonva (2026-10-12, review): a Villanyrajz szerkesztőfelületének jelölését kérdezi, ami nem villanyszerelői tudás és a program változatától függ; a tervező súgójába való."
+  },
+  {
+    "id": "q-kap-0021",
+    "version": 1,
+    "topic": "kapcsolasok",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Kettős váltókapcsolásnál (2 × 106+6) a betáp fázisa csak az első billentyű közös kapcsára (C1) kerül, áthidaló pedig hiányzik, és a két közös kapocs belül sincs összekötve. Mi a következmény?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A 2. lámpa egyik állásban sem gyullad ki",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A két lámpa mindig együtt kapcsol",
+        "correct": false
+      },
+      {
+        "id": "c",
+        "text": "Az 1. lámpa folyamatosan ég",
+        "correct": false
+      },
+      {
+        "id": "d",
+        "text": "Bármelyik billentyű átváltásakor zárlat keletkezik",
+        "correct": false
+      }
+    ],
+    "explanation": "A 2. billentyű közös kapcsa (C2) betáp nélkül marad, ezért a második lámpakör egyik állásban sem kap fázist. Ha viszont a két kört két külön áramkör táplálja, áthidaló nem kell és nem is szabad, mert az összekötné a két áramkört.",
+    "ref": "kettos-valtokapcsolo-106-6-bekotese#gyakori-hibak",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  }
+]

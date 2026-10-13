@@ -1,4 +1,4 @@
-// Run only against a local ShockCraft preview with the D1 migrations applied.
+// Run only against a local Villanyrajz preview with the D1 migrations applied.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const base=process.env.TEST_BASE_URL||'http://127.0.0.1:5180';

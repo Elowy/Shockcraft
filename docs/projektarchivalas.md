@@ -6,6 +6,8 @@ A tervező felső sávjában a **Projektek** gomb nyitja meg az Aktív, Archivá
 - **Lomtárba:** megőrzi a tervet a Lomtár listában. Nincs végleges törlés vagy időzített ürítés.
 - **Visszaállítás:** az archivált vagy lomtárban lévő terv az Aktív listára kerül. Innen megnyitható, ha a fióknak van hozzáférése.
 
+**Megosztási linkek** ([tervmegosztás](tervmegosztas.md)): archiváláskor a projekt linkjei **szünetelnek**, és visszaállítás után a lejáratig újra működnek. Lomtárba helyezéskor a linkek **véglegesen megszűnnek**; a lomtárból való visszaállítás sem éleszti újra őket, új linket kell készíteni. A megerősítő ablak ezt jelzi.
+
 A művelet előtt megerősítés jelenik meg. A jelenleg nyitott terv mentetlen módosításait előbb el kell menteni. Ha a nyitott projektet archiválod vagy lomtárba helyezed, a szerkesztő üres, még el nem mentett tervre vált. Ez nem foglal le új projekthelyet.
 
 ## Projekthelyek és hozzáférés

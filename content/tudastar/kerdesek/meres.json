@@ -1,0 +1,729 @@
+[
+  {
+    "id": "q-mer-0001",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Melyik eszközzel kell munkavégzés előtt megállapítani a feszültségmentességet?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Kétpólusú feszültségvizsgálóval, minden pólus között",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Egypólusú fáziskereső csavarhúzóval",
+        "correct": false,
+        "why": "A fáziskereső kijelzése függ a testhelyzettől és a padlótól; lemerült vagy hibás eszköz is „nincs feszültséget” mutat."
+      },
+      {
+        "id": "c",
+        "text": "A lámpa kapcsolgatásával: ha nem ég, nincs feszültség",
+        "correct": false,
+        "why": "A kikapcsolt lámpa semmit nem bizonyít a vezetékek feszültségéről."
+      },
+      {
+        "id": "d",
+        "text": "Az elosztó feliratával: ha a kismegszakító ki van kapcsolva, nincs feszültség",
+        "correct": false,
+        "why": "A felirat tévedhet, és a kismegszakító csak a fázist bontja."
+      }
+    ],
+    "explanation": "A feszültségmentességet a munkahelyen, közvetlenül a munka előtt, minden pólus között kétpólusú feszültségvizsgálóval kell megállapítani. A fáziskereső nem igazolja a feszültségmentességet, és a felirat vagy a kikapcsolt lámpa sem helyettesíti a mérést.",
+    "ref": "feszultsegmentesites-ot-szabalya#3-a-feszultsegmentesseg-megallapitasa",
+    "shuffle": true,
+    "family": "faziskereso",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0002",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Mit kell tenni a kétpólusú feszültségvizsgálóval a feszültségmentesség megállapítása előtt és után?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A működését egy ismert feszültségforráson ellenőrizni",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Az elemét kivenni, hogy a mérés közben ne merüljön le",
+        "correct": false,
+        "why": "Elem nélkül a vizsgáló nem működik; a működését kell ellenőrizni."
+      },
+      {
+        "id": "c",
+        "text": "A mérőcsúcsait a védővezetőhöz érintve „kisütni”",
+        "correct": false,
+        "why": "Ez nem ellenőrzi a vizsgáló működését."
+      },
+      {
+        "id": "d",
+        "text": "A méréshatárt a legkisebb állásba kapcsolni",
+        "correct": false,
+        "why": "A feszültségvizsgáló működésének ellenőrzését ez nem pótolja."
+      }
+    ],
+    "explanation": "A feszültségvizsgáló csak akkor bizonyít, ha biztosan működik: ezért a mérés előtt és után is egy ismert feszültségforráson ellenőrizni kell. Ha a vizsgáló a mérés közben meghibásodik, a „nincs feszültség” kijelzés hamis biztonságot ad.",
+    "ref": "feszultsegmentesites-ot-szabalya#3-a-feszultsegmentesseg-megallapitasa",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0003",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 2,
+    "type": "multi",
+    "stem": "A feszültségmentesség megállapításakor egy egyfázisú áramkörben mely vezetőpárok között kell mérni? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A fázis- és a nullavezető között (L–N)",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A fázis- és a védővezető között (L–PE)",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "A nulla- és a védővezető között (N–PE)",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "Csak a fázis és a föld között, a többi mérés felesleges",
+        "correct": false,
+        "why": "A csak fázis–föld mérés gyakori hiba: a nullavezetőn is lehet veszélyes feszültség."
+      }
+    ],
+    "explanation": "A feszültségmentességet minden pólus között kell megállapítani: egyfázisú áramkörben L–N, L–PE és N–PE között, háromfázisúban a fázisvezetők egymás között is. A nullavezetőt is feszültség alattinak kell tekinteni, amíg a mérés mást nem mutat, mert közös nullavezetőn, szakadáskor vagy felcserélt bekötésnél veszélyes feszültség lehet rajta.",
+    "ref": "feszultsegmentesites-ot-szabalya#3-a-feszultsegmentesseg-megallapitasa",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0004",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 1,
+    "type": "truefalse",
+    "stem": "A fáziskereső csavarhúzó sötéten maradó jelzőfénye igazolja, hogy a vezeték feszültségmentes.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": false
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": true
+      }
+    ],
+    "explanation": "Az egypólusú fáziskereső kijelzése függ attól, hogyan állsz és milyen a padló, a lemerült vagy hibás eszköz pedig akkor is „nincs feszültséget” mutat, ha van. A feszültségmentességet csak kétpólusú feszültségvizsgálóval, minden pólus között mérve lehet megállapítani.",
+    "ref": "feszultsegmentesites-ot-szabalya#3-a-feszultsegmentesseg-megallapitasa",
+    "shuffle": false,
+    "family": "faziskereso",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0005",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "A szakember műszere a hálózati feszültségre 230 V-ot mutat. Mekkora a szinuszos feszültség csúcsértéke?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "kb. 163 V",
+        "correct": false,
+        "why": "Ez 230 / √2; a csúcsérték az effektív értéknél nagyobb, nem kisebb."
+      },
+      {
+        "id": "b",
+        "text": "230 V",
+        "correct": false,
+        "why": "A 230 V az effektív érték; a pillanatnyi érték ennél nagyobbra is kileng."
+      },
+      {
+        "id": "c",
+        "text": "kb. 325 V",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "400 V",
+        "correct": false,
+        "why": "Ez a két fázisvezető közötti vonali feszültség, effektív értékben."
+      }
+    ],
+    "explanation": "A hálózati feszültség megadott és mért értéke az effektív érték; szinuszos feszültségnél a csúcsérték Û = √2 · 230 V ≈ 325 V. A pozitív és a negatív csúcs között kb. 650 V van, ezért egyes alkatrészek feszültségtűrését a csúcsértékhez kell választani.",
+    "ref": "elektromos-feszultseg#egyenfeszultseg-es-valtakozo-feszultseg",
+    "shuffle": false,
+    "family": "csucsertek",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0006",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Miért mutathat hibás értéket egy egyszerű, átlagérték-mérő multiméter egy LED-meghajtó torzított áramának mérésekor?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Mert az átlagot méri, és csak szinuszos jelre helyes szorzóval számol",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Mert a LED-meghajtó egyenáramot vesz fel a hálózatból",
+        "correct": false,
+        "why": "A meghajtó a hálózatból váltakozó áramot vesz fel, csak torzított alakút."
+      },
+      {
+        "id": "c",
+        "text": "Mert torzított áramnál az effektív érték mindig nulla, ezt a műszer nem tudja kijelezni",
+        "correct": false,
+        "why": "A torzított áramnak is van effektív értéke, csak az átlagból nem számolható helyesen."
+      },
+      {
+        "id": "d",
+        "text": "Mert a multiméter az 50 Hz-es áramot egyáltalán nem érzékeli",
+        "correct": false,
+        "why": "Az 50 Hz-es áramot érzékeli; a hiba a jelalakból adódik."
+      }
+    ],
+    "explanation": "Az egyszerűbb műszerek egy része a jel átlagát méri, és azt az 1,11-es szorzóval alakítja effektív értékké; ez csak tisztán szinuszos jelre helyes. Torzított áramnál (LED-meghajtó, kapcsolóüzemű tápegység, inverter) csak a valódi effektív értéket számoló, „true RMS” műszer mutat helyes értéket.",
+    "ref": "elektromos-aram#az-effektiv-ertek",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0007",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "A szakember lakatfogóval egy ép egyfázisú áramkör háromeres kábelét (L, N, PE) egyben fogja körül. Mit mutat jó esetben a műszer?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Közel 0 A-t: a fázis- és a nullaáram kioltja egymást",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A fázisáram kétszeresét, mert két áramvezető ér van a kábelben",
+        "correct": false,
+        "why": "A két áram ellentétes irányú, mágneses hatásuk kioltja egymást."
+      },
+      {
+        "id": "c",
+        "text": "Pontosan a fázisvezető áramát",
+        "correct": false,
+        "why": "Ezt akkor mutatná, ha csak a fázisvezetőt fogná körül."
+      },
+      {
+        "id": "d",
+        "text": "A fázis és a nulla közötti feszültséget",
+        "correct": false,
+        "why": "A lakatfogó a körülfogott vezetők áramának mágneses hatását méri, nem feszültséget."
+      }
+    ],
+    "explanation": "A lakatfogó a körülfogott vezetőkben folyó áramok összegét méri; ép egyfázisú áramkörben a fázis- és a nullavezető árama egyenlő és ellentétes irányú, ezért az összegük közel nulla. A terhelőáram méréséhez egyetlen vezetőt kell körülfogni; ugyanezen az elven, a különbséget figyelve működik az áram-védőkapcsoló is.",
+    "ref": "elektromos-aram#aramerosseg-a-gyakorlatban",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0008",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Milyen nagyságrendű egy ép szigetelés szigetelési ellenállása?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Néhány milliohm, mint egy jó kötésé",
+        "correct": false,
+        "why": "Ez egy jó kötés ellenállásának nagyságrendje."
+      },
+      {
+        "id": "b",
+        "text": "Néhány ohm",
+        "correct": false,
+        "why": "Ekkora ellenálláson át a hálózati feszültség jelentős áramot hajtana: ez súlyos szigetelési hiba lenne."
+      },
+      {
+        "id": "c",
+        "text": "Néhány kiloohm",
+        "correct": false,
+        "why": "Ez is súlyosan leromlott szigetelésre utalna."
+      },
+      {
+        "id": "d",
+        "text": "Megaohmos nagyságrendű vagy nagyobb",
+        "correct": true
+      }
+    ],
+    "explanation": "A szigetelés is ellenállás, de jó állapotban nagyon nagy, legalább megaohmos nagyságrendű; öregedés, nedvesség vagy sérülés csökkenti. Szigetelésvizsgáló műszerrel, a feszültségmentesített berendezésen mérik, az elfogadható legkisebb értéket a vonatkozó szabvány adja meg.",
+    "ref": "elektromos-ellenallas#ellenallas-a-szerelesi-gyakorlatban",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0009",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Mit ellenőriz a szakember a hibahurok-impedancia mérésével?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Hogy testzárlatkor elég nagy hibaáram folyik-e a gyors lekapcsoláshoz",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A vezetékek szigetelésének állapotát és öregedését",
+        "correct": false,
+        "why": "Ezt a szigetelési ellenállás mérése vizsgálja."
+      },
+      {
+        "id": "c",
+        "text": "Az áram-védőkapcsoló kioldási idejét és kioldási áramát",
+        "correct": false,
+        "why": "Ezt a FI-relé műszeres vizsgálata méri."
+      },
+      {
+        "id": "d",
+        "text": "A fogyasztásmérő pontosságát",
+        "correct": false,
+        "why": "A mérőhely és a fogyasztásmérő az elosztói engedélyes hatásköre."
+      }
+    ],
+    "explanation": "A hibahurok-impedancia a zárlati áram útjának teljes impedanciája a táplálástól a hiba helyéig és vissza; ez szabja meg, mekkora áram folyik testzárlatkor. Ha túl nagy, a hibaáram az azonnali kioldási tartomány alá eshet, és a fémházakon a megengedettnél tovább maradhat veszélyes feszültség; ezért a szakember a beépítés után méri.",
+    "ref": "szakszotar#betu-h",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0010",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Egy dugaljnál az L–N hurokimpedancia mért értéke 0,46 Ω. Egyszerűsítve mekkora zárlati áramra lehet számítani 230 V-on?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "kb. 106 A",
+        "correct": false,
+        "why": "Ez U · Z; a szorzat nem áramot ad."
+      },
+      {
+        "id": "b",
+        "text": "250 A",
+        "correct": false,
+        "why": "A hurokimpedancia már tartalmazza az oda- és a visszavezetőt, nem kell kétszer számolni."
+      },
+      {
+        "id": "c",
+        "text": "500 A",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "1000 A",
+        "correct": false,
+        "why": "Ez a hurokimpedancia felével számolt érték; a mért érték a teljes hurokra vonatkozik."
+      }
+    ],
+    "explanation": "Egyszerűsítve Ik ≈ U / Z = 230 V / 0,46 Ω = 500 A, ami jóval nagyobb például egy B16-os kismegszakító azonnali kioldási tartományának 80 A-es felső határánál. A mért hurokimpedancia a teljes hurokra (oda és vissza, a hálózat felőli részt is beleértve) vonatkozik; a pontos értékelés a reaktanciát, a vezeték melegedését és a mérési bizonytalanságot is figyelembe veszi, ez a szakember feladata.",
+    "ref": "rovidzarlat-es-tulterheles#szampelda-egyszerusitett-zarlatiaram-becsles",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0011",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Mit NEM ellenőriz az áram-védőkapcsoló „T” jelű próbagombja?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A pontos kioldási áramot és időt, és a védővezetőt",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A kioldó szerkezet mechanikai működését",
+        "correct": false,
+        "why": "Ezt éppen ellenőrzi: ha a gombra kiold, a szerkezet működik."
+      },
+      {
+        "id": "c",
+        "text": "A készülék belső próbaáramkörének működését",
+        "correct": false,
+        "why": "Ezt is ellenőrzi: a gomb ezen át hoz létre különbözeti áramot."
+      },
+      {
+        "id": "d",
+        "text": "Hogy kioldáskor a védett áramkörök táplálása megszűnik-e",
+        "correct": false,
+        "why": "A gomb megnyomásakor ez látható: a védett áramkörök táplálása megszűnik."
+      }
+    ],
+    "explanation": "A próbagomb a készülék belsejében, egy ellenálláson át hoz létre különbözeti áramot, így a kioldó szerkezet és a belső áramkör működését ellenőrzi. A pontos kioldási áramot és időt, valamint a védővezetőt nem vizsgálja, mert a próbaáramkör nem halad át rajta; ezeket a szakember műszerrel méri.",
+    "ref": "aram-vedokapcsolo-fi-rele#a-probagomb",
+    "shuffle": true,
+    "family": "fi-probagomb",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0012",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 2,
+    "type": "multi",
+    "stem": "Egy dugaljáramkör szerelése után melyek tartoznak a szakember műszeres ellenőrzései közé? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A védővezető folytonossága",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A szigetelési ellenállás",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "A hibahurok-impedancia",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "Egy dugaljba dugott lámpa felvillanása, amely a védővezetőt is ellenőrzi",
+        "correct": false,
+        "why": "A működő lámpa csak a fázis és a nulla meglétét mutatja, a védővezetőről semmit nem árul el."
+      },
+      {
+        "id": "e",
+        "text": "A kismegszakító névleges áramának leolvasása, amely a hurokimpedanciát is igazolja",
+        "correct": false,
+        "why": "A névleges áram adat; a hurokimpedanciát mérni kell."
+      }
+    ],
+    "explanation": "A szerelés utáni ellenőrzés szemrevételezésből és műszeres mérésekből áll: a védővezető folytonossága, a szigetelési ellenállás, a polaritás, visszakapcsolás után a hibahurok-impedancia és az áram-védőkapcsoló működése. Egy működő lámpa vagy egy névleges adat ezek egyikét sem helyettesíti; az eredményeket dokumentálni kell.",
+    "ref": "dugalj-bekotese#a-szereles-menete-szakembernek",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0013",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Melyik mennyiséget méri a háztartási fogyasztásmérő (villanyóra)?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A felhasznált hatásos energiát, kWh-ban",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A pillanatnyi áramerősséget, amperben kijelezve",
+        "correct": false,
+        "why": "A fogyasztásmérő az idő alatt felhasznált energiát összegzi."
+      },
+      {
+        "id": "c",
+        "text": "A hálózati feszültséget, voltban",
+        "correct": false,
+        "why": "A feszültség csak az egyik tényező; a mérő energiát mér."
+      },
+      {
+        "id": "d",
+        "text": "A látszólagos teljesítményt, VA-ben",
+        "correct": false,
+        "why": "A háztartási fogyasztásmérő a hatásos energiát méri."
+      }
+    ],
+    "explanation": "A fogyasztásmérő a felhasznált villamos energiát méri kilowattórában; az energia a hatásos teljesítmény és az idő szorzata. A mérőt az elosztói engedélyes szereli fel és plombálja, a mérőhelyen végzett munkákra az ő szabályai vonatkoznak.",
+    "ref": "elektromos-teljesitmeny#energia-es-fogyasztas",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0014",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Melyik bekötés helyes egy fogyasztó áramának és feszültségének méréséhez?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Az árammérő sorosan, a feszültségmérő párhuzamosan kapcsolódik a fogyasztóhoz",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Az árammérő párhuzamosan, a feszültségmérő sorosan kapcsolódik a fogyasztóhoz",
+        "correct": false,
+        "why": "A párhuzamosan kötött, kis belső ellenállású árammérő rövidzárat okozna."
+      },
+      {
+        "id": "c",
+        "text": "Az árammérő és a feszültségmérő is sorosan kapcsolódik a fogyasztóhoz",
+        "correct": false,
+        "why": "A sorosan kötött feszültségmérő nagy belső ellenállása gyakorlatilag megszakítaná az áramkört."
+      },
+      {
+        "id": "d",
+        "text": "Az árammérő és a feszültségmérő is párhuzamosan kapcsolódik a fogyasztóhoz",
+        "correct": false,
+        "why": "A párhuzamosan kötött árammérő rövidzárat okozna."
+      }
+    ],
+    "explanation": "Az áram a vezetőn folyik át, ezért az árammérőt sorosan, az áram útjába kell iktatni; a feszültség két pont között van, ezért a feszültségmérőt a két pontra, párhuzamosan kell kötni. Az árammérő belső ellenállása ezért nagyon kicsi, a feszültségmérőé nagyon nagy; a felcserélés rövidzárat vagy hibás mérést okoz.",
+    "ref": "elektromos-aram#aramerosseg-a-gyakorlatban",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0015",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "Terhelés alatt egy fogyasztó kapcsain jellemzően valamivel kisebb a feszültség, mint az elosztóban, mert a vezetékeken is esik feszültség.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "Kirchhoff huroktörvénye szerint a forrás feszültsége megoszlik a fogyasztó és a vezetékek között; terhelés alatt a fázis- és a nullavezetőn is esik feszültség. Ha például mindkét vezetőn 2,3 V esik, a 230 V-ból a fogyasztóra 225,4 V jut, ami 2 %-os feszültségesés.",
+    "ref": "elektromos-feszultseg#feszultseg-az-aramkorben-forras-es-fogyaszto",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0016",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 1,
+    "type": "truefalse",
+    "stem": "Ha a hálózati feszültségre 224 V-ot vagy 236 V-ot mérnek, az önmagában már hálózati hibára utal, hiszen a névleges érték 230 V.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": false
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": true
+      }
+    ],
+    "explanation": "A közcélú hálózat feszültsége a terheléstől és a hálózat állapotától függően a névleges érték körül ingadozik; kisfeszültségen a 10 perces átlagok döntő többségének a névleges érték ±10 %-án belül (230 V-nál 207–253 V között) kell lennie. A 224 V és a 236 V ezen a sávon belül van, ezért önmagában nem utal hibára.",
+    "ref": "elektromos-feszultseg#feszultseg-az-aramkorben-forras-es-fogyaszto",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0017",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Egy irodai asztalon a megvilágítást szeretnéd ellenőrizni. Mivel mérhető megbízhatóan?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Kalibrált luxmérővel, a munkasíkon",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A telefon „luxmérő” alkalmazásával, pontosan",
+        "correct": false,
+        "why": "A telefonos alkalmazások csak durva tájékoztatást adnak."
+      },
+      {
+        "id": "c",
+        "text": "A lámpák wattszámának összeadásával",
+        "correct": false,
+        "why": "A watt a felvett teljesítmény, nem a felületre jutó fény."
+      },
+      {
+        "id": "d",
+        "text": "A fényforrás lumenértékével, mert az azonos a luxszal",
+        "correct": false,
+        "why": "A lumen a kibocsátott fényt, a lux a felületre jutó fényt jelenti."
+      }
+    ],
+    "explanation": "A megvilágítás (lux) a felületre jutó fényáram négyzetméterenként, ezért a munkasíkon, kalibrált luxmérővel kell mérni. A telefonos alkalmazások csak durva tájékoztatást adnak, a lumen és a watt pedig a lámpát jellemzi, nem a felületre jutó fényt.",
+    "ref": "lumen-es-lux#lux-mennyi-feny-jut-a-feluletre",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0018",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "A szakember egy leválasztott áramkörben a fázis és a védővezető között 0 V-ot mér, a nullavezető és a védővezető között viszont 60 V-ot. Mi a helyes következtetés?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A munka nem kezdhető el: a nullavezetőn veszélyes feszültség van",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A munka elkezdhető, mert a fázisvezető feszültségmentes",
+        "correct": false,
+        "why": "A nullavezetőn mért feszültség is veszélyes; minden pólus között feszültségmentességet kell igazolni."
+      },
+      {
+        "id": "c",
+        "text": "A mérés biztosan hibás, mert a nullavezetőn soha nincs feszültség",
+        "correct": false,
+        "why": "Közös nullavezetőn, szakadáskor vagy felcserélt bekötésnél a nullán is lehet veszélyes feszültség."
+      },
+      {
+        "id": "d",
+        "text": "Elég a nullavezetőt szigetelőszalaggal leszigetelni, és a munka folytatható",
+        "correct": false,
+        "why": "A feszültség okát meg kell szüntetni; a szigetelőszalag nem feszültségmentesítés."
+      }
+    ],
+    "explanation": "Ha bármelyik mérés feszültséget jelez, a munka nem kezdhető el, és a leválasztást felül kell vizsgálni. A nullavezetőn közös nullavezető, nulla- vagy PEN-szakadás, illetve felcserélt bekötés miatt lehet feszültség; ezért kell minden pólus között mérni, nem csak a fázis és a föld között.",
+    "ref": "feszultsegmentesites-ot-szabalya#3-a-feszultsegmentesseg-megallapitasa",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0019",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Miért csak feszültségmentes áramkörön szabad ohmmérővel ellenállást mérni?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Mert a külső feszültség meghamisítja a mérést, és a műszert is károsíthatja",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Mert feszültség alatt minden ellenállás nulla",
+        "correct": false,
+        "why": "Az ellenállás anyagjellemző, nem tűnik el feszültség alatt."
+      },
+      {
+        "id": "c",
+        "text": "Mert az ohmmérő a hálózati feszültséget használja a méréshez, saját forrása nincs",
+        "correct": false,
+        "why": "Az ohmmérő saját belső forrással mér."
+      },
+      {
+        "id": "d",
+        "text": "Mert ellenállása csak az egyenáramú köröknek van",
+        "correct": false,
+        "why": "Minden vezetőnek és alkatrésznek van ellenállása, váltakozó áramú körben is."
+      }
+    ],
+    "explanation": "Az ohmmérő saját belső forrásából kis feszültséget kapcsol a mért részre, és az áramból számolja az ellenállást (R = U / I). Ha a mért rész feszültség alatt van, a külső feszültség meghamisítja az eredményt, a műszert károsíthatja, és a mérést végzőt is veszélyezteti.",
+    "ref": "elektromos-ellenallas#mi-az-ellenallas",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-mer-0020",
+    "version": 1,
+    "topic": "meres",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "A fogyasztásmérő állása egy hét alatt 12 345,6 kWh-ról 12 381,6 kWh-ra nőtt. Mekkora volt az átlagos felvett teljesítmény?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "kb. 214 W",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "1,5 kW",
+        "correct": false,
+        "why": "Ez 36 kWh / 24 h, mintha az egész fogyasztás egyetlen nap alatt történt volna."
+      },
+      {
+        "id": "c",
+        "text": "kb. 5,1 kW",
+        "correct": false,
+        "why": "Ez 36 kWh / 7; a napok számával osztottak órák helyett."
+      },
+      {
+        "id": "d",
+        "text": "36 kW",
+        "correct": false,
+        "why": "Ez maga az energia, kWh helyett kW-ban; az időtartammal osztani kell."
+      }
+    ],
+    "explanation": "A fogyasztásmérő energiát mér: a hét alatt 12 381,6 − 12 345,6 = 36 kWh fogyott. Az átlagos teljesítmény P = W / t = 36 kWh / (7 · 24 h) = 36 kWh / 168 h ≈ 0,214 kW, azaz kb. 214 W.",
+    "ref": "elektromos-teljesitmeny#teljesitmeny-es-energia",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  }
+]

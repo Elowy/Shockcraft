@@ -1,9 +1,11 @@
-# ShockCraft – fejlesztői útmutató (CLAUDE.md)
+# Villanyrajz – fejlesztői útmutató (CLAUDE.md)
 
 ## Mi ez az alkalmazás?
 
-**ShockCraft** egy magyar nyelvű, böngészőalapú villamos tervszerkesztő SaaS.
+**Villanyrajz** (korábbi nevén ShockCraft) egy magyar nyelvű, böngészőalapú villamos tervszerkesztő SaaS.
 Villanyszerelőknek és lakóépületek villamos tervein dolgozóknak készül.
+
+> **Névváltás:** a felhasználó felé mindenhol „Villanyrajz” szerepel (felület, PDF, e-mail, Stripe-terméknév, számlatétel, letöltött fájlnevek, jogi szövegek). A technikai azonosítók **szándékosan változatlanok**, mert átnevezésük kijelentkeztetné a felhasználókat vagy elveszítené a böngészőben tárolt adatokat: `shockcraft_session` süti, `shockcraft-*` localStorage/sessionStorage kulcsok, `SHOCKCRAFT_*` env változók, `X-ShockCraft-User` fejléc, Stripe idempotencia-kulcsok (a `shockcraft-monthly-portal-vN` kulcs verzióját emeld, ha a portálkonfiguráció tartalma változik), `SC-` számlázási rendelésazonosító-előtag (duplikációvédelem!), `shockcraft.service`, `/srv/shockcraft` útvonalak, `shockcraft` MySQL-adatbázisnév a példákban. Új kódban is ezeket a meglévő kulcsokat használd. A kézikönyv (Tudástár/Kalkulátorok) új böngészőkulcsai `shockcraft-kb-*` előtagúak (a téma közös: `shockcraft-theme`); a Tesztekéi: `shockcraft-kb-quiz-v1` (localStorage: eredmények, kérdésenkénti statisztika) és `shockcraft-kb-quiz-session` (sessionStorage: a futó teszt).
 
 **Fő funkciók:**
 - Alaprajz-szerkesztő: szobák, falak, ajtók/ablakok, szerelvények (kapcsolók, dugaljak, RJ45, lámpakiállás, kötődoboz, lakáselosztó-jelölés)
@@ -18,9 +20,17 @@ Villanyszerelőknek és lakóépületek villamos tervein dolgozóknak készül.
 - Vendég-mód (böngészőbe ment) és fiókos mód (D1/MySQL adatbázis)
 - Projektkezelés: mentés, verzióvédelem, névátírás, másolat, JSON import/export
 - Projekt életciklus: aktív / archivált / lomtár állapotok
+- Ügyfelek és teendők (fiókszintű): ügyféltörzs, projekt–ügyfél hozzárendelés, határidős teendők, Esedékes nézet, árajánlat-kitöltés ügyféladatokból
+- Tervmegosztás: csak olvasható, lejáró, visszavonható link (`/megosztas#t=…`) a legutóbb mentett tervről, opcionális PDF-engedéllyel
+- Méretezési segédszámítás (Eszközök → Méretezés): áramkörönkénti, tervezői ellenőrzést segítő számítás (Ib ≤ In ≤ Iz, I2, legkisebb keresztmetszet, feszültségesés, opcionális hurokimpedancia), feltételezésekkel és forrásokkal; opcionális PDF-táblák; „nem felel meg”/„nem számítható” a tervellenőrzésben. Nem tervezői méretezés; a táblázatértékek tervezői jóváhagyása függőben
+- Termékkatalógus (fiókszintű): saját termék- és árlista (kézzel, CSV-ből, mintakészletből), típusonkénti és soronkénti termékválasztás az ajánlatban, fiók-alapértelmezések, árfrissítés; termék az anyagkimutatásban, a CSV-ben és az ajánlat-PDF-ben
 - Sötét/világos mód
+- Kalkulátorok (`/kalkulatorok`, a Villanyszerelő Tudástár első szekciója): ingyenes, belépés és süti nélkül; 19 közzétett T0 kalkulátor („Belsőleg ellenőrizve”), 8 T1 kalkulátor elkészült, de lektori jóváhagyásig a kiadási kapu (`lib/calc/release.ts`) mögött rejtve; kereső, kedvencek, legutóbbiak, megosztható URL, levezetés, saját SVG-ábrák
+- Tudástár – Elmélet és szakszótár (`/tudastar`, `/tudastar/elmelet`, `/tudastar/szotar`): ingyenes, belépés és süti nélkül; 17 cikk (12 R1, 5 R2) és a szakszótár (58 kifejezés) „Belsőleg ellenőrizve” jelvénnyel, 22 saját SVG-ábrával; a tartalom Markdown-vázlatból (`content/tudastar/`) generált TS-modul, ujjlenyomattal; közzétételi kapu: `lib/kb/release.ts`. A 13 R3 vázlat (bekötések, kismegszakító, FI-relé, földelés, EPH, feszültségmentesítés) csak szakmai lektor után adható ki – addig a buildbe sem kerül
+- Tudástár – Sémák és ábramotor (`/tudastar/semak`, R3 – a lektorálásig rejtve, minden útvonal 404): 20 netlistából (`content/tudastar/r3/*.netlist.json`) + elrendezésből (`content/tudastar/diagramok/`) vezetékszintű bekötési rajz (Bekötés nézet, szerverkomponens), Működés nézet (kliensszigete: kapcsoló- és hibahelyzet-gombok, érszintű áramút a szimulációból), vezetéktábla, kapcsolóállás-táblázat; a TS-szimulátor (`lib/kb/circuit.ts`) = a Python `sim.py`; rajz = netlista teszt mutációs próbákkal; az ábra-ujjlenyomat a cikk rekordjának része; a buildbe csak a közzétett (lektorált) cikk ábrája kerül. A lektor az ábrákat és a biztonsági szabályokat a lektori csomag 4., a cikkek teljes szövegét az 5. részében kapja (LK-4); R3 rekord csak teljesen kitöltve (második olvasóval) tesz közzé
+- Tudástár – Tesztek (`/tudastar/tesztek`, vizsgaszimuláció): ingyenes, belépés és süti nélkül; „Gyakorló teszt – nem hivatalos vizsgakérdések; az eredmény nem igazolás.” jelöléssel. Számolós gyakorló: 9 sablon a közzétett T0-kalkulátorokra (a helyes érték és a levezetés `runCalc`-ból, tévesztők megnevezett hibamodellekből), Gyakorló / Vizsga (időkorlát, kérdéstérkép, újratöltés-álló) / Hibáim mód, megosztható tesztkód (`?kod=`), „Teszteld magad” a cikkekben; a 3 T1-sablon a kalkulátor lektori kiadásáig rejtve. Kérdésbank-infrastruktúra (séma, kiadó szkript, lektori CSV) kész, a bank ≥ 150 jóváhagyott kérdésig (témakörönként ≥ 10) nem élesedik – a kapu: `lib/quiz/gate.ts`
 
-**Élő oldal:** https://shockcraft-villanytervezo.lollipopp23.chatgpt.site/
+**Élő oldal:** https://shockcraft-villanytervezo.lollipopp23.chatgpt.site/ (a `villanyrajz.hu` domain lefoglalva, még nincs élesítve)
 
 ---
 
@@ -51,6 +61,11 @@ app/                    Next.js App Router oldalak
   layout.tsx            Gyökér layout (hu lang, CookieNotice)
   page.tsx              Főoldal (marketing landing)
   tervezo/page.tsx      A tervező szerkesztő (fő UI)
+  megosztas/page.tsx    Megosztott terv, csak olvasható nyilvános nézet (#t=<token>, force-dynamic)
+  (kezikonyv)/          Kézikönyv-útvonalcsoport (ThemeBoot, metadataBase, kezikonyv.css; nincs getAccount/db/auth/next/headers)
+    kalkulatorok/       layout (Shell), page (hub), [slug]/page (force-static, revalidate 3600, dynamicParams=false), not-found
+    tudastar/           page (kezdőlap), not-found, elmelet/ (page, [slug] cikk, kategoria/[kategoria]), szotar/, tesztek/ (statikus oldalváz + kliensszigete; csak ha van közzétett tartalma), semak/ (gyűjtő- és [slug] részletoldal; csak közzétett, R3-lektorált sémával – most 404) – mind force-static, csak közzétett tétel (lib/kb/release.ts)
+  sitemap.ts, robots.ts Metaadat-útvonalak (APP_ORIGIN-ból; a sitemap csak közzétett kalkulátort és Tudástár-tételt tartalmaz)
   admin/page.tsx        Admin panel (Stripe, email beállítások)
   api/                  API route-ok
     auth/               Belépés, regisztráció, kijelentkezés, jelszócsere
@@ -60,6 +75,10 @@ app/                    Next.js App Router oldalak
     billing-profile/    Számlázási profil
     stripe/             Stripe API
     templates/          Sablonkönyvtár
+    workbook/           Ügyfél- és teendő-munkafüzet (GET/PUT)
+    catalog/            Termékkatalógus (GET/PUT, revision-CAS)
+    plan-share/         Tervmegosztás – tulajdonosi linkkezelés (GET/POST/DELETE)
+    shared-plan/        Tervmegosztás – nyilvános nézet (POST, munkamenet nélkül)
     transfer-access/    Projekthozzáférés-átvitel
     account-email/      E-mail-visszaigazolás, -csere
     backgrounds/        Háttéralaprajz upload/olvasás
@@ -78,6 +97,19 @@ components/             43 UI komponens
   admin-email.tsx       Admin Resend konfig
   admin-invoicing.tsx   Admin számlázás konfig
   quote-...tsx          Árajánlat komponensek
+  workbook-*.tsx        Ügyfelek és teendők dialógus (dialog, tasks, clients)
+  share-dialog.tsx      Tervmegosztás – tulajdonosi ablak (link létrehozása, lista, visszavonás)
+  share-viewer.tsx      Tervmegosztás – megtekintő oldal (alaprajz, telek, elosztó, jegyzékek)
+  floor-drawing.tsx     Közös alaprajzi rajz (FloorShapes, RoomLabels, ScaleBar, PlanLegend) – szerkesztő és megtekintő
+  catalog-manager.tsx   Termékkatalógus fül (Eszközök → Termékkatalógus): CRUD, CSV-import/-export, mintakészlet, fiók-alapértelmezések
+  product-picker.tsx    Termékválasztó dialógus (típushoz vagy ajánlati sorhoz)
+  kezikonyv/            Kézikönyv-keret: shell (AppBar, Shell, alsó nav/fülek), kb-chrome (kereső, menü, kedvencek, téma, értesítés), theme-boot, json-ld, safety-notice, planner-cta, report-link, kb-continue („Folytasd”); article/ (cikkoldal: article-view, blocks, inline, article-list, article-actions kliensszigete); figures/ (a cikkek saját SVG-ábrái, jegyzék: index.tsx FIGURES)
+  calc/                 Kalkulátor-felület: calculator (kliens), calc-index (hub), calc-example (SSR példa), calc-figures (SVG), islands/<slug> (kalkulátoronként egy kliensszigete)
+  kezikonyv/diagram/    Bekötési ábra (netlista + elrendezés → rajz): scene (jelenet, állásonkénti kiemelés), symbols (szimbólumkészlet), bekotes (SVG, data-wire/-from/-to/-term), diagram-run (kliensszigete: nézetváltó, Működés), diagram-figure (figura: jelmagyarázat, vezetéktábla, kapcsolóállás-táblázat); kezikonyv/semak/ (gyűjtőoldal)
+  quiz/                 Tesztek: quiz-app (kliensszigete: beállítás, tesztkód, eredmények), quiz-runner (lustán: futó teszt, eredmény), quiz-shared, calc-defs (a kalkulátordefiníciók lusta betöltése a kalkulátorok saját szigetéből)
+  sizing-report.tsx     Méretezési segédszámítás fül (Eszközök → Méretezés): felelősségi doboz, áramkörönkénti ellenőrzések, áramköri/projekt/elosztó beállítások, Iz0-felülírások
+  quote-products.tsx    Ajánlat „Termékek és katalógusárak” része (típusválasztás, alapértelmezések, árfrissítés)
+  use-catalog.ts        useCatalog hook: /api/catalog betöltés és mentés (revision-CAS)
 
 lib/                    43 üzleti logika / utility modul
   plan.ts               Plan schema (Zod), seed terv, validatePlan()
@@ -87,7 +119,13 @@ lib/                    43 üzleti logika / utility modul
   pdf-export.ts         PDF generálás (jsPDF)
   projects.ts           ProjectState, blankProject, removeStructure
   quote.ts              Árajánlat számítás, syncQuote, quoteTotals
-  quote-schema.ts       Quote Zod schema
+  quote-schema.ts       Quote Zod schema (+ opcionális termékpillanatkép: product, productPinned, productDefaults, productDisplay)
+  quote-products.ts     Ajánlat ↔ termék: típusválasztás, soronkénti rögzítés, fiók-alapértelmezés, árfrissítés, productResolver (tiszta modul)
+  product-refs.ts       Gépi típuskulcs (device:/module:/cable:/site:) az anyagkimutatás soraihoz, cableRef normalizálás
+  catalog.ts            Termékkatalógus Zod-séma, keresés, módosítók, productLine (PDF) (tiszta modul)
+  catalog-csv.ts        Katalógus-CSV: dekódolás (UTF-8/UTF-16LE/Windows-1250), parseHuf, import-összefésülés, export
+  catalog-sample.ts     25 tételes „(minta)” készlet
+  catalog-client.ts     /api/catalog kliens hívások
   geometry.ts           Geometriai segédfüggvények
   wall-snap.ts          Falhoz illesztés logika
   board.ts              Elosztó modul típusok, validáció
@@ -95,6 +133,11 @@ lib/                    43 üzleti logika / utility modul
   schematic.ts          Kapcsolási rajz generálás
   plan-tools.ts         Anyaglista (materialList), keresés
   circuit-assignment.ts Áramkör-hozzárendelés
+  phase-load.ts         Fázisterhelés-összesítés (elosztónként L1/L2/L3, aszimmetria)
+  sizing-tables.ts      Méretezési segédszámítás: MINDEN számérték és forrás egy helyen (PVC Iz0, B.52.14, B.52.17, G.52.1, ρ1, λ, U0, cmin, m), lookupok, ujjlenyomat, SIZING_REVIEW (kezdetben „ellenőrizendő” – soha ne állítsd jóváhagyottra; név és névjegyzéki szám csak hozzájárulással, mert a modul a kliensbe is bekerül)
+  sizing-schema.ts      circuit.sizing / plan.sizing opcionális Zod-séma, pruneSizing (validatePlan végén)
+  sizing-formulas.ts    Méretezési képletek, kábeljelölés, felelősségi szövegek – kiemelve a sizing.ts-ből (csak a sizing-tables-t importálja; a sizing.ts változatlan néven re-exportál)
+  sizing.ts             Kábeljelölés-értelmezés, képletek, circuitSizing/boardSizing/projectSizing, sizingTarget, PDF-sorok, mutáló segédek (tiszta modul)
   route-points.ts       Nyomvonal töréspontok
   architecture.ts       Ajtók/ablakok Zod schema, validateArchitecture
   dimensions.ts         Méretvonalak schema és geometria
@@ -108,10 +151,20 @@ lib/                    43 üzleti logika / utility modul
   draft-backup.ts       Ideiglenes szerkesztés megőrzés
   transfer-access.ts    Projekthozzáférés-átvitel
   templates.ts          Sablon könyvtár
+  workbook.ts           Ügyfél/teendő Zod-sémák, szabályok, esedékesség (tiszta modul)
+  workbook-server.ts    Projektállapotok a munkafüzet-ellenőrzéshez (szerver)
+  workbook-client.ts    /api/workbook kliens hívások
+  share.ts              Tervmegosztás: token, sémák, adatminimalizálás (sharedPlan), floorViewBox (tiszta modul)
+  share-server.ts       Tervmegosztás szerveroldal: rate limit, állapot, lista, létrehozás, visszavonás, megnyitás
+  share-client.ts       /api/plan-share és /api/shared-plan kliens hívások (fail closed)
   structure-copy.ts     Szint/épület másolás
   device-copy.ts        Szerelvény másolás
   panel-link.ts         Telki elosztó ↔ alaprajzi jelölés összekötés
   utils.ts              cn() class merge
+  site-origin.ts        siteOrigin() (APP_ORIGIN validálva, nem dob), kbPreview() (SHOCKCRAFT_KB_PREVIEW) – a cloudflare:workers env-ből
+  calc/                 Kalkulátormotor (tiszta, zod és lib/plan nélkül): number (parseNum/formatNum/formatSI), units, constants (forrással), core (CalcDef, runCalc), url, formulas, fields, sizing-fields, categories, release (KIADÁSI KAPU – egyetlen konfigurációs pont), registry (szerver), defs/<slug>.ts (27 kalkulátor)
+  kb/                   Kézikönyv-keret: circuit.ts (netlista-szimulátor: a content/tudastar/r3-sim/sim.py TS-megfelelője; simulate, truthTable, wireTable, érszintű áramút – pathWires), categories (KB_NAME, KB_TITLE, szekciók, CALC_HUB), safety, search (ékezetfüggetlen, szinonimák, elírás), storage (shockcraft-kb-* tárolók), theme, links (a tervező csak ezt importálja); release.ts (TUDÁSTÁR KÖZZÉTÉTELI KAPU – egyetlen konfigurációs pont); content/ (types, fingerprint, inline mini-jelölés, categories, changes, registry – szerver; generated/ – GENERÁLT, kézzel ne szerkeszd)
+  quiz/                 Tesztek (tiszta, kliensen is): topics (témakörök, QUIZ_NOTICE), rng (mulberry32), code (beállítás, tesztkód), templates (a 9 T0-sablon és a közös segédek; előtaghiba csak 2 × 2-ben), templates-t1 (a 3 T1-sablon – a böngésző csak közzétételük után, lustán tölti), all-templates (mind a 12 a tesztkód sorrendjében – csak szerver és teszt), engine (kérdésépítés a helyes válasz tervezett helyével, kvóta, súlyozás, pontozás), gate.ts (TESZTEK KIADÁSI KAPUJA – egyetlen konfigurációs pont: sablonrekordok, bankküszöb), storage (shockcraft-kb-quiz-*); registry (szerver: sablonállapot a kalkulátorkapuból, kiadás, kliensadat); schema (zod – csak szkript és teszt); release/ (GENERÁLT: manifest, index – élesedésig kérdésszöveg nélkül), id-registry.json (csak bővülhet)
 
 db/
   schema.ts             Drizzle ORM séma (D1/SQLite)
@@ -130,6 +183,16 @@ scripts/
   sites-env.mjs         D1/R2 binding injektálás
   install-ci.mjs        CI npm install
   mysql-setup.mjs       MySQL séma inicializálás
+  calc-release.ts       Kalkulátorok kiadási állapota, tartalmi és forrás-ujjlenyomata (list | record <slug>)
+  calc-source.ts        Kalkulátorok forrás-ujjlenyomata (a definíció és futásidejű helyi importjai; a kiadási rekord `source` mezője, CI-ben ellenőrizve)
+  calc-golden-indep.py  Független Python-újraszámolás a kalkulátorpéldákhoz (belső kettős ellenőrzés)
+  kb-content.ts         Tudástár-tartalommotor: build (content/tudastar/*.md → lib/kb/content/generated) | check | list | record <id>; kb-content/ (parse, generate – R3-ellenőrzés: checkR3, figures – ábra-ujjlenyomat, diagrams – netlistás ábra forrása és ujjlenyomata, diagram-check – rajz = netlista ellenőrzés, schema, checklist)
+  kb-circuit-reference.py  A Python-szimulátor referenciája a TS-egyenértékűséghez (tests/fixtures/kb-circuit-reference.json; --check)
+  lektori-csomag.ts     Lektori csomag generátora (docs/lektori-csomag.md + .pdf; --check; kiadások: EDITIONS; 4. rész: biztonsági szabályok, közös kérdések, bekötési ábrák vektorosan, BEK-<ID>; 5. rész: R3 cikkszövegek, CIK-<ID>; a kirajzolt PDF ellenőrzése) – folyamat: docs/lektoralas.md
+  lektori-csomag-cikkek.ts  A lektori csomag 5. részének adatai (R3 vázlatok szövege, tartalmi ujjlenyomat, BLOCKED)
+  build-guard.mjs       Build-előfeltétel: kb-content check + lektori-csomag --check (az npm run build és a build:node hívja; fail closed)
+  quiz-release.ts       Tesztek kiadása: check | build (lib/quiz/release, azonosítójegyzék) | list | fingerprint <id> | templates; quiz/ (bank, csv)
+  quiz-csv.ts           Lektori kérdés-CSV: export (25 kérdéses csomagok) | import <csv> [--apply] (a lib/catalog-csv.ts dekódolójával)
 
 deploy/
   nginx.conf            Nginx reverse proxy konfig
@@ -142,6 +205,13 @@ docs/                   Feature dokumentáció (Markdown)
   stripe.md             Stripe webhook és admin beállítás
   email.md              Resend beállítás
   mysql.md              MySQL migráció és beállítás
+  tudastar.md           Tudástár (Elmélet, szakszótár, Tesztek, Sémák és ábramotor): tartalommotor, közzétételi kapu, R3 kiadása lektor után, ábrák, netlista → elrendezés → rajz
+  kalkulatorok.md       Kalkulátorok és a közös kézikönyv-keret
+  lektoralas.md         Lektori csomag folyamata: küldés, javítás, a SIZING_REVIEW, a T1 kalkulátorrekordok és az R3 (bekötési ábrás) cikkrekordok rögzítése
+  lektori-csomag.md/.pdf  Generált lektori csomag (LK-n) – kézzel ne szerkeszd
+
+content/tudastar/       Tudástár forrásvázlatai (Markdown + YAML front matter): elmelet/ (18 közzétett R1/R2), r3/ (13 R3 + 20 netlista – lektorra vár, NEM közzétehető), diagramok/ (a netlisták elrendezése: csak geometria, a netlista ujjlenyomatához kötve), r3-sim/, lektori-kerdesek-*.md
+content/tudastar/kerdesek/  A statikus kérdésbank forrása (<témakör>.json; MI-tervezet, lektorra vár – a kérdésszerző írja, a kiadó csak olvassa)
 
 tests/
   auth-flow.mjs         Auth integrációs teszt (lokális Worker ellen)
@@ -157,6 +227,8 @@ tests/
 
 npm run install:ci      # CI-barát telepítés
 npm run dev             # Dev szerver: http://localhost:5173
+# Megosztási és e-mail-linkek helyi kipróbálásához APP_ORIGIN kell (nélküle a link létrehozása 503):
+CLOUDFLARE_INCLUDE_PROCESS_ENV=true APP_ORIGIN=http://localhost:5173 npm run dev
 npm run build           # Cloudflare Sites build (dist/)
 npm run build:node      # Node.js build (dist/, standalone)
 npm run start           # Sites preview (Wrangler local)
@@ -166,6 +238,8 @@ npm run db:generate     # Drizzle migrációk generálása
 ```
 
 ### Lokális D1 migrációk (egyszer kell alkalmazni, build után)
+
+Friss adatbázisnál a `drizzle/0000…0011` fájlokat mind sorrendben kell alkalmazni (a minta két parancsa a `--file` cseréjével); meglévő helyi adatbázisnál csak az újakat (legutóbb: `drizzle/0011_colossal_madame_masque.sql`, `product_catalogs` tábla; előtte `drizzle/0010_late_king_cobra.sql`, `plan_shares` tábla, és `drizzle/0009_wonderful_lucky_pierre.sql`, `workbooks` tábla).
 
 ```bash
 node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js \
@@ -197,6 +271,9 @@ node tests/auth-flow.mjs   # lokális Worker + D1 szükséges, http://127.0.0.1:
 | `plans` | Tervek (id=projectKey, data JSON, revision, updatedAt, state) |
 | `plan_versions` | Verzióelőzmények (projectId, revision, data, savedAt) |
 | `template_libraries` | Felhasználói sablon könyvtárak |
+| `workbooks` | Felhasználónkénti ügyfél- és teendő-munkafüzet (JSON + revision) |
+| `product_catalogs` | Felhasználónkénti termékkatalógus (JSON: termékek + fiók-alapértelmezések, revision; user_id FK CASCADE) |
+| `plan_shares` | Tervmegosztási linkek (token_hash = SHA-256, owner_id FK CASCADE, project_id/project_key, label, allow_pdf, auth_version, created/expires/last_viewed_at ms) |
 | `billing_settings` | Stripe konfig (titkosítva, admin panelről állítható) |
 | `billing_grants` | Projekt jogosultságok (free / live / sub_live mode) |
 | `billing_orders` | Stripe rendelések |
@@ -280,7 +357,12 @@ Plan {
     board?: {rows, modulesPerRow}  ← fő elosztó mérete (max 12×36)
     extraBoards?: Board[]          ← extra elosztók (max 19)
   }
-  circuits: Circuit[]         ← áramkörök (phase L1/L2/L3/3P, rating, curve B/C/D, rcd)
+  circuits: Circuit[]         ← áramkörök (phase L1/L2/L3/3P, rating, curve B/C/D, rcd, load? W,
+                                 sizing? {method, insulation, ambient, grouped, length, cosPhi, usage})
+  sizing?: {                  ← méretezési segédszámítás projektbeállításai (mind opcionális)
+    methodInside, methodOutside, insulation, ambient, grouped, supply, earthing,
+    boards?: {building, board, upstreamDrop?, zs?}[], overrides?: {method, insulation, loaded, section, iz, note}[]
+  }
   modules: Module[]           ← elosztó modulok (type, width 1-8, row, slot)
   boardWires: BoardWire[]     ← elosztón belüli bekötések
 }
@@ -306,7 +388,8 @@ Plan {
 - Motor: **jsPDF**, vektoros output, A4 vagy A3 fekvő, 100%-os nyomtatás = helyes méretarány
 - Betűkészlet: **NotoSans** (beágyazott TTF, teljes magyar ékezet-támogatás)
 - Scope: `floor`, `plot`, `board`, `all`, `single`, `multi`
-- Tartalom: alaprajz + telek rajz + elosztó kapcsolási rajz + szerelvényjegyzék + nyomvonaljegyzék + áramkörlista
+- Tartalom: alaprajz + telek rajz + elosztó kapcsolási rajz + szerelvényjegyzék + nyomvonaljegyzék + áramkörlista + fázisterhelés
+- `PdfOptions.sizing === true` (alapból ki): az elosztóoldalakra „méretezési segédszámítás” és „méretezés indoklása” tábla, módosított lábléc; a NotoSans-ból hiányzó ≤ ≥ ≈ √ jeleket a `clean()` cseréli
 - Méretarány-jelző és dátum minden oldalon
 - Export aktív havi előfizetéshez kötött (backlog: ingyenes/egyszeri projekt kivétel)
 
@@ -370,6 +453,30 @@ Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja e
 ### Tesztelés
 - `tests/auth-flow.mjs` – teljes auth flow integrációs teszt lokális Worker ellen
 - `tests/mysql-config.mjs` – MySQL kapcsolat ellenőrzés
+- `tests/workbook.ts` – ügyfél/teendő lib-teszt: `node_modules/.bin/tsx tests/workbook.ts`
+- `tests/workbook-api.ts` – `/api/workbook` route-teszt memóriabeli SQLite-on: `node_modules/.bin/esbuild tests/workbook-api.ts --bundle --platform=node --format=esm --external:mysql2 --alias:cloudflare:workers=./db/node-env.ts --outfile=.sites-runtime/workbook-api.mjs && env -u MYSQL_URL node --no-warnings .sites-runtime/workbook-api.mjs`
+- `tests/share.ts` – tervmegosztás lib-teszt (token, sémák, adatminimalizálás, statikus őrök): `node_modules/.bin/tsx tests/share.ts`
+- `tests/share-api.ts` – `/api/plan-share` és `/api/shared-plan` route-teszt memóriabeli SQLite-on: `node_modules/.bin/esbuild tests/share-api.ts --bundle --platform=node --format=esm --external:mysql2 --alias:cloudflare:workers=./db/node-env.ts --outfile=.sites-runtime/share-api.mjs && env -u MYSQL_URL node --no-warnings .sites-runtime/share-api.mjs`
+- `tests/catalog.ts` – termékkatalógus lib-teszt (séma, CSV-import/-export, mintakészlet, típuskulcs): `node_modules/.bin/tsx tests/catalog.ts`
+- `tests/quote-products.ts` – ajánlat ↔ termék (típusválasztás, árfrissítés, anyagkimutatás-CSV, megosztás, PDF-füst): `node_modules/.bin/tsx tests/quote-products.ts`
+- `tests/sizing-tables.ts` – méretezési táblázatok (relációk, források, lookupok, ujjlenyomat, jóváhagyási kapu): `node --no-warnings --import tsx tests/sizing-tables.ts`
+- `tests/sizing.ts` – méretezési segédszámítás kézzel számolt példákkal (kábeljelölés, képletek, seed, ellenőrzések, séma, tervellenőrzés, PDF, szóhasználat, megosztás): `node --no-warnings --import tsx tests/sizing.ts`
+- `tests/calc.ts` – kalkulátormotor: parseNum/formázás, definíciók (szóhasználat, metaadat, szigetek), kiadási kapu (az elvárt állapot a `RELEASES`-ből levezetve, T0 közzétéve, T1 csak lektori rekorddal, tartalmi és forrás-ujjlenyomat – `scripts/calc-source.ts`, táblázat-kapu, T2 tiltva), ellenőrzési regressziók, tervezői linkek, URL oda-vissza, fuzz, 10 000 seedes tulajdonságteszt, egyezés a Méretezés/Fázisterhelés számításával: `node_modules/.bin/tsx tests/calc.ts`
+- `tests/calc-golden.ts` – 217 golden eset relatív tűréssel és mutációs próbával (definíciós példák, független kiegészítő esetek, a terv 5.3 értékei): `node_modules/.bin/tsx tests/calc-golden.ts`
+- `tests/kb-search.ts`, `tests/kb-storage.ts` – kereső és vendégtárolás: `node_modules/.bin/tsx tests/kb-search.ts`
+- `tests/kb-guards.ts` – statikus őrök (importgráf: nincs db/auth/billing/pdf/lib/plan/zod/next/headers; nincs getAccount/cookies/headers/fetch; dangerouslySetInnerHTML csak JSON-LD/téma; a tervező csak lib/kb/links.ts-t importál; content/, scripts/, node:fs tiltva; kliensszigetbe nem kerül Tudástár-törzs, -regiszter vagy -kapu; a Tesztek szigetét csak a tesztoldal importálja, a T1-sablonokat statikusan csak az all-templates; a Tudástár-oldal szerverkomponens; fejlécek; kulcsok): `node_modules/.bin/tsx tests/kb-guards.ts`
+- `tests/sizing-formulas.ts` – a lib/sizing-formulas.ts kiemelésének regressziója: `node_modules/.bin/tsx tests/sizing-formulas.ts`
+- `tests/lektori-csomag.ts` – lektori csomag (LK-n): a `docs/lektori-csomag.md`/`.pdf` naprakész, kiadások (`EDITIONS`), minden táblázatérték tétele, a 2. rész a méretezés függvényeivel és a mintatervvel, a 3. rész (T1 kalkulátorok) a `runCalc`-kal és a bemeneti korlátokkal összevetve, a 4. rész (24 biztonsági szabály, 20 bekötési ábra: rajz a PDF-ben, vezeték- és kapcsolóállás-tábla a szimulátorral, ábránkénti ujjlenyomat-pár, egyedi azonosítójú lektori kérdések tiltólistával, belső jegyzetek kizárása, R3-rekord kötése: `diagramRefProblems`), az 5. rész (13 R3 cikkvázlat teljes szöveggel, tartalmi ujjlenyomat, `BLOCKED`, rekordkötés: `articleRefProblems`), a kirajzolt PDF ellenőrzése mutációs próbákkal (`pdfProblems`), jóváhagyó lap, a név megjelenése (`reviewText`, kalkulátorjelvény), `docs/meretezes.md` „Mit nem vizsgál” = program: `node --no-warnings --import tsx tests/lektori-csomag.ts`; generálás: `node --import tsx scripts/lektori-csomag.ts` (`--check`: csak ellenőriz); folyamat: `docs/lektoralas.md`
+- `tests/approval-simulation.ts` – szimulált jóváhagyás (betöltési horoggal, a fájlok változatlanok): a `sizing-tables`, `sizing`, `calc`, `calc-golden`, `kb-guards`, `quiz` teszt a jóváhagyott `SIZING_REVIEW`-ra és két T1 lektori rekordra is zöld, név nélkül és névvel: `node --no-warnings --import tsx tests/approval-simulation.ts`
+- `tests/kb-content.ts` – Tudástár-tartalommotor és -kapu: generált modulok naprakészek, front matter teljes, tartalom-hűség (a renderelt szöveg = a vázlat), pontosan a 18 R1/R2 közzétett, R3 sehol (static params, sitemap, kereső, linkcél, build bemenetei), tartalmi és ábra-ujjlenyomat a rekordban és kockázati alsó korlát (mutációs próbákkal), a lustán töltődő keresőindex = a közzétett tételek, belső linkek (R3-ra szövegként, „hamarosan – szakmai lektorálás alatt”), szótár-horgonyok, ábra minden helyőrzőhöz, „kiadás ellenőrzés alatt”: `node_modules/.bin/tsx tests/kb-content.ts`
+- `tests/kb-routes.mjs` – build utáni füstteszt mindkét targeten (kalkulátorok és Tudástár; R3 404 – perjellel és RSC-kéréssel is –, a csak R3 kategóriák és a `/tudastar/semak` 404-e, Sémák-link, netlista-felirat és ábrajelölő sehol, R3 link és szöveg sehol: Tudástár, főoldal, hub, kalkulátoroldalak; title ≤ 60; Tesztek: fül, jelölés, kanonikus URL, JS nélküli tartalék, „Teszteld magad”, T1-sablon sehol, a kérdésbank kiadatlan szövege egyik oldalon sincs, sitemap): `BASE=http://127.0.0.1:8787 node tests/kb-routes.mjs`
+- `tests/kb-figures.mjs` – build utáni böngészős (Playwright) ellenőrzés: 320 px-en nincs vízszintes görgetés, ábrafeliratok 320/390 px-en ≥ 9/10 px és keretben, szövegközi linkek linkként jelölve, JS nélkül a cikkműveletek rejtve, érintési célok ≥ 44 px; Tesztek 320 px-en (beállítás, gyakorló, vizsga, eredmény) görgetés nélkül, 390 px-en az alsó sáv nem nyeli el a fókuszban levő mező melletti gomb koppintását/kattintását, billentyűzetes fókuszkezelés, élő régiók, linkjelölés, JS nélkül mintafeladat: `BASE=http://127.0.0.1:8787 node tests/kb-figures.mjs`
+- `tests/kb-dist.mjs` – build utáni őr: az R3 vázlatok, a netlisták feliratai, a bekötési ábra jelölői (`tests/kb-r3-needles.mjs`) és a kérdésbank kiadatlan kérdéseinek szövege (`tests/kb-quiz-needles.mjs`) nincs a `dist/`-ben, a cikktörzs nincs a kliens-JS-ben, a T1-sablonok szövege csak a saját, be nem töltött `templates-t1` csomagban: `node tests/kb-dist.mjs`
+- `tests/kb-circuit.ts` – a TS-netlistaszimulátor (`lib/kb/circuit.ts`) = a Python `sim.py` és bővítései: 20 netlista minden állása (kimenetek, hálózatok, energizált hálózatok, invariánsok, vezetéktábla), 1190 mutáns azonos PASS/FAIL-lal, kóddal, üzenettel; érszintű áramút: `node --no-warnings --import tsx tests/kb-circuit.ts` (referencia: `python3 -I scripts/kb-circuit-reference.py --check`)
+- `tests/kb-diagram.ts` – rajz = netlista: a kirajzolt SVG-ből visszaolvasva (erek, kapcsok, színek, feliratok, csomópontok, keresztezések, érintkezők, átfedés, olvashatóság ≥ 10 px, kontraszt), Működés = szimuláció mind a 208 állásban, figura (nézetváltó, aria-pressed, aria-live, táblák), ábra-ujjlenyomat; mutációs próba (819): `node --no-warnings --import tsx tests/kb-diagram.ts`
+- `tests/kb-semak.ts` – Sémák: sablonok szimulált jóváhagyással (gyűjtő- és részletoldal), csak a közzétett cikk ábrája generálódik, kapu (ábra-/szimbólummódosítás → újraellenőrzendő, belső rekord R3-ra nem), R3-ellenőrzés mutációs próbával; valós állapot: 0 közzétett séma: `node --no-warnings --import tsx tests/kb-semak.ts`
+- `tests/quiz.ts` – Tesztek: sablononként 10 000 seedes tulajdonságteszt (helyes = `runCalc`, a tévesztők egyediek, ≥ 5 % eltérés, növekvő sorrend, magyar számformátum; a helyes válasz helye A–D egyenként 10–50 %, számolás nélküli stratégia ≤ 40 %, egyedüli ikerpár nincs; valószerű paramétertér), motor-determinizmus, témakvóta (legnagyobb maradék), ismétlésmentesség, `w = h · r`, tesztkód oda-vissza (URL-lel), kapu (a T1-sablon rejtve, levezetve a kalkulátorkapuból; bank rejtve 150 alatt – mutációs próba ideiglenes másolaton, a valódi jóváhagyásoktól függetlenül), kérdésbank-séma a `content/tudastar/kerdesek/*.json`-ra (ha még nincs fájl, nem bukik), szivárgásőr a build bemeneteire, azonosítójegyzék (csak bővülhet), lektori CSV oda-vissza (UTF-8, Windows-1250, UTF-16LE), tárolás, tiltott kifejezések: `node --no-warnings --import tsx tests/quiz.ts`
+- `tests/catalog-api.ts` – `/api/catalog` route-teszt memóriabeli SQLite-on: `node_modules/.bin/esbuild tests/catalog-api.ts --bundle --platform=node --format=esm --external:mysql2 --alias:cloudflare:workers=./db/node-env.ts --outfile=.sites-runtime/catalog-api.mjs && env -u MYSQL_URL node --no-warnings .sites-runtime/catalog-api.mjs`
 - Unit tesztek nincsenek; a `validatePlan()` (`lib/plan.ts`) az elsődleges validációs pont
 
 ---
@@ -380,4 +487,22 @@ Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja e
 
 2. **Árajánlat-PDF** (kész, útiköltséggel) – tervből átvett anyaglista, anyagár + munkadíj, ÁFA-kezelés, összesítés, PDF export. Kód: `lib/quote.ts`, `lib/quote-schema.ts`, `components/quote-*.tsx`.
 
-3. **Tervezett:** ügyfél- és feladatkezelés, tervmegosztás/együttműködés, gyártói termékkatalógus, fázisterhelés-összesítés, szakmailag ellenőrzött villamos méretezés.
+3. **Fázisterhelés** (kész) – áramkörönkénti terhelés (megadott vagy becsült), elosztónkénti L1/L2/L3 összesítés, figyelmeztetések, PDF-táblázat. Kód: `lib/phase-load.ts`, `components/phase-load-report.tsx`, doksi: `docs/fazisterheles.md`.
+
+4. **Ügyfél- és feladatkezelés** (kész) – fiókszintű `workbooks` JSON-munkafüzet revisionnel: ügyféltörzs, projekt–ügyfél hozzárendelés, teendők (projekt / ügyfél / általános), Esedékes nézet és jelvény, árajánlat-kitöltés. Archivált/lomtáras projektre 409, zároltra 402, nem mentettre 409; törlés mindig engedett; a `plans` táblát nem írja. Kód: `lib/workbook*.ts`, `app/api/workbook/route.ts`, `components/workbook-*.tsx`, doksi: `docs/ugyfelek-teendok.md`.
+
+5. **Tervmegosztás** (kész, 1. lépés) – csak olvasható, lejáró (1/7/30/90 nap), visszavonható link a legutóbb mentett változatról; `/megosztas#t=<token>`, csak a token SHA-256 lenyomata tárolódik; a megtekintő nem kap árajánlatot, hátteret, tulajdonosi vagy belső azonosítót; PDF/SVG csak `allow_pdf` ÉS a tulajdonos aktuális `exportAccess`-e mellett; archiválás/zárolás szüneteltet, lomtár/jelszó-visszaállítás/fióktörlés megszüntet; egységes 404, saját rate limit (`share-ip`/`share-link`/`share-create`). Kód: `lib/share*.ts`, `app/api/plan-share`, `app/api/shared-plan`, `app/megosztas`, `components/share-*.tsx`, `components/floor-drawing.tsx`, doksi: `docs/tervmegosztas.md`.
+
+6. **Termékkatalógus** (kész, MVP) – fiókszintű `product_catalogs` JSON-blob revisionnel (2000 termék / 1,5 MB, minden fióknak ingyenes); CSV-import (UTF-8/UTF-16LE/Windows-1250, `;`/`,`/tab, magyar számformátum, árrés/bruttó), CSV-export, 25 tételes mintakészlet. A projekt termékválasztása a `plan.quote`-ban él (`productDefaults` + soronkénti `product`/`productPinned` pillanatkép), így visszavonható és a megosztásba nem kerül; illesztés a `MaterialRow.ref` gépi kulccsal, a `materialKey`/`quoteSource` változatlan. Árfrissítés csak gombbal; a munkadíjat csak üres helyre írja. PDF-ben „Termék: …” sor (mód: gyártó+név / +cikkszám / nincs), mintatermék nélkül. Kód: `lib/catalog*.ts`, `lib/product-refs.ts`, `lib/quote-products.ts`, `app/api/catalog`, `components/catalog-manager.tsx`, `components/product-picker.tsx`, `components/quote-products.tsx`, `components/use-catalog.ts`, doksi: `docs/termekkatalogus.md`.
+
+7. **Méretezési segédszámítás** (kész, jóváhagyás függőben) – tervezői ellenőrzést segítő számítás áramkörönként: legkisebb keresztmetszet, Ib ≤ In ≤ Iz, I2 ≤ 1,45 · Iz, feszültségesés (G.52.1), Zs megadása esetén hurokimpedancia (TN). Minden szám a `lib/sizing-tables.ts`-ben, forrással; `SIZING_REVIEW` ujjlenyomathoz kötött, kezdetben „ellenőrizendő”; XLPE-tábla `null` (PVC-tartalék, feltételezésként). Bemenetek opcionális tervmezőkben (`circuits[].sizing`, `sizing`), nincs új tábla/migráció/API; a megosztott tervből törlődnek. Tervsegéd „Méretezés” fül, `PdfOptions.sizing` (alapból ki), `checkPlan(plan,{sizing:true})` (csak fail/na). Kód: `lib/sizing*.ts`, `components/sizing-report.tsx`, doksi: `docs/meretezes.md`.
+
+8. **Kalkulátorok** (kész, 1–2. fázis) – `/kalkulatorok`, ingyen, belépés és süti nélkül, statikus (ISR) oldalak, CSP. 19 T0 kalkulátor közzétéve („Belsőleg ellenőrizve”, független újraszámolással), 8 T1 (feszültségesés, motoráram, LED-szalag tápegység, fázisjavítás, keresztmetszet, kismegszakító, hurokimpedancia, terhelhetőség-táblázat) elkészült, de csak szakmai lektori rekorddal (és a táblázatalapúak – a feszültségesés is – `tablesApproved()`-dal) adhatók ki – az egyetlen konfigurációs pont a `lib/calc/release.ts`. T2 nem épül. Elérés: nyilvános fejléc, főoldal, tervező felső sávja, Tervsegéd, Fázisterhelés-mélylink (a Méretezés-mélylink a T1 kiadásakor jelenik meg). Új böngészőkulcsok: `shockcraft-kb-bookmarks-v1`, `shockcraft-kb-recent-v1` (előzmény csak a bemenet módosítása után), `shockcraft-kb-prefs-v1` (csak ha a „/” gyorsbillentyűt kikapcsolják). A kiadási rekord tartalmi (`fingerprint`) és forrás-ujjlenyomatot (`source`) is rögzít: a számítás kódjának vagy egy közös modulnak (pl. `lib/calc/number.ts`, `lib/sizing-formulas.ts`) a módosítása után a rekordot újra kell ellenőrizni (`scripts/calc-release.ts list`). A tervező JS-e +6,6 KB gz-vel nőtt (a terv +2 KB-ot enged; mérés és bontás a `docs/kalkulatorok.md`-ben, tulajdonosi döntésre vár). Lektori anyag: a lektori csomag 3. része (LK-3-tól, kalkulátoronként `KAL-<SLUG>` blokk az ujjlenyomat-párral és kalkulátoronkénti döntéssel; `docs/lektoralas.md`). Kód: `lib/calc/*`, `lib/kb/*`, `lib/sizing-formulas.ts`, `components/calc`, `components/kezikonyv`, `app/(kezikonyv)`, doksi: `docs/kalkulatorok.md`.
+
+9. **Tudástár – Elmélet és szakszótár** (kész, R1/R2) – `/tudastar` (kezdőlap: kereső, „Folytasd”, kalkulátorok kiemelve, kategóriák), `/tudastar/elmelet` (+ `kategoria/<id>`), `/tudastar/elmelet/<slug>` (Röviden, tartalomjegyzék, ábrák, képletek, kidolgozott példák, Gyakori tévedések, kapcsolódó cikkek és kalkulátorok, források „kiadás ellenőrzés alatt” jelöléssel, változásnapló, jelvény, R2-nél Figyelem-doboz), `/tudastar/szotar` (horgonyok, DefinedTermSet). Forrás: `content/tudastar/elmelet/*.md` → `scripts/kb-content.ts build` → `lib/kb/content/generated` (a repóban; futásidőben nincs parser, a kliensbe nem kerül törzs). A kapu (`lib/kb/release.ts`, szabálya `lib/kb/content/gate.ts`) rekordja a tartalmi és az ábra-ujjlenyomathoz (`figures`: a kirajzolt SVG-komponens modulja, `kit.tsx`, a FIGURES-bejegyzés, az ábraszínek) kötött: a tartalom vagy egy ábra bármely módosítása után újra kell ellenőrizni, a rekordot frissíteni (`scripts/kb-content.ts list|record`), és a `build`-et újra futtatni (a böngészőbe lustán töltődő keresőindex `lib/kb/content/generated/search.ts` csak közzétett tételt tartalmaz). A biztonságkritikus kategóriákba (védelmi eszközök, érintésvédelem, munkabiztonság, kapcsolások, földelés) és a Sémák szekcióba csak R3 kerülhet (`categories.ts` `minRisk`; generálási hiba és kapu). Az R2 tételek belső ellenőrzéssel való kiadásának tulajdonosi megerősítése nyitott (`docs/tudastar.md` „Eltérések”). R1/R2: belső kettős ellenőrzés; R3: CSAK szakmai lektor (+ második olvasó) után – fejlesztő vagy MI `lektoralt` rekordot nem írhat. A kalkulátoroldalak „Kapcsolódó cikkek” szakasza és a cikkek kalkulátorlinkjei a front matter `calculators` mezőjéből. Kód: `lib/kb/content/*`, `lib/kb/release.ts`, `scripts/kb-content*`, `components/kezikonyv/article`, `components/kezikonyv/figures`, `app/(kezikonyv)/tudastar`, doksi: `docs/tudastar.md`.
+
+10. **Tudástár – Tesztek** (kész: számolós gyakorló; a kérdésbank lektorra vár) – `/tudastar/tesztek`: 9 számolós sablon a közzétett T0-kalkulátorokra (`lib/quiz/templates.ts`; helyes érték és levezetés `runCalc`-ból, tévesztők megnevezett hibamodellekből; a helyes válasz helye a seedből egyenletes, előtaghiba csak 2 × 2-ben – a válaszok külalakja nem árulja el a helyeset; a 3 T1-sablon külön, lustán töltött modulban: `lib/quiz/templates-t1.ts`), Gyakorló / Vizsga / Hibáim, tesztkód (`lib/quiz/code.ts`), „Teszteld magad” a cikkekben, „Tesztek” fül, sitemap. Kapu – egyetlen konfigurációs pont: `lib/quiz/gate.ts` (sablon: a kalkulátor kapujából levezetve – T1-nél lektori rekord, táblázatosnál `tablesApproved()` – plusz ujjlenyomatos belső rekord; bank: ≥ 150 jóváhagyott kérdés, témakörönként ≥ 10, addig kérdésszöveg a build bemeneteibe sem kerül). Kérdésbank: `content/tudastar/kerdesek/<téma>.json` (séma: `lib/quiz/schema.ts`, zod csak szkriptben/tesztben; `"AI-tervezet"`/`"lektorra-var"` vázlat, közzétenni csak lektor által jóváhagyott, a tartalmi ujjlenyomatra szóló kérdést), `scripts/quiz-release.ts`, `scripts/quiz-csv.ts` (lektori CSV, 25-ös csomagok). A sziget kezdeti JS-e ≈ 9 KB gz, a motor és a kalkulátorok a teszt indításakor töltődnek; a többi oldal +0,24 KB (útvonaltábla), a Tudástár-oldalak +0,13 KB-tal többet. Kód: `lib/quiz/*`, `components/quiz/*`, `app/(kezikonyv)/tudastar/tesztek`, doksi: `docs/tudastar.md` „Tesztek (vizsgaszimuláció)”.
+
+11. **Tudástár – Sémák és ábramotor** (kész, a lektorálásig rejtve; terv 3.4) – netlista (`content/tudastar/r3/*.netlist.json`) → elrendezés (`content/tudastar/diagramok/<id>.json`, csak geometria, a netlista ujjlenyomatához kötve) → jelenet (`components/kezikonyv/diagram/scene.ts`) → Bekötés nézet (szerver-SVG `data-wire/-from/-to`), Működés nézet (kliensszigete `diagram-run.tsx`, 1,7 KB gz, csak netlistás ábrát tartalmazó oldalon töltődik; aria-pressed, aria-live, érszintű áramút), „Vezetékek táblázatban” (`<details>`), kapcsolóállás-táblázat; PDF (lektori csomag 4. rész) ugyanabból. Egyenértékűség: `lib/kb/circuit.ts` = `sim.py` (`tests/kb-circuit.ts`); rajz = netlista (`tests/kb-diagram.ts`, 819 mutáns). Kapu: az ábra-ujjlenyomat (netlista, elrendezés, rajzoló kód, rajz-CSS) a cikk `figures` ujjlenyomatának része; a `lib/kb/content/generated/diagrams.ts` csak közzétett cikk ábráját tartalmazza (most üres); `/tudastar/semak` (+ `[slug]`) és a „Sémák” fül csak közzétett sémával; a `tests/kb-dist.mjs`/`kb-routes.mjs` a netlisták feliratait és az ábrajelölőket is keresi. R3 vázlat generáláskor: veszély-doboz a könyvtári szöveggel (`lib/kb/safety.ts` `bekotes`, `munkavegzes`), kötelező szakaszok, feszültségmentesítéssel kezdődő szerelési lépések (`checkR3`). Lektori csomag LK-4: 4. rész, `BEK-<ID>` blokkok, ábránkénti döntés, második olvasó; R3 rekord csak lektor után, `approvalRef` az ábrák ujjlenyomat-párjával (`diagramRefProblems`). Nincs Szerelési rajz nézet (a tervező szimbólumait a Tudástár nem importálhatja). Doksi: `docs/tudastar.md` „Sémák és ábramotor”, `docs/lektoralas.md` 4.3.
+
+12. **Tervezett:** Tudástár 3. lépés folytatása (R3 kiadása lektor után – előtte a 4 blokkolt vázlat nem netlistás ábrái és a Szerelési rajz nézet, Tudnivalók, Könyvjelzők oldal, tervezői Tudástár-linkek; a kérdésbank élesítése a lektorálás után, profilonkénti küszöb), megosztás 2. lépés (megjegyzések, háttér a megosztott nézetben, link meghosszabbítása), közös szerkesztés más fiókból, termékkatalógus 2. ütem (szerelvényenkénti termék, összeállítás/kit, rendelési lista), méretezés 2. lépés (nyomvonalankénti szerelési mód, topológiai hossz, XLPE/E-táblázat jóváhagyás után, megosztott nézet).

@@ -1,0 +1,734 @@
+[
+  {
+    "id": "q-fold-0001",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mit jelöl a földelési rendszerek betűjelében (például TN-C-S) az első betű?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A táppont csillagpontjának földelését",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A fogyasztói berendezés fémházainak földelését",
+        "correct": false,
+        "why": "Ezt a második betű jelöli."
+      },
+      {
+        "id": "c",
+        "text": "A nulla- és a védővezető viszonyát",
+        "correct": false,
+        "why": "Ezt a TN utáni kiegészítő betű (C vagy S) jelöli."
+      },
+      {
+        "id": "d",
+        "text": "A hálózat fázisainak számát",
+        "correct": false,
+        "why": "A betűjel a földelés módját írja le, a fázisok számát nem."
+      }
+    ],
+    "explanation": "Az első betű a táppont (az elosztói transzformátor) csillagpontjára vonatkozik: T – közvetlenül földelt, I – a földtől elszigetelt vagy nagy impedancián át földelt. A második betű a fémházakra (testekre) vonatkozik, a TN utáni C vagy S pedig azt mutatja, közös PEN-vezető vagy külön N és PE látja-e el a nulla- és a védővezető szerepét.",
+    "ref": "foldelesi-rendszerek#mit-jelentenek-a-betuk",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0002",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Mit jelent a TN-C-S jelölésben a „C” és az „S” betű?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Előbb közös PEN-vezető, a szétválasztás után külön nulla- és védővezető fut",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A C a csillagpont földelését, az S a szekunder oldali tekercs földelését jelöli",
+        "correct": false,
+        "why": "A csillagpont földelését az első betű (T) mutatja."
+      },
+      {
+        "id": "c",
+        "text": "A C a kapcsolt fázisvezetőt, az S a szabad (kapcsolatlan) fázisvezetőt jelöli",
+        "correct": false,
+        "why": "A kiegészítő betű a nulla- és a védővezető viszonyáról szól, nem a fázisvezetőkről."
+      },
+      {
+        "id": "d",
+        "text": "A C a rézből készült védővezetőt, az S az acélból készült földelőt jelöli",
+        "correct": false,
+        "why": "A betűk nem anyagot jelölnek."
+      }
+    ],
+    "explanation": "TN-rendszerben a kiegészítő betű a nulla- és a védővezető viszonyát adja meg: C – közös PEN-vezető látja el mindkét szerepet, S – a nullavezető (N) és a védővezető (PE) külön fut. A TN-C-S-ben a táppont felőli szakaszon PEN fut, a szétválasztási ponttól N és PE külön.",
+    "ref": "foldelesi-rendszerek#mit-jelentenek-a-betuk",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0003",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Melyik földelési rendszer a legelterjedtebb a hazai lakóépületekben?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "TN-C-S",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "IT",
+        "correct": false,
+        "why": "IT-rendszert ott alkalmaznak, ahol a váratlan lekapcsolás nagy kockázat, például kórházi műtőben; lakossági csatlakozásnál nem fordul elő."
+      },
+      {
+        "id": "c",
+        "text": "TN-S, már a transzformátortól kezdve",
+        "correct": false,
+        "why": "Ez jellemzően saját transzformátoros létesítményekben, például ipari üzemben fordul elő."
+      },
+      {
+        "id": "d",
+        "text": "TN-C, az összes lakásáramkörben",
+        "correct": false,
+        "why": "Új lakásberendezés ma nem készül TN-C-rendszerben."
+      }
+    ],
+    "explanation": "A közcélú hálózat jellemzően négyvezetős (három fázis és PEN), és a PEN-vezető a fogyasztói berendezés kezdetén egyetlen ponton válik szét nulla- és védővezetőre: ez a TN-C-S. A szétválasztás helyét és kialakítását az elosztói engedélyes előírásai határozzák meg.",
+    "ref": "foldelesi-rendszerek#tn-c-s-a-pen-szetvalasztasa",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0004",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "A PEN-vezetőbe kapcsoló vagy biztosító is beépíthető, hiszen üzem közben ugyanúgy áramot vezet, mint a nullavezető.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": false
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": true
+      }
+    ],
+    "explanation": "A PEN-vezető egyszerre nulla- és védővezető: ha egy kapcsoló, biztosító vagy áram-védőkapcsoló megszakítaná, a hozzá kötött fémházak elveszítenék a védővezetőjüket, és a fogyasztón át fázisfeszültségre kerülhetnének. Ezért a PEN-t semmilyen kapcsoló- vagy védelmi készülék nem bonthatja.",
+    "ref": "foldelesi-rendszerek#tn-c-kozos-pen-vezeto-a-fogyasztoig",
+    "shuffle": false,
+    "family": "pen-nem-bonthato",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0005",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "Mi az oka annak, hogy TN-C-rendszerű (közös PEN-vezetős) szakaszon áram-védőkapcsoló NEM alkalmazható?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A hibaáram a PEN-en, a vasmagon át tér vissza, így különbözeti áram nem keletkezik",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A FI-relé a PEN-vezető nagy áramától túlmelegszik",
+        "correct": false,
+        "why": "A PEN árama a nullavezetőével azonos; az ok a működési elvben van."
+      },
+      {
+        "id": "c",
+        "text": "A TN-C-rendszerben a hibaáram túl kicsi, ezért a FI-relé testzárlatkor sem érné el a kioldást",
+        "correct": false,
+        "why": "A hibaáram nagy, de a vasmagon át tér vissza; a FI-relé a különbségre old ki, nem a nagyságra."
+      },
+      {
+        "id": "d",
+        "text": "A FI-relé csak háromfázisú hálózatban működik",
+        "correct": false,
+        "why": "Kétpólusú, egyfázisú áram-védőkapcsoló is van."
+      }
+    ],
+    "explanation": "TN-C-ben a fémház a PEN-vezetőre csatlakozik, amely a FI-relé vasmagján is áthaladna, így testzárlatkor a hibaáram a vasmagon át tér vissza, és nincs különbség. Ha a készülék mégis kioldana, a PEN bontásával a fémház a védővezetőjét is elveszítené; ezért a FI-relé előtt a PEN-t N- és PE-vezetőre kell szétválasztani.",
+    "ref": "foldelesi-rendszerek#tn-c-kozos-pen-vezeto-a-fogyasztoig",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0006",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "A TN-C-S rendszer PEN-szétválasztási pontja után mi igaz a nulla- és a védővezetőre?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Sehol nem köthetők újra össze, sem alelosztóban, sem dugaljban, sem készülékben",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Az alelosztókban újra össze kell kötni őket, hogy a hibaáram gyorsabban folyjon el",
+        "correct": false,
+        "why": "Az újbóli összekötés után a védővezetőn és a hozzá kötött csöveken üzemi áram folyna."
+      },
+      {
+        "id": "c",
+        "text": "Dugaljban összeköthetők, ha az áramkörben nincs áram-védőkapcsoló",
+        "correct": false,
+        "why": "Ilyenkor a hiba rejtve marad, és nullavezető-szakadáskor a fémházak feszültség alá kerülhetnek."
+      },
+      {
+        "id": "d",
+        "text": "Csak a világítási áramkörökben kell őket külön vezetni",
+        "correct": false,
+        "why": "A szétválasztás után minden áramkörben külön fut a nulla- és a védővezető."
+      }
+    ],
+    "explanation": "A szétválasztás egyirányú: utána a nulla- és a védővezető sehol nem köthető újra össze. Ha mégis összeérnek, a védővezetőn és a hozzá kötött csöveken üzemi áram folyik; a FI-relé csak akkor old ki, ha az összekötés a védett oldalán van, különben a hiba rejtve marad.",
+    "ref": "foldelesi-rendszerek#tn-c-s-a-pen-szetvalasztasa",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0007",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "TN-C-S rendszerű házban a szétválasztási pont előtt – a hálózatban vagy a ház csatlakozó vezetékében – megszakad a PEN-vezető. Melyik állítás igaz?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Az egész védővezető-rendszer feszültség alá kerülhet, és ezt egyik védelem sem kapcsolja le",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A FI-relé azonnal kiold, mert a nullavezető árama ilyenkor eltér a fázisvezetőétől",
+        "correct": false,
+        "why": "A fázis- és a nullavezető árama ilyenkor is egyenlő, a fogyasztó árama az épület földelőjén át keres utat."
+      },
+      {
+        "id": "c",
+        "text": "A kismegszakítók kioldanak, mert a PEN-szakadás zárlatot okoz",
+        "correct": false,
+        "why": "A szakadás nem zárlat, túláram nem keletkezik."
+      },
+      {
+        "id": "d",
+        "text": "Nincs veszély, mert a védővezető a szétválasztási pont után már külön fut a nullától",
+        "correct": false,
+        "why": "A védővezető a szétválasztási ponton a PEN-hez kapcsolódik, így annak szakadása a PE-re is hat."
+      }
+    ],
+    "explanation": "A szétválasztás előtti PEN-szakadáskor a fogyasztók árama az épület földelőjén és a talajon át keres utat, ezért minden fémház és az EPH-ba kötött cső potenciálja megemelkedhet. A FI-relé ezt nem érzékeli, mert a fázis- és a nullavezető árama egyenlő. Közös hálózati PEN szakadásakor a saját főkapcsoló lekapcsolása sem szünteti meg biztosan a veszélyt, mert a többi, ugyanarra a PEN-szakaszra kötött fogyasztó is megemelheti a potenciált.",
+    "ref": "foldelesi-rendszerek#tn-c-s-a-pen-szetvalasztasa",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet",
+    "family": "pen-szakadas-fi"
+  },
+  {
+    "id": "q-fold-0008",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 2,
+    "type": "multi",
+    "stem": "Egy lakásban a lámpák fényereje erősen ingadozik, egyes készülékek leállnak, mások melegszenek. Mi a helyes teendő? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Ha veszély nélkül megteheted, kapcsold le a főkapcsolót",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Ne érints fémrészt (csaptelep, radiátor, készülékház)",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "Jelezd azonnal az elosztói engedélyes hibabejelentőjének és szakembernek",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "Keresd meg a laza nullavezetőt a lakáselosztóban, és húzd meg a kapcsát",
+        "correct": false,
+        "why": "Az elosztóban végzett munka szakember feladata; a lekapcsolás után is maradhat feszültség a fémrészeken."
+      },
+      {
+        "id": "e",
+        "text": "Kapcsold be a nagy fogyasztókat, hogy a feszültség kiegyenlítődjön",
+        "correct": false,
+        "why": "Ez semmit nem old meg, és tovább terhelheti a túlfeszültséget kapó készülékeket."
+      }
+    ],
+    "explanation": "A tünetek nulla- vagy PEN-szakadásra utalhatnak: a fázisok feszültsége eltolódik, egyes készülékek túlfeszültséget kapnak, és a fémrészek is feszültség alá kerülhetnek. A főkapcsoló lekapcsolása után is maradhat feszültség a fémrészeken, ezért ne érintsd őket, és azonnal jelezd a hibát az elosztói engedélyesnek és szakembernek.",
+    "ref": "foldelesi-rendszerek#mikor-hivj-szakembert",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0009",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Milyen színjelölésű a PEN-vezető?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Zöld-sárga, a végein kék jelöléssel (vagy fordítva)",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Csupa kék, jelölés nélkül, mert elsősorban nullavezetőként működik",
+        "correct": false,
+        "why": "A kék a nullavezető színe; a PEN védőfunkciója miatt zöld-sárga jelölést is kap."
+      },
+      {
+        "id": "c",
+        "text": "Fekete, a végein zöld-sárga jelöléssel",
+        "correct": false,
+        "why": "A fekete fázisvezető-szín."
+      },
+      {
+        "id": "d",
+        "text": "Barna, a végein kék jelöléssel",
+        "correct": false,
+        "why": "A barna fázisvezető-szín."
+      }
+    ],
+    "explanation": "A PEN egyszerre védő- és nullavezető, ezért a zöld-sárga szín (védőfunkció) és a kék (nullavezető) együtt jelöli: zöld-sárga a végeken kék jelöléssel, vagy fordítva. Régi berendezésben a színek eltérhetnek, ezért a vezető szerepét mérés dönti el, nem a szín.",
+    "ref": "vezetekek-szinjelolese#vedovezeto-zold-sarga-es-csak-az",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0010",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "TT-rendszerű berendezésben jellemzően mi végzi testzárlatkor a táplálás önműködő lekapcsolását?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Az áram-védőkapcsoló, mert a földön át záródó hibaáram jellemzően kicsi",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A kismegszakító elektromágneses kioldója, mert a hibaáram a PEN-en tér vissza",
+        "correct": false,
+        "why": "TT-rendszerben nincs vezető kapcsolat a fogyasztói védővezető és a táppont között; a hibaáram a talajon át tér vissza."
+      },
+      {
+        "id": "c",
+        "text": "A szigetelésfigyelő, amely a hibát jelzi, de nem kapcsol le",
+        "correct": false,
+        "why": "Szigetelésfigyelő az IT-rendszer jellemzője."
+      },
+      {
+        "id": "d",
+        "text": "Az olvadóbiztosító, mert a földelők ellenállása elhanyagolható",
+        "correct": false,
+        "why": "A két földelőn és a talajon át záródó hurok éppen nagy ellenállású."
+      }
+    ],
+    "explanation": "TT-rendszerben a fémházak saját védőföldelőn vannak, a táppont csillagpontja pedig az üzemi földelőn; testzárlatkor a hibaáram a két földelőn és a talajon át, nagy ellenállású hurokban folyik. Ez a túláramvédelem gyors kioldásához jellemzően kevés, ezért a hibavédelmet áram-védőkapcsoló adja, a védőföldelő ellenállását pedig ehhez választják meg és mérik.",
+    "ref": "foldelesi-rendszerek#tt-sajat-foldelo-a-fogyasztonal",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0011",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 3,
+    "type": "single",
+    "stem": "TT-rendszerű berendezésben elszakad a védőföldelő vezetője, majd egy fémházas készülékben testzárlat keletkezik. Mi igaz?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A fémház tartósan fázisfeszültségre kerülhet, a lekapcsolás elmaradhat",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A FI-relé azonnal kiold, mert a hibaáram a védővezetőn tér vissza",
+        "correct": false,
+        "why": "Szakadt földelővezetőnél nincs zárt hurok, hibaáram nem folyik."
+      },
+      {
+        "id": "c",
+        "text": "A kismegszakító kiold, mert a hibaáram a nullavezetőn tér vissza",
+        "correct": false,
+        "why": "A testzárlat hibaárama nem a nullavezetőn tér vissza, és zárt hurok sincs."
+      },
+      {
+        "id": "d",
+        "text": "Nincs veszély, mert TT-rendszerben a fémház mindig közvetlenül a földön van",
+        "correct": false,
+        "why": "A földelővezető szakadásával a fémház elveszíti a kapcsolatát a földelővel."
+      }
+    ],
+    "explanation": "A védőföldelő vezetőjének szakadásakor testzárlatkor nincs zárt hurok, ezért egyik védelem sem kapcsol le, és a fémház tartósan fázisfeszültségre kerülhet. A FI-relé csak az áramütés közben, a testen átfolyó áramra old ki, egy nagyobb kioldási áramú (például 300 mA-es, tűzvédelmi) készülék pedig jellemzően nem; ezért a földelés folytonosságát, ellenállását és a FI-relé működését időszakos felülvizsgálat ellenőrzi.",
+    "ref": "foldelesi-rendszerek#tt-sajat-foldelo-a-fogyasztonal",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0012",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Mi jellemző az IT-rendszerre?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Földeletlen táppont; az első testzárlatnál a szigetelésfigyelő jelez",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A táppont és a fémházak közös PEN-vezetőn vannak",
+        "correct": false,
+        "why": "Ez a TN-C-rendszer."
+      },
+      {
+        "id": "c",
+        "text": "A fémházakat nem kötik védővezetőre, mert a hálózat táppontja földeletlen",
+        "correct": false,
+        "why": "IT-rendszerben a fémházak közös védővezetőn és földelőn vannak."
+      },
+      {
+        "id": "d",
+        "text": "Lakossági csatlakozásnál ez a leggyakoribb rendszer",
+        "correct": false,
+        "why": "Lakossági csatlakozásnál nem fordul elő; jellemzően kórházi műtőkben és egyes ipari folyamatoknál alkalmazzák."
+      }
+    ],
+    "explanation": "Az IT-rendszerben a táppont csillagpontja nincs közvetlenül földelve, a fémházak viszont közös védővezetőn és földelőn vannak. Az első testzárlat nem ad zárt hurkot, ezért nem kell azonnal lekapcsolni, de a szigetelésfigyelő jelez, és a hibát mielőbb meg kell szüntetni, mert egy második testzárlat egy másik fázison már lekapcsolást igényel.",
+    "ref": "foldelesi-rendszerek#it-foldeletlen-tappont-szigetelesfigyeles",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0013",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 3,
+    "type": "truefalse",
+    "stem": "IT-rendszerben az első testzárlat után a többi fázisvezető a földhöz képest a vonali feszültségre is kerülhet.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": true
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": false
+      }
+    ],
+    "explanation": "Az első testzárlat egy fázist közel földpotenciálra köt, ezért a másik két fázis a földhöz képest a fázisok közötti, vonali feszültségre kerülhet. Az első hiba tehát nem veszélytelen: a szigetelésfigyelő jelzése után mielőbb meg kell szüntetni.",
+    "ref": "foldelesi-rendszerek#it-foldeletlen-tappont-szigetelesfigyeles",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0014",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "TN-S-rendszerben megszakad a nullavezető, a védővezető ép. Melyik állítás igaz?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A fémház feszültségmentes marad, a szakadás utáni nullavezető viszont fázisra kerülhet",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "A fogyasztó fémháza fázisfeszültségre kerül, mert a nulla- és a védővezető közös vezető",
+        "correct": false,
+        "why": "TN-S-ben a nulla- és a védővezető végig külön fut."
+      },
+      {
+        "id": "c",
+        "text": "A FI-relé kiold, mert a nullavezető árama megszűnik",
+        "correct": false,
+        "why": "A szakadás után sem a fázis-, sem a nullavezetőn nem folyik áram, nincs különbözeti áram."
+      },
+      {
+        "id": "d",
+        "text": "A nullavezető érintése ilyenkor veszélytelen, mert a szakadás után nem folyik rajta áram",
+        "correct": false,
+        "why": "A bekapcsolt fogyasztón át a nullavezető szakadás utáni része fázisfeszültségre kerülhet."
+      }
+    ],
+    "explanation": "TN-S-ben a védővezető ép marad, ezért a fémház nem kerül feszültség alá, a fogyasztó pedig leáll. A szakadás utáni nullavezető-szakasz viszont a bekapcsolt fogyasztón át fázisfeszültségre kerülhet, ezért érintése életveszélyes; háromfázisú hálózatban a csillagpont eltolódása túlfeszültséget is okozhat.",
+    "ref": "foldelesi-rendszerek#tn-s-kulon-nulla-es-vedovezeto",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0015",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Hogyan nevezte a régi hazai szóhasználat a TN-rendszerű érintésvédelmet?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Nullázás",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Védőföldelés",
+        "correct": false,
+        "why": "Ez a TT-rendszerű érintésvédelem régi neve."
+      },
+      {
+        "id": "c",
+        "text": "Védőelválasztás",
+        "correct": false,
+        "why": "Ez egy másik védelmi mód neve, nem a TN-rendszeré."
+      },
+      {
+        "id": "d",
+        "text": "Szigetelésfigyelés",
+        "correct": false,
+        "why": "Ez az IT-rendszer jellemző eszköze, nem a TN régi neve."
+      }
+    ],
+    "explanation": "A régi hazai szóhasználat a TN-rendszerű érintésvédelmet nullázásnak, a TT-rendszerűt védőföldelésnek nevezte. A kifejezések régi tervekben és jegyzőkönyvekben ma is előfordulnak, ezért érdemes ismerni a megfelelésüket.",
+    "ref": "foldelesi-rendszerek#mit-jelentenek-a-betuk",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0016",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 2,
+    "type": "truefalse",
+    "stem": "Gáz- vagy más éghető anyagot szállító fém csővezeték földelőként is használható, ha jó a kapcsolata a talajjal.",
+    "choices": [
+      {
+        "id": "igaz",
+        "text": "Igaz",
+        "correct": false
+      },
+      {
+        "id": "hamis",
+        "text": "Hamis",
+        "correct": true
+      }
+    ],
+    "explanation": "Gázt vagy más éghető anyagot szállító csővezetéket földelőként használni a gyakori, súlyos hibák közé tartozik: hibaáram vagy szikra tüzet, robbanást okozhat. A gázvezeték a fő EPH-ba a gázszolgáltató előírása szerint kialakított ponton kerülhet, ez azonban potenciálkiegyenlítés, nem földelés.",
+    "ref": "foldelesi-rendszerek#gyakori-hibak",
+    "shuffle": false,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0017",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Hol történik jellemzően a PEN-vezető szétválasztása TN-C-S rendszerben, és ki határozza meg a pontos helyét?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A fogyasztói berendezés kezdetén, az elosztói engedélyes előírásai szerint",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Minden dugaljban külön, a villanyszerelő aktuális döntése és a helyi adottságok szerint",
+        "correct": false,
+        "why": "A szétválasztás egyetlen ponton történik, utána a nulla- és a védővezető sehol nem köthető újra össze."
+      },
+      {
+        "id": "c",
+        "text": "A transzformátor csillagpontjánál, a lakás tulajdonosának kérésére",
+        "correct": false,
+        "why": "Ha már a csillagpontnál szétválik, az TN-S-rendszer."
+      },
+      {
+        "id": "d",
+        "text": "Minden alelosztóban újra, hogy a védővezető ellenállása kicsi maradjon",
+        "correct": false,
+        "why": "A szétválasztás után az ismételt összekötés tilos."
+      }
+    ],
+    "explanation": "A TN-C-S-ben a PEN a táppontól a szétválasztási pontig fut, onnan a nulla- és a védővezető külön halad. A szétválasztás a fogyasztói berendezés kezdetén (a mérőhelynél vagy az azt követő első elosztóban) történik, pontos helyét és kialakítását az elosztói engedélyes előírásai határozzák meg; jellemzően ide kapcsolódik az épület földelője és a fő EPH-sín is.",
+    "ref": "foldelesi-rendszerek#tn-c-s-a-pen-szetvalasztasa",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0018",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 3,
+    "type": "multi",
+    "stem": "Melyik állítás igaz a földelési rendszerekre? (több helyes válasz)",
+    "choices": [
+      {
+        "id": "a",
+        "text": "TN-rendszerben a fémházak vezetőn át a táppont földelt pontjához kapcsolódnak",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "TT-rendszerben a fémházak saját földelőn vannak, és nincs vezető kapcsolatuk a táppont földelőjével",
+        "correct": true
+      },
+      {
+        "id": "c",
+        "text": "IT-rendszerben a táppont nincs közvetlenül földelve",
+        "correct": true
+      },
+      {
+        "id": "d",
+        "text": "TN-C-rendszerben a nulla- és a védővezető végig külön fut",
+        "correct": false,
+        "why": "Ez a TN-S; a TN-C-ben közös PEN-vezető látja el mindkét szerepet."
+      },
+      {
+        "id": "e",
+        "text": "TN-S-rendszerben a védővezetőn üzem közben a terhelőáram egy része is folyik",
+        "correct": false,
+        "why": "TN-S-ben a védővezetőn üzem közben nem folyik terhelőáram."
+      }
+    ],
+    "explanation": "A második betű a fémházak kapcsolatát adja meg: N – vezetőn át a táppont földelt pontjához, T – saját földelőhöz; az első betű helyén álló I földeletlen (vagy nagy impedancián át földelt) táppontot jelent. A TN-C-ben közös PEN, a TN-S-ben külön N és PE fut, és a TN-S védővezetőjén üzem közben nem folyik terhelőáram.",
+    "ref": "foldelesi-rendszerek#a-rendszerek-egy-tablazatban",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0019",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 1,
+    "type": "single",
+    "stem": "Régi lakásban kéteres vezetékezést találsz, a dugaljak védőérintkezője a nullavezetőre van kötve. Mi a helyes megközelítés?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A korszerűsítéshez külön védővezető kell; a megoldásról szakember dönt",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Egy áram-védőkapcsoló beépítése önmagában megoldja a problémát",
+        "correct": false,
+        "why": "A fémház testzárlatát a FI-relé ilyenkor nem érzékeli, és a nullázott kötés a FI-relé után kioldást is okozhat (ha a nullára kötött fémház földelt részhez ér)."
+      },
+      {
+        "id": "c",
+        "text": "A nullavezető és a védőérintkező összekötése biztonságos, nem kell vele foglalkozni",
+        "correct": false,
+        "why": "Nullavezető-szakadáskor vagy fázis–nulla felcseréléskor a csatlakoztatott fémház fázisfeszültségre kerülhet."
+      },
+      {
+        "id": "d",
+        "text": "Elég a dugaljak elé kétpólusú kapcsolót szerelni",
+        "correct": false,
+        "why": "A kapcsoló a hiányzó védővezetőt nem pótolja."
+      }
+    ],
+    "explanation": "A kéteres, „nullázott” áramkör vékony vezetővel kialakított TN-C: nullavezető-szakadáskor a csatlakoztatott fémházas készülék háza a készüléken át, felcseréléskor közvetlenül kerül fázisfeszültségre. Az elé épített FI-relé a fémház testzárlatát sem érzékeli, ezért a korszerűsítéshez külön védővezető kell, amelyet szakember tervez meg.",
+    "ref": "foldelesi-rendszerek#regi-berendezesben",
+    "shuffle": true,
+    "family": "nullazott-dugalj",
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  },
+  {
+    "id": "q-fold-0020",
+    "version": 1,
+    "topic": "foldelesi-rendszerek",
+    "difficulty": 2,
+    "type": "single",
+    "stem": "Milyen a közcélú kisfeszültségű elosztóhálózat jellemző kialakítása Magyarországon?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Négyvezetős (három fázis és PEN), több ponton ismételten földelve",
+        "correct": true
+      },
+      {
+        "id": "b",
+        "text": "Ötvezetős: három fázisvezető, külön nulla- és védővezető már a transzformátortól",
+        "correct": false,
+        "why": "Ez TN-S lenne; a közcélú hálózat jellemzően PEN-vezetős."
+      },
+      {
+        "id": "c",
+        "text": "Háromvezetős: csak három fázisvezető, nullavezető nélkül",
+        "correct": false,
+        "why": "A lakossági fogyasztók egyfázisú táplálásához nullavezető (PEN) is kell."
+      },
+      {
+        "id": "d",
+        "text": "Kétvezetős: egy fázis és egy nulla minden utcában",
+        "correct": false,
+        "why": "A közcélú hálózat háromfázisú."
+      }
+    ],
+    "explanation": "A közcélú elosztóhálózat jellemzően négyvezetős (három fázis és PEN), és a PEN-t az elosztói engedélyes több ponton ismételten földeli. A fogyasztói berendezés kezdetén a PEN szétválik nulla- és védővezetőre, így jön létre a TN-C-S-rendszer.",
+    "ref": "foldelesi-rendszerek#tn-c-kozos-pen-vezeto-a-fogyasztoig",
+    "shuffle": true,
+    "review": "lektorra-var",
+    "source": "AI-tervezet"
+  }
+]

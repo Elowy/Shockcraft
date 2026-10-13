@@ -1,4 +1,4 @@
--- MySQL 8.0+. Run once against an empty ShockCraft database before setting MYSQL_URL.
+-- MySQL 8.0+. Run once against an empty Villanyrajz database before setting MYSQL_URL.
 CREATE TABLE IF NOT EXISTS plan_versions (
  project_id varchar(191) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
  revision int NOT NULL,
@@ -123,3 +123,34 @@ CREATE TABLE IF NOT EXISTS template_libraries (
  revision INT NOT NULL,
  updated_at VARCHAR(40) NOT NULL
 );
+CREATE TABLE IF NOT EXISTS workbooks (
+ user_id varchar(36) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+ data longtext NOT NULL,
+ revision int NOT NULL,
+ updated_at varchar(40) NOT NULL,
+ CONSTRAINT workbooks_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+CREATE TABLE IF NOT EXISTS plan_shares (
+ id varchar(36) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+ token_hash char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+ owner_id varchar(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+ project_id varchar(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+ project_key varchar(191) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+ label varchar(80) NOT NULL DEFAULT '',
+ allow_pdf int NOT NULL DEFAULT 0,
+ auth_version int NOT NULL,
+ created_at bigint NOT NULL,
+ expires_at bigint NOT NULL,
+ last_viewed_at bigint NULL,
+ UNIQUE KEY plan_shares_token_unique (token_hash),
+ KEY plan_shares_owner_project_idx (owner_id,project_key),
+ KEY plan_shares_expiry_idx (expires_at),
+ CONSTRAINT plan_shares_owner_fk FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+CREATE TABLE IF NOT EXISTS product_catalogs (
+ user_id varchar(36) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+ data longtext NOT NULL,
+ revision int NOT NULL,
+ updated_at varchar(40) NOT NULL,
+ CONSTRAINT product_catalogs_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;

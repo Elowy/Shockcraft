@@ -1,12 +1,12 @@
 # Fióklevelek: Resend beállítása
 
-A ShockCraft e-mailben küld jelszó-visszaállító és e-mail-címet megerősítő hivatkozást. A szolgáltatás kezdetben ki van kapcsolva; levél csak érvényes Resend-beállításokkal küldhető.
+A Villanyrajz e-mailben küld jelszó-visszaállító és e-mail-címet megerősítő hivatkozást. A szolgáltatás kezdetben ki van kapcsolva; levél csak érvényes Resend-beállításokkal küldhető.
 
 ## Bekapcsolás
 
 1. Hozz létre saját Resend-fiókot, és a **Domains** oldalon add hozzá a saját feladói domainedet vagy aldomainedet. A Resendben látható DNS-bejegyzéseket állítsd be a domain szolgáltatójánál, majd várd meg a sikeres domainellenőrzést. [Hivatalos útmutató](https://resend.com/docs/dashboard/domains/introduction).
 2. Az **API Keys** alatt hozz létre levélküldésre jogosult kulcsot. Az alkalmazás a Resend HTTPS API-ját használja, SMTP-jelszó nem szükséges.
-3. A ShockCraft **Admin → Fióklevelek · Resend** részében add meg a domainhez tartozó feladói e-mail-címet és a `re_…` kulcsot. Kapcsold be a fióklevelek küldését, majd mentsd.
+3. A Villanyrajz **Admin → Fióklevelek · Resend** részében add meg a domainhez tartozó feladói e-mail-címet és a `re_…` kulcsot. Kapcsold be a fióklevelek küldését, majd mentsd.
 4. A **Fiókom → Megerősítő levél küldése** gombbal kérj levelet a saját fiókodhoz. Nyisd meg a levelet, majd a megerősítő oldalon nyomd meg a gombot. A **Fiókom → Állapot frissítése** mutatja az eredményt.
 5. Próbáld ki az **Elfelejtetted a jelszavad?** folyamatot is. A sikeres jelszócsere után a régi jelszóval és korábbi munkamenettel már nem lehet belépni. A mentett tervek megmaradnak.
 

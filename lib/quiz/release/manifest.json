@@ -1,0 +1,20 @@
+{
+ "version": 1,
+ "release": "14b8f096",
+ "live": false,
+ "total": 0,
+ "topics": {
+  "alapfogalmak-szamitasok": 0,
+  "kapcsolasok": 0,
+  "vedelmi-eszkozok": 0,
+  "erintesvedelem": 0,
+  "foldelesi-rendszerek": 0,
+  "kabelek-vezetekek": 0,
+  "meres": 0,
+  "gepek": 0,
+  "vilagitas": 0,
+  "munkabiztonsag": 0
+ },
+ "minTotal": 150,
+ "minPerTopic": 10
+}
