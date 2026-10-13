@@ -94,6 +94,20 @@ jobs:
           # A Passenger e fájl változásakor újraindítja az alkalmazást.
           echo "${GITHUB_SHA} $(date -u +%Y-%m-%dT%H:%M:%SZ)" > deploy-pkg/tmp/restart.txt
 
+          # Ha az alkalmazás könyvtára egyben a domain webgyökere, a webszerver ne szolgálja ki
+          # közvetlenül a szerverkódot: a Node a fájlokat a fájlrendszerből olvassa, ez nem érinti.
+          for d in dist scripts tmp; do
+            cat > "deploy-pkg/$d/.htaccess" <<'HTA'
+          <IfModule mod_authz_core.c>
+            Require all denied
+          </IfModule>
+          <IfModule !mod_authz_core.c>
+            Order allow,deny
+            Deny from all
+          </IfModule>
+          HTA
+          done
+
           # Ellenőrzés: megvan-e a szerver belépési pontja.
           if [ ! -f deploy-pkg/dist/standalone/server.js ]; then
             echo "::error::Hiányzik a deploy-pkg/dist/standalone/server.js – a build nem készítette el a standalone kiadást."

@@ -94,6 +94,7 @@ Mit csinál:
 - A `main` ágra pusholt kódot (vagy kézi indításra: Actions → „Telepítés FTP-re” → Run workflow) a GitHub leforgatja, és a kész Node.js-kiadást FTPS-en (21-es port, explicit TLS) feltölti a tárhelyre.
 - Csak a változott fájlokat tölti fel (a szerveren az action `.ftp-deploy-sync-state.json` állapotfájlt tart).
 - A `tmp/restart.txt` minden kiadásnál megváltozik, ezért a Passenger újraindítja az alkalmazást.
+- A `dist/`, `scripts/` és `tmp/` könyvtárba tiltó `.htaccess` kerül: ha az alkalmazás könyvtára egyben a domain webgyökere, a webszerver akkor sem szolgálja ki közvetlenül a szerverkódot (a Node a fájlokat a fájlrendszerből olvassa, ez nem érinti). A gyökér `.htaccess`-ét (a cPanel Passenger-beállítása) a feltöltés nem írja felül.
 - A workflow: `.github/workflows/deploy-ftp.yml`; a lépései: előfeltétel-ellenőrzés, `npm run install:ci`, típusellenőrzés, `npm run build:node`, telepítőcsomag összeállítása, feltöltés.
 
 Egyszeri beállítás a GitHubon (Settings → Secrets and variables → Actions):
