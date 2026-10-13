@@ -100,9 +100,9 @@ Mit csinál:
 Egyszeri beállítás a GitHubon (Settings → Secrets and variables → Actions):
 
 - Titkok: `FTP_USERNAME` (az FTP-felhasználó), `FTP_PASSWORD` (az FTP-jelszó). A jelszó csak itt szerepeljen, soha ne kerüljön a repóba vagy üzenetbe.
-- Változók: `FTP_SERVER_DIR` – a célkönyvtár az FTP-fiókon belül, pl. `./villanyrajz-app/`; a záró perjel kötelező, és nem lehet a nyilvános webgyökér (public_html).
+- Változó: `FTP_SERVER_DIR` – a célkönyvtár az FTP-fiókon belül (záró perjellel, pl. `./villanyrajz-app/`); nem lehet a nyilvános webgyökér (public_html). Titokként is megadható; ha egyik sincs, a feltöltés az FTP-fiók gyökerébe (`./`) megy – ezért az FTP-fiók könyvtára maga az alkalmazás könyvtára legyen.
 - Opcionális változók: `FTP_SERVER` (alapértelmezés: `ftp.luiz-tech.hu`) és `FTP_PROTOCOL` (alapértelmezés: `ftps`; ha a tárhely nem támogat TLS-t, `ftp` – nem javasolt, mert a jelszó titkosítatlanul utazik).
-- Ha valamelyik kötelező érték hiányzik, a workflow az első lépésben magyar hibaüzenettel leáll.
+- Ha az `FTP_USERNAME` vagy az `FTP_PASSWORD` hiányzik, a workflow az első lépésben magyar hibaüzenettel leáll.
 
 Egyszeri beállítás a tárhelyen (cPanel → Setup Node.js App):
 
