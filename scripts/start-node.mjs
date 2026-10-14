@@ -1,4 +1,5 @@
 if(!process.env.MYSQL_URL)throw Error('MYSQL_URL is required for the Node.js server.');
+try{new URL(process.env.MYSQL_URL)}catch{throw Error('MYSQL_URL is not a valid URL: URL-encode the special characters of the password (encodeURIComponent).')}
 if(!process.env.APP_ORIGIN)throw Error('APP_ORIGIN must contain the public HTTPS origin.');
 const origin=new URL(process.env.APP_ORIGIN);
 if(origin.pathname!=='/'||origin.search||origin.hash||origin.username||origin.password)throw Error('APP_ORIGIN must be an origin only.');

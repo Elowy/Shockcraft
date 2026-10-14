@@ -198,6 +198,7 @@ deploy/
   nginx.conf            Nginx reverse proxy konfig
   shockcraft.service    systemd service unit
   env.production.example  Env változók példa
+  cpanel-app.cjs        Passenger/cPanel-indító (a FTP-workflow app.cjs-ként telepíti): .env.production beolvasása, logs/inditas.log (titkok nélkül)
 
 docs/                   Feature dokumentáció (Markdown)
   BACKLOG.md            Nyitott fejlesztési feladatok
