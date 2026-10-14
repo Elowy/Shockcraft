@@ -89,12 +89,8 @@ jobs:
           {"name":"villanyrajz","private":true,"type":"module","engines":{"node":">=22.13.0"},"scripts":{"start":"node scripts/start-node.mjs"}}
           JSON
 
-          # CommonJS-indító Passenger/cPanel-hez.
-          cat > deploy-pkg/app.cjs <<'CJS'
-          // A cPanel „Setup Node.js App” felületén az „Application startup file”
-          // mezőbe ezt a fájlt kell írni: app.cjs
-          import('./scripts/start-node.mjs').catch((e) => { console.error(e); process.exit(1); });
-          CJS
+          # CommonJS-indító Passenger/cPanel-hez (.env.production beolvasása, logs/inditas.log).
+          cp deploy/cpanel-app.cjs deploy-pkg/app.cjs
 
           # A Passenger e fájl változásakor újraindítja az alkalmazást.
           echo "${GITHUB_SHA} $(date -u +%Y-%m-%dT%H:%M:%SZ)" > deploy-pkg/tmp/restart.txt

@@ -109,14 +109,23 @@ Egyszeri beállítás a tárhelyen (cPanel → Setup Node.js App):
 - Node.js: legalább 22.13.
 - Application root: az `FTP_SERVER_DIR` könyvtár.
 - Application startup file: `app.cjs`.
-- Környezeti változók a kezelőfelületen (a `.env.production` nem töltődik fel): `APP_ORIGIN`, `MYSQL_URL`, `SESSION_SECRET`, `ADMIN_USER_ID`, `SHOCKCRAFT_NODE_RUNTIME=1`, valamint a többi a 3. pont szerint.
+- Környezeti változók: `APP_ORIGIN`, `MYSQL_URL`, `SESSION_SECRET`, `ADMIN_USER_ID`, `SHOCKCRAFT_NODE_RUNTIME=1`, valamint a többi a 3. pont szerint. Két helyen adhatók meg:
+  - a kezelőfelületen (Environment variables), vagy
+  - az alkalmazás könyvtárában levő `.env.production` fájlban (`chmod 600 .env.production`). Az `app.cjs` indításkor beolvassa; ha egy változó mindkét helyen szerepel, a kezelőfelületé érvényes. A fájl soha nem kerülhet a domain nyilvános webgyökerébe, és a feltöltés sem hozza létre, sem nem törli.
+- A `MYSQL_URL` jelszavában a speciális karaktereket (`@ : / ? # % &` stb.) URL-kódolni kell (`node -e 'console.log(encodeURIComponent(process.argv[1]))' 'jelszó'`); kódolatlan jelszóval a szerver nem indul el.
 - A „Run NPM Install” gombot nem kell megnyomni: a csomag saját `node_modules`-t hoz.
 - MySQL: a sémát egyszer kell létrehozni – phpMyAdminban a `db/mysql-schema.sql` importálásával, vagy a `scripts/mysql-setup.mjs` futtatásával. Minden kiadásnál futtasd az újonnan megjelent táblákat is (pl. `workbooks`, `plan_shares`, `product_catalogs`).
 
 Ellenőrzés:
 
 - A GitHub Actions futásának naplója legyen zöld.
-- Utána a `GET /api/health` végpont 200-at adjon.
+- Utána a `GET /api/health` végpont 200-at adjon (503: a szerver fut, de az adatbázis nem érhető el – az ok a naplóban).
+
+Ha az oldal „Web application could not be started” hibát ad:
+
+- Nézd meg az alkalmazás könyvtárában a `logs/inditas.log` fájlt. Az `app.cjs` minden indításkor beleírja a Node-verziót, a `.env.production` állapotát, az `APP_ORIGIN` és a `MYSQL_URL` eredetét (kezelőfelület / fájl / hiányzik; az értéket nem), valamint az indulás első két percének kimenetét és hibáit. A titkokat (`MYSQL_URL`, kulcsok, URL-be írt jelszó) kitakarja.
+- Ha a fájl nem jön létre, a Passenger el sem indította az alkalmazást: a Setup Node.js App felületén add meg a „Passenger log file” mezőt (pl. `/home/<felhasználó>/logs/villanyrajz-passenger.log`), indítsd újra az alkalmazást, és abban keresd a hibaoldalon látható Error ID-t.
+- Kézi próba SSH-n (a cPanel által kiírt `source …/activate` parancs után, az alkalmazás könyvtárában): `PORT=3999 node app.cjs`, majd egy másik terminálban `curl -s http://127.0.0.1:3999/api/health`.
 
 Megjegyzés:
 
