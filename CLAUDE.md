@@ -110,6 +110,10 @@ components/             43 UI komponens
   sizing-report.tsx     Méretezési segédszámítás fül (Eszközök → Méretezés): felelősségi doboz, áramkörönkénti ellenőrzések, áramköri/projekt/elosztó beállítások, Iz0-felülírások
   quote-products.tsx    Ajánlat „Termékek és katalógusárak” része (típusválasztás, alapértelmezések, árfrissítés)
   use-catalog.ts        useCatalog hook: /api/catalog betöltés és mentés (revision-CAS)
+  selection-chip.tsx    Kijelölési címke keskeny szerkesztőben (≤ 1050 px): „Kijelölve: …” + Tulajdonságok + Kijelölés megszüntetése; szellemkattintás-védelem
+
+hooks/
+  use-media-query.ts    useMediaQuery + a szerkesztő töréspontjai (EDITOR_NARROW = 1050 px, EDITOR_PHONE = 760 px) – egyezniük kell az app/globals.css média-lekérdezéseivel
 
 lib/                    43 üzleti logika / utility modul
   plan.ts               Plan schema (Zod), seed terv, validatePlan()
@@ -477,6 +481,7 @@ Az `/admin` oldal csak akkor érhető el, ha a bejelentkezett user `userId`-ja e
 - `tests/kb-diagram.ts` – rajz = netlista: a kirajzolt SVG-ből visszaolvasva (erek, kapcsok, színek, feliratok, csomópontok, keresztezések, érintkezők, átfedés, olvashatóság ≥ 10 px, kontraszt), Működés = szimuláció mind a 208 állásban, figura (nézetváltó, aria-pressed, aria-live, táblák), ábra-ujjlenyomat; mutációs próba (819): `node --no-warnings --import tsx tests/kb-diagram.ts`
 - `tests/kb-semak.ts` – Sémák: sablonok szimulált jóváhagyással (gyűjtő- és részletoldal), csak a közzétett cikk ábrája generálódik, kapu (ábra-/szimbólummódosítás → újraellenőrzendő, belső rekord R3-ra nem), R3-ellenőrzés mutációs próbával; valós állapot: 0 közzétett séma: `node --no-warnings --import tsx tests/kb-semak.ts`
 - `tests/quiz.ts` – Tesztek: sablononként 10 000 seedes tulajdonságteszt (helyes = `runCalc`, a tévesztők egyediek, ≥ 5 % eltérés, növekvő sorrend, magyar számformátum; a helyes válasz helye A–D egyenként 10–50 %, számolás nélküli stratégia ≤ 40 %, egyedüli ikerpár nincs; valószerű paramétertér), motor-determinizmus, témakvóta (legnagyobb maradék), ismétlésmentesség, `w = h · r`, tesztkód oda-vissza (URL-lel), kapu (a T1-sablon rejtve, levezetve a kalkulátorkapuból; bank rejtve 150 alatt – mutációs próba ideiglenes másolaton, a valódi jóváhagyásoktól függetlenül), kérdésbank-séma a `content/tudastar/kerdesek/*.json`-ra (ha még nincs fájl, nem bukik), szivárgásőr a build bemeneteire, azonosítójegyzék (csak bővülhet), lektori CSV oda-vissza (UTF-8, Windows-1250, UTF-16LE), tárolás, tiltott kifejezések: `node --no-warnings --import tsx tests/quiz.ts`
+- `tests/planner-layout.mjs` – build utáni böngészős (Playwright) elrendezési teszt a tervezőhöz, 16 ablakméreten (1920×1080 … 360×740, érintéssel is): a dokumentum soha nem görög (minden nézetben, az Elosztó „Bekötések” után is), 1050 px-ig a tulajdonságpanel nem nyílik meg magától (kijelölési címke + kapcsoló, Escape/Delete/szint- és fülváltás zárja, töréspontváltáskor zárva), a nyitott panel nem takarja a füleket/eszköztárat (táblagépen a vászon tetejétől, telefonon alsó lap), a fülek nem lógnak rá az eszköztárra, 1051 px-től a dokkolt panel változatlan, sötét mód, szellemkattintás, fókusz: `BASE=http://127.0.0.1:8787 node tests/planner-layout.mjs` (helyi preview + D1-migrációk kellenek; eldobható fiókot regisztrál; `SIZES=1024x768,390x844`, `JOBS`, `SHOTS`)
 - `tests/catalog-api.ts` – `/api/catalog` route-teszt memóriabeli SQLite-on: `node_modules/.bin/esbuild tests/catalog-api.ts --bundle --platform=node --format=esm --external:mysql2 --alias:cloudflare:workers=./db/node-env.ts --outfile=.sites-runtime/catalog-api.mjs && env -u MYSQL_URL node --no-warnings .sites-runtime/catalog-api.mjs`
 - Unit tesztek nincsenek; a `validatePlan()` (`lib/plan.ts`) az elsődleges validációs pont
 
