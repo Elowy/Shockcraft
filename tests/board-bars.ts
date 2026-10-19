@@ -16,6 +16,22 @@ const wire=(id:string,from:Endpoint,to:Endpoint)=>({id,name:id,building:'house',
 const has=(wires:Plan['boardWires'],a:Endpoint,z:Endpoint)=>wires.some(w=>endpointKey(w.from)===endpointKey(a)&&endpointKey(w.to)===endpointKey(z)||endpointKey(w.from)===endpointKey(z)&&endpointKey(w.to)===endpointKey(a));
 const touches=(wires:Plan['boardWires'],e:Endpoint)=>wires.filter(w=>[w.from,w.to].some(x=>endpointKey(x)===endpointKey(e)));
 const viaBar=(wires:Plan['boardWires'],e:Endpoint,bar:string)=>touches(wires,e).filter(w=>[w.from,w.to].some(x=>x.kind==='bar'&&x.id===bar)).length===1&&touches(wires,e).length===1;
+// Független előírás (nem a megvalósítás szabálya): az automatikus fogyasztóval (áramkör N, ÁVK / RCBO N-bemenet, SPD N) terhelt N-sín hálózatába – a kézi és az automatikus vezetékek, a nullasín-modul / leágazó / sorkapocs
+// N-csomópontján át is – csak a sín saját betápláló N-kimenete tartozhat: az ÁVK sínjébe kizárólag a saját ÁVK-ja (mindenképp, tehát gyökér nélküli nullasín-modul nem elég), a főnullasínba legfeljebb egy főkapcsoló és soha ÁVK.
+// Így nem kerül áramkör N-je másik ÁVK nullájára, és nem kerüli meg a saját ÁVK-ját (az ÁVK N-bemenete pedig nem a saját N-kimenetének hálózatára).
+function feedOracle(q:Plan,autoWires:Plan['boardWires']){
+ const parent=new Map<string,string>(),ends=new Map<string,Endpoint>(),find=(x:string):string=>{let r=x;while(parent.get(r)!==r)r=parent.get(r)!;return r};
+ const node=(e:Endpoint)=>{const mod=e.kind==='module'?q.modules.find(x=>x.id===e.id):undefined;return e.kind==='bar'?'bar:'+e.id:mod&&['NEUTRAL','DISTRIBUTION','TERMINAL'].includes(mod.type)&&e.port.startsWith('N')?'node:'+e.id:'port:'+endpointKey(e)};
+ for(const w of q.boardWires)for(const e of [w.from,w.to]){const n=node(e);if(!parent.has(n))parent.set(n,n);ends.set(endpointKey(e),e)}
+ for(const w of q.boardWires)parent.set(find(node(w.from)),find(node(w.to)));
+ const sourcesOf=(barId:string)=>[...ends.values()].filter(e=>e.kind==='module'&&e.port==='N-out'&&find(node(e))===find('bar:'+barId)&&['MAIN','RCD'].includes(q.modules.find(x=>x.id===e.id)!.type)).map(e=>e.id);
+ for(const w of autoWires){
+  const be=[w.from,w.to].find(e=>e.kind==='bar'&&/^(n|rcd):/.test(e.id)),o=be&&(be===w.from?w.to:w.from);if(!be||!o||(o.kind==='module'&&o.port==='N-out'))continue;
+  const src=sourcesOf(be.id);
+  if(be.id.startsWith('rcd:'))assert.deepEqual(src,[be.id.slice(4)],`az ÁVK sínjét (${be.id}) csak a saját ÁVK-ja táplálhatja (${w.id})`);
+  else{assert.ok(src.length<=1,`a főnullasínt (${be.id}) legfeljebb egy forrás táplálja (${w.id})`);assert.ok(src.every(id=>q.modules.find(x=>x.id===id)!.type==='MAIN'),`a főnullasínt (${be.id}) ÁVK nem táplálhatja (${w.id})`)}
+ }
+}
 // Minden forgatókönyvben: a kézi + az automatikus vezetékek együtt érvényesek; nincs L-vezeték, N–PE kötés, sín–sín kötés; egyedi azonosítók és sínkapcsok.
 function invariants(p:Plan,buildingId='house',boardId=''){
  const auto=autoBoardWires(p,buildingId,boardId),q=structuredClone(p);q.boardWires=[...p.boardWires,...auto.wires];
@@ -33,6 +49,7 @@ function invariants(p:Plan,buildingId='house',boardId=''){
   if(bar.kind==='rcd')assert.ok(feeders.every(w=>[w.from,w.to].some(e=>e.kind==='module'&&e.id===bar.rcdId)),'az ÁVK sínjét idegen N-kimenet nem táplálja');
  }
  const used=auto.wires.flatMap(w=>[w.from,w.to]).filter(e=>e.kind==='bar').map(endpointKey);
+ feedOracle(q,auto.wires);
  assert.equal(new Set(used).size,used.length,'minden automatikus vezeték saját sínkapcsot kap');
  assert.deepEqual(auto,autoBoardWires(p,buildingId,boardId),'determinisztikus');
  return auto;
@@ -454,11 +471,15 @@ function boards3(p:Plan){return `main ${autoBarsOn(p.buildings[0],'')?'on':'off'
   const a2=invariants(p);assert.equal(touches(a2.wires,m('spd','N')).length,0);assert.equal(touches(a2.wires,m('q4','N-in')).length,0);assert.ok(has(a2.wires,m('spd','PE'),b('pe:house/','T1')));assert.ok(has(a2.wires,c('c4','N'),m('q4','N-out')),'az RCBO saját N-je nem sínre megy');
   assert.deepEqual(a2.warnings.map(w=>w.replace(/^[^:]+/,'')).sort(),[unfedWarn('','N-sín','Főkapcsoló','N-szál'),unfedWarn('','N-sín','Főkapcsoló','N-bemenet'),unfedWarn('','N-sín','Főkapcsoló','N-kapocs')].sort());
   assert.ok(a2.warnings.some(w=>w.startsWith('spd: ')&&w.endsWith('N-kapocs automatikus bekötése kimarad.')))}
- // (c) az ÁVK N-kimenete kézzel a főnullasínre kötve: az ÁVK-sín nem táplált, mögötte az áramkörök N-je bekötetlen
+ // (c) az ÁVK N-kimenete kézzel a főnullasínre kötve: az ÁVK-sín nem táplált (mögötte az áramkörök N-je bekötetlen), a főnullasínt pedig két forrás (a főkapcsoló és az ÁVK) táplálja:
+ // az automatikus bekötés a főnullasínt nem táplálja és fogyasztót (ÁVK N-bemenet) sem köt rá
  {const p=base();p.boardWires.push(wire('x',m('m1','N-out'),b('n:house/','T5')));validatePlan(p);
   const a=invariants(p);assert.deepEqual(['c1','c2','c3'].map(id=>touches(a.wires,c(id,'N')).length),[0,0,0]);
-  assert.deepEqual(a.warnings,[unfedWarn('Nappali dugaljak','N-sín · FI-01','FI-01','N-szál'),unfedWarn('Hálószoba dugaljak','N-sín · FI-01','FI-01','N-szál'),unfedWarn('Világítás','N-sín · FI-01','FI-01','N-szál')]);
-  assert.ok(has(a.wires,m('m0','N-out'),b('n:house/','T1')),'a főnullasín táplált');assert.ok(a.wires.every(w=>!w.id.startsWith('auto:m1:N-out')),'a kézi vezetékű N-kimenetre nincs automatikus')}
+  assert.deepEqual(a.warnings,['N-sín: két forrásról kap betáplálást (Főkapcsoló, FI-01); az automatikus bekötés nem táplálja, és nem köt rá fogyasztót.',
+   'FI-01 · 40 A / 30 mA · A: a(z) N-sín két forrásról kap betáplálást (Főkapcsoló, FI-01), ezért az N-bemenet automatikus bekötése kimarad.',
+   unfedWarn('Nappali dugaljak','N-sín · FI-01','FI-01','N-szál'),unfedWarn('Hálószoba dugaljak','N-sín · FI-01','FI-01','N-szál'),unfedWarn('Világítás','N-sín · FI-01','FI-01','N-szál')]);
+  assert.equal(touches(a.wires,m('m0','N-out')).length,0,'a kétforrású főnullasínt a főkapcsoló automatikusan nem táplálja');assert.equal(touches(a.wires,m('m1','N-in')).length,0);
+  assert.ok(a.wires.every(w=>!w.id.startsWith('auto:m1:N-out')),'a kézi vezetékű N-kimenetre nincs automatikus')}
  // (d) a sín kézzel közvetlenül az ÁVK N-kimenetéről táplált (a kézi betáplálás): táplált sín, a fogyasztók rákerülnek, a kézi kapocs szabad marad
  {const p=base();p.boardWires.push(wire('x',m('m1','N-out'),b('rcd:m1','T1')));validatePlan(p);
   const a=invariants(p);assert.deepEqual(a.warnings,[]);assert.ok(['c1','c2','c3'].every((id,i)=>has(a.wires,c(id,'N'),b('rcd:m1','T'+(i+2)))));
@@ -479,4 +500,257 @@ function boards3(p:Plan){return `main ${autoBarsOn(p.buildings[0],'')?'on':'off'
  assert.deepEqual(invariants(base()).warnings,[]);
  {const p=base();p.buildings[0].board={rows:4,modulesPerRow:18,autoBars:false};p.boardWires.push(wire('x',m('m1','N-out'),b('n:house/','T5')));validatePlan(p);assert.deepEqual(autoBoardWires(p,'house',''),{wires:[],warnings:[]})}
 }
-console.log('PASS: tokozati sínek elosztónként (üres elosztó nélkül), ÁVK-csoport (bekötés – áthidalás, kismegszakítón és fázissínen át is, RCBO mögött – → szöveg → figyelmeztetés; ellentmondás), RCBO, betápláló készülékek (több főkapcsoló, kaszkádolt ÁVK), nem táplált sín, kézi felülírás és sínkapocs-kihagyás, elosztónkénti kapcsoló, terminálszám, törlés/tisztítás, szerkezetmásolás, séma és megosztás.');
+// 17) Az áramkör saját L-szálának kézi vezetéke is bizonyíték (a betápláló védelem nincs az áramkörhöz rendelve): kimenő sorkapocs, közvetlenül az ÁVK / főkapcsoló L-kimenete, fázissín, idegen RCBO mögül; az áramkör saját RCBO-ja átvezet.
+{
+ const g=(p:Plan,id='c9')=>rcdGroup(p,p.circuits.find(x=>x.id===id)!);
+ const conflict=/^A\(z\) „FI-01” ÁVK-csoport ellentmond a bekötésnek \(a védelem a főkapcsolóról kap betáplálást\)\.$/;
+ const setup=(text:string,extra:Partial<Plan['circuits'][number]>={})=>{const p=base();add(p,'f2','RCD',1,8,4,{name:'FI-02 · 25 A'});circuit(p,'c9',{rcd:text,...extra});return p};
+ // (a) c9 L → X1 L-2; X1 L-1 ← Q9 (hozzárendeletlen kismegszakító) L-out; Q9 L-in ← FI-01 L1-out: a szöveg (üres vagy másik ÁVK) nem számít
+ for(const text of ['','FI-02','FI-01']){
+  const p=setup(text);add(p,'q9','MCB',1,0,1);add(p,'x1','TERMINAL',1,2,2);
+  p.boardWires.push(wire('w1',m('m1','L1-out'),m('q9','L-in')),wire('w2',m('q9','L-out'),m('x1','L-1')),wire('w3',m('x1','L-2'),c('c9','L')));validatePlan(p);
+  assert.equal(p.modules.find(x=>x.id==='q9')!.circuit,'','a kismegszakító valóban hozzárendeletlen');
+  assert.deepEqual(g(p),{status:'rcd',rcdId:'m1'},'szöveg: '+JSON.stringify(text));
+  const a=invariants(p);assert.ok(viaBar(a.wires,c('c9','N'),'rcd:m1'),'az N a bekötés szerinti ÁVK sínjére kerül');assert.deepEqual(a.warnings,[]);
+ }
+ // (b) ugyanez a főkapcsolóról: nincs ÁVK a védelem előtt → főnullasín; ÁVK-t megnevező szöveg = ellentmondás
+ {const p=setup('');add(p,'q9','MCB',1,0,1);add(p,'x1','TERMINAL',1,2,2);
+  p.boardWires.push(wire('w1',m('m0','L1-out'),m('q9','L-in')),wire('w2',m('q9','L-out'),m('x1','L-1')),wire('w3',m('x1','L-2'),c('c9','L')));validatePlan(p);
+  assert.deepEqual(g(p),{status:'none'});assert.ok(viaBar(invariants(p).wires,c('c9','N'),'n:house/'));
+  p.circuits.find(x=>x.id==='c9')!.rcd='FI-01';assert.equal(g(p).status,'unresolved');assert.match(g(p).reason!,conflict);
+  {const a=invariants(p);assert.equal(touches(a.wires,c('c9','N')).length,0);assert.ok(a.wires.some(w=>w.id==='auto:c9:PE'));assert.equal(a.warnings.length,1);assert.match(a.warnings[0],/^c9: A\(z\) „FI-01” ÁVK-csoport ellentmond a bekötésnek.* Az N-szál automatikus bekötése kimarad\.$/)}}
+ // (c) az áramkör L-je közvetlenül az ÁVK / a főkapcsoló L-kimenetén
+ for(const text of ['','FI-02','FI-77']){const p=setup(text);p.boardWires.push(wire('w',m('m1','L1-out'),c('c9','L')));validatePlan(p);
+  assert.deepEqual(g(p),{status:'rcd',rcdId:'m1'},'szöveg: '+JSON.stringify(text));assert.ok(viaBar(invariants(p).wires,c('c9','N'),'rcd:m1'))}
+ {const p=setup('');p.boardWires.push(wire('w',m('m0','L1-out'),c('c9','L')));validatePlan(p);assert.deepEqual(g(p),{status:'none'});assert.ok(viaBar(invariants(p).wires,c('c9','N'),'n:house/'));
+  p.circuits.find(x=>x.id==='c9')!.rcd='FI-01';assert.match(g(p).reason!,conflict);assert.equal(touches(invariants(p).wires,c('c9','N')).length,0)}
+ // (d) fázissínen át: ÁVK → fázissín → áramkör L
+ for(const text of ['','FI-02']){const p=setup(text);add(p,'bb','BUSBAR',2,0,4);p.boardWires.push(wire('a',m('m1','L1-out'),m('bb','L-1')),wire('z',m('bb','L-2'),c('c9','L')));validatePlan(p);
+  assert.deepEqual(g(p),{status:'rcd',rcdId:'m1'},'szöveg: '+JSON.stringify(text));assert.ok(viaBar(invariants(p).wires,c('c9','N'),'rcd:m1'))}
+ // (e) idegen RCBO L-kimenete mögül (fázissínen át): nem azonosítható; közvetlenül az idegen RCBO-ra kötni a validáció szerint sem lehet
+ {const p=setup('');circuit(p,'c4');add(p,'q4','RCBO',1,0,2,{circuit:'c4'});add(p,'bb','BUSBAR',2,0,4);p.boardWires.push(wire('a',m('q4','L-out'),m('bb','L-1')),wire('z',m('bb','L-2'),c('c9','L')));validatePlan(p);
+  assert.deepEqual(g(p),{status:'unresolved',reason:'A(z) „c9” áramkör védelmi készüléke egy RCBO (q4) mögül kap betáplálást.'});
+  const a=invariants(p);assert.equal(touches(a.wires,c('c9','N')).length,0);assert.ok(a.wires.some(w=>w.id==='auto:c9:PE'));assert.ok(has(a.wires,c('c4','N'),m('q4','N-out')),'az RCBO saját áramköre változatlan');assert.equal(a.warnings.length,1);
+  const d=setup('');circuit(d,'c4');add(d,'q4','RCBO',1,0,2,{circuit:'c4'});d.boardWires.push(wire('x',m('q4','L-out'),c('c9','L')));assert.throws(()=>validatePlan(d),/áramkör-hozzárendelése eltér/)}
+ // (f) az áramkör saját RCBO-ja átvezet: c4 L ← q4 L-out, q4 L-in ← FI-01; a saját RCBO nem „idegen RCBO”
+ for(const text of ['','FI-02']){const p=setup('');circuit(p,'c4',{rcd:text});add(p,'q4','RCBO',1,0,2,{circuit:'c4'});p.boardWires.push(wire('a',m('m1','L1-out'),m('q4','L-in')),wire('z',m('q4','L-out'),c('c4','L')));validatePlan(p);
+  assert.deepEqual(g(p,'c4'),{status:'rcd',rcdId:'m1'},'szöveg: '+JSON.stringify(text));const a=invariants(p);assert.ok(has(a.wires,c('c4','N'),m('q4','N-out')));assert.ok(viaBar(a.wires,m('q4','N-in'),'rcd:m1'));assert.deepEqual(a.warnings,[])}
+ // (g) háromfázisú áramkör: az L1 az ÁVK-ról, az L2 a főkapcsolóról → ellentmondó betáplálás
+ {const p=setup('',{phase:'3P'});p.boardWires.push(wire('a',m('m1','L1-out'),c('c9','L1')),wire('z',m('m0','L2-out'),c('c9','L2')));validatePlan(p);
+  assert.deepEqual(g(p),{status:'unresolved',reason:'A(z) „c9” áramkör védelmi készüléke az ÁVK-ból és a főkapcsolóról is kap betáplálást.'});assert.equal(touches(invariants(p).wires,c('c9','N')).length,0);
+  p.boardWires=[wire('a',m('m1','L1-out'),c('c9','L1')),wire('z',m('m1','L2-out'),c('c9','L2'))];validatePlan(p);assert.deepEqual(g(p),{status:'rcd',rcdId:'m1'})}
+ // (h) az N- és PE-szál vezetéke nem betáplálás: a szöveg dönt
+ {const p=setup('FI-01');add(p,'nm','NEUTRAL',1,0,4);p.boardWires.push(wire('n',c('c9','N'),m('nm','N1')));validatePlan(p);assert.deepEqual(g(p),{status:'rcd',rcdId:'m1'})}
+}
+
+// 18) Többször táplált sín: a kézzel rákötött második betápláló (főkapcsoló vagy ÁVK N-kimenete, nullasín-modul, sorkapcson / leágazón át is) esetén az automatikus bekötés a sínt nem táplálja,
+// fogyasztót sem köt rá, és figyelmeztet; a fogyasztói út (áramkör N → sorkapocs → sín) nem betáplálás.
+{
+ const two=(bar:string,names:string)=>`${bar}: két forrásról kap betáplálást (${names}); az automatikus bekötés nem táplálja, és nem köt rá fogyasztót.`;
+ const onBarAuto=(a:ReturnType<typeof autoBoardWires>,bar:string)=>a.wires.filter(w=>[w.from,w.to].some(e=>e.kind==='bar'&&e.id===bar));
+ // (a) FI-02 N-kimenete kézzel FI-01 N-sínjére (a természetes betápláló az automatikus bekötéssel is táplálná volna)
+ {const p=base();add(p,'f2','RCD',1,0,4,{name:'FI-02'});p.boardWires.push(wire('w',m('f2','N-out'),b('rcd:m1','T1')));validatePlan(p);
+  const a=invariants(p);assert.equal(onBarAuto(a,'rcd:m1').length,0,'a kétforrású sínre semmi automatikus nem kerül');assert.equal(touches(a.wires,m('m1','N-out')).length,0);
+  assert.equal(a.warnings[0],two('N-sín · FI-01','FI-01, FI-02'));assert.equal(a.warnings.length,4);
+  assert.deepEqual(a.warnings.slice(1),['Nappali dugaljak','Hálószoba dugaljak','Világítás'].map(n=>`${n}: a(z) N-sín · FI-01 két forrásról kap betáplálást (FI-01, FI-02), ezért az N-szál automatikus bekötése kimarad.`));
+  assert.ok(viaBar(a.wires,m('f2','N-in'),'n:house/'),'a többi sín változatlan');assert.ok(['c1','c2','c3'].every(id=>a.wires.some(w=>w.id==='auto:'+id+':PE')),'a PE ettől még bekötve');
+  assert.equal(buildSchematic(p,'house','multi').warnings.length,4,'a rajz ugyanazt a figyelmeztetést mutatja');
+  // ha a másik betáplálót eltávolítják, a sín újra rendben van
+  p.boardWires=[];assert.deepEqual(invariants(p).warnings,[])}
+ // (b) mindkét betáplálás kézi: FI-01 saját N-kimenete (a természetes betápláló) és FI-02 is ugyanarra a sínre
+ {const p=base();add(p,'f2','RCD',1,0,4,{name:'FI-02'});p.boardWires.push(wire('w1',m('m1','N-out'),b('rcd:m1','T1')),wire('w2',m('f2','N-out'),b('rcd:m1','T2')));validatePlan(p);
+  const a=invariants(p);assert.equal(onBarAuto(a,'rcd:m1').length,0);assert.equal(a.warnings[0],two('N-sín · FI-01','FI-01, FI-02'));assert.equal(a.warnings.length,4)}
+ // (c) a második főkapcsoló N-kimenete kézzel a főnullasínre: a főnullasín kétforrású
+ {const p=base();add(p,'main2','MAIN',2,0,4);p.boardWires.push(wire('w',m('main2','N-out'),b('n:house/','T1')));validatePlan(p);
+  const a=invariants(p);assert.equal(onBarAuto(a,'n:house/').length,0,'a főnullasínre sem betápláló, sem fogyasztó nem kerül');assert.equal(a.warnings[0],two('N-sín','Főkapcsoló, main2'));
+  assert.ok(a.warnings.some(w=>/^FI-01 · 40 A \/ 30 mA · A: a\(z\) N-sín két forrásról kap betáplálást .*N-bemenet automatikus bekötése kimarad\.$/.test(w)));
+  assert.ok(viaBar(a.wires,m('m1','N-out'),'rcd:m1'),'az ÁVK sínje változatlan');assert.ok(a.wires.some(w=>w.id==='auto:c1:N'))}
+ // (d) a második betápláló sorkapcson, illetve leágazón át: FI-02 N-out → X N-1; X N-2 → FI-01 sín
+ for(const [type,a1,a2] of [['TERMINAL','N-1','N-2'],['DISTRIBUTION','N-1','N-3']] as const){
+  const p=base();add(p,'f2','RCD',1,0,4,{name:'FI-02'});add(p,'x',type,2,0,4);p.boardWires.push(wire('a',m('f2','N-out'),m('x',a1)),wire('z',m('x',a2),b('rcd:m1','T1')));validatePlan(p);
+  const a=invariants(p);assert.equal(onBarAuto(a,'rcd:m1').length,0,type);assert.equal(a.warnings[0],two('N-sín · FI-01','FI-01, FI-02'),type)}
+ // (e) betáplálás sorkapcson / leágazón át, egyetlen forrás: FI-01 N-out → X N-1; X N-2 → saját sín: táplált, a fogyasztók rákerülnek, nincs figyelmeztetés
+ for(const [type,a1,a2] of [['TERMINAL','N-1','N-2'],['DISTRIBUTION','N-1','N-3']] as const){
+  const p=base();add(p,'x',type,2,0,4);p.boardWires.push(wire('a',m('m1','N-out'),m('x',a1)),wire('z',m('x',a2),b('rcd:m1','T1')));validatePlan(p);
+  const a=invariants(p);assert.deepEqual(a.warnings,[],type);assert.ok(['c1','c2','c3'].every((id,i)=>has(a.wires,c(id,'N'),b('rcd:m1','T'+(i+2)))),type)}
+ // (f) fogyasztói út nem betáplálás: c1 N → sorkapocs N-1; sorkapocs N-2 → FI-01 sín; FI-01 N-out kézzel máshová → a sín nem táplált, c2/c3 N-je nem kerül rá
+ for(const [type,a1,a2] of [['TERMINAL','N-1','N-2'],['DISTRIBUTION','N-1','N-3']] as const){
+  const p=base();add(p,'x',type,2,0,4);add(p,'nm','NEUTRAL',3,0,4);p.boardWires.push(wire('o',m('m1','N-out'),m('nm','N1')),wire('a',c('c1','N'),m('x',a1)),wire('z',m('x',a2),b('rcd:m1','T1')));validatePlan(p);
+  const a=invariants(p);assert.equal(onBarAuto(a,'rcd:m1').length,0,type);
+  assert.deepEqual(a.warnings,[unfed('Hálószoba dugaljak'),unfed('Világítás')],type);
+  // ha a sín fogyasztói útja mellett igazi betápláló is van (a nullasín-modul a sínre kötve), táplált
+  const q=structuredClone(p);q.boardWires.push(wire('y',m('nm','N2'),b('rcd:m1','T2')));validatePlan(q);assert.deepEqual(invariants(q).warnings,[],type)}
+ function unfed(name:string){return `${name}: a(z) N-sín · FI-01 nem kap betáplálást (a(z) FI-01 N-kimenete kézzel máshová van kötve), ezért az N-szál automatikus bekötése kimarad.`}
+ // (g) a gyökér nélküli (régi, DIN-es) nullasín-modul csak a főnullasínnek lehet saját betáplálója; az ÁVK sínjét csak a saját ÁVK-ja táplálhatja: c1 N → nm N1, nm N2 → FI-01 sín, FI-01 N-kimenete kézzel másik nullasínre kötve
+ // → a sín idegen forrásról (nm) kap betáplálást, c2/c3 N-je nem kerül rá (a nullája nem az ÁVK-n át jönne); ha a nullasín-modul az ÁVK N-kimenetéről kap betáplálást (másik nullasínen át is), a sín táplált (a 25) idegen forrás-esetek külön)
+ {const p=base();add(p,'nm','NEUTRAL',1,0,4);add(p,'nm2','NEUTRAL',2,0,4);p.boardWires.push(wire('o',m('m1','N-out'),m('nm2','N1')),wire('a',c('c1','N'),m('nm','N1')),wire('z',m('nm','N2'),b('rcd:m1','T1')));validatePlan(p);
+  const a=invariants(p);assert.equal(onBarAuto(a,'rcd:m1').length,0);assert.equal(touches(a.wires,c('c2','N')).length,0);assert.equal(touches(a.wires,c('c3','N')).length,0);
+  assert.equal(a.warnings[0],'N-sín · FI-01: idegen forrásról kap betáplálást (nm); az automatikus bekötés nem táplálja, és nem köt rá fogyasztót.');assert.equal(a.warnings.length,3);
+  const q=structuredClone(p);q.boardWires.push(wire('l',m('nm2','N2'),m('nm','N3')));validatePlan(q);
+  const a2=invariants(q);assert.deepEqual(a2.warnings,[]);assert.ok(viaBar(a2.wires,c('c2','N'),'rcd:m1')&&viaBar(a2.wires,c('c3','N'),'rcd:m1'),'az ÁVK-ról betáplált nullasín-modul a sínt táplálttá teszi')}
+ // (h) kétforrású sín kapcsolója: autoBars:false → semmi; az alapeset (egy forrás) változatlan
+ assert.deepEqual(invariants(base()).warnings,[]);
+}
+
+// 19) RCBO-s áramkör ÁVK-csoport szövege: az RCBO saját neve (teljes vagy a „ · ” előtti rész) vagy „RCBO” nem ÁVK-csoport (mint az üres szöveg), nincs figyelmeztetés.
+{
+ const mk=(text:string,extra:Partial<Plan['modules'][number]>={})=>{const p=base();circuit(p,'c9',{rcd:text});add(p,'q9','RCBO',1,0,2,{circuit:'c9',name:'Q9 · 16 A / 30 mA',...extra});validatePlan(p);return p};
+ const g=(p:Plan)=>rcdGroup(p,p.circuits.find(x=>x.id==='c9')!);
+ for(const text of ['Q9','q9 · 16 a / 30 ma',' q9 ','RCBO','rcbo','']){
+  const p=mk(text);assert.deepEqual(g(p),{status:'none'},JSON.stringify(text));const a=invariants(p);assert.deepEqual(a.warnings,[],JSON.stringify(text));
+  assert.ok(viaBar(a.wires,m('q9','N-in'),'n:house/'),'az RCBO N-bemenete a főnullasínről');assert.ok(has(a.wires,c('c9','N'),m('q9','N-out')));assert.ok(viaBar(a.wires,c('c9','PE'),'pe:house/'));
+ }
+ // más szöveg: továbbra is „nem található”, és az RCBO N-bemenete kimarad
+ {const p=mk('FI-99');assert.deepEqual(g(p),{status:'unresolved',reason:'A(z) „FI-99” ÁVK-csoport nem található ebben az elosztóban.'});assert.equal(touches(invariants(p).wires,m('q9','N-in')).length,0)}
+ // az ÁVK neve előnyben: ha a szöveg egy ÁVK-ra is illik, az ÁVK a csoport
+ {const p=mk('FI-01',{name:'FI-01 · RCBO'});assert.deepEqual(g(p),{status:'rcd',rcdId:'m1'});assert.ok(viaBar(invariants(p).wires,m('q9','N-in'),'rcd:m1'))}
+ // a szabály csak az áramkör saját RCBO-jára vonatkozik: kismegszakítós áramkör vagy másik áramkör RCBO-ja → nem található
+ {const p=base();circuit(p,'c9',{rcd:'RCBO'});add(p,'q9','MCB',1,0,1,{circuit:'c9'});assert.equal(g(p).status,'unresolved');
+  const q=base();circuit(q,'c9',{rcd:'Q10'});add(q,'q9','MCB',1,0,1,{circuit:'c9'});circuit(q,'c10');add(q,'q10','RCBO',1,2,2,{circuit:'c10',name:'Q10'});assert.equal(g(q).status,'unresolved');
+  const r=base();circuit(r,'c9',{rcd:'Q9'});add(r,'q9','RCBO',1,0,2,{circuit:'c9',board:'sub'});r.buildings[0].extraBoards=[{id:'sub',name:'Alelosztó',rows:2,modulesPerRow:6}];assert.equal(g(r).status,'unresolved','másik elosztó RCBO-ja nem számít')}
+ // a bekötés a szövegnél erősebb marad: az RCBO az ÁVK L-kimenetéről táplált
+ {const p=mk('RCBO');p.boardWires.push(wire('e',m('m1','L1-out'),m('q9','L-in')));validatePlan(p);assert.deepEqual(g(p),{status:'rcd',rcdId:'m1'});assert.ok(viaBar(invariants(p).wires,m('q9','N-in'),'rcd:m1'))}
+}
+
+// 20) SPD: az N-kapocs ugyanúgy az L-oldali betáplálás szerinti sínre kerül, mint az ÁVK N-bemenete (egyetlen ÁVK mögött az ÁVK sínje, főkapcsolóról vagy betáplálás nélkül a főnullasín); nem egyértelmű vagy RCBO mögötti SPD: figyelmeztetés.
+{
+ const spd=(wires:Plan['boardWires'],setup?:(p:Plan)=>void)=>{const p=base();add(p,'spd','SPD',1,0,4);setup?.(p);p.boardWires.push(...wires);validatePlan(p);return p};
+ // nincs bekötés: főnullasín (változatlan)
+ {const a=invariants(spd([]));assert.ok(viaBar(a.wires,m('spd','N'),'n:house/'));assert.ok(viaBar(a.wires,m('spd','PE'),'pe:house/'));assert.deepEqual(a.warnings,[])}
+ // egyetlen ÁVK mögött (közvetlenül, áthidalással is): az ÁVK N-sínje
+ for(const w of [[wire('sw1',m('m1','L1-out'),m('spd','L1'))],[wire('sw1',m('m1','L1-out'),m('m2','L-in')),wire('sw2',m('m2','L-in'),m('spd','L1'))]]){
+  const a=invariants(spd(w));assert.ok(viaBar(a.wires,m('spd','N'),'rcd:m1'));assert.ok(viaBar(a.wires,m('spd','PE'),'pe:house/'));assert.deepEqual(a.warnings,[]);
+  assert.equal(a.wires.find(x=>x.id==='auto:spd:N')!.name,'N · spd → N-sín · FI-01')}
+ // főkapcsolóról
+ {const a=invariants(spd([wire('sw1',m('m0','L1-out'),m('spd','L1'))]));assert.ok(viaBar(a.wires,m('spd','N'),'n:house/'));assert.deepEqual(a.warnings,[])}
+ // RCBO mögött: nincs N-vezeték (a PE igen), figyelmeztetés
+ {const a=invariants(spd([wire('sw1',m('q4','L-out'),m('spd','L1'))],p=>{circuit(p,'c4');add(p,'q4','RCBO',1,4,2,{circuit:'c4'})}));
+  assert.equal(touches(a.wires,m('spd','N')).length,0);assert.ok(viaBar(a.wires,m('spd','PE'),'pe:house/'));assert.deepEqual(a.warnings,['spd: az SPD egy RCBO mögül kap betáplálást, ezért az N-kapocs automatikus bekötése kimarad.'])}
+ // két ÁVK-ról / ÁVK-ról és főkapcsolóról: nem egyértelmű
+ for(const second of [m('f2','L2-out'),m('m0','L2-out')]){
+  const a=invariants(spd([wire('sw1',m('m1','L1-out'),m('spd','L1')),wire('sw2',second,m('spd','L2'))],p=>add(p,'f2','RCD',2,0,4,{name:'FI-02'})));
+  assert.equal(touches(a.wires,m('spd','N')).length,0);assert.ok(viaBar(a.wires,m('spd','PE'),'pe:house/'));assert.equal(a.warnings.length,1);assert.match(a.warnings[0],/^spd: az SPD L-oldali betáplálása nem egyértelmű/)}
+ // kézi N-vezeték felülír
+ {const a=invariants(spd([wire('sw1',m('m1','L1-out'),m('spd','L1')),wire('sw2',m('spd','N'),b('n:house/','T5'))]));assert.equal(touches(a.wires,m('spd','N')).length,0)}
+}
+
+// 21) A fázissín mellett a leágazó és a sorkapocs is átvezet a betáplálás követésében (üres vagy téves szöveggel is, tehát csak a bekötés dönt).
+{
+ const g=(p:Plan,id='c4')=>rcdGroup(p,p.circuits.find(x=>x.id===id)!);
+ for(const text of ['','FI-77']){
+  // sorkapocs: FI-01 → X L-1; X L-2 → Q4
+  const t=base();circuit(t,'c4',{rcd:text});add(t,'q4','MCB',1,4,1,{circuit:'c4'});add(t,'tk','TERMINAL',1,0,2);t.boardWires.push(wire('a',m('m1','L1-out'),m('tk','L-1')),wire('z',m('tk','L-2'),m('q4','L-in')));validatePlan(t);
+  assert.deepEqual(g(t),{status:'rcd',rcdId:'m1'},'sorkapocs, szöveg: '+JSON.stringify(text));assert.ok(viaBar(invariants(t).wires,c('c4','N'),'rcd:m1'));
+  // leágazó: FI-01 → D L1-1; D L1-2 → Q4
+  const d=base();circuit(d,'c4',{rcd:text});add(d,'q4','MCB',1,4,1,{circuit:'c4'});add(d,'dist','DISTRIBUTION',1,0,4);d.boardWires.push(wire('a',m('m1','L1-out'),m('dist','L1-1')),wire('z',m('dist','L1-2'),m('q4','L-in')));validatePlan(d);
+  assert.deepEqual(g(d),{status:'rcd',rcdId:'m1'},'leágazó, szöveg: '+JSON.stringify(text));assert.ok(viaBar(invariants(d).wires,c('c4','N'),'rcd:m1'));
+ }
+ // főkapcsolóról + ÁVK-t megnevező szöveg = ellentmondás (csak a csomóponton át látszik): sorkapocs és leágazó (az L2 csomópont, az L2 fázisú áramkörrel)
+ {const t=base();circuit(t,'c4',{rcd:'FI-01'});add(t,'q4','MCB',1,4,1,{circuit:'c4'});add(t,'tk','TERMINAL',1,0,2);t.boardWires.push(wire('a',m('m0','L1-out'),m('tk','L-1')),wire('z',m('tk','L-2'),m('q4','L-in')));validatePlan(t);
+  assert.equal(g(t).status,'unresolved');assert.match(g(t).reason!,/ellentmond a bekötésnek/);
+  const d=base();circuit(d,'c4',{rcd:'FI-01',phase:'L2'});add(d,'q4','MCB',1,4,1,{circuit:'c4'});add(d,'dist','DISTRIBUTION',1,0,4);d.boardWires.push(wire('a',m('m0','L2-out'),m('dist','L2-1')),wire('z',m('dist','L2-3'),m('q4','L-in')));validatePlan(d);
+  assert.equal(g(d).status,'unresolved');assert.match(g(d).reason!,/ellentmond a bekötésnek/);
+  // egy másik csomópont (L1) ÁVK-s betáplálása nem számít az L2 áramkörnek
+  d.boardWires.push(wire('b2',m('m1','L1-out'),m('dist','L1-1')));validatePlan(d);assert.equal(g(d).status,'unresolved')}
+}
+
+// 22) Az automatikus vezeték neve az áramkör saját vezetőnevét használja, ha van (N, PE; az RCBO N-out vezetéke is).
+{
+ const p=base();p.circuits[0].conductorNames={N:' N1 kék ',PE:'PE zöld-sárga'};circuit(p,'c4',{rcd:'FI-01',conductorNames:{N:'N2'}});add(p,'q4','RCBO',1,0,2,{circuit:'c4'});validatePlan(p);
+ const a=invariants(p),name=(id:string)=>a.wires.find(w=>w.id===id)!.name;
+ assert.equal(name('auto:c1:N'),'N1 kék · c1 → N-sín · FI-01'.replace('c1','Nappali dugaljak'));assert.equal(name('auto:c1:PE'),'PE zöld-sárga · Nappali dugaljak → PE-sín');
+ assert.equal(name('auto:c2:N'),'N · Hálószoba dugaljak → N-sín · FI-01');assert.equal(name('auto:c2:PE'),'PE · Hálószoba dugaljak → PE-sín');
+ assert.equal(name('auto:c4:N'),'N2 · c4 → q4');assert.equal(name('auto:c4:PE'),'PE · c4 → PE-sín');
+ assert.ok(a.wires.every(w=>w.name.length<=120));
+}
+
+// 23) Elfogyó sínkapcsok: a sínenkénti összesítő figyelmeztetés (a kimaradt bekötések száma), a többi bekötés ép és egyedi kapcsot kap.
+{
+ const p=base();p.circuits=[];p.boardWires=[];p.modules=p.modules.filter(x=>x.type==='MAIN'||x.type==='RCD');
+ for(let i=0;i<300;i++)p.circuits.push({id:'k'+i,name:'k'+i,building:'house',phase:'L1',rating:16,curve:'B',cable:'3 × 2,5 mm²',rcd:''});
+ for(let i=0;i<105;i++)p.modules.push({id:'s'+i,name:'s'+i,building:'house',type:'SPD',row:1+Math.floor(i/9),slot:(i%9)*4,width:4,circuit:''});
+ const auto=autoBoardWires(p,'house','');
+ const onBar=(bar:string)=>auto.wires.filter(w=>[w.from,w.to].some(e=>e.kind==='bar'&&e.id===bar));
+ assert.equal(onBar('pe:house/').length,400);assert.equal(onBar('n:house/').length,400);
+ for(const bar of ['pe:house/','n:house/']){const ports=onBar(bar).map(w=>[w.from,w.to].find(e=>e.kind==='bar')!.port);assert.equal(new Set(ports).size,400);assert.ok(ports.includes('T400')&&!ports.includes('T401'))}
+ assert.deepEqual(auto.warnings,['PE-sín: elfogytak a sínkapcsok (legfeljebb 400), ezért 5 automatikus bekötés kimarad.','N-sín: elfogytak a sínkapcsok (legfeljebb 400), ezért 7 automatikus bekötés kimarad.']);
+ assert.deepEqual(autoBoardWires(p,'house',''),auto,'determinisztikus');
+}
+
+// 24) Kézzel szerkesztett azonosítók: a kézi vezeték „auto:” azonosítóját a betöltés átnevezi (nem ütközik a származtatottal, nem jelenik meg automatikusként); a '/' jelet tartalmazó épület- és elosztóazonosítók sínazonosítója egyértelmű.
+{
+ const p=base();add(p,'nm','NEUTRAL',1,0,4);add(p,'pm','PE',1,4,4);
+ p.boardWires.push(wire('auto:c2:N',c('c1','N'),m('nm','N1')),wire('auto:x',c('c3','PE'),m('pm','PE1')));
+ const q=validatePlan(JSON.parse(JSON.stringify(p)));
+ assert.deepEqual(q.boardWires.map(w=>w.id),['kezi:c2:N','kezi:x']);assert.deepEqual(q.boardWires.map(w=>[endpointKey(w.from),endpointKey(w.to)]),p.boardWires.map(w=>[endpointKey(w.from),endpointKey(w.to)]),'a végpontok változatlanok');
+ const eff=effectiveBoardWires(q);assert.equal(new Set(eff.wires.map(w=>w.id)).size,eff.wires.length,'nincs ütköző azonosító');
+ assert.ok(!eff.auto.has('kezi:c2:N')&&!eff.auto.has('kezi:x'),'a kézi vezeték nem automatikus');assert.ok(eff.auto.has('auto:c2:N'),'a származtatott c2 N megvan');
+ assert.deepEqual(validatePlan(JSON.parse(JSON.stringify(q))),q,'idempotens');
+ // a két sínazonosító nem lehet kétértelmű
+ const slash=base();slash.buildings[0].id='a';slash.circuits.forEach(x=>x.building='a');slash.modules.forEach(x=>x.building='a');slash.boardWires=[];
+ slash.buildings[1].id='a/b';slash.buildings[1].extraBoards=[{id:'x',name:'Alelosztó',rows:2,modulesPerRow:6}];
+ slash.modules.push({id:'sq',name:'sq',building:'a/b',board:'x',type:'MCB',row:0,slot:0,width:1,circuit:''});validatePlan(slash);
+ assert.deepEqual(boardBars(slash,'a/b','x').map(x=>x.id),['pe:a/b/x','n:a/b/x']);
+ const at=(id:string)=>{const e=endpointInfo(slash,b(id,'T1'));return e&&[e.building,e.board]};
+ assert.deepEqual(at('pe:a/b/x'),['a/b','x']);assert.deepEqual(at('n:a/'),['a','']);assert.deepEqual(at('pe:a/'),['a','']);assert.equal(at('pe:a/b/y'),null);assert.equal(at('pe:a/b/'),null,'üres elosztónak (a/b főelosztója) nincs sínje');
+ // ütköző azonosítópár (a + „b/x” elosztó, illetve a/b + „x” elosztó) nem tölthető be
+ const clash=structuredClone(slash);clash.buildings[0].extraBoards=[{id:'b/x',name:'Alelosztó',rows:2,modulesPerRow:6}];clash.modules.push({id:'sq2',name:'sq2',building:'a',board:'b/x',type:'MCB',row:0,slot:0,width:1,circuit:''});
+ assert.throws(()=>validatePlan(clash),/Ismétlődő elosztóazonosító/);
+}
+// 25) Idegen forrásról táplált sín: egyetlen, de nem a sín saját betáplálójától származó forrás sem tesz táplálttá egy sínt (az ÁVK sínjét csak a saját ÁVK-ja, a főnullasínt főkapcsoló / gyökér nélküli nullasín-modul táplálhatja, ÁVK soha):
+// a fogyasztó (áramkör N-szál, ÁVK / RCBO N-bemenet, SPD N-kapocs) nem kerül rá, figyelmeztetés; a kézi vezetékeket az automatikus réteg nem bántja. A `feedOracle` (invariants) minden esetben független előírással is ellenőrzi.
+{
+ const alienBar=(bar:string,names:string)=>`${bar}: idegen forrásról kap betáplálást (${names}); az automatikus bekötés nem táplálja, és nem köt rá fogyasztót.`;
+ const alienWhy=(prefix:string,bar:string,names:string,what:string)=>`${prefix}: a(z) ${bar} idegen forrásról kap betáplálást (${names}), ezért az ${what} automatikus bekötése kimarad.`;
+ const unfedWhy=(prefix:string,bar:string,feeder:string,what:string)=>`${prefix}: a(z) ${bar} nem kap betáplálást (a(z) ${feeder} N-kimenete kézzel máshová van kötve), ezért az ${what} automatikus bekötése kimarad.`;
+ const onBar=(w:Plan['boardWires'],id:string)=>w.filter(x=>[x.from,x.to].some(e=>e.kind==='bar'&&e.id===id));
+ const peOnly=(a:ReturnType<typeof autoBoardWires>,ids:string[])=>ids.every(id=>a.wires.some(w=>w.id==='auto:'+id+':PE'));
+ // (L) régi terv: az FI-01 N-kimenete a nullasín-modulra, az FI-02 N-kimenete az FI-01 sínjére kötve → az FI-01 sínje idegen forrásról (FI-02) kap betáplálást
+ {const p=base();add(p,'f2','RCD',1,4,4,{name:'FI-02 · 25 A'});add(p,'nz','NEUTRAL',1,8,4);
+  p.boardWires.push(wire('w1',m('m1','N-out'),m('nz','N1')),wire('w2',m('f2','N-out'),b('rcd:m1','T1')));validatePlan(p);
+  const a=invariants(p);
+  assert.equal(onBar(a.wires,'rcd:m1').length,0,'az idegen forrású ÁVK-sínre semmi automatikus nem kerül');assert.deepEqual(['c1','c2','c3'].map(id=>touches(a.wires,c(id,'N')).length),[0,0,0]);assert.ok(peOnly(a,['c1','c2','c3']));
+  assert.deepEqual(a.warnings,[alienBar('N-sín · FI-01','FI-02'),...['Nappali dugaljak','Hálószoba dugaljak','Világítás'].map(n=>alienWhy(n,'N-sín · FI-01','FI-02','N-szál'))]);
+  assert.ok(has(a.wires,m('m0','N-out'),b('n:house/','T1'))&&has(a.wires,m('m1','N-in'),b('n:house/','T2'))&&has(a.wires,m('f2','N-in'),b('n:house/','T3')),'a főnullasín és a többi sín változatlan');
+  assert.equal(buildSchematic(p,'house','multi').warnings.length,4,'a rajz ugyanazt a figyelmeztetést mutatja');
+  // a hibás betáplálás (w2) bontása után a sín már nem idegen forrású, hanem a megszokott „nem táplált” eset (az FI-01 N-kimenete továbbra is a nullasín-modulon van)
+  const q=structuredClone(p);q.boardWires=q.boardWires.filter(w=>w.id!=='w2');validatePlan(q);
+  assert.deepEqual(invariants(q).warnings.map(t=>t.replace(/^[^:]+/,'')),[unfedWhy('','N-sín · FI-01','FI-01','N-szál'),unfedWhy('','N-sín · FI-01','FI-01','N-szál'),unfedWhy('','N-sín · FI-01','FI-01','N-szál')],'bontás után a megszokott „nem táplált” eset');
+  // az alapeset (kézi vezeték nélkül) továbbra is figyelmeztetés nélküli
+  assert.deepEqual(invariants(base()).warnings,[])}
+ // (J) főkapcsoló nélküli alelosztó: az FI-11 N-kimenete kézzel az alelosztó főnullasínjére kötve → a főnullasínt ÁVK táplálja: sem az FI-11 N-bemenete, sem a csoport nélküli áramkör N-je nem kerül rá
+ {const p=base();p.buildings[0].extraBoards=[{id:'sub',name:'Alelosztó',rows:2,modulesPerRow:12}];
+  add(p,'f11','RCD',0,0,4,{name:'FI-11 · 25 A',board:'sub'});add(p,'q11','MCB',0,4,1,{board:'sub',circuit:'c11'});add(p,'q12','MCB',0,5,1,{board:'sub',circuit:'c12'});
+  circuit(p,'c11',{board:'sub',rcd:'FI-11'});circuit(p,'c12',{board:'sub',rcd:''});
+  p.boardWires.push(wire('w1',m('f11','N-out'),b('n:house/sub','T1')));validatePlan(p);
+  const a=invariants(p,'house','sub');
+  assert.equal(onBar(a.wires,'n:house/sub').length,0,'az ÁVK-ról táplált főnullasínre semmi automatikus nem kerül');assert.equal(touches(a.wires,m('f11','N-in')).length,0,'az ÁVK N-bemenete nem kerül a saját N-kimenetének hálózatára');assert.equal(touches(a.wires,c('c12','N')).length,0,'az ÁVK nélküli áramkör N-je nem megy át az FI-11-en');assert.equal(touches(a.wires,c('c11','N')).length,0);
+  assert.ok(peOnly(a,['c11','c12']));
+  assert.deepEqual(a.warnings,[alienBar('N-sín','FI-11'),alienWhy('FI-11 · 25 A','N-sín','FI-11','N-bemenet'),unfedWhy('c11','N-sín · FI-11','FI-11','N-szál'),alienWhy('c12','N-sín','FI-11','N-szál')]);
+  // gyökér nélküli nullasín-modul a főnullasínnek (főkapcsoló nélküli alelosztóban) saját betáplálója: a fogyasztók rákerülnek
+  const q=base();q.buildings[0].extraBoards=[{id:'sub',name:'Alelosztó',rows:2,modulesPerRow:12}];
+  add(q,'snz','NEUTRAL',1,0,4,{board:'sub'});circuit(q,'c12',{board:'sub',rcd:''});add(q,'q12','MCB',0,5,1,{board:'sub',circuit:'c12'});add(q,'spd','SPD',1,4,4,{board:'sub'});q.boardWires.push(wire('w',m('snz','N2'),b('n:house/sub','T1')));validatePlan(q);
+  const a2=invariants(q,'house','sub');assert.deepEqual(a2.warnings,[]);assert.ok(viaBar(a2.wires,c('c12','N'),'n:house/sub')&&viaBar(a2.wires,m('spd','N'),'n:house/sub'))}
+ // (K) a régi „Főkapcsoló N-ki → ÁVK N-be” átkötés, az FI-01 N-kimenete kézzel a főnullasínre: a főnullasínt az FI-01 táplálja → az FI-02 N-bemenete és az ÁVK nélküli áramkör N-je nem kerül rá
+ {const p=base();circuit(p,'c9',{rcd:''});add(p,'f2','RCD',1,4,4,{name:'FI-02 · 25 A'});circuit(p,'c10',{rcd:'FI-02'});
+  p.boardWires.push(wire('w1',m('m0','N-out'),m('m1','N-in')),wire('w2',m('m1','N-out'),b('n:house/','T1')));validatePlan(p);
+  const a=invariants(p);
+  assert.equal(onBar(a.wires,'n:house/').length,0,'a főnullasínre semmi automatikus nem kerül');assert.equal(touches(a.wires,c('c9','N')).length,0,'az ÁVK nélküli áramkör N-je nem megy át az FI-01-en');assert.equal(touches(a.wires,m('f2','N-in')).length,0,'az FI-02 nullája nem megy át az FI-01 N-pólusán');
+  assert.deepEqual(['c1','c2','c3'].map(id=>touches(a.wires,c(id,'N')).length),[0,0,0]);
+  assert.ok(has(a.wires,m('f2','N-out'),b('rcd:f2','T1'))&&viaBar(a.wires,c('c10','N'),'rcd:f2'),'a független FI-02 sínje és csoportja rendben');
+  assert.deepEqual(a.warnings,[alienBar('N-sín','FI-01'),alienWhy('FI-02 · 25 A','N-sín','FI-01','N-bemenet'),...['Nappali dugaljak','Hálószoba dugaljak','Világítás'].map(n=>unfedWhy(n,'N-sín · FI-01','FI-01','N-szál')),alienWhy('c9','N-sín','FI-01','N-szál')])}
+ // (M) felcserélt betáplálás: a főkapcsoló N-kimenete az FI-01 sínjére, az FI-01 N-kimenete a főnullasínre → mindkét sín idegen forrásról táplált, semmi nem kerül rájuk (a rajz is ugyanezt mutatja)
+ {const p=base();circuit(p,'c9',{rcd:''});p.boardWires.push(wire('w1',m('m0','N-out'),b('rcd:m1','T1')),wire('w2',m('m1','N-out'),b('n:house/','T1')));validatePlan(p);
+  const a=invariants(p);
+  assert.equal(onBar(a.wires,'rcd:m1').length,0);assert.equal(onBar(a.wires,'n:house/').length,0);assert.deepEqual(['c1','c2','c3','c9'].map(id=>touches(a.wires,c(id,'N')).length),[0,0,0,0]);assert.equal(touches(a.wires,m('m1','N-in')).length,0);assert.ok(peOnly(a,['c1','c2','c3','c9']));
+  assert.deepEqual(a.warnings,[alienBar('N-sín','FI-01'),alienBar('N-sín · FI-01','Főkapcsoló'),alienWhy('FI-01 · 40 A / 30 mA · A','N-sín','FI-01','N-bemenet'),...['Nappali dugaljak','Hálószoba dugaljak','Világítás'].map(n=>alienWhy(n,'N-sín · FI-01','Főkapcsoló','N-szál')),alienWhy('c9','N-sín','FI-01','N-szál')]);
+  const s=buildSchematic(p,'house','single','');assert.deepEqual(s.warnings,a.warnings,'a kapcsolási rajz ugyanazokat a figyelmeztetéseket mutatja');assert.deepEqual(s.missing.filter(x=>x.signal==='N').map(x=>x.circuit).sort(),['Hálószoba dugaljak','Nappali dugaljak','Világítás','c9'].sort(),'az N-szálak bekötetlenek, nem látszanak rossz sínre kötöttnek');
+  // autoBars:false → semmi automatikus; a javított terv (a kézi vezetékek a saját betápláló kapcsokon) hibátlan
+  const off=structuredClone(p);off.buildings[0].board={rows:4,modulesPerRow:18,autoBars:false};assert.deepEqual(autoBoardWires(off,'house',''),{wires:[],warnings:[]});
+  const fixed=structuredClone(p);fixed.boardWires=[wire('w1',m('m0','N-out'),b('n:house/','T1')),wire('w2',m('m1','N-out'),b('rcd:m1','T1'))];validatePlan(fixed);assert.deepEqual(invariants(fixed).warnings,[],'a saját betápláló kapcsokra kötve minden rendben')}
+ // (N) a saját betápláló jelen van és szabad: az egyetlen idegen forrás mellett kétforrású sín (a kétforrású ág változatlan), a „csak idegen” forrás nem azonos a „két forrás” esettel
+ {const p=base();add(p,'f2','RCD',1,0,4,{name:'FI-02'});p.boardWires.push(wire('w',m('f2','N-out'),b('rcd:m1','T1')));validatePlan(p);
+  const a=invariants(p);assert.equal(a.warnings[0],'N-sín · FI-01: két forrásról kap betáplálást (FI-01, FI-02); az automatikus bekötés nem táplálja, és nem köt rá fogyasztót.');assert.ok(!a.warnings.some(t=>/idegen/.test(t)))}
+}
+
+console.log('PASS: tokozati sínek elosztónként (üres elosztó nélkül), ÁVK-csoport (bekötés – áthidalás, kismegszakítón, fázissínen, leágazón, sorkapcson és az áramkör saját L-szálán át is, RCBO mögött – → szöveg → figyelmeztetés; ellentmondás; RCBO saját neve), RCBO, betápláló készülékek (több főkapcsoló, kaszkádolt ÁVK, SPD), nem táplált, többször táplált és idegen forrásról táplált sín, vezetőnevek, elfogyó sínkapcsok, kézzel szerkesztett azonosítók, kézi felülírás és sínkapocs-kihagyás, elosztónkénti kapcsoló, terminálszám, törlés/tisztítás, szerkezetmásolás, séma és megosztás.');

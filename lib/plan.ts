@@ -43,6 +43,9 @@ for(const b of p.buildings)for(const f of b.floors)for(const r of f.routes){
 }
 for(const node of p.plot.nodes){add(node.id);if(node.deviceId&&!p.buildings.some(b=>b.floors.some(f=>f.devices.some(d=>d.id===node.deviceId))))throw Error("A telki pont hivatkozott szerelvénye hiányzik.");}
 for(const r of p.plot.routes){add(r.id);if(r.from===r.to||!p.plot.nodes.some(n=>n.id===r.from)||!p.plot.nodes.some(n=>n.id===r.to))throw Error("A telki nyomvonal két különböző, létező végpontot igényel.");}
-p.boardWires.forEach(w=>add(w.id));validateBoard(p);
+// A tokozati sínek azonosítója az épület- és elosztóazonosítóból képződik ('pe:<épület>/<elosztó>'): két különböző elosztó nem adhat azonos azonosítót (csak '/' jelet tartalmazó, kézzel szerkesztett azonosítókkal fordulhat elő).
+const barKeys=new Set<string>();for(const b of p.buildings)for(const v of boards(b)){const key=b.id+'/'+v.id;if(barKeys.has(key))throw Error("Ismétlődő elosztóazonosító.");barKeys.add(key)}
+// Az 'auto:' előtag az automatikus (származtatott) N/PE-vezetékeké (lib/board-bars.ts): kézzel szerkesztett tervben szereplő kézi vezeték ilyen azonosítóját átnevezzük, hogy ne ütközzön a származtatottal, és ne jelenjen meg automatikusként.
+p.boardWires.forEach(w=>{if(w.id.startsWith('auto:'))w.id='kezi:'+w.id.slice(5);add(w.id)});validateBoard(p);
 pruneSizing(p);
 return p}
