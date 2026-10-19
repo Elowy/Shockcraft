@@ -4,8 +4,8 @@ Az **Eszközök → Áramkörlista** nézetben válassz épületet és áramkör
 
 - Szerelvények darabszáma, típusa, szintje és beépítési magassága.
 - Az áramkörhöz rendelt nyomvonalak hossza: alaprajzi és függőleges rész, ráhagyás nélkül. A végpontok helyét és magasságát a kapcsolt szerelvényekből számítjuk.
-- L/N/PE szálak közvetlen elosztóbekötése, egyedi vezetőnevekkel és célkapoccsal. Háromfázisú áramkörnél L1/L2/L3 külön szerepel.
-- Hozzárendelt elosztókészülékek. A hozzárendelés nem jelent automatikusan bekötést.
+- L/N/PE szálak elosztóbekötése, egyedi vezetőnevekkel és célkapoccsal; az N és PE szálnál a kézi vezeték mellett az automatikus N/PE-sínbekötés is megjelenik („automatikus” jelöléssel). Háromfázisú áramkörnél L1/L2/L3 külön szerepel.
+- Hozzárendelt elosztókészülékek. A hozzárendelés az L-vezetőt nem köti be; az N és PE szálat az elosztó automatikus N/PE-bekötése köti a sínekre (Elosztó → Bekötések, elosztónként kikapcsolható).
 
 Kattints egy szerelvényre, nyomvonalra vagy elosztókészülékre a megnyitásához. A bekötési pont gombja a célkészüléket nyitja meg az elosztóban. Az összesítés a terv módosításakor frissül. A lista nem módosítja a tervet.
 

@@ -1,6 +1,7 @@
 import {boardName} from './board-size';
 import {type Plan,labels} from './plan';
 import {circuitPorts,endpointInfo,moduleLabels} from './board';
+import {boardWiring} from './board-bars';
 import {floorLength,floorPoints} from './geometry';
 import type {SearchResult} from './plan-tools';
 
@@ -23,11 +24,13 @@ export function circuitReport(plan:Plan,circuitId:string){
   return m?{id:m.id,type:'modules',buildingId:building.id,floorId:building.floors[0]?.id||'',title:m.name,subtitle:building.name+' / '+boardName(building,m.board)+' · '+moduleLabels[m.type]+' · '+(m.row+1)+'. sor',x:0,y:0}:null;
  };
  const modules=plan.modules.filter(m=>m.building===building.id&&m.circuit===circuit.id).map(m=>moduleTarget(m.id)!);
+ const effective=boardWiring(plan,building.id,circuit.board||'');
  const ports=circuitPorts(circuit).map(port=>{
-  const wire=plan.boardWires.find(w=>w.building===building.id&&[w.from,w.to].some(e=>e.kind==='circuit'&&e.id===circuit.id&&e.port===port.id));
+  // A kézi vezeték megelőzi az automatikusat (a kézi vezetékek a listában elöl állnak).
+  const wire=effective.wires.find(w=>w.building===building.id&&[w.from,w.to].some(e=>e.kind==='circuit'&&e.id===circuit.id&&e.port===port.id));
   const other=wire&&(wire.from.kind==='circuit'&&wire.from.id===circuit.id?wire.to:wire.from);
   const info=other&&endpointInfo(plan,other),target=other?.kind==='module'?moduleTarget(other.id):null;
-  return {...port,wireName:wire?.name||'',connection:info?.text||'',target};
+  return {...port,wireName:wire?.name||'',connection:info?.text||'',target,auto:!!wire&&effective.auto.has(wire.id)};
  });
  const length=routes.reduce((sum,r)=>({horizontal:sum.horizontal+r.horizontal,vertical:sum.vertical+r.vertical,total:sum.total+r.total}),{horizontal:0,vertical:0,total:0});
  return {circuit,devices,routes,modules,ports,length};

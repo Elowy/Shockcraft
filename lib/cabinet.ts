@@ -1,6 +1,7 @@
 import type {Plan,Point} from './plan';
 import {boardSize,inBoard} from './board-size';
 import {modulePorts,circuitPorts,endpointInfo,endpointKey,compatible,connectBoard,type Endpoint,type Port} from './board';
+import {boardBarPorts,type BarInfo} from './board-bars';
 
 // Preview an unassigned protection device with the poles of the selected circuit.
 export function connectionPlan(plan:Plan,ends:Endpoint[]):Plan{
@@ -13,6 +14,7 @@ export function connectionIssue(plan:Plan,from:Endpoint,to:Endpoint):string|null
  if(a.building!==b.building)return 'Másik épülethez tartozó kapocs.';
  if(a.board!==b.board)return 'Másik elosztóhoz tartozó kapocs.';
  if(from.kind===to.kind&&(from.id===to.id||from.kind==='circuit'))return 'Másik készülék vagy áramköri szál szükséges.';
+ if(from.kind==='bar'&&to.kind==='bar')return 'Két sín kapcsa nem köthető össze közvetlenül.';
  if(!compatible(a.signal,b.signal))return 'Eltérő fázisú, N- és PE-kapcsok nem köthetők össze.';
  const c=[from,to].find(e=>e.kind==='circuit'),m=[from,to].find(e=>e.kind==='module');
  const device=m&&plan.modules.find(x=>x.id===m.id);
@@ -55,12 +57,23 @@ export function cabinetLayout(plan:Plan,buildingId:string,boardId=''){
   }
   y+=h+14;
  }
+ // Tokozati PE- és N-sínek a DIN-sorok alatt: nem foglalnak modulhelyet; a kapcsok ugyanúgy a pins listába kerülnek, mint a készülékeké.
+ const barsTop=y,bars:{bar:BarInfo;x:number;y:number;w:number;h:number;railY:number;railW:number}[]=[],barPitch=40,barPerRow=Math.max(1,Math.floor((size.modulesPerRow*unit-12)/barPitch));
+ const barList=boardBarPorts(plan,buildingId,boardId);
+ if(barList.length){let by=y+34;
+  for(const bar of barList){const subRows=Math.ceil(bar.ports.length/barPerRow),h=68+subRows*40;
+   bars.push({bar,x:62,y:by,w:size.modulesPerRow*unit+20,h,railY:by+30,railW:size.modulesPerRow*unit});
+   bar.ports.forEach((port,i)=>pins.push({x:left+20+(i%barPerRow)*barPitch,y:by+60+Math.floor(i/barPerRow)*40,end:{kind:'bar',id:bar.id,port:port.id},port,side:'bottom',escapeY:by+h-18}));
+   by+=h+10;
+  }
+  y=by;
+ }
  const cardColumns=Math.max(1,Math.floor((width-144)/480)),cardWidth=(width-144)/cardColumns-32;
  const circuitTop=y+40,cards=circuits.map((c,i)=>{const x=left+(i%cardColumns)*(cardWidth+32),cy=circuitTop+Math.floor(i/cardColumns)*172,w=cardWidth;
   circuitPorts(c).forEach((port,j,ports)=>pins.push({x:x+w*(j+.5)/ports.length,y:cy+90,end:{kind:'circuit',id:c.id,port:port.id},port,side:'bottom',escapeY:cy+136}));
   return {circuit:c,x,y:cy,w,h:112};
  });
- return {size,railWidth:size.modulesPerRow*unit,width,height:circuitTop+Math.ceil(circuits.length/cardColumns)*172+24,rows,devices,cards,pins,circuitTop};
+ return {size,railWidth:size.modulesPerRow*unit,width,height:circuitTop+Math.ceil(circuits.length/cardColumns)*172+24,rows,devices,bars,barsTop,cards,pins,circuitTop};
 }
 export function cabinetWirePoints(a:CabinetPin,b:CabinetPin,index:number):Point[]{
  const shift=(index%5)*4,ay=a.escapeY+(a.side==='top'?-shift:shift),by=b.escapeY+(b.side==='top'?-shift:shift);

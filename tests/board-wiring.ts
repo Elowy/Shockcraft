@@ -3,6 +3,7 @@ import {readFileSync,writeFileSync} from 'node:fs';
 import {seed,validatePlan,uid} from '../lib/plan';
 import {moduleTypes,moduleWidths,circuitPorts,modulePorts,connectBoard,removeBoardLinks,pruneBoardLinks} from '../lib/board';
 import {removeStructure} from '../lib/projects';
+import {effectiveBoardWires} from '../lib/board-bars';
 import {createPlanPdf} from '../lib/pdf-export';
 const p=validatePlan(seed);
 assert.deepEqual(p.boardWires,[]);
@@ -37,4 +38,13 @@ const font=readFileSync('public/fonts/NotoSans-Regular.ttf').toString('base64');
 const pdf=createPlanPdf(p,{scope:'board',paper:'a4',buildingId:'house',floorId:'ground'},font);
 writeFileSync('.sites-runtime/board-test.pdf',Buffer.from(pdf.output('arraybuffer')));
 assert.ok(pdf.getNumberOfPages()>=5);
+// Az automatikus N/PE-bekötés származtatott: a tárolt vezetékek nem változnak, a kézi N/PE-kötések (PE-, nullasín-modul) felülírják.
+{
+ const stored=JSON.stringify(p.boardWires),eff=effectiveBoardWires(p);
+ assert.equal(JSON.stringify(p.boardWires),stored);assert.ok(eff.wires.length>p.boardWires.length);assert.ok(eff.auto.size>0);
+ assert.ok(!eff.wires.some(w=>eff.auto.has(w.id)&&[w.from,w.to].some(e=>e.kind==='circuit'&&e.id==='c1'&&(e.port==='N'||e.port==='PE'))),'c1 kézi N/PE szálára nincs automatikus vezeték');
+ assert.ok(eff.wires.some(w=>eff.auto.has(w.id)&&[w.from,w.to].some(e=>e.kind==='circuit'&&e.id==='c2'&&e.port==='PE')));
+ const off=structuredClone(p);off.buildings[0].board={rows:4,modulesPerRow:18,autoBars:false};
+ assert.deepEqual(effectiveBoardWires(off).wires,off.boardWires,'autoBars:false = csak a kézi vezetékek (az eredeti viselkedés)');
+}
 console.log('Board wiring: legacy import, all device types, connection validation, 3P, cleanup, round-trip and PDF passed.');

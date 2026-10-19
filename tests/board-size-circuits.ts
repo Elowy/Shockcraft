@@ -5,6 +5,7 @@ import {cabinetLayout,connectTerminals} from '../lib/cabinet';
 import {toggleDeviceCircuit} from '../lib/circuit-assignment';
 import {createPlanPdf} from '../lib/pdf-export';
 import {readFileSync} from 'node:fs';
+import {effectiveBoardWires} from '../lib/board-bars';
 const p=validatePlan(structuredClone(seed));
 assert.deepEqual(boardSize(p.buildings[0]),{rows:4,modulesPerRow:18},'legacy projects keep their default board');
 assert.ok(boardSizeIssue(p,'house',{rows:1,modulesPerRow:6}));
@@ -29,4 +30,14 @@ assert.throws(()=>toggleDeviceCircuit(connected,'garage','garagefloor','d1','c1'
 validatePlan(connected);
 const font=readFileSync('public/fonts/NotoSans-Regular.ttf').toString('base64');
 const pdf=createPlanPdf(p,{scope:'board',paper:'a4',buildingId:'house',floorId:'ground'},font);assert.ok(pdf.getNumberOfPages()>=5,'six rows paginate plus registers');
+// Az áramköri hozzárendelés az automatikus (N/PE) vezetékeket sem változtatja meg, és L-vezetéket nem hoz létre.
+{
+ const a=validatePlan(structuredClone(seed)),before=JSON.stringify(effectiveBoardWires(a).wires);
+ toggleDeviceCircuit(a,'house','ground','d1','c2');toggleDeviceCircuit(a,'house','ground','d1','c1');
+ assert.equal(JSON.stringify(effectiveBoardWires(a).wires),before);assert.deepEqual(a.boardWires,[]);
+ assert.ok(effectiveBoardWires(a).wires.every(w=>!w.from.port.startsWith('L')&&!w.to.port.startsWith('L')||w.from.kind==='module'&&w.to.kind==='module'),'csak N/PE');
+ // A főelosztó átméretezése megőrzi az autoBars beállítást (a beállító ablak összefésüli a mezőket).
+ a.buildings[0].board={rows:4,modulesPerRow:18,autoBars:false};a.buildings[0].board={...a.buildings[0].board,rows:5,modulesPerRow:20};
+ assert.equal(a.buildings[0].board.autoBars,false);assert.equal(effectiveBoardWires(a).auto.size,0);
+}
 console.log('PASS: legacy defaults, per-building size, bounds/shrink rejection, module placement, saved settings, click assign/reassign/remove, unchanged wiring and paginated PDF.');

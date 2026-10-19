@@ -3,6 +3,7 @@ import {dimensionGeometry} from './dimensions';
 import {boardSize,boards,boardName,inBoard} from './board-size';
 import {buildSchematic,schematicTitle,type SchematicMode} from './schematic';
 import {moduleLabels,moduleShort,endpointInfo,circuitPorts,endpointKey} from "./board";
+import {boardWiring} from "./board-bars";
 import {phaseLoad,phases} from "./phase-load";
 import {jsPDF} from 'jspdf';
 import {labels,siteLabels} from './plan';
@@ -68,9 +69,11 @@ export function createPlanPdf(plan:Plan,options:PdfOptions,font:string,backgroun
  const load=phaseLoad(plan,b.id,boardId);
  table('Elosztó - fázisterhelés',title+' | Összesen '+number(load.total/1000)+' kW | Aszimmetria '+Math.round(load.imbalance)+'%',['Áramkör','Fázis','Védelem','Terhelés','Áram'],[70,18,25,40,40],[...load.circuits.map(c=>[c.circuit.name,c.circuit.phase,c.circuit.curve+c.circuit.rating+' A',number(c.watts)+' W'+(c.estimated?' (becsült)':''),number(c.current)+' A'+(c.circuit.phase==='3P'?' / fázis':'')+(c.overload?' - túlterhelt':'')]),...phases.map(p=>['Összesen '+p,p,'-',number(load.phases[p].watts)+' W',number(load.phases[p].current)+' A'])]);
  if(options.sizing){const results=boardSizing(plan,b.id,boardId);if(results.length){table('Elosztó - méretezési segédszámítás',title+' | '+SIZING_DISCLAIMER_SHORT+' | '+SIZING_PDF_LEGEND,SIZING_PDF_HEADERS,SIZING_PDF_WIDTHS,sizingPdfRows(results));table('Elosztó - méretezés indoklása',title+' | '+SIZING_DISCLAIMER_SHORT,SIZING_REASON_HEADERS,SIZING_REASON_WIDTHS,sizingReasonRows(results))}}
- table('Elosztó - bekötési jegyzék',title,['Vezeték neve','Honnan / kapocs','Hová / kapocs'],[55,75,75],plan.boardWires.filter(w=>w.building===b.id&&endpointInfo(plan,w.from)?.board===boardId).map(w=>[w.name,endpointInfo(plan,w.from)?.text||'-',endpointInfo(plan,w.to)?.text||'-']));
- const unconnected=plan.circuits.filter(c=>c.building===b.id&&inBoard(c,boardId)).flatMap(c=>circuitPorts(c).filter(port=>!plan.boardWires.some(w=>[w.from,w.to].some(e=>endpointKey(e)===endpointKey({kind:'circuit',id:c.id,port:port.id})))).map(port=>[c.name,port.signal,port.label,'Nincs bekötve']));
+ const wiring=boardWiring(plan,b.id,boardId);
+ table('Elosztó - bekötési jegyzék',title+(wiring.auto.size?' | az automatikus N/PE-bekötések jelölve':''),['Vezeték neve','Honnan / kapocs','Hová / kapocs'],[55,75,75],wiring.wires.map(w=>[w.name+(wiring.auto.has(w.id)?' (automatikus)':''),endpointInfo(plan,w.from)?.text||'-',endpointInfo(plan,w.to)?.text||'-']));
+ const unconnected=plan.circuits.filter(c=>c.building===b.id&&inBoard(c,boardId)).flatMap(c=>circuitPorts(c).filter(port=>!wiring.wires.some(w=>[w.from,w.to].some(e=>endpointKey(e)===endpointKey({kind:'circuit',id:c.id,port:port.id})))).map(port=>[c.name,port.signal,port.label,'Nincs bekötve']));
  table('Elosztó - be nem kötött szálak',title,['Áramkör','Jel','Szál neve','Állapot'],[55,20,85,40],unconnected);
+ table('Elosztó - az automatikus bekötés figyelmeztetései',title,['Figyelmeztetés'],[205],wiring.warnings.map(t=>[t]));
  }
  function schematicPage(b:Plan['buildings'][number],mode:SchematicMode,boardId=''){
   const diagram=buildSchematic(plan,b.id,mode,boardId),scale=(W-2*margin)/diagram.width,top=43,usable=H-top-31,tile=usable/scale;
@@ -89,7 +92,7 @@ export function createPlanPdf(plan:Plan,options:PdfOptions,font:string,backgroun
     else{doc.setLineWidth((p.width||2)*scale);doc.setLineDashPattern(p.dash?[1.4,1.2]:[],0);p.points.slice(1).forEach((b,i)=>{const a=p.points[i];doc.line(xx(a.x),yy(a.y),xx(b.x),yy(b.y))})}
    }
    doc.restoreGraphicsState();doc.setLineDashPattern([],0);
-   text('Rajzi tartomány: '+Math.round(offset)+'–'+Math.round(end)+' | Kapocsjelek: üres = nincs bekötve; kitöltött = megadott kapcsolat.',margin,H-24,8);
+   text('Rajzi tartomány: '+Math.round(offset)+'–'+Math.round(end)+' | Kapocsjelek: üres = nincs bekötve; kitöltött = megadott kapcsolat; szaggatott vonal = automatikus N/PE-bekötés.',margin,H-24,8);
   }
   table('Kapcsolási rajz - bekötési jegyzék',b.name+' / '+boardName(b,boardId),['Kapcsolat','Megadott végpontok'],[55,160],diagram.edges.map(e=>[e.name,e.detail]));
   table('Kapcsolási rajz - hiányzó bekötések',b.name+' / '+boardName(b,boardId),['Áramkör','Jel','Szál neve'],[70,20,120],diagram.missing.map(m=>[m.circuit,m.signal,m.name]));

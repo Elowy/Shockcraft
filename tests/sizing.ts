@@ -233,7 +233,9 @@ assert.equal(size(p,'c1').zsBoard,null,'az elosztó-beállítás elosztónként 
 // 19. PDF.
 const font=readFileSync('public/fonts/NotoSans-Regular.ttf').toString('base64');
 const opts={scope:'board' as const,paper:'a4' as const,buildingId:'house',floorId:'ground'};
-assert.equal(createPlanPdf(fresh(),opts,font).getNumberOfPages(),5);
+// A kiinduló 5 lap az automatikus N/PE-bekötés nélküli (autoBars:false) elosztóé; bekapcsolva a bekötési jegyzék új lapot kap.
+const legacyBoard=()=>{const q=fresh();q.buildings[0].board={rows:4,modulesPerRow:18,autoBars:false};return q};
+assert.equal(createPlanPdf(legacyBoard(),opts,font).getNumberOfPages(),5);assert.equal(createPlanPdf(fresh(),opts,font).getNumberOfPages(),6);
 assert.ok(createPlanPdf(fresh(),{...opts,sizing:true},font).getNumberOfPages()>=7);
 const allPages=createPlanPdf(fresh(),{...opts,scope:'all'},font).getNumberOfPages(),allSizing=createPlanPdf(fresh(),{...opts,scope:'all',sizing:true},font).getNumberOfPages();
 assert.ok(allSizing>22,String(allSizing));assert.ok(allSizing>=allPages+2);
