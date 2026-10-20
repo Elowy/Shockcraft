@@ -71,8 +71,8 @@ export function createPlanPdf(plan:Plan,options:PdfOptions,font:string,backgroun
  if(options.sizing){const results=boardSizing(plan,b.id,boardId);if(results.length){table('Elosztó - méretezési segédszámítás',title+' | '+SIZING_DISCLAIMER_SHORT+' | '+SIZING_PDF_LEGEND,SIZING_PDF_HEADERS,SIZING_PDF_WIDTHS,sizingPdfRows(results));table('Elosztó - méretezés indoklása',title+' | '+SIZING_DISCLAIMER_SHORT,SIZING_REASON_HEADERS,SIZING_REASON_WIDTHS,sizingReasonRows(results))}}
  const wiring=boardWiring(plan,b.id,boardId);
  table('Elosztó - bekötési jegyzék',title+(wiring.auto.size?' | az automatikus N/PE-bekötések jelölve':''),['Vezeték neve','Honnan / kapocs','Hová / kapocs'],[55,75,75],wiring.wires.map(w=>[w.name+(wiring.auto.has(w.id)?' (automatikus)':''),endpointInfo(plan,w.from)?.text||'-',endpointInfo(plan,w.to)?.text||'-']));
- const unconnected=plan.circuits.filter(c=>c.building===b.id&&inBoard(c,boardId)).flatMap(c=>circuitPorts(c).filter(port=>!wiring.wires.some(w=>[w.from,w.to].some(e=>endpointKey(e)===endpointKey({kind:'circuit',id:c.id,port:port.id})))).map(port=>[c.name,port.signal,port.label,'Nincs bekötve']));
- table('Elosztó - be nem kötött szálak',title,['Áramkör','Jel','Szál neve','Állapot'],[55,20,85,40],unconnected);
+ const unconnected=plan.circuits.filter(c=>c.building===b.id&&inBoard(c,boardId)).flatMap(c=>circuitPorts(c).filter(port=>!wiring.wires.some(w=>[w.from,w.to].some(e=>endpointKey(e)===endpointKey({kind:'circuit',id:c.id,port:port.id})))).map(port=>[c.name,port.signal,port.label,'Nincs bekötve'+(wiring.reasons[endpointKey({kind:'circuit',id:c.id,port:port.id})]?' – az automatikus bekötés kimaradt: '+wiring.reasons[endpointKey({kind:'circuit',id:c.id,port:port.id})]:'')]));
+ table('Elosztó - be nem kötött szálak',title,['Áramkör','Jel','Szál neve','Állapot'],[45,15,50,100],unconnected);
  table('Elosztó - az automatikus bekötés figyelmeztetései',title,['Figyelmeztetés'],[205],wiring.warnings.map(t=>[t]));
  }
  function schematicPage(b:Plan['buildings'][number],mode:SchematicMode,boardId=''){
@@ -95,7 +95,7 @@ export function createPlanPdf(plan:Plan,options:PdfOptions,font:string,backgroun
    text('Rajzi tartomány: '+Math.round(offset)+'–'+Math.round(end)+' | Kapocsjelek: üres = nincs bekötve; kitöltött = megadott kapcsolat; szaggatott vonal = automatikus N/PE-bekötés.',margin,H-24,8);
   }
   table('Kapcsolási rajz - bekötési jegyzék',b.name+' / '+boardName(b,boardId),['Kapcsolat','Megadott végpontok'],[55,160],diagram.edges.map(e=>[e.name,e.detail]));
-  table('Kapcsolási rajz - hiányzó bekötések',b.name+' / '+boardName(b,boardId),['Áramkör','Jel','Szál neve'],[70,20,120],diagram.missing.map(m=>[m.circuit,m.signal,m.name]));
+  table('Kapcsolási rajz - hiányzó bekötések',b.name+' / '+boardName(b,boardId),['Áramkör','Jel','Szál neve','Ok'],[45,15,50,100],diagram.missing.map(m=>[m.circuit,m.signal,m.name,m.reason||'']));
  }
  const building=plan.buildings.find(b=>b.id===options.buildingId)||plan.buildings[0],floor=building?.floors.find(f=>f.id===options.floorId)||building?.floors[0];
  if(options.scope==='floor'&&(!building||!floor))throw Error('Nincs exportálható szint. Hozz létre egy szintet, vagy válaszd a telek PDF-et.');if(['board','single','multi'].includes(options.scope)&&!building)throw Error('Nincs exportálható épület.');

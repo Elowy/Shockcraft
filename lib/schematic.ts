@@ -21,7 +21,7 @@ export function buildSchematic(plan:Plan,buildingId:string,mode:SchematicMode,bo
  const wireSignal=(wire:Plan['boardWires'][number])=>{const a=endpointInfo(plan,wire.from)!.signal,b=endpointInfo(plan,wire.to)!.signal;return a==='L'?b:a};
  const connected=new Set(wires.flatMap(w=>[endpointKey(w.from),endpointKey(w.to)]));
  const ports=new Map<string,Point>(),nodes:DiagramNode[]=[],edges:DiagramEdge[]=[];
- const missing=circuits.flatMap(c=>circuitPorts(c).filter(p=>!connected.has(endpointKey({kind:'circuit',id:c.id,port:p.id}))).map(p=>({circuit:c.name,signal:p.signal,name:p.label})));
+ const missing=circuits.flatMap(c=>circuitPorts(c).filter(p=>!connected.has(endpointKey({kind:'circuit',id:c.id,port:p.id}))).map(p=>{const reason=effective.reasons[endpointKey({kind:'circuit',id:c.id,port:p.id})];return {circuit:c.name,signal:p.signal,name:p.label,...(reason?{reason}:{})}}));
  const key=(e:Pick<Endpoint,'kind'|'id'>)=>JSON.stringify([e.kind,e.id]);
  const body:Primitive[]=[];
  let y=70;

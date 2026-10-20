@@ -87,25 +87,21 @@ function groupOf(plan:Plan,circuit:Circuit,ix:Index):RcdGroup{
  return {status:'unresolved',reason:match.length?`A(z) „${circuit.rcd}” ÁVK-csoport több készülékre is illik.`:`A(z) „${circuit.rcd}” ÁVK-csoport nem található ebben az elosztóban.`};
 }
 
-export type AutoWires={wires:BoardWire[];warnings:string[]};
-// Egy sínre kézzel kötött N-kapocs betápláló „gyökerei”: a főkapcsoló vagy az ÁVK N-kimenete; a sorkapocs, a fővezetéki leágazó és a nullasín-modul N-csomópontján át követve.
-// Egy fogyasztói út (pl. áramkör N → sorkapocs → sín) nem betáplálás, ezért üres halmazt ad; a gyökér nélküli nullasín-modul önmaga a betápláló (a régi, DIN-es nullasín), de csak a főnullasínnél elfogadott forrás: az ÁVK sínjét csak a saját ÁVK-ja táplálhatja (lásd `foreign`).
-function nRoots(ix:Index,x:Mod,port:string,seen=new Set<string>()):Set<string>{
- const roots=new Set<string>();
- if(x.type==='MAIN'||x.type==='RCD'){if(port==='N-out')roots.add(x.id);return roots}
- if(!(x.type==='NEUTRAL'||x.type==='DISTRIBUTION'||x.type==='TERMINAL')||!port.startsWith('N'))return roots;
- for(const w of ix.wires.get(x.id)??[]){
-  const mine=[w.from,w.to].find(e=>e.kind==='module'&&e.id===x.id&&e.port.startsWith('N')),other=mine&&(mine===w.from?w.to:w.from);
-  const y=other?.kind==='module'?ix.mods.get(other.id):undefined;
-  if(!y||!other||seen.has(w.id))continue;seen.add(w.id);
-  nRoots(ix,y,other.port,seen).forEach(r=>roots.add(r));
- }
- if(!roots.size&&x.type==='NEUTRAL')roots.add(x.id);
- return roots;
-}
+export type AutoWires={wires:BoardWire[];warnings:string[];reasons:Record<string,string>};
 const conductor=(c:Circuit,key:'N'|'PE')=>c.conductorNames?.[key]?.trim()||key;
+const N_NODE=new Set(['NEUTRAL','DISTRIBUTION','TERMINAL']);
+// Az N-vezető kapcsa (sín, áramkör N-szál, készülék N-kapcsa); az N-hálózat vezetékeit csak ilyen végpontok alkotják.
+const isN=(e:Endpoint)=>e.kind==='bar'?/^(n|rcd):/.test(e.id):e.kind==='circuit'?e.port==='N':e.port.startsWith('N');
+// Az automatikus N/PE-bekötés. Az N-oldal egyetlen hálózat-modellre épül: a KÉZI vezetékek N-hálózataiból (union-find) minden sínre kiderül, kik vannak vele egy hálózaton,
+// és csak ez dönt arról, hogy a sínt táplálja-e a program, és kötünk-e rá fogyasztót. Csomópont: egy sín (minden kapcsa), egy nullasín-modul / leágazó / sorkapocs (minden N-kapcsa) egy-egy; minden más kapocs önmagában.
+// – Egy hálózaton több sín (kézi áthidalás, sorkapcson, leágazón, nullasín-modulon vagy közös kapcson át is): egyik sínt sem tápláljuk, és egyikre sem kötünk fogyasztót.
+// – Forrás: a hálózat főkapcsolójának vagy ÁVK-jának N-kimenete (az RCBO N-kimenete csak a saját áramkörének szól, a gyökér nélküli nullasín-modul nem forrás), plusz a sín természetes betáplálója, ha az N-kimenete szabad
+//   (ÁVK-sín: a saját ÁVK-ja; főnullasín: az első főkapcsoló). Több forrás, vagy a sín saját betáplálójától eltérő forrás: a sínt nem tápláljuk, fogyasztót nem kötünk rá.
+//   Forrás nélkül, ha a természetes betápláló megvan, de máshová kötötték: a sín nem táplált (fogyasztó nem kerül rá). Főkapcsoló nélküli elosztó főnullasínje (kábelről táplált alelosztó) betáplálás nélkül is fogad.
+// – Egy készülék N-bemenetét nem kötjük olyan hálózatra, amelyen ugyanannak a készüléknek az N-kimenete van, és a betápláló N-kimenetét sem olyanra, amelyen a saját N-bemenete: a készülék N-pólusa nem hidalható át.
+// A kézi vezetékeket soha nem módosítja; L-vezetőt, N–PE kötést és sín–sín kötést nem hoz létre. A PE-oldal változatlan: minden áramkör és az SPD PE-je a PE-sínre kerül.
 export function autoBoardWires(plan:Plan,buildingId:string,boardId=''):AutoWires{
- const building=plan.buildings.find(b=>b.id===buildingId),none:AutoWires={wires:[],warnings:[]};
+ const building=plan.buildings.find(b=>b.id===buildingId),none:AutoWires={wires:[],warnings:[],reasons:{}};
  if(!building||!autoBarsOn(building,boardId))return none;
  const bars=boardBars(plan,buildingId,boardId);if(!bars.length)return none;
  const pe=bars.find(b=>b.kind==='pe')!,main=bars.find(b=>b.kind==='n')!,ix=indexOf(plan);
@@ -114,7 +110,7 @@ export function autoBoardWires(plan:Plan,buildingId:string,boardId=''):AutoWires
  for(const w of plan.boardWires)for(const e of [w.from,w.to]){taken.add(endpointKey(e));if(e.kind==='bar'){const set=used.get(e.id)??new Set<number>();set.add(barPortIndex(e.port));used.set(e.id,set)}}
  const modules=plan.modules.filter(m=>m.building===buildingId&&inBoard(m,boardId)).sort((a,b)=>a.row-b.row||a.slot-b.slot||a.id.localeCompare(b.id));
  const circuits=plan.circuits.filter(c=>c.building===buildingId&&inBoard(c,boardId));
- const wires:BoardWire[]=[],warnings:string[]=[],overflow=new Map<string,number>();
+ const wires:BoardWire[]=[],others:string[]=[],reasons:Record<string,string>={},overflow=new Map<string,number>(),skipped=new Map<string,string[]>();
  const barFor=(g:RcdGroup)=>g.status==='rcd'?bars.find(b=>b.rcdId===g.rcdId):g.status==='none'?main:undefined;
  // A sínkapocs a legkisebb szabad sorszámú kapocs; a kézi vezetékek kapcsait kihagyja. Ha elfogytak a kapcsok, a bekötés kimarad (a sínenkénti összesítő figyelmeztetés a végén).
  const terminal=(bar:Bar)=>{const set=used.get(bar.id)??new Set<number>();used.set(bar.id,set);let n=1;while(set.has(n))n++;set.add(n);return n<=BAR_MAX_TERMINALS?'T'+n:''};
@@ -123,60 +119,61 @@ export function autoBoardWires(plan:Plan,buildingId:string,boardId=''):AutoWires
  const mod=(m:Mod,port:string):Endpoint=>({kind:'module',id:m.id,port});
  const free=(m:Mod,port:string)=>!taken.has(endpointKey(mod(m,port)));
  const firstMain=modules.find(m=>m.type==='MAIN');
- // Az N-sín betáplálói. Természetes betápláló: az ÁVK a saját sínjét, az első főkapcsoló a főnullasínt táplálja (ha az N-kimenete szabad, az automatikus bekötés teszi); ide jönnek a kézzel rákötött
- // betáplálók is (főkapcsoló vagy ÁVK N-kimenete, nullasín-modul, ezek sorkapcson / leágazón át; lásd nRoots).
- // – Nincs betápláló, de a természetes betáplálója megvan az elosztóban (kézzel máshová kötötték): a sínre fogyasztót (áramkör, ÁVK/RCBO N-bemenet, SPD) nem kötünk, figyelmeztetünk, az N-szál bekötetlen marad.
- //   Főkapcsoló nélküli elosztónál (pl. kábelről táplált alelosztó) a főnullasínnek nincs természetes betáplálója, ott a fogyasztók rákerülnek.
- // – Két (vagy több) betápláló van (pl. az ÁVK N-kimenetét kézzel másik sínre kötötték): az automatikus bekötés a sínt nem táplálja és fogyasztót sem köt rá, figyelmeztetünk. A kézi vezetékeket nem bántja.
- // – Idegen betápláló van (pl. másik ÁVK N-kimenete az ÁVK sínjén, a főkapcsoló N-kimenete az ÁVK sínjén, ÁVK N-kimenete a főnullasínen): ugyanígy kezeljük; egyetlen idegen forrás sem tesz „táplált”-tá egy sínt.
+ // 1) N-hálózatok a kézi vezetékeken.
+ const parent=new Map<string,string>();
+ const find=(k:string):string=>{let r=k;for(let p=parent.get(r);p!==undefined&&p!==r;p=parent.get(r))r=p;return r};
+ const node=(e:Endpoint)=>e.kind==='bar'?'bar:'+e.id:e.kind==='module'&&N_NODE.has(ix.mods.get(e.id)?.type??'')?'node:'+e.id:endpointKey(e);
+ for(const w of plan.boardWires)if(w.building===buildingId&&isN(w.from)&&isN(w.to)){const a=node(w.from),z=node(w.to);for(const k of [a,z])if(!parent.has(k))parent.set(k,k);parent.set(find(a),find(z))}
+ const net=(bar:Bar)=>find('bar:'+bar.id),onNet=(bar:Bar,m:Mod,port:string)=>find(endpointKey(mod(m,port)))===net(bar);
+ // 2) Az N-sínek állapota: üres `why` = a sín rendben táplált (vagy főkapcsoló nélküli elosztó főnullasínje), egyébként a fogyasztó nem kerülhet rá.
+ const nbars=bars.filter(b=>b.kind!=='pe'),state=new Map<string,{why:string;warn:string;always:boolean}>();
  const natural=(bar:Bar)=>bar.kind==='rcd'?ix.mods.get(bar.rcdId!):bar.kind==='n'?firstMain:undefined;
- const roots=new Map<string,Set<string>>(),ids=new Set(bars.map(b=>b.id));
- for(const w of plan.boardWires){const e=w.from.kind==='bar'?w.from:w.to.kind==='bar'?w.to:undefined;if(!e||!ids.has(e.id))continue;const o=e===w.from?w.to:w.from,x=o.kind==='module'?ix.mods.get(o.id):undefined;if(!x)continue;const r=nRoots(ix,x,o.port);if(r.size){const set=roots.get(e.id)??new Set<string>();r.forEach(i=>set.add(i));roots.set(e.id,set)}}
- const sources=new Map<string,Set<string>>();
- for(const bar of bars)if(bar.kind!=='pe'){const set=new Set<string>(),f=natural(bar);if(f&&free(f,'N-out'))set.add(f.id);roots.get(bar.id)?.forEach(i=>set.add(i));sources.set(bar.id,set)}
- // Egy sín megengedett betáplálója: az ÁVK sínjét csak a saját ÁVK-ja, a főnullasínt főkapcsoló vagy gyökér nélküli nullasín-modul táplálhatja, ÁVK soha. Idegen forrásról (pl. másik ÁVK N-kimenete, vagy a főkapcsoló N-kimenete az ÁVK sínjén)
- // az áramkör N-je másik ÁVK nullájára kerülne, vagy megkerülné a saját ÁVK-ját; ezért az ilyen sínt is „nem táplált”-nak kezeljük (a kézi vezetékeket nem bántja).
- const foreign=(bar:Bar)=>[...sources.get(bar.id)!].filter(id=>bar.kind==='rcd'?id!==bar.rcdId:ix.mods.get(id)?.type==='RCD');
- const blocked=(bar:Bar)=>(sources.get(bar.id)?.size||0)>1||foreign(bar).length>0,names=(ids:string[])=>ids.map(id=>barShortName(ix.mods.get(id)?.name||id)).join(', '),sourceNames=(bar:Bar)=>names([...sources.get(bar.id)!]);
- const unfed=(bar:Bar)=>{
-  const set=sources.get(bar.id);if(!set)return '';
-  if(set.size>1)return `a(z) ${bar.label} ${set.size===2?'két':'több'} forrásról kap betáplálást (${sourceNames(bar)})`;
-  const alien=foreign(bar);if(alien.length)return `a(z) ${bar.label} idegen forrásról kap betáplálást (${names(alien)})`;
-  const feeder=natural(bar);
-  return set.size||!feeder?'':`a(z) ${bar.label} nem kap betáplálást (a(z) ${bar.kind==='rcd'?barShortName(feeder.name):feeder.name} N-kimenete kézzel máshová van kötve)`;
- };
- for(const bar of bars){
-  const set=sources.get(bar.id);if(!set)continue;
-  if(set.size>1)warnings.push(`${bar.label}: ${set.size===2?'két':'több'} forrásról kap betáplálást (${sourceNames(bar)}); az automatikus bekötés nem táplálja, és nem köt rá fogyasztót.`);
-  else if(foreign(bar).length)warnings.push(`${bar.label}: idegen forrásról kap betáplálást (${names(foreign(bar))}); az automatikus bekötés nem táplálja, és nem köt rá fogyasztót.`);
+ const sname=(xs:Mod[])=>xs.map(x=>barShortName(x.name)).join(', ');
+ for(const bar of nbars){
+  const root=net(bar),joined=nbars.filter(o=>o!==bar&&net(o)===root),nat=natural(bar);
+  const cand=modules.filter(x=>x===nat?free(x,'N-out')||onNet(bar,x,'N-out'):(x.type==='MAIN'||x.type==='RCD')&&onNet(bar,x,'N-out')),src=nat&&cand.includes(nat)?[nat,...cand.filter(x=>x!==nat)]:cand;
+  const closed=src.find(x=>onNet(bar,x,'N-in'));
+  const block=(why:string,cut='az automatikus bekötés nem táplálja, és nem köt rá fogyasztót.')=>state.set(bar.id,{why,warn:`${bar.label}: ${why}; ${cut}`,always:true});
+  if(joined.length){const l=joined.map(o=>o.label).join(', ');block(`kézi bekötés összeköti a(z) ${l} ${joined.length>1?'sínekkel':'sínnel'}`)}
+  else if(closed)block(`a(z) ${barShortName(closed.name)} N-bemenete kézzel erre a sínre van kötve (a készülék N-pólusa áthidalt)`);
+  else if(src.length>1){const alien=nat&&src.includes(nat)?src.filter(x=>x!==nat):[];block(alien.length?`idegen forrás (${sname(alien)}) is rá van kötve a saját betápláló (${sname([nat!])}) mellett`:`${src.length===2?'két':'több'} forrásról kap betáplálást (${sname(src)})`)}
+  else if(src.length===1&&!(bar.kind==='rcd'?src[0].id===bar.rcdId:src[0].type==='MAIN'))block(`idegen forrásról kap betáplálást (${sname(src)})`);
+  else if(!src.length&&nat){const why=`nem kap betáplálást (a(z) ${bar.kind==='rcd'?barShortName(nat.name):nat.name} N-kimenete kézzel máshová van kötve)`;state.set(bar.id,{why,warn:`${bar.label}: ${why}; az automatikus bekötés nem köt rá fogyasztót.`,always:false})}
+  else state.set(bar.id,{why:'',warn:'',always:false});
  }
- // Fogyasztó N-kapcsának bekötése sínre (nem táplált vagy többször táplált sínre nem kötünk, figyelmeztetünk).
- const consume=(prefix:string,what:string,key:string,end:Endpoint,bar:Bar,name:string,barFirst=false)=>{const why=unfed(bar);if(why)warnings.push(`${prefix}: ${why}, ezért az ${what} automatikus bekötése kimarad.`);else toBar(key,end,bar,name,barFirst)};
- // Az ÁVK N-bemenete és az SPD N-kapcsa arról a sínről jön, amelyiknek a csoportjából a készülék az L-oldali betáplálását kapja: egyetlen ÁVK mögött a felső ÁVK N-sínjéről (különben a nulla megkerülné a felső ÁVK toroidját), főkapcsolóról vagy betáplálás nélkül a főnullasínről.
- const viaFeed=(m:Mod,who:string,what:string,key:string,end:Endpoint,name:(bar:Bar)=>string,barFirst:boolean)=>{
-  const f=feedOf(ix,m),up=f.rcds.size===1&&!f.main&&!f.rcbos.size?bars.find(b=>b.rcdId===[...f.rcds][0]):undefined;
-  if(up)consume(m.name,what,key,end,up,name(up),barFirst);
-  else if(f.rcbos.size)warnings.push(`${m.name}: ${who} egy RCBO mögül kap betáplálást, ezért az ${what} automatikus bekötése kimarad.`);
-  else if(f.rcds.size)warnings.push(`${m.name}: ${who} L-oldali betáplálása nem egyértelmű (több ÁVK-ról vagy a főkapcsolóról is kap betáplálást), ezért az ${what} automatikus bekötése kimarad.`);
-  else consume(m.name,what,key,end,main,name(main),barFirst);
+ // Fogyasztó N-kapcsának bekötése sínre: a sínnek rendben táplálnak kell lennie, a készülék saját másik N-pólusa nem lehet ugyanazon a hálózaton.
+ const skip=(bar:Bar,item:string,end:Endpoint)=>{const list=skipped.get(bar.id)??[];list.push(item);skipped.set(bar.id,list);reasons[endpointKey(end)]=`${bar.label}: ${state.get(bar.id)!.why}`};
+ const consume=(prefix:string,what:string,key:string,end:Endpoint,bar:Bar,name:string,barFirst=false,dev?:Mod)=>{
+  if(state.get(bar.id)!.why)skip(bar,`${prefix} (${what})`,end);
+  else if(dev&&onNet(bar,dev,'N-out')){const t=`a(z) ${dev.name} N-kimenete kézzel erre a sínre (${bar.label}) van kötve`;others.push(`${prefix}: ${t}, ezért az ${what} automatikus bekötése kimarad.`);reasons[endpointKey(end)]=`${bar.label}: ${t}`}
+  else toBar(key,end,bar,name,barFirst);
  };
- // 1) Betápláló és védelmi készülékek N/PE kapcsai.
+ // Az ÁVK N-bemenete és az SPD N-kapcsa arról a sínről jön, amelyiknek a csoportjából a készülék az L-oldali betáplálását kapja: egyetlen ÁVK mögött a felső ÁVK N-sínjéről (különben a nulla megkerülné a felső ÁVK toroidját), főkapcsolóról vagy betáplálás nélkül a főnullasínről.
+ const viaFeed=(m:Mod,who:string,what:string,key:string,end:Endpoint,name:(bar:Bar)=>string,barFirst:boolean,dev?:Mod)=>{
+  const f=feedOf(ix,m),up=f.rcds.size===1&&!f.main&&!f.rcbos.size?bars.find(b=>b.rcdId===[...f.rcds][0]):undefined;
+  if(up)consume(m.name,what,key,end,up,name(up),barFirst,dev);
+  else if(f.rcbos.size)others.push(`${m.name}: ${who} egy RCBO mögül kap betáplálást, ezért az ${what} automatikus bekötése kimarad.`);
+  else if(f.rcds.size)others.push(`${m.name}: ${who} L-oldali betáplálása nem egyértelmű (több ÁVK-ról vagy a főkapcsolóról is kap betáplálást), ezért az ${what} automatikus bekötése kimarad.`);
+  else consume(m.name,what,key,end,main,name(main),barFirst,dev);
+ };
+ const open=(bar:Bar)=>!state.get(bar.id)!.why;
+ // 3) Betápláló és védelmi készülékek N/PE kapcsai.
  for(const m of modules){
   if(m.type==='MAIN'&&free(m,'N-out')){
    // A főnullasínt egyetlen forrás táplálhatja: több főkapcsoló esetén csak az elsőé (sor, hely, azonosító szerint) kerül rá automatikusan.
-   if(m===firstMain){if(!blocked(main))toBar(m.id+':N-out',mod(m,'N-out'),main,`N · ${m.name} → ${main.label}`)}
-   else warnings.push(`${m.name}: több főkapcsoló van az elosztóban; az N-kimenete nem kerül automatikusan a főnullasínre.`);
+   if(m===firstMain){if(open(main))toBar(m.id+':N-out',mod(m,'N-out'),main,`N · ${m.name} → ${main.label}`)}
+   else others.push(`${m.name}: több főkapcsoló van az elosztóban; az N-kimenete nem kerül automatikusan a főnullasínre.`);
   }
   if(m.type==='RCD'){
    const own=bars.find(b=>b.rcdId===m.id)!;
-   if(free(m,'N-in'))viaFeed(m,'az ÁVK','N-bemenet',m.id+':N-in',mod(m,'N-in'),bar=>`N · ${bar.label} → ${m.name}`,true);
-   if(free(m,'N-out')&&!blocked(own))toBar(m.id+':N-out',mod(m,'N-out'),own,`N · ${m.name} → ${own.label}`);
+   if(free(m,'N-in'))viaFeed(m,'az ÁVK','N-bemenet',m.id+':N-in',mod(m,'N-in'),bar=>`N · ${bar.label} → ${m.name}`,true,m);
+   if(free(m,'N-out')&&open(own))toBar(m.id+':N-out',mod(m,'N-out'),own,`N · ${m.name} → ${own.label}`);
   }
   if(m.type==='RCBO'&&free(m,'N-in')){
    const c=circuits.find(c=>c.id===m.circuit);
    if(c){const g=groupOf(plan,c,ix),bar=barFor(g);
-    if(bar)consume(m.name,'N-bemenet',m.id+':N-in',mod(m,'N-in'),bar,`N · ${bar.label} → ${m.name}`,true);
-    else warnings.push(`${m.name}: ${g.reason} Az N-bemenet automatikus bekötése kimarad.`);
+    if(bar)consume(m.name,'N-bemenet',m.id+':N-in',mod(m,'N-in'),bar,`N · ${bar.label} → ${m.name}`,true,m);
+    else others.push(`${m.name}: ${g.reason} Az N-bemenet automatikus bekötése kimarad.`);
    }
   }
   if(m.type==='SPD'){
@@ -184,7 +181,7 @@ export function autoBoardWires(plan:Plan,buildingId:string,boardId=''):AutoWires
    if(free(m,'PE'))toBar(m.id+':PE',mod(m,'PE'),pe,`PE · ${m.name} → ${pe.label}`);
   }
  }
- // 2) Az áramkörök PE- és N-szálai (a vezetéknévben az áramkör saját vezetőneve, ha van).
+ // 4) Az áramkörök PE- és N-szálai (a vezetéknévben az áramkör saját vezetőneve, ha van).
  for(const c of circuits){
   const cp=(port:string):Endpoint=>({kind:'circuit',id:c.id,port});
   if(!taken.has(endpointKey(cp('PE'))))toBar(c.id+':PE',cp('PE'),pe,`${conductor(c,'PE')} · ${c.name} → ${pe.label}`);
@@ -192,29 +189,33 @@ export function autoBoardWires(plan:Plan,buildingId:string,boardId=''):AutoWires
   const rcbo=modules.find(m=>m.type==='RCBO'&&m.circuit===c.id);
   if(rcbo){
    if(free(rcbo,'N-out'))toPort(c.id+':N',cp('N'),mod(rcbo,'N-out'),`${conductor(c,'N')} · ${c.name} → ${rcbo.name}`);
-   else warnings.push(`${c.name}: a(z) ${rcbo.name} N-kimenetén kézi bekötés van, ezért az áramkör N-szálának automatikus bekötése kimarad.`);
+   else{const t=`a(z) ${rcbo.name} N-kimenetén kézi bekötés van`;others.push(`${c.name}: ${t}, ezért az áramkör N-szálának automatikus bekötése kimarad.`);reasons[endpointKey(cp('N'))]=t}
    continue;
   }
   const g=groupOf(plan,c,ix),bar=barFor(g);
   if(bar)consume(c.name,'N-szál',c.id+':N',cp('N'),bar,`${conductor(c,'N')} · ${c.name} → ${bar.label}`);
-  else warnings.push(`${c.name}: ${g.reason} Az N-szál automatikus bekötése kimarad.`);
+  else{others.push(`${c.name}: ${g.reason} Az N-szál automatikus bekötése kimarad.`);reasons[endpointKey(cp('N'))]=g.reason!}
  }
+ // 5) Figyelmeztetések: sínenként egy (a kimaradt fogyasztókkal együtt), utána a fogyasztónkéntiek, végül a sínkapcsok elfogyása.
+ const warnings:string[]=[];
+ for(const bar of nbars){const s=state.get(bar.id)!,list=skipped.get(bar.id);if(s.why&&(s.always||list))warnings.push(s.warn+(list?` Kimaradt az automatikus bekötésből: ${list.join(', ')}.`:''))}
+ warnings.push(...others);
  for(const bar of bars){const n=overflow.get(bar.id);if(n)warnings.push(`${bar.label}: elfogytak a sínkapcsok (legfeljebb ${BAR_MAX_TERMINALS}), ezért ${n} automatikus bekötés kimarad.`)}
- return {wires,warnings};
+ return {wires,warnings,reasons};
 }
 
 // Egy elosztó tényleges vezetékei: a kézi (tárolt) és az automatikus vezetékek. Az automatikusakat az `auto` azonosítóhalmaz jelöli.
-export type EffectiveWires={wires:BoardWire[];auto:Set<string>;warnings:string[]};
+export type EffectiveWires={wires:BoardWire[];auto:Set<string>;warnings:string[];reasons:Record<string,string>};
 export function boardWiring(plan:Plan,buildingId:string,boardId=''):EffectiveWires{
  const explicit=plan.boardWires.filter(w=>{const a=endpointInfo(plan,w.from),b=endpointInfo(plan,w.to);return w.building===buildingId&&a?.board===boardId&&b?.board===boardId&&a.building===buildingId&&b.building===buildingId});
  const auto=autoBoardWires(plan,buildingId,boardId);
- return {wires:[...explicit,...auto.wires],auto:new Set(auto.wires.map(w=>w.id)),warnings:auto.warnings};
+ return {wires:[...explicit,...auto.wires],auto:new Set(auto.wires.map(w=>w.id)),warnings:auto.warnings,reasons:auto.reasons};
 }
 // A teljes terv tényleges vezetékei (minden épület minden elosztójával). A figyelmeztetések előtt az elosztó neve áll.
 export function effectiveBoardWires(plan:Plan):EffectiveWires{
- const wires=[...plan.boardWires],auto=new Set<string>(),warnings:string[]=[];
- for(const b of plan.buildings)for(const v of boards(b)){const a=autoBoardWires(plan,b.id,v.id);wires.push(...a.wires);a.wires.forEach(w=>auto.add(w.id));warnings.push(...a.warnings.map(t=>`${b.name} / ${v.name}: ${t}`))}
- return {wires,auto,warnings};
+ const wires=[...plan.boardWires],auto=new Set<string>(),warnings:string[]=[],reasons:Record<string,string>={};
+ for(const b of plan.buildings)for(const v of boards(b)){const a=autoBoardWires(plan,b.id,v.id);wires.push(...a.wires);a.wires.forEach(w=>auto.add(w.id));Object.assign(reasons,a.reasons);warnings.push(...a.warnings.map(t=>`${b.name} / ${v.name}: ${t}`))}
+ return {wires,auto,warnings,reasons};
 }
 
 // A sínek kapcsai: T1…Tk, k = max(6, a sínre futó vezetékek száma + 2, a legnagyobb kézzel használt kapocs sorszáma), hogy kézi vezeték kapcsa soha ne szűnjön meg.
