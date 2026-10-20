@@ -18,7 +18,7 @@ Bejelentkezés nélkül, a projekt **legutóbb mentett** változatát mutatja:
 
 - **Alaprajz:** épület- és szintválasztó, nagyítás (100–400 %), méretvonalak, helyiségnevek, jelmagyarázat; a jegyzékből kiválasztott elem kiemelve.
 - **Telek:** a telek, az épületek és a telki nyomvonalak (csak megtekintés).
-- **Elosztó:** egyvonalas és többvonalas kapcsolási rajz elosztónként.
+- **Elosztó:** egyvonalas és többvonalas kapcsolási rajz elosztónként, a tokozati PE-/N-sínekkel és az automatikus N/PE-bekötéssel (szaggatott vonal). Az automatikus vezetékek nem tárolódnak: a megtekintő a megosztott tervből és az elosztó `autoBars` beállításából ugyanazt származtatja, mint a tulajdonos.
 - **Jegyzékek:** áramkörök, nyomvonalak, fázisterhelés; a „megnyitás” gomb az alaprajzon, a telken vagy az elosztónál mutatja az elemet.
 - **PDF és kapcsolási rajz SVG** csak akkor, ha a link engedi **és** a tulajdonos exportjoga a letöltés pillanatában is fennáll.
 - Állandó tájékoztató sáv: a tartalomért a megosztó felel, az oldal soha nem kér jelszót vagy fizetési adatot; „Visszaélés bejelentése” e-mail-link.

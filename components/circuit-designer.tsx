@@ -1,16 +1,19 @@
 'use client';
 import {inBoard,boardName} from '@/lib/board-size';
-import {useState} from 'react';
+import {useMemo,useState} from 'react';
 import {Plus,Undo2,Redo2,Check,CircuitBoard} from 'lucide-react';
 import {toast} from 'sonner';
 import {type Plan,type Device,labels} from '@/lib/plan';
 import {circuitPorts} from '@/lib/board';
+import {effectiveBoardWires} from '@/lib/board-bars';
 import {floorPoints} from '@/lib/geometry';
 import {toggleDeviceCircuit} from '@/lib/circuit-assignment';
 import {BackgroundImage} from './background-image';
 import {ElectricalSymbol} from './electrical-symbol';
 export function CircuitDesigner({plan,buildingId,boardId='',floorId,onFloor,change,onCreate,onBoard,undo,redo,canUndo,canRedo}:{plan:Plan;buildingId:string;boardId?:string;floorId:string;onFloor:(id:string)=>void;change:(fn:(p:Plan)=>void)=>void;onCreate:()=>void;onBoard:()=>void;undo:()=>void;redo:()=>void;canUndo:boolean;canRedo:boolean}){
  const circuits=plan.circuits.filter(c=>c.building===buildingId&&inBoard(c,boardId)),building=plan.buildings.find(b=>b.id===buildingId)!;
+ // A bekötött szálak száma a kézi és az automatikus (N/PE-sín) vezetékeket is számolja.
+ const wiring=useMemo(()=>effectiveBoardWires(plan),[plan]);
  const [chosen,setChosen]=useState(''),[filter,setFilter]=useState('all'),[notice,setNotice]=useState('');
  const circuit=circuits.find(c=>c.id===chosen)||circuits[0],floor=building.floors.find(f=>f.id===floorId)||building.floors[0];
  const allDevices=building.floors.flatMap(f=>f.devices),visible=(d:Device)=>filter==='all'||(filter==='free'?!d.circuit:d.circuit===circuit?.id);
@@ -20,7 +23,7 @@ export function CircuitDesigner({plan,buildingId,boardId='',floorId,onFloor,chan
  const action=(d:Device)=>d.circuit===circuit?.id?'Hozzárendelés megszüntetése':`Hozzárendelés: ${circuit?.name||'válassz áramkört'}`;
  return <section className="circuit-designer" aria-label="Áramkörök kattintásos szerkesztése"><div className="circuit-designer-toolbar"><button className="primary" onClick={onCreate}><Plus/> Új áramkör</button><button onClick={onBoard}><CircuitBoard/> Elosztó és áramkörbeállítások</button><button aria-label="Visszavonás" onClick={undo} disabled={!canUndo}><Undo2/></button><button aria-label="Újra" onClick={redo} disabled={!canRedo}><Redo2/></button></div>
   <p className="circuit-designer-hint">Válassz áramkört, majd kattints a szerelvényre az alaprajzon vagy a listában. Újabb kattintással megszüntetheted a hozzárendelést. Másik áramkör eleme áthelyeződik a kiválasztott áramkörbe.</p>
-  <div className="circuit-picker" aria-label="Áramkör kiválasztása">{circuits.map(c=>{const total=circuitPorts(c).length,bound=plan.boardWires.filter(w=>[w.from,w.to].some(e=>e.kind==='circuit'&&e.id===c.id)).length;return <button key={c.id} aria-pressed={c.id===circuit?.id} onClick={()=>{setChosen(c.id);setNotice('')}}><b>{c.name}</b><span>{boardName(building,c.board)} · {c.phase} · {c.curve}{c.rating} A · {c.cable}</span><small>{allDevices.filter(d=>d.circuit===c.id).length} szerelvény · {bound}/{total} szál bekötve</small></button>})}</div>
+  <div className="circuit-picker" aria-label="Áramkör kiválasztása">{circuits.map(c=>{const total=circuitPorts(c).length,bound=wiring.wires.filter(w=>[w.from,w.to].some(e=>e.kind==='circuit'&&e.id===c.id)).length;return <button key={c.id} aria-pressed={c.id===circuit?.id} onClick={()=>{setChosen(c.id);setNotice('')}}><b>{c.name}</b><span>{boardName(building,c.board)} · {c.phase} · {c.curve}{c.rating} A · {c.cable}</span><small>{allDevices.filter(d=>d.circuit===c.id).length} szerelvény · {bound}/{total} szál bekötve</small></button>})}</div>
   {!circuits.length&&<p className="circuit-empty">Még nincs áramkör. Az „Új áramkör” gombbal hozhatod létre az elsőt.</p>}
   <div className="circuit-filters"><label>Szint<select aria-label="Áramköri nézet szintje" value={floor?.id||''} onChange={e=>onFloor(e.target.value)}>{building.floors.map(f=><option key={f.id} value={f.id}>{f.name}</option>)}</select></label><label>Mutatott szerelvények<select aria-label="Szerelvények szűrése" value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">Összes</option><option value="selected">Kiválasztott áramkör</option><option value="free">Nincs hozzárendelve</option></select></label><span>{floor?.devices.filter(d=>!d.circuit).length||0} hozzárendeletlen ezen a szinten</span></div>
   <p role="status" className="circuit-assignment-status">{notice||(circuit?`Kiválasztva: ${circuit.name}. A zöld keret az ehhez tartozó szerelvényeket jelöli.`:'Hozz létre és válassz ki egy áramkört.')}</p>
@@ -32,6 +35,6 @@ export function CircuitDesigner({plan,buildingId,boardId='',floorId,onFloor,chan
    {floor.devices.filter(visible).map(d=>{const selected=!!circuit&&d.circuit===circuit.id;return <g key={d.id} transform={`translate(${d.x} ${d.y})`} role="button" tabIndex={0} aria-disabled={!circuit} aria-pressed={selected} aria-label={`${d.name} · ${labels[d.kind]} · ${action(d)}`} onClick={()=>assign(d)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();assign(d)}}} className={'circuit-map-device'+(selected?' assigned':'')}><title>{d.name+' · '+(plan.circuits.find(c=>c.id===d.circuit)?.name||'Nincs hozzárendelve')}</title><circle className="assignment-ring" r="20" fill="var(--plan-room)" stroke={selected?'#258574':!d.circuit?'#bb772b':'var(--border)'} strokeWidth={selected?3:1.5} strokeDasharray={!d.circuit?'4 3':undefined}/><g transform={`rotate(${d.angle})`}><ElectricalSymbol kind={d.kind}/></g><text x="25" y="5" fontSize="13" fill="var(--foreground)" paintOrder="stroke" stroke="var(--plan-room)" strokeWidth="4">{d.name}</text></g>})}
    {floor.rooms.map(r=><text key={r.id} x={r.x+r.w/2} y={r.y+r.h/2} textAnchor="middle" fontSize="15" fill="var(--foreground)" paintOrder="stroke" stroke="var(--plan-room)" strokeWidth="8" pointerEvents="none">{r.name}</text>)}
   </svg></div><details className="circuit-device-list" open><summary>{floor.name} szerelvényei ({floor.devices.filter(visible).length})</summary><div>{floor.devices.filter(visible).map(d=><button key={d.id} disabled={!circuit} aria-label={`${d.name} hozzárendelése a listában`} aria-pressed={d.circuit===circuit?.id} onClick={()=>assign(d)}><span><b>{d.name}</b> · {labels[d.kind]}<small>{plan.circuits.find(c=>c.id===d.circuit)?.name||'Nincs hozzárendelve'} · {d.height} cm</small></span>{d.circuit===circuit?.id&&<Check/>}</button>)}</div>{!floor.devices.filter(visible).length&&<p>Nincs a szűrésnek megfelelő szerelvény ezen a szinten.</p>}</details></>:<p className="circuit-empty">Az alaprajzi szerelvényekhez előbb hozz létre egy szintet.</p>}
-  <p className="circuit-designer-hint">A hozzárendelés a szerelvény áramkörét állítja be. Új nyomvonalat vagy elosztóbekötést nem hoz létre.</p>
+  <p className="circuit-designer-hint">A hozzárendelés a szerelvény áramkörét állítja be. Új nyomvonalat vagy L-bekötést nem hoz létre; az N és PE szálakat az elosztó automatikus bekötése a sínekre köti.</p>
  </section>;
 }

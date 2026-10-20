@@ -7,11 +7,15 @@ import {pruneBoardLinks} from '../lib/board';
 import {buildSchematic} from '../lib/schematic';
 import {createPlanPdf} from '../lib/pdf-export';
 import {materialList,searchPlan} from '../lib/plan-tools';
+import {autoBoardWires,boardBarPorts} from '../lib/board-bars';
 
 let p=validatePlan(structuredClone(seed));
 assert.deepEqual(boardSize(p.buildings[0]),{rows:4,modulesPerRow:18});
 assert.equal(boards(p.buildings[0]).length,1);
-p.buildings[0].extraBoards=[{id:'sub',name:'Emeleti elosztó',rows:2,modulesPerRow:6}];
+// Az alábbi, eredeti ellenőrzések a kézi bekötésre vonatkoznak: az automatikus N/PE-bekötés elosztónként kikapcsolva (autoBars:false).
+// Az alapértelmezett (bekapcsolt) viselkedést a fájl vége vizsgálja.
+p.buildings[0].board={rows:4,modulesPerRow:18,autoBars:false};
+p.buildings[0].extraBoards=[{id:'sub',name:'Emeleti elosztó',rows:2,modulesPerRow:6,autoBars:false}];
 p.circuits.push({...p.circuits[0],id:'sub-c',name:'Emeleti dugaljak',board:'sub'});
 p.modules.push({id:'sub-m',name:'Q-SUB',type:'MCB',building:'house',board:'sub',row:0,slot:0,width:1,circuit:''});
 assert.doesNotThrow(()=>validatePlan(p),'same slot in different boards is valid');
@@ -27,7 +31,7 @@ const preview=connectionPlan(p,[circuit]);assert.equal(preview.modules.find(m=>m
 assert.equal(preview.modules.find(m=>m.id==='m0')!.circuit,'');
 p=connectTerminals(p,circuit,terminal,'sub-wire');validatePlan(p);
 assert.equal(buildSchematic(p,'house','multi').wireCount,0);
-const diagram=buildSchematic(p,'house','multi','sub');assert.equal(diagram.wireCount,1);assert.equal(diagram.nodes.length,2);assert.equal(diagram.missing.length,2);
+const diagram=buildSchematic(p,'house','multi','sub');assert.equal(diagram.wireCount,1);assert.equal(diagram.nodes.filter(n=>n.kind!=='bar').length,2);assert.equal(diagram.nodes.filter(n=>n.kind==='bar').length,2,'a sínek autoBars:false mellett is megjelennek');assert.equal(diagram.missing.length,2);
 assert.ok(!diagram.nodes.some(n=>n.id==='m0'));
 assert.ok(circuitBoardIssue(p,'sub-c',''));assert.ok(boardDeleteIssue(p,'house','sub'));
 assert.throws(()=>moveModule(p,'sub-m',''),/Áthelyezés/);
@@ -50,6 +54,22 @@ const mainPdf=createPlanPdf(p,{scope:'board',paper:'a4',buildingId:'house',floor
 const subPdf=createPlanPdf(p,{scope:'board',paper:'a4',buildingId:'house',floorId:'ground',boardId:'sub'},font);
 assert.equal(mainPdf.getNumberOfPages(),5);assert.equal(subPdf.getNumberOfPages(),6);
 const all=createPlanPdf(p,{scope:'all',paper:'a4',buildingId:'house',floorId:'ground'},font);
-const oldAll=createPlanPdf(validatePlan(seed),{scope:'all',paper:'a4',buildingId:'house',floorId:'ground'},font);
-assert.equal(all.getNumberOfPages()-oldAll.getNumberOfPages(),12,'all export includes sub-board layout, registers, phase load and both schematics');
+const legacySeed=validatePlan(seed);legacySeed.buildings[0].board={rows:4,modulesPerRow:18,autoBars:false};
+const oldAll=createPlanPdf(legacySeed,{scope:'all',paper:'a4',buildingId:'house',floorId:'ground'},font);
+assert.equal(all.getNumberOfPages()-oldAll.getNumberOfPages(),13,'all export includes sub-board layout, registers, phase load and both schematics (a sínek miatt a többvonalas rajz 1 lappal hosszabb: 12 + 1)');
+// Alapértelmezett viselkedés: mindkét elosztó automatikus N/PE-bekötéssel (hiányzó autoBars = bekapcsolva).
+{
+ const d=structuredClone(p);delete d.buildings[0].board!.autoBars;delete d.buildings[0].extraBoards![0].autoBars;validatePlan(d);
+ const main=buildSchematic(d,'house','multi'),sub=buildSchematic(d,'house','multi','sub');
+ assert.equal(main.wireCount,9);assert.equal(main.autoCount,9);assert.equal(main.missing.length,3);
+ // A sub-board áramköre a „FI-01” ÁVK-csoportot nevezi meg, de ilyen ÁVK nincs ebben az elosztóban: az N-szál nem kerül sínre, figyelmeztetéssel.
+ assert.equal(sub.wireCount,2,'1 kézi L + 1 automatikus PE');assert.equal(sub.autoCount,1);assert.equal(sub.nodes.length,4,'MCB + PE-sín + N-sín + áramkör');
+ assert.equal(sub.missing.length,1);assert.equal(sub.warnings.length,1);assert.match(sub.warnings[0],/„FI-01” ÁVK-csoport nem található ebben az elosztóban/);
+ assert.deepEqual(boardBarPorts(d,'house','sub').map(b=>b.label),['PE-sín','N-sín']);
+ assert.equal(autoBoardWires(d,'house','sub').wires.length,1);
+ const mainPdf=createPlanPdf(d,{scope:'board',paper:'a4',buildingId:'house',floorId:'ground'},font),subPdf=createPlanPdf(d,{scope:'board',paper:'a4',buildingId:'house',floorId:'ground',boardId:'sub'},font);
+ assert.ok(mainPdf.getNumberOfPages()>=5&&subPdf.getNumberOfPages()>=6);
+ const allAuto=createPlanPdf(d,{scope:'all',paper:'a4',buildingId:'house',floorId:'ground'},font);assert.ok(allAuto.getNumberOfPages()>oldAll.getNumberOfPages());
+ console.log('default (autoBars on) pages: main',mainPdf.getNumberOfPages(),'sub',subPdf.getNumberOfPages(),'all',allAuto.getNumberOfPages());
+}
 console.log('PASS: legacy compatibility, independent board sizing/slots/circuits/wires, invalid references, cross-board guards, panel links, search, round-trip persistence, movement/deletion guards and PDF pagination.');

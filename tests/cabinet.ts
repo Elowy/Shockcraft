@@ -34,4 +34,25 @@ for(const type of moduleTypes){for(const width of [1,moduleWidths[type]]){
  assert.equal(cabinetLayout(sample,'garage').pins.length,0);
  const [a,b]=layout.pins;for(const point of cabinetWirePoints(a,b,1))assert.ok(Number.isFinite(point.x)&&Number.isFinite(point.y));
 }}
+// Tokozati sínek: nem foglalnak modulhelyet, a DIN-sorok alatt állnak, a kapcsaik a pins listában vannak, az áramköri kártyák lejjebb kerülnek.
+{
+ const layout=cabinetLayout(plan,'house');
+ assert.deepEqual(layout.bars.map(b=>b.bar.label),['PE-sín','N-sín','N-sín · FI-01']);
+ const lastRow=layout.rows.at(-1)!;assert.ok(layout.barsTop>=lastRow.y+lastRow.h,'a sínek a DIN-sorok alatt vannak');
+ assert.ok(layout.circuitTop>layout.bars.at(-1)!.y+layout.bars.at(-1)!.h,'az áramköri kártyák a sínek alatt kezdődnek');
+ const barPins=layout.pins.filter(p=>p.end.kind==='bar');
+ assert.equal(barPins.length,layout.bars.reduce((n,b)=>n+b.bar.ports.length,0));assert.equal(new Set(layout.pins.map(p=>endpointKey(p.end))).size,layout.pins.length);
+ for(const pin of barPins){assert.ok(pin.x>0&&pin.x<layout.width&&pin.y>layout.barsTop&&pin.y<layout.circuitTop);assert.ok(Number.isFinite(pin.escapeY))}
+ assert.equal(layout.devices.length,5,'a sínek nem modulok');
+ const off=structuredClone(plan);off.buildings[0].board={rows:4,modulesPerRow:18,autoBars:false};
+ assert.equal(cabinetLayout(off,'house').bars.length,3,'autoBars:false mellett is vannak sínek');
+ assert.equal(cabinetLayout(plan,'garage').bars.length,0,'az üres elosztónak nincs sínje');
+ // Kézi bekötés a sín kapcsára: kör→sín; sín↔sín tilos; a nem létező sín kapcsa elavult.
+ const bar=layout.bars.find(b=>b.bar.kind==='pe')!.bar,tEnd={kind:'bar' as const,id:bar.id,port:'T6'};
+ const manual=connectTerminals(plan,circuitEnd('c1','PE'),tEnd,'manual-pe');validatePlan(manual);assert.equal(manual.boardWires.length,1);
+ assert.match(connectionIssue(plan,circuitEnd('c1','N'),tEnd)!,/Eltérő/,'N nem köthető PE-sínre');
+ const two=layout.bars.filter(b=>b.bar.signal==='N').map(b=>({kind:'bar' as const,id:b.bar.id,port:'T1'}));
+ assert.match(connectionIssue(plan,two[0],two[1])!,/Két sín/);
+ assert.match(connectionIssue(plan,circuitEnd('c1','PE'),{kind:'bar',id:'pe:nincs/',port:'T1'})!,/megváltozott/);
+}
 console.log('PASS: click connections, immutable changes, reverse duplicates, occupied circuits, phases/N isolation, three-phase assignment, building separation and all device terminal layouts.');

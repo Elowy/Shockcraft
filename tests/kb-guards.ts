@@ -179,7 +179,7 @@ for(const f of ['app/(kezikonyv)/kalkulatorok/[slug]/page.tsx','app/(kezikonyv)/
 {
  const DG=[...walk('components/kezikonyv/diagram'),...walk('components/kezikonyv/semak'),resolve('lib/kb/circuit.ts')];
  const c=closure(DG);
- const PLANNER=/^(components\/(plan-|board-|circuit-|floor-|share-|pdf-|quote-|sizing-|phase-load|electrical)|app\/tervezo\/|lib\/(plan|schematic|board|board-size|geometry|plan-tools|circuit-assignment|wall-snap|route-points|architecture|projects|pdf-export|sizing|phase-load)\.ts$|db\/|lib\/(auth|billing|subscription-access)\.ts$|scripts\/|content\/)/;
+ const PLANNER=/^(components\/(plan-|board-|circuit-|floor-|share-|pdf-|quote-|sizing-|phase-load|electrical)|app\/tervezo\/|lib\/(plan|schematic|board|board-size|board-bars|geometry|plan-tools|circuit-assignment|wall-snap|route-points|architecture|projects|pdf-export|sizing|phase-load)\.ts$|db\/|lib\/(auth|billing|subscription-access)\.ts$|scripts\/|content\/)/;
  for(const f of c.files)assert.ok(!PLANNER.test(rel(f)),'ábramodulból tervező-, db-, auth- vagy billing-kód (vagy forrás): '+c.chain(f));
  assert.ok(!c.packages.has('node:fs')&&!c.packages.has('fs')&&!c.packages.has('zod'),'az ábramodul tiszta (fájlrendszer és zod nélkül)');
  const strip=(src:string)=>src.replace(/\/\*[\s\S]*?\*\//g,'').replace(/(^|[^:'"])\/\/.*$/gm,'$1');
